@@ -1,0 +1,69 @@
+# Docker Compose for local development and testing
+# Use this to test the Docker build locally before deploying to EasyPanel
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://cave-express.ci}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://cave-express.ci}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://cave-express.ci}
+      # Redis
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_USER=${REDIS_USER:-default}
+      - REDIS_TLS=${REDIS_TLS:-false}
+      - REDIS_DB=${REDIS_DB:-0}
+      - REDIS_PREFIX=${REDIS_PREFIX:-caveexpress}
+      - REDIS_TTL=${REDIS_TTL:-3600}
+      # Email
+      - SMTPHOST=${SMTPHOST}
+      - SMTPPORT=${SMTPPORT}
+      - SMTPUSERNAME=${SMTPUSERNAME}
+      - SMTPPASSWORD=${SMTPPASSWORD}
+      - SMTPREPLYTO=${SMTPREPLYTO}
+      # Payment
+      - PAIEMENTPRO_MERCHANT_ID=${PAIEMENTPRO_MERCHANT_ID}
+      - PAIEMENTPRO_SECRET=${PAIEMENTPRO_SECRET}
+      # SMS
+      - SMSING_FROM=${SMSING_FROM}
+      - SMSING_SMS_WHATSAPP_BUSINESS_API_KEY=${SMSING_SMS_WHATSAPP_BUSINESS_API_KEY}
+      - SMSING_SMS_WHATSAPP_BUSINESS_API_TOKEN=${SMSING_SMS_WHATSAPP_BUSINESS_API_TOKEN}
+      - SMSING_WHATSAPP_CLOUD_API_KEY=${SMSING_WHATSAPP_CLOUD_API_KEY}
+      - SMSING_WHATSAPP_CLOUD_API_TOKEN=${SMSING_WHATSAPP_CLOUD_API_TOKEN}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:

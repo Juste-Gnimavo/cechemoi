@@ -1,0 +1,1739 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  WAVE
+  ORANGE_MONEY
+  MTN_MOBILE_MONEY
+  CASH_ON_DELIVERY
+  PAIEMENTPRO
+  // Additional methods for manual invoice payments
+  CASH
+  BANK_TRANSFER
+  CHECK
+  OTHER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  password      String?   // Only for ADMIN, MANAGER, STAFF
+  phone         String    // Not unique alone - same person can have multiple roles
+  phoneVerified DateTime?
+  whatsappNumber String?  // May be different from phone
+  image         String?
+  role          UserRole  @default(CUSTOMER)
+
+  // Geolocation data (captured during registration)
+  ipAddress     String?
+  city          String?
+  country       String?
+  countryCode   String?
+
+  // Login tracking
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  lastLoginBrowser String?
+
+  // User settings and metadata
+  metadata      Json?     // For storing user preferences, notification settings, etc.
+
+  // Two-Factor Authentication (for ADMIN, MANAGER, STAFF only)
+  twoFactorEnabled      Boolean  @default(false)
+  twoFactorPhone        String?  // Phone for 2FA OTP
+  twoFactorBackupCodes  String?  @db.Text // JSON array of hashed backup codes
+
+  // Password Reset (for ADMIN, MANAGER, STAFF only)
+  passwordResetToken    String?   @unique
+  passwordResetExpires  DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+  addresses     Address[]
+  cart          Cart?
+  reviews       Review[]
+  wishlist      WishlistItem[]
+  otpCodes      OtpCode[]
+  notifications Notification[]
+  customerNotes CustomerNote[]
+  abandonedCarts AbandonedCart[]
+  loyaltyPoints LoyaltyPoints?
+  invoices      Invoice[]
+  invoicePayments InvoicePayment[] @relation("InvoicePaymentCreator")
+  blogPosts     BlogPost[]
+  deviceTokens  DeviceToken[]
+  pushCampaigns PushCampaign[] @relation("CampaignCreator")
+  pushLogs      PushNotificationLog[]
+
+  @@unique([phone, role]) // A person can have same phone for different roles (e.g. CUSTOMER + ADMIN)
+  @@index([phone])
+  @@index([email])
+  @@index([whatsappNumber])
+  @@index([createdAt])
+  @@index([role])
+}
+
+model CustomerNote {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  content     String
+  noteType    String   // 'private' or 'shared'
+  authorId    String?  // Admin who created the note
+  authorName  String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  phone     String
+  code      String
+  purpose   String   // 'login', 'register', 'verify', 'reset'
+
+  verified  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([phone])
+  @@index([code])
+  @@index([expiresAt])
+}
+
+enum NotificationType {
+  ORDER_CONFIRMATION
+  PAYMENT_CONFIRMATION
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  WELCOME
+  OTP_VERIFICATION
+  PASSWORD_RESET
+  ORDER_CANCELLED
+}
+
+enum NotificationChannel {
+  WHATSAPP_360
+  SMS
+  WHATSAPP_CLOUD
+  WHATSAPP
+  EMAIL
+  PUSH  // Mobile push notifications (FCM)
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String?
+  user        User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  type        NotificationType
+  channel     NotificationChannel
+  status      NotificationStatus @default(PENDING)
+
+  recipient   String             // Phone number or WhatsApp number
+  message     String
+  mediaUrl    String?            // For PDFs, images, etc.
+  read        Boolean            @default(false) // User has read the notification
+
+  // API Response tracking
+  externalId  String?            // ID from the messaging service
+  errorMessage String?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+
+  // Metadata
+  metadata    Json?              // Additional data (order ID, etc.)
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([channel])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  parentId    String?
+  parent      Category? @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryToCategory")
+  products    Product[] @relation("ProductPrimaryCategory") // Primary category (backward compatible)
+  productCategories ProductCategory[] // Many-to-many relationship
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+// Join table for Product-Category many-to-many relationship
+model ProductCategory {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([productId, categoryId])
+  @@index([productId])
+  @@index([categoryId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text // Legacy field, kept for backward compatibility
+  shortDescription String? @db.Text // 2-3 lines summary for product listings
+  longDescription  String? @db.Text // Full HTML content from rich text editor
+  price       Float
+  salePrice   Float?
+  sku         String   @unique
+  stock       Int      @default(0)
+  images      String[]
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+
+  // Product type flag
+  isWine      Boolean  @default(true) // true for wine products, false for accessories/other
+
+  // Wine specific fields (only relevant when isWine = true)
+  vintage     String?
+  region      String?
+  country     String?
+  grapeVariety String?
+  alcoholContent Float?
+  volume      String?  // e.g., "750ml"
+  wineType    String?  // Rouge, Blanc, Rosé, Effervescent, etc.
+
+  // Product metadata
+  weight      Float?   // in kg
+  dimensions  String?  // e.g., "30x20x10cm"
+  tags        String[] // Product tags
+
+  // Inventory management
+  lowStockThreshold Int   @default(10) // Alert when stock falls below this
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Marketing - Cross-sell and Up-sell
+  relatedProducts String[] // Product IDs for cross-sell
+  upsellProducts  String[] // Product IDs for up-sell
+
+  // Tax
+  taxClassId  String?
+  taxClass    TaxClass? @relation("ProductTaxClass", fields: [taxClassId], references: [id])
+
+  // Primary category (backward compatible - required)
+  categoryId  String
+  category    Category @relation("ProductPrimaryCategory", fields: [categoryId], references: [id])
+
+  // Additional categories (many-to-many)
+  productCategories ProductCategory[]
+
+  variations  ProductVariation[]
+  attributes  ProductAttribute[]
+  stockMovements StockMovement[]
+  orderItems  OrderItem[]
+  cartItems   CartItem[]
+  reviews     Review[]
+  wishlistItems WishlistItem[]
+  bundleItems ProductBundleItem[]
+  invoiceItems InvoiceItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([published])
+  @@index([featured])
+  @@index([sku])
+  @@index([taxClassId])
+}
+
+model ProductVariation {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name        String   // e.g., "750ml", "1L", "Gift Box"
+  sku         String   @unique
+  price       Float
+  salePrice   Float?
+  stock       Int      @default(0)
+
+  // Variation-specific attributes
+  attributes  Json?    // e.g., {"size": "750ml", "vintage": "2018"}
+
+  enabled     Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sku])
+}
+
+model ProductAttribute {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  name        String   // e.g., "Couleur", "Taille"
+  value       String   // e.g., "Rouge", "750ml"
+
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([name])
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  type        String   // 'purchase', 'sale', 'adjustment', 'return', 'damaged'
+  quantity    Int      // Positive for increase, negative for decrease
+  previousStock Int    // Stock before movement
+  newStock    Int      // Stock after movement
+
+  reference   String?  // Order number, purchase order, etc.
+  reason      String?  // Reason for adjustment
+  notes       String?
+
+  performedBy String?  // User ID who made the change
+  performedByName String? // User name
+
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod
+
+  subtotal        Float
+  tax             Float         @default(0)
+  shippingCost    Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+
+  // Payment tracking
+  paymentReference String?      // PaiementPro transaction reference
+  paymentSessionId String?      // PaiementPro session ID
+
+  // Coupon tracking
+  couponId        String?
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  couponCode      String?       // Store the code used
+
+  // Shipping tracking
+  shippingMethodId String?
+  shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
+
+  shippingAddressId String
+  shippingAddress   Address      @relation(fields: [shippingAddressId], references: [id])
+
+  items           OrderItem[]
+  orderNotes      OrderNote[]
+  refunds         Refund[]
+  payment         Payment?
+  invoice         Invoice?
+  scheduledNotifications ScheduledNotification[]
+
+  notes           String?
+  trackingNumber  String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@index([couponId])
+  @@index([shippingMethodId])
+  @@index([paymentReference])
+}
+
+model OrderNote {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  content   String
+  noteType  String   // 'private' or 'customer'
+  authorId  String?
+  authorName String  // Could be system or admin name
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+model Refund {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  amount      Float
+  reason      String?
+  refundType  String   // 'full' or 'partial'
+
+  processedBy String?  // Admin user ID
+  status      String   @default("pending") // pending, processed, failed
+
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+
+  @@index([orderId])
+  @@index([createdAt])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL    // Partially paid (has deposits/installments)
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  invoiceNumber   String        @unique
+
+  // Order relation - OPTIONAL (for standalone invoices)
+  orderId         String?       @unique
+  order           Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  // Customer info (required even for standalone invoices)
+  customerName    String
+  customerEmail   String?
+  customerPhone   String?
+  customerAddress String?       @db.Text
+
+  // Status
+  status          InvoiceStatus @default(DRAFT)
+
+  // Dates
+  issueDate       DateTime      @default(now())
+  dueDate         DateTime?
+  paidDate        DateTime?
+
+  // Amounts
+  subtotal        Float
+  tax             Float         @default(0)
+  shippingCost    Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+  amountPaid      Float         @default(0)  // Total amount paid so far (for installments)
+
+  // Additional info
+  notes           String?       @db.Text
+  pdfUrl          String?       // Path to generated PDF
+  currency        String        @default("CFA")
+
+  // Email tracking
+  sentAt          DateTime?
+  sentTo          String?       // Email address
+
+  // Audit
+  createdById     String?
+  createdBy       User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Line items (for standalone invoices)
+  items           InvoiceItem[]
+
+  // Payment tracking (for installments/deposits)
+  payments        InvoicePayment[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([status])
+  @@index([orderId])
+  @@index([createdById])
+  @@index([issueDate])
+  @@index([customerEmail])
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Item details (flexible for non-product items)
+  description String
+  quantity    Int
+  unitPrice   Float
+  total       Float
+
+  // Optional product reference
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+// Invoice Payment Tracking (for installments/deposits/partial payments)
+model InvoicePayment {
+  id              String        @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Payment details
+  amount          Float         // Amount of this payment
+  paymentMethod   PaymentMethod // Payment method used
+  reference       String?       // Transaction reference / receipt number
+  paidAt          DateTime      @default(now()) // When this payment was made
+
+  // Additional info
+  notes           String?       @db.Text
+
+  // Provider info (if paid online)
+  provider        String?       // PAIEMENTPRO, etc.
+  providerRef     String?       // Provider transaction reference
+
+  // Audit
+  createdById     String?
+  createdBy       User?         @relation("InvoicePaymentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([invoiceId])
+  @@index([paidAt])
+  @@index([paymentMethod])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+  total     Float
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName     String
+  phone        String
+
+  // African/Ivorian address format
+  rue          String?  // Rue (street) - optional
+  quartier     String?  // Quartier (neighborhood) - important in CI
+  cite         String?  // Cité (area/district) - important in CI
+  city         String   // Ville
+  description  String?  @db.Text // Directions textuelles (ex: "à partir de la pharmacie Lagunes, tourner à gauche")
+
+  // Geolocation (GPS coordinates)
+  latitude     Float?   // Latitude GPS
+  longitude    Float?   // Longitude GPS
+  geoAccuracy  Float?   // Accuracy in meters
+  geoSource    String?  // 'browser', 'mobile', 'manual'
+
+  // Legacy fields for backward compatibility
+  addressLine1 String   // Can store combined address
+  addressLine2 String?  // Additional info
+  state        String?  // Region/State
+  zipCode      String?  // Postal code (rarely used in Africa)
+  country      String   @default("Côte d'Ivoire")
+
+  isDefault    Boolean  @default(false)
+
+  orders       Order[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([city])
+  @@index([quartier])
+  @@index([latitude, longitude])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating    Int      // 1-5
+  title     String?
+  comment   String?
+
+  verified  Boolean  @default(false) // Verified purchase
+  published Boolean  @default(true)
+
+  // Admin reply
+  adminReply String?
+  repliedAt  DateTime?
+  repliedBy  String?  // Admin user ID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@index([published])
+  @@unique([productId, userId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+// Blog System Models
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  image       String?
+  color       String?    // For UI badge color
+  parentId    String?
+  parent      BlogCategory? @relation("BlogCategoryToCategory", fields: [parentId], references: [id], onDelete: SetNull)
+  children    BlogCategory[] @relation("BlogCategoryToCategory")
+  posts       BlogPost[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model BlogTag {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  color       String?    // For UI badge color
+  posts       BlogPostTag[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([slug])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+  image       String?
+
+  // Publishing
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  publishedAt DateTime?
+
+  // Author
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  authorName  String?  // Cached for display
+
+  // Category (single primary category)
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Tags (many-to-many)
+  tags        BlogPostTag[]
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Stats
+  viewCount   Int      @default(0)
+  readTime    Int?     // Estimated reading time in minutes
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([featured])
+  @@index([publishedAt])
+}
+
+// Join table for BlogPost-BlogTag many-to-many relationship
+model BlogPostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+}
+
+model Coupon {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  description     String?
+
+  // Discount type and value
+  discountType    String   // 'percentage' or 'fixed'
+  discountValue   Float    // Percentage (0-100) or fixed amount
+
+  // Restrictions
+  minimumOrderAmount Float? // Minimum order amount to use coupon
+  maximumDiscount    Float? // Maximum discount for percentage coupons
+
+  // Category restrictions
+  allowedCategories String[] // Empty means all categories
+  excludedCategories String[] // Specific categories to exclude
+
+  // Product restrictions
+  allowedProducts String[] // Product IDs, empty means all products
+  excludedProducts String[] // Product IDs to exclude
+
+  // Usage limits
+  usageLimit      Int?     // Total number of times coupon can be used (null = unlimited)
+  usageLimitPerUser Int?   // Times each user can use it (null = unlimited)
+  usageCount      Int      @default(0) // Track total uses
+
+  // Validity period
+  startsAt        DateTime?
+  expiresAt       DateTime?
+
+  // Status
+  active          Boolean  @default(true)
+
+  // Relations
+  orders          Order[]
+  usages          CouponUsage[]
+
+  // Admin tracking
+  createdBy       String?  // Admin user ID
+  createdByName   String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([code])
+  @@index([active])
+  @@index([expiresAt])
+}
+
+model CouponUsage {
+  id          String   @id @default(cuid())
+  couponId    String
+  coupon      Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  userId      String
+  orderId     String   // Which order used this coupon
+
+  discountAmount Float // How much discount was applied
+  orderTotal     Float // Total order amount
+
+  createdAt   DateTime @default(now())
+
+  @@index([couponId])
+  @@index([userId])
+  @@index([orderId])
+}
+
+model ShippingZone {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Côte d'Ivoire", "France", "Sénégal"
+  countries   String[] // List of countries in this zone
+  enabled     Boolean  @default(true)
+  isDefault   Boolean  @default(false) // Default zone (Ivory Coast)
+
+  methods     ShippingMethod[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([enabled])
+  @@index([isDefault])
+}
+
+model ShippingMethod {
+  id          String   @id @default(cuid())
+  zoneId      String
+  zone        ShippingZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  name        String   // e.g., "Livraison Standard", "Livraison Express"
+  description String?
+  enabled     Boolean  @default(true)
+
+  // Pricing
+  costType    String   // 'flat_rate', 'free', 'weight_based', 'price_based'
+  cost        Float    @default(0)
+
+  // Conditions for free shipping or weight/price calculations
+  minOrderAmount Float?  // Free or discounted if order exceeds this
+  weightRanges   Json?   // [{min: 0, max: 5, cost: 2000}, {min: 5, max: 10, cost: 3500}]
+  priceRanges    Json?   // [{min: 0, max: 50000, cost: 2000}, {min: 50000, max: null, cost: 0}]
+
+  // Delivery time estimate
+  estimatedDays String?  // e.g., "2-3 jours", "24h"
+
+  // Tax settings
+  taxable     Boolean  @default(false) // Whether shipping cost is taxable
+
+  orders      Order[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([zoneId])
+  @@index([enabled])
+}
+
+model TaxRate {
+  id          String   @id @default(cuid())
+  country     String   // e.g., "Côte d'Ivoire", "France"
+  state       String?  // Optional state/region
+  rate        Float    // Tax rate as percentage (e.g., 18 for 18%)
+  name        String   // e.g., "VAT", "TVA", "Sales Tax"
+  enabled     Boolean  @default(true)
+  isDefault   Boolean  @default(false) // Default tax rate
+
+  // Tax application
+  applyToShipping Boolean @default(false)
+  priority    Int      @default(1) // For multiple tax rates, lower number = higher priority
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([country])
+  @@index([enabled])
+  @@index([isDefault])
+}
+
+model TaxClass {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Standard", "Reduced", "Zero-rated", "Exempt"
+  description String?
+  rate        Float?   // Override rate for this class (optional)
+  enabled     Boolean  @default(true)
+
+  products    Product[] @relation("ProductTaxClass")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([enabled])
+}
+
+model TaxExemption {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  reason      String   // Reason for exemption
+  certificate String?  // Certificate number if applicable
+  validUntil  DateTime? // Expiration date
+  enabled     Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([enabled])
+}
+
+model Settings {
+  id                String   @id @default(cuid())
+  siteName          String   @default("Cave Express")
+  siteDescription   String?
+  siteUrl           String?
+  contactEmail      String?
+  contactPhone      String?
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?
+  country           String   @default("Côte d'Ivoire")
+
+  // Tax & Currency
+  currency          String   @default("XOF") // West African CFA franc
+  currencySymbol    String   @default("CFA")
+  currencyPosition  String   @default("before") // before, after
+  thousandSeparator String   @default(",")
+  decimalSeparator  String   @default(".")
+  decimals          Int      @default(0)
+  taxRate           Float    @default(18.0) // Default 18% VAT for Côte d'Ivoire
+  pricesIncludeTax  Boolean  @default(false) // Whether displayed prices include tax
+  calculateTax      Boolean  @default(true)  // Enable/disable tax calculation
+  eurToXofRate      Float    @default(680.0) // Fixed exchange rate: 1 EUR = X XOF
+
+  // Shipping
+  freeShippingThreshold Float @default(0)
+  flatShippingRate      Float @default(0)
+  shippingCalculation   String @default("per_order") // per_order, per_item
+
+  // Product Settings
+  shopPageDisplay   String   @default("grid") // grid, list
+  productsPerPage   Int      @default(12)
+  defaultSorting    String   @default("date_desc") // date_desc, date_asc, price_asc, price_desc, name_asc, name_desc, popularity
+  stockDisplayFormat String  @default("quantity") // quantity, in_stock_out_stock, hide
+  lowStockThreshold  Int     @default(5)
+  outOfStockVisibility Boolean @default(true) // Show out of stock products
+  enableReviews      Boolean @default(true)
+  reviewsRequirePurchase Boolean @default(false) // Only verified purchases can review
+
+  // Cart & Checkout
+  enableGuestCheckout Boolean @default(true)
+  cartPageEnabled    Boolean  @default(true)
+  enableCoupons      Boolean  @default(true)
+  calculateShipping  Boolean  @default(true)
+  requirePhone       Boolean  @default(true)
+  requireEmail       Boolean  @default(false)
+
+  // Account & Privacy
+  enableRegistration Boolean  @default(true)
+  accountCreation    String   @default("optional") // optional, required, disabled
+  privacyPolicyPage  String?
+  termsPage          String?
+  enableNewsletterSignup Boolean @default(true)
+
+  // Email Settings
+  emailFromName      String   @default("Cave Express")
+  emailFromAddress   String?
+  enableOrderEmails  Boolean  @default(true)
+  enableWelcomeEmail Boolean  @default(true)
+  enableLowStockEmail Boolean @default(true)
+  lowStockEmailRecipient String?
+
+  // Permalinks
+  productSlugPrefix  String?  // e.g., "produit", "wine"
+  categorySlugPrefix String?  // e.g., "categorie"
+
+  // API & Advanced
+  enableAPI          Boolean  @default(false)
+  apiKey             String?  @unique
+  enableWebhooks     Boolean  @default(false)
+  webhookUrl         String?
+
+  // Social Media
+  facebookUrl       String?
+  instagramUrl      String?
+  twitterUrl        String?
+  whatsappNumber    String?
+
+  // Maintenance
+  maintenanceMode   Boolean  @default(false)
+  maintenanceMessage String?
+
+  updatedAt         DateTime @updatedAt
+}
+
+// Marketing Models
+
+model ProductBundle {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  
+  // Pricing
+  regularPrice Float   // Sum of individual product prices
+  bundlePrice  Float   // Discounted bundle price
+  discount     Float   // Discount percentage
+  
+  enabled     Boolean  @default(true)
+  featured    Boolean  @default(false)
+  
+  items       ProductBundleItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([enabled])
+}
+
+model ProductBundleItem {
+  id        String   @id @default(cuid())
+  bundleId  String
+  bundle    ProductBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  quantity  Int      @default(1)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([bundleId])
+  @@index([productId])
+}
+
+model AbandonedCart {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Guest info if no user
+  guestEmail  String?
+  guestPhone  String?
+  
+  // Cart data
+  items       Json     // Cart items snapshot
+  subtotal    Float
+  
+  // Recovery
+  recovered   Boolean  @default(false)
+  recoveredAt DateTime?
+  emailSent   Boolean  @default(false)
+  emailSentAt DateTime?
+  
+  expiresAt   DateTime // When to stop tracking
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([recovered])
+  @@index([emailSent])
+  @@index([expiresAt])
+}
+
+model LoyaltyPoints {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  points      Int      @default(0)
+  totalEarned Int      @default(0) // Lifetime points earned
+  totalSpent  Int      @default(0) // Lifetime points spent
+  
+  tier        String   @default("bronze") // bronze, silver, gold, platinum
+  
+  transactions LoyaltyTransaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId])
+  @@index([tier])
+}
+
+model LoyaltyTransaction {
+  id          String   @id @default(cuid())
+  loyaltyId   String
+  loyalty     LoyaltyPoints @relation(fields: [loyaltyId], references: [id], onDelete: Cascade)
+
+  type        String   // earn, spend, expire, adjustment
+  points      Int      // Positive for earn, negative for spend
+
+  reason      String   // "Purchase #12345", "Redeemed for discount", etc.
+  orderId     String?  // Related order if applicable
+
+  balance     Int      // Balance after transaction
+
+  createdAt   DateTime @default(now())
+
+  @@index([loyaltyId])
+  @@index([createdAt])
+}
+
+// Advanced Reporting
+model SavedReport {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+
+  // Report configuration
+  reportType  String   // sales, customers, products, inventory, tax, custom
+  dateRange   String   // today, week, month, year, custom, all_time
+  startDate   DateTime?
+  endDate     DateTime?
+
+  // Filters (stored as JSON)
+  filters     Json?    // { status: ['completed'], category: 'electronics', etc. }
+
+  // Columns to include
+  columns     String[] // ['product', 'revenue', 'quantity', etc.]
+
+  // Grouping and sorting
+  groupBy     String?  // 'product', 'category', 'customer', 'date', etc.
+  sortBy      String?  // 'revenue', 'quantity', 'date', etc.
+  sortOrder   String   @default("desc") // asc, desc
+
+  // User who created
+  createdBy   String
+
+  // Scheduling
+  schedules   ReportSchedule[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([createdBy])
+  @@index([reportType])
+}
+
+model ReportSchedule {
+  id          String   @id @default(cuid())
+  reportId    String
+  report      SavedReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  // Schedule config
+  frequency   String   // daily, weekly, monthly
+  dayOfWeek   Int?     // 0-6 for weekly (0 = Sunday)
+  dayOfMonth  Int?     // 1-31 for monthly
+  time        String   // HH:mm format
+
+  // Delivery
+  recipients  String[] // Email addresses
+  format      String   @default("pdf") // pdf, csv, xlsx
+
+  enabled     Boolean  @default(true)
+  lastRun     DateTime?
+  nextRun     DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([reportId])
+  @@index([enabled])
+  @@index([nextRun])
+}
+
+// Payment Tracking Model
+model Payment {
+  id                String   @id @default(cuid())
+  orderId           String   @unique
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Payment provider details
+  provider          String   // 'PAIEMENTPRO', 'STRIPE', etc.
+  reference         String   @unique // Transaction reference from provider
+  sessionId         String?  // Session ID for redirect-based payments
+
+  // Amount tracking
+  amount            Float    // Amount in XOF (or other currency)
+  currency          String   @default("XOF")
+
+  // Customer information
+  customerEmail     String
+  customerFirstName String
+  customerLastName  String
+  customerPhone     String
+
+  // Payment channel (for PaiementPro)
+  channel           String?  // OMCIV2, MOMOCI, FLOOZ, WAVECI, CARD, etc.
+
+  // Payment status
+  status            PaymentStatus @default(PENDING)
+
+  // Provider response data
+  providerResponse  Json?    // Store full provider response
+  errorMessage      String?
+
+  // Transaction tracking
+  transactionDate   DateTime?
+  paymentId         String?  // Provider's payment ID (e.g., CI2023013113165473)
+
+  // Metadata
+  description       String?
+  returnContext     Json?    // Custom data passed to provider
+
+  // Webhooks tracking
+  webhookReceived   Boolean  @default(false)
+  webhookReceivedAt DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([reference])
+  @@index([status])
+  @@index([provider])
+  @@index([orderId])
+  @@index([customerEmail])
+  @@index([createdAt])
+}
+
+// Notification Templates System
+enum NotificationTrigger {
+  ORDER_PLACED
+  ORDER_PROCESSING
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  ORDER_REFUNDED
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  CUSTOMER_NOTE
+  NEW_ACCOUNT
+  PASSWORD_RESET
+  LOYALTY_POINTS_EARNED
+  ABANDONED_CART
+  BACK_IN_STOCK
+  NEW_ORDER_ADMIN
+  PAYMENT_RECEIVED_ADMIN
+  LOW_STOCK_ADMIN
+  OUT_OF_STOCK_ADMIN
+  NEW_CUSTOMER_ADMIN
+  NEW_REVIEW_ADMIN
+  DAILY_REPORT_ADMIN
+  // New notifications
+  INVOICE_CREATED       // Invoice with link sent after order placement
+  INVOICE_PAID          // Invoice marked as paid notification
+  REVIEW_REQUEST        // Ask for Trustpilot review after shipping
+  PAYMENT_REMINDER_1    // 1 day after unpaid order
+  PAYMENT_REMINDER_2    // 3 days after unpaid order
+  PAYMENT_REMINDER_3    // 5 days after unpaid order
+  // Standalone payments (/payer/ flow)
+  STANDALONE_PAYMENT_RECEIVED
+  STANDALONE_PAYMENT_FAILED
+}
+
+model NotificationTemplate {
+  id          String              @id @default(cuid())
+
+  // Template identification
+  trigger     NotificationTrigger
+  channel     NotificationChannel
+  name        String              // e.g., "Order Placed - SMS"
+  description String?
+
+  // Template content
+  subject     String?             // For emails
+  content     String              // Template with variables
+
+  // Push notification content (short versions for mobile)
+  pushTitle   String?             // Push notification title (max 65 chars)
+  pushBody    String?             // Push notification body (max 240 chars)
+
+  // Recipient
+  recipientType String            // 'customer' or 'admin'
+
+  // Settings
+  enabled     Boolean             @default(true)
+
+  // Admin settings
+  adminPhone  String?             // Admin phone for admin notifications
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([trigger, channel]) // One template per trigger/channel combination
+  @@index([trigger])
+  @@index([channel])
+  @@index([enabled])
+}
+
+model NotificationSettings {
+  id                    String   @id @default(cuid())
+
+  // Admin phones for notifications
+  adminPhones           String[] // Array of admin phone numbers
+  adminWhatsApp         String?  // Admin WhatsApp number
+  adminEmails           String[] // Array of admin emails
+
+  // SMS Provider settings
+  smsProvider           String   @default("SMSING") // SMSING, TWILIO, etc.
+  smsApiKey             String?
+  smsSenderId           String?
+
+  // WhatsApp Provider settings
+  whatsappProvider      String   @default("360") // 360, CLOUD, etc.
+  whatsappApiKey        String?
+  whatsappPhoneId       String?
+
+  // Email Provider settings
+  emailProvider         String   @default("RESEND")
+  emailApiKey           String?
+  emailFromAddress      String?
+  emailFromName         String?
+
+  // Global notification toggles
+  smsEnabled            Boolean  @default(true)
+  whatsappEnabled       Boolean  @default(true)
+  emailEnabled          Boolean  @default(false)
+  pushEnabled           Boolean  @default(true)
+
+  // Failover settings
+  failoverEnabled       Boolean  @default(true)
+  failoverOrder         String[] @default(["WHATSAPP", "SMS"]) // Order of failover
+
+  // Push notification settings (Firebase)
+  firebaseProjectId     String?
+  firebaseClientEmail   String?
+  firebasePrivateKey    String? @db.Text
+
+  // Testing
+  testMode              Boolean  @default(false)
+  testPhoneNumber       String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([id]) // Ensure only one settings record
+}
+
+// Store notification history for analytics
+model NotificationLog {
+  id          String              @id @default(cuid())
+
+  // Template used
+  trigger     NotificationTrigger
+  channel     NotificationChannel
+
+  // Recipient
+  recipientPhone  String?
+  recipientEmail  String?
+  recipientName   String?
+
+  // Content
+  content     String
+
+  // Status
+  status      String              // 'sent', 'failed', 'pending'
+  errorMessage String?
+
+  // Provider response
+  providerId  String?             // ID from SMS/WhatsApp provider
+  providerResponse Json?
+
+  // Related entities
+  orderId     String?
+  userId      String?
+
+  // Cost tracking
+  cost        Float?              // Cost in credits/money
+
+  sentAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([trigger])
+  @@index([channel])
+  @@index([status])
+  @@index([orderId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// Scheduled Notifications (for payment reminders, follow-ups, etc.)
+model ScheduledNotification {
+  id          String              @id @default(cuid())
+
+  // Type of scheduled notification
+  trigger     NotificationTrigger
+
+  // Related entities
+  orderId     String
+  order       Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId      String?
+
+  // Scheduling
+  scheduledFor DateTime           // When to send the notification
+  reminderNumber Int              @default(1) // 1, 2, or 3 for payment reminders
+
+  // Status
+  status      String              @default("pending") // 'pending', 'sent', 'cancelled', 'failed'
+  sentAt      DateTime?
+  cancelledAt DateTime?
+
+  // Error tracking
+  errorMessage String?
+  attempts    Int                 @default(0)
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([orderId])
+  @@index([trigger])
+}
+
+// Payment Follow-up Settings (admin configurable)
+model PaymentFollowUpSettings {
+  id                String   @id @default("default")
+
+  // Enable/disable follow-ups
+  enabled           Boolean  @default(true)
+
+  // Reminder delays in hours
+  reminder1Delay    Int      @default(24)   // 1 day = 24 hours
+  reminder2Delay    Int      @default(72)   // 3 days = 72 hours
+  reminder3Delay    Int      @default(120)  // 5 days = 120 hours
+
+  // Enable individual reminders
+  reminder1Enabled  Boolean  @default(true)
+  reminder2Enabled  Boolean  @default(true)
+  reminder3Enabled  Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Marketing campaigns (bulk SMS/WhatsApp messaging)
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String   // Campaign name
+  channel     NotificationChannel  // SMS, WHATSAPP, WHATSAPP_CLOUD
+
+  // Content
+  message     String   @db.Text
+  mediaUrl    String?  // For WhatsApp images/files
+  template    String?  // For WhatsApp Cloud (template name)
+
+  // Targeting
+  targetType  String   // 'all', 'custom', 'segment'
+  customNumbers String? @db.Text  // JSON array of phone numbers
+  segmentFilter Json?   // Filter criteria for customer segment
+
+  // Statistics
+  totalRecipients Int    @default(0)
+  sentCount       Int    @default(0)
+  failedCount     Int    @default(0)
+
+  // Status
+  status      String   @default("draft") // draft, scheduled, sending, sent, failed
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Created by
+  createdBy   String
+  createdByName String
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  logs        CampaignLog[]
+
+  @@index([channel])
+  @@index([status])
+  @@index([createdBy])
+  @@index([createdAt])
+}
+
+// Individual campaign message logs
+model CampaignLog {
+  id          String   @id @default(cuid())
+
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // Recipient
+  phone       String
+  customerName String?
+  userId      String?  // If sent to registered customer
+
+  // Content sent
+  message     String   @db.Text
+  mediaUrl    String?
+
+  // Status
+  status      String   // sent, failed, pending
+  errorMessage String?
+  providerId  String?  // ID from SMS/WhatsApp provider
+  providerResponse Json?
+
+  // Cost tracking
+  cost        Float?
+
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([phone])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ========================================
+// STANDALONE PAYMENTS (for /payer/ flow)
+// ========================================
+
+model StandalonePayment {
+  id              String        @id @default(cuid())
+  reference       String        @unique
+  amount          Int           // Amount in XOF
+  customerName    String
+  customerPhone   String
+  channel         String?       // OMCIV2, MOMOCI, FLOOZ, WAVECI, CARD, PAYPAL
+
+  // Payment status
+  status          PaymentStatus @default(PENDING)
+
+  // PaiementPro data
+  sessionId       String?
+  paymentId       String?       // Provider's payment ID
+  providerResponse Json?
+  errorMessage    String?
+
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  paidAt          DateTime?
+
+  // Webhook tracking
+  webhookReceived   Boolean     @default(false)
+  webhookReceivedAt DateTime?
+
+  // Notification tracking
+  notificationSent  Boolean     @default(false)
+  notificationSentAt DateTime?
+
+  @@index([reference])
+  @@index([status])
+  @@index([customerPhone])
+  @@index([createdAt])
+}
+
+// ========================================
+// PUSH NOTIFICATIONS (FCM)
+// ========================================
+
+enum DevicePlatform {
+  IOS
+  ANDROID
+  WEB
+}
+
+enum PushTargetType {
+  ALL_USERS
+  SPECIFIC_USERS
+  BY_TIER
+  BY_LOCATION
+}
+
+enum PushCampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum PushDeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  FAILED
+}
+
+// Store FCM tokens for mobile devices
+model DeviceToken {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Device info
+  token         String         @unique // FCM token
+  platform      DevicePlatform // iOS, Android, Web
+  deviceModel   String?
+  osVersion     String?
+  appVersion    String?
+
+  // Metadata
+  isActive      Boolean        @default(true)
+  lastUsedAt    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([token])
+  @@index([platform])
+  @@index([isActive])
+}
+
+// Push notification campaigns (admin sends to users)
+model PushCampaign {
+  id               String             @id @default(cuid())
+
+  // Campaign details
+  name             String
+  title            String             // Notification title (max 65 chars)
+  body             String             // Notification body (max 240 chars)
+  imageUrl         String?            // Rich notification image
+  deepLink         String?            // Link to product/category/screen
+
+  // Targeting
+  targetType       PushTargetType
+  targetUserIds    String[]           // Specific user IDs (if targetType = SPECIFIC_USERS)
+  targetTier       String?            // If targetType = BY_TIER (BRONZE, SILVER, GOLD)
+  targetCity       String?            // If targetType = BY_LOCATION
+
+  // Scheduling
+  status           PushCampaignStatus @default(DRAFT)
+  scheduledFor     DateTime?          // null = send now
+  sentAt           DateTime?
+
+  // Stats
+  totalSent        Int                @default(0)
+  totalDelivered   Int                @default(0)
+  totalOpened      Int                @default(0)
+  totalClicked     Int                @default(0)
+
+  // Audit
+  createdBy        String
+  creator          User               @relation("CampaignCreator", fields: [createdBy], references: [id])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  // Relations
+  logs             PushNotificationLog[]
+
+  @@index([status])
+  @@index([createdBy])
+  @@index([createdAt])
+}
+
+// Individual push notification delivery logs
+model PushNotificationLog {
+  id            String             @id @default(cuid())
+
+  // Campaign
+  campaignId    String
+  campaign      PushCampaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // Recipient
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceToken   String
+
+  // Delivery tracking
+  status        PushDeliveryStatus @default(PENDING)
+  sentAt        DateTime           @default(now())
+  deliveredAt   DateTime?
+  openedAt      DateTime?
+  clickedAt     DateTime?
+
+  // Error tracking
+  error         String?
+
+  @@index([campaignId])
+  @@index([userId])
+  @@index([status])
+}

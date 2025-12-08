@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation API de paiement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            /* background-color: #fff; */
+            border-radius: 8px;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+        }
+        h1 {
+            color: #333;
+        }
+        .response {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .response-code {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .response-data {
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    </style>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
+</head>
+<body>
+    <div class="container">
+        <img src="https://dashboard.paiementpro.net/_files/logo-paiementpro-removebg-preview.png" width="220px" alt=""><br>
+        <h1>Documentation API de paiement</h1>
+        <p>Cette API permet de récupérer l'état d'une transaction en utilisant sa référence.</p>
+        <h2>Exemple de réponse :</h2>
+        <div class="response">
+            <p><span class="response-code">200 OK</span></p>
+            <pre class="response-data">
+{
+    "marchant_id":"PP-F1096",
+    "pay_id":"CI2023013113165473",
+    "reference":"123456789",
+    "amount":1000,
+    "channel":"CARD2",
+    "token":"af8066cdac5e35d695dfd66ba12a63d8",
+    "date":"2023-01-31 13:20:51",
+    "success":true
+}
+            </pre>
+        </div><br>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                    <td>marchant_id</td>
+                  <th scope="row">Identifiant marchand</th>
+                </tr>
+                <tr>    
+                    <td>pay_id</td>
+                  <th scope="row">Identifiant de paiement de l'opérateur</th>
+                </tr>
+                <tr>
+                    <td>reference</td>
+                  <th scope="row">Référence du marchand</th>
+                </tr>
+                <tr>
+                    <td>amount</td>
+                  <th scope="row">Montant</th>
+                </tr>
+                <tr>
+                    <td>channel</td>
+                  <th scope="row">Mode de paiement</th>
+                </tr>
+                <tr>
+                  <td>token</td>
+                  <th scope="row">Token</th>
+                </tr>
+                <tr>
+                  <td>date</td>
+                  <th scope="row">Date de la transaction</th>
+                </tr>
+                <tr>
+                  <td>success</td>
+                  <th scope="row">Statut de la reponse</th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        <h2>Utilisation de l'API :</h2>
+        <p>Envoyez une requête GET à l'URL suivante :</p>
+        <pre>https://api.paiementpro.net/status/{reference}</pre>
+        <p>Remplacez <code>{reference}</code> par la référence de la transaction.</p>
+    </div>
+</body>
+</html>
