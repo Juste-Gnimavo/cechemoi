@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { sendWhatsAppMessage } from '@/lib/notification-service'
-import { sendSMS } from '@/lib/smsing-service'
+import { prisma } from '@/lib/prisma'
+import { smsingService } from '@/lib/smsing-service'
 
 // Generate unique reference
 function generateReference(): string {
@@ -125,10 +124,10 @@ Vous recevrez une confirmation définitive sous peu.
 CÈCHÉMOI - Originalité, Créativité et Beauté`
 
     try {
-      await sendWhatsAppMessage(customerPhone, customerMessage)
+      await smsingService.sendWhatsAppBusiness({ to: customerPhone, message: customerMessage })
     } catch {
       try {
-        await sendSMS(customerPhone, customerMessage)
+        await smsingService.sendSMS({ to: customerPhone, message: customerMessage })
       } catch (smsError) {
         console.error('Failed to send customer notification:', smsError)
       }
@@ -150,10 +149,10 @@ ${customerNotes ? `Notes: ${customerNotes}` : ''}
 Confirmez dans l'admin: /admin/appointments`
 
     try {
-      await sendWhatsAppMessage(adminPhone, adminMessage)
+      await smsingService.sendWhatsAppBusiness({ to: adminPhone, message: adminMessage })
     } catch {
       try {
-        await sendSMS(adminPhone, adminMessage)
+        await smsingService.sendSMS({ to: adminPhone, message: adminMessage })
       } catch (adminSmsError) {
         console.error('Failed to send admin notification:', adminSmsError)
       }

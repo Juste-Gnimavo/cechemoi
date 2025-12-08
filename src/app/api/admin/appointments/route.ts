@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || !['ADMIN', 'MANAGER'].includes(session.user?.role || '')) {
+    const user = session?.user as { id?: string; role?: string } | undefined
+    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -91,7 +92,8 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || !['ADMIN', 'MANAGER'].includes(session.user?.role || '')) {
+    const user = session?.user as { id?: string; role?: string } | undefined
+    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -108,13 +110,13 @@ export async function PATCH(request: NextRequest) {
       updateData.status = status
       if (status === 'CONFIRMED') {
         updateData.confirmedAt = new Date()
-        updateData.confirmedBy = session.user.id
+        updateData.confirmedBy = user?.id
       } else if (status === 'COMPLETED') {
         updateData.completedAt = new Date()
-        updateData.completedBy = session.user.id
+        updateData.completedBy = user?.id
       } else if (status === 'CANCELLED') {
         updateData.cancelledAt = new Date()
-        updateData.cancelledBy = session.user.id
+        updateData.cancelledBy = user?.id
       }
     }
 
