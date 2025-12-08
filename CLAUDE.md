@@ -1,6 +1,6 @@
-# CAVE EXPRESS - PROJECT STATUS
+# CÈCHÉMOI - PROJECT STATUS
 
-**Project**: Cave Express Wine Store (Web + Mobile)
+**Project**: CÈCHÉMOI Fashion Store (Web + Mobile)
 **Stack**: Next.js 14, Prisma, PostgreSQL, NextAuth | React Native, Expo SDK 54
 **Last Updated**: 2025-11-27
 
@@ -201,7 +201,7 @@ Continue `MOBILE-SESSIONS-LOGS/NEXT-STEP.md`
 ## 📁 PROJECT STRUCTURE
 
 ```
-cave-express/
+cechemoi/
 ├── src/                    # Web app (Next.js)
 │   ├── app/               # Pages
 │   ├── components/        # UI components

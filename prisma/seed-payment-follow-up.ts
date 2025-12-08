@@ -139,10 +139,8 @@ function getDefaultTemplates() {
       name: 'Rappel Paiement 1 - SMS',
       description: 'Premier rappel de paiement (2 jours après commande)',
       recipientType: 'customer',
-      content: `[CaveExpress] Rappel: Votre commande #{order_number} ({order_total}) est en attente de paiement. Payez maintenant!
-
-ORANGE: +225 07 0346 0426
-MTN/WAVE: +225 05 5679 1431`,
+      content: `[CÈCHÉMOI] Rappel: Votre commande #{order_number} ({order_total}) est en attente de paiement. Payez maintenant!
+`,
       enabled: true,
     },
     // PAYMENT_REMINDER_1 - WhatsApp
@@ -163,12 +161,7 @@ Votre commande *#{order_number}* est en attente de paiement.
 
 💰 *Montant: {order_total}*
 
-📱 *Modes de paiement:*
-• Orange Money: +225 07 0346 0426
-• MTN MoMo: +225 05 5679 1431
-• Wave: +225 05 5679 1431
-
-Réglez maintenant pour recevoir vos vins rapidement! 🍷`,
+Réglez maintenant pour recevoir votre commande rapidement! 👗`,
       enabled: true,
     },
     // PAYMENT_REMINDER_2 - SMS
@@ -178,10 +171,7 @@ Réglez maintenant pour recevoir vos vins rapidement! 🍷`,
       name: 'Rappel Paiement 2 - SMS',
       description: 'Deuxième rappel de paiement (5 jours après commande)',
       recipientType: 'customer',
-      content: `[CaveExpress] Votre commande #{order_number} expire bientôt! Montant: {order_total}. Payez vite!
-
-ORANGE: +225 07 0346 0426
-MTN/WAVE: +225 05 5679 1431`,
+      content: `[CÈCHÉMOI] Votre commande #{order_number} expire bientôt! Montant: {order_total}. Payez vite!`,
       enabled: true,
     },
     // PAYMENT_REMINDER_2 - WhatsApp
@@ -202,12 +192,7 @@ Votre commande *#{order_number}* n'est toujours pas réglée.
 
 💰 *Montant: {order_total}*
 
-⚠️ Les stocks peuvent être limités.
-
-📱 *Modes de paiement:*
-• Orange Money: +225 07 0346 0426
-• MTN MoMo: +225 05 5679 1431
-• Wave: +225 05 5679 1431`,
+`,
       enabled: true,
     },
     // PAYMENT_REMINDER_3 - SMS
@@ -217,10 +202,8 @@ Votre commande *#{order_number}* n'est toujours pas réglée.
       name: 'Rappel Paiement 3 - SMS',
       description: 'Dernier rappel de paiement (7 jours après commande)',
       recipientType: 'customer',
-      content: `[CaveExpress] DERNIER RAPPEL: Commande #{order_number} ({order_total}) sera annulée sous 24h!
-
-ORANGE: +225 07 0346 0426
-MTN/WAVE: +225 05 5679 1431`,
+      content: `[CÈCHÉMOI] DERNIER RAPPEL: Commande #{order_number} ({order_total})!
+`,
       enabled: true,
     },
     // PAYMENT_REMINDER_3 - WhatsApp
@@ -234,17 +217,12 @@ MTN/WAVE: +225 05 5679 1431`,
 
 Bonjour {customer_name},
 
-Votre commande *#{order_number}* sera *automatiquement annulée sous 24h* sans paiement.
+Votre commande *#{order_number}* est toujours en attente de paiement.
 
 📦 *Détails:*
 {order_product_with_qty}
 
 💰 *Montant: {order_total}*
-
-📱 *Réglez maintenant:*
-• Orange Money: +225 07 0346 0426
-• MTN MoMo: +225 05 5679 1431
-• Wave: +225 05 5679 1431
 
 Un problème? Contactez-nous! 🤝`,
       enabled: true,

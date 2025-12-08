@@ -1,7 +1,7 @@
 {
-  "name": "cave-express",
+  "name": "cechemoi",
   "version": "1.0.0",
-  "description": "Cave Express - Modern Online Wine Store",
+  "description": "Originalité, Créativité et Beauté de Chez Moi",
   "private": true,
   "scripts": {
     "dev": "next dev",

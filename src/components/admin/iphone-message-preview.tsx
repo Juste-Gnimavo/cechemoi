@@ -15,7 +15,7 @@ export function IPhoneMessagePreview({
   mediaUrl,
   channel,
   recipientCount,
-  senderName = 'Cave Express'
+  senderName = 'CÈCHÉMOI'
 }: IPhoneMessagePreviewProps) {
   const getChannelConfig = () => {
     switch (channel) {

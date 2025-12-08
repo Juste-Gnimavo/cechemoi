@@ -56,7 +56,7 @@ export const useCurrency = create<CurrencyState>()(
       },
     }),
     {
-      name: 'cave-express-currency',
+      name: 'cechemoi-currency',
       partialize: (state) => ({
         currency: state.currency,
         exchangeRate: state.exchangeRate,

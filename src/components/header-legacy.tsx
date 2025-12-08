@@ -10,14 +10,12 @@ import { MiniCart } from '@/components/mini-cart'
 import { useCurrency } from '@/store/currency'
 import { useTheme } from '@/store/theme'
 
-// Static wine categories for faster page load
-const WINE_CATEGORIES = [
-  { id: 'grands-vins', name: 'Grands Vins', slug: 'grands-vins' },
-  { id: 'vin-rouge', name: 'Vin rouge', slug: 'vin-rouge' },
-  { id: 'vin-blanc', name: 'Vin blanc', slug: 'vin-blanc' },
-  { id: 'vin-rose', name: 'Vin rosé', slug: 'vin-rose' },
-  { id: 'vin-effervescent', name: 'Vin effervescent', slug: 'vin-effervescent' },
-  { id: 'champagne', name: 'Champagne', slug: 'champagne' },
+// Static fashion categories for faster page load
+const FASHION_CATEGORIES = [
+  { id: 'robes', name: 'Robes', slug: 'robes' },
+  { id: 'ensembles', name: 'Ensembles', slug: 'ensembles' },
+  { id: 'pret-a-porter', name: 'Prêt-à-Porter', slug: 'pret-a-porter' },
+  { id: 'accessoires', name: 'Accessoires', slug: 'accessoires' },
 ]
 
 export function Header() {
@@ -52,11 +50,11 @@ export function Header() {
           {/* Logo - Horizontal */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo/web/logo-cave-express-transparent-dark-mode.png" 
-              alt="Cave Express"
-              width={260}
-              height={260}
-              className="h-20 w-auto"
+              src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
+              alt="CÈCHÉMOI"
+              width={200}
+              height={60}
+              className="h-14 w-auto"
               priority
             />
           </Link>
@@ -65,19 +63,31 @@ export function Header() {
           <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center">
             <Link
               href="/"
-              className="text-gray-300 hover:text-[#C27B43] transition-colors text-sm font-medium"
+              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
             >
               Accueil
             </Link>
-            {WINE_CATEGORIES.map((category) => (
+            {FASHION_CATEGORIES.map((category) => (
               <Link
                 key={category.id}
-                href={`/categorie-vin/${category.slug}`}
-                className="text-primary-100 hover:text-[#C27B43] transition-colors text-sm font-medium"
+                href={`/categorie/${category.slug}`}
+                className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
               >
                 {category.name}
               </Link>
             ))}
+            <Link
+              href="/showroom"
+              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
+            >
+              Showroom
+            </Link>
+            <Link
+              href="/sur-mesure"
+              className="px-4 py-1.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 hover:bg-primary-500/30 rounded-full transition-colors text-sm font-medium"
+            >
+              Sur-Mesure ✨
+            </Link>
           </nav>
 
           {/* Right Side Icons */}
@@ -89,7 +99,7 @@ export function Header() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="text-gray-300 hover:text-[#C27B43] transition-colors flex items-center gap-2"
+                    className="text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"
                     title="Mon compte"
                   >
                     <User className="w-5 h-5" />
@@ -179,7 +189,7 @@ export function Header() {
                 {/* Tableau de bord - Quick access link */}
                 <Link
                   href={['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) ? '/admin' : '/account'}
-                  className="hidden md:flex items-center gap-1.5 text-sm text-gray-400 hover:text-[#C27B43] transition-colors"
+                  className="hidden md:flex items-center gap-1.5 text-sm text-gray-400 hover:text-primary-400 transition-colors"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span>Tableau de bord</span>
@@ -188,7 +198,7 @@ export function Header() {
             ) : (
               <Link
                 href="/auth/login-phone"
-                className="text-gray-300 hover:text-[#C27B43] transition-colors flex items-center gap-2"
+                className="text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"
                 title="Connexion"
               >
                 <User className="w-5 h-5" />
@@ -224,7 +234,7 @@ export function Header() {
             {/* Search Icon */}
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="text-gray-300 hover:text-[#C27B43] transition-colors"
+              className="text-gray-300 hover:text-primary-400 transition-colors"
               title="Rechercher"
             >
               <Search className="w-5 h-5" />
@@ -233,7 +243,7 @@ export function Header() {
             {/* Wishlist Icon */}
             <Link
               href="/account/wishlist"
-              className="relative text-gray-300 hover:text-[#C27B43] transition-colors"
+              className="relative text-gray-300 hover:text-primary-400 transition-colors"
               title="Favoris"
             >
               <Heart className="w-5 h-5" />
@@ -248,7 +258,7 @@ export function Header() {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden text-gray-300 hover:text-[#C27B43]"
+              className="lg:hidden text-gray-300 hover:text-primary-400"
               aria-label="Menu"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -262,28 +272,42 @@ export function Header() {
             <div className="flex flex-col space-y-3">
               <Link
                 href="/"
-                className="text-gray-300 hover:text-[#C27B43] transition-colors py-2"
+                className="text-gray-300 hover:text-primary-400 transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Accueil
               </Link>
-              {WINE_CATEGORIES.map((category) => (
+              {FASHION_CATEGORIES.map((category) => (
                 <Link
                   key={category.id}
-                  href={`/categorie-vin/${category.slug}`}
-                  className="text-gray-300 hover:text-[#C27B43] transition-colors py-2 block"
+                  href={`/categorie/${category.slug}`}
+                  className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {category.name}
                 </Link>
               ))}
+              <Link
+                href="/showroom"
+                className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Showroom
+              </Link>
+              <Link
+                href="/sur-mesure"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/20 border border-primary-500/30 text-primary-400 rounded-lg transition-colors font-medium mt-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sur-Mesure ✨
+              </Link>
               {session && (
                 <button
                   onClick={() => {
                     setIsMenuOpen(false)
                     signOut({ callbackUrl: '/' })
                   }}
-                  className="text-gray-300 hover:text-[#C27B43] transition-colors py-2 text-left"
+                  className="text-gray-300 hover:text-primary-400 transition-colors py-2 text-left"
                 >
                   Déconnexion
                 </button>

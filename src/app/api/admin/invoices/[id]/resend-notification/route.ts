@@ -73,9 +73,9 @@ export async function POST(
         order_total: invoice.total.toString(),
         payment_method: 'Facture',
         payment_reference: invoice.invoiceNumber,
-        store_name: 'Cave Express',
-        store_url: 'https://cave-express.ci',
-        store_phone: '+225 05 56 79 14 31',
+        store_name: 'CÈCHÉMOI',
+        store_url: 'https://cechemoi.com',
+        store_phone: '+225 0759545410',
       },
     })
 

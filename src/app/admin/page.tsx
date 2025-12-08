@@ -251,7 +251,7 @@ export default function AdminDashboard() {
             Tableau de Bord
           </h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Vue d'ensemble de votre boutique Cave Express
+            Vue d'ensemble de votre boutique CÈCHÉMOI
           </p>
         </div>
         {adminProfile && (

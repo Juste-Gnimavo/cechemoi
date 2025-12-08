@@ -56,11 +56,11 @@ export default function PushNotificationPage() {
 
   // Deep link presets
   const deepLinkPresets = [
-    { label: 'Accueil', value: 'caveexpress://home' },
-    { label: 'Catalogue', value: 'caveexpress://catalogue' },
-    { label: 'Panier', value: 'caveexpress://cart' },
-    { label: 'Mes commandes', value: 'caveexpress://orders' },
-    { label: 'Fidélité', value: 'caveexpress://loyalty' },
+    { label: 'Accueil', value: 'cechemoi://home' },
+    { label: 'Catalogue', value: 'cechemoi://catalogue' },
+    { label: 'Panier', value: 'cechemoi://cart' },
+    { label: 'Mes commandes', value: 'cechemoi://orders' },
+    { label: 'Fidélité', value: 'cechemoi://loyalty' },
   ]
 
   // Fetch stats on load
@@ -360,7 +360,7 @@ export default function PushNotificationPage() {
                       type="text"
                       value={deepLink}
                       onChange={(e) => setDeepLink(e.target.value)}
-                      placeholder="caveexpress://products/wine-id"
+                      placeholder="cechemoi://products/wine-id"
                       className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                     <select
@@ -562,11 +562,11 @@ export default function PushNotificationPage() {
                     <div className="bg-gray-100 dark:bg-gray-200 rounded-2xl p-3 shadow-lg">
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-lg">W</span>
+                          <span className="text-white text-lg">C</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-gray-900 text-sm">Cave Express</span>
+                            <span className="font-semibold text-gray-900 text-sm">CÈCHÉMOI</span>
                             <span className="text-gray-500 text-xs">maintenant</span>
                           </div>
                           <p className="font-medium text-gray-900 text-sm mt-0.5 line-clamp-1">

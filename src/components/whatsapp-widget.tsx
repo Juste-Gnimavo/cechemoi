@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-const WHATSAPP_NUMBER = '2250556791431'
+const WHATSAPP_NUMBER = '2250759545410'
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`
 
 export function WhatsAppWidget() {

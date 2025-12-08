@@ -96,7 +96,7 @@ function SuccessContent() {
     <div className="min-h-screen min-h-[100dvh] bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b px-4 py-3">
-        <Image src="/logo-dark-rect.png" alt="Cave Express" width={120} height={36} className="h-7 w-auto" />
+        <Image src="/logo-dark-rect.png" alt="CÈCHÉMOI" width={120} height={36} className="h-7 w-auto" />
       </header>
 
       {/* Main Content */}

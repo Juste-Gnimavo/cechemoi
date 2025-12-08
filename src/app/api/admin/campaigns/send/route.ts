@@ -146,9 +146,9 @@ async function sendCampaignMessages(
 
   // Store variables for replacement
   const storeVariables = {
-    '{store_name}': 'CAVE EXPRESS',
-    '{store_phone}': '+225 05 56 79 14 31',
-    '{store_url}': 'https://cave-express.ci',
+    '{store_name}': 'CÈCHÉMOI',
+    '{store_phone}': '+225 0759545410',
+    '{store_url}': 'https://cechemoi.com',
   }
 
   for (const recipient of recipients) {
@@ -191,7 +191,7 @@ async function sendCampaignMessages(
           to: recipient.phone,
           otpCode: finalMessage,
           language,
-          useCustomTemplate: template === 'cave_express',
+          useCustomTemplate: template === 'cechemoi',
         })
       } else {
         throw new Error('Invalid channel')

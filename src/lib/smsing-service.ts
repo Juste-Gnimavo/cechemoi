@@ -42,9 +42,9 @@ export class SMSingService {
       smsWhatsappApiToken: process.env.SMSING_SMS_WHATSAPP_BUSINESS_API_TOKEN || '',
       whatsappCloudApiKey: process.env.SMSING_WHATSAPP_CLOUD_API_KEY || '',
       whatsappCloudApiToken: process.env.SMSING_WHATSAPP_CLOUD_API_TOKEN || '',
-      from: process.env.SMSING_FROM || 'CaveExpress',
+      from: process.env.SMSING_FROM || 'CECHEMOI',
       baseUrl: 'https://panel.smsing.app/smsAPI',
-      logoUrl: 'https://cave-express.ci/logo/web/icon-512-maskable.png',
+      logoUrl: 'https://cechemoi.com/logo/web/icon-512-maskable.png',
     }
   }
 
@@ -149,7 +149,7 @@ export class SMSingService {
       if (mediaUrl) {
         queryParams.append('file', mediaUrl)
       } else {
-        // Always include Cave Express logo for branding
+        // Always include CÈCHÉMOI logo for branding
         queryParams.append('file', this.config.logoUrl)
       }
 
@@ -201,7 +201,7 @@ export class SMSingService {
    *
    * Two templates available:
    * 1. official_otp_code_template - Official OTP template
-   * 2. cave_express - Custom Cave Express template with logo
+   * 2. cechemoi - Custom CÈCHÉMOI template with logo
    */
   async sendWhatsAppCloudOTP(params: {
     to: string
@@ -216,8 +216,8 @@ export class SMSingService {
       let templateText: string
 
       if (useCustomTemplate) {
-        // Cave Express custom template with logo
-        templateText = `content:cave_express|lang=${language}|body=${otpCode}|header=image:${this.config.logoUrl}`
+        // CÈCHÉMOI custom template with logo
+        templateText = `content:cechemoi|lang=${language}|body=${otpCode}|header=image:${this.config.logoUrl}`
       } else {
         // Official OTP template
         templateText = `content:official_otp_code_template|lang=${language}|body=${otpCode}|button=${otpCode}`

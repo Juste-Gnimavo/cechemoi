@@ -6,7 +6,7 @@ export interface Country {
 }
 
 export const countries: Country[] = [
-  // African countries (most relevant for Cave Express)
+  // African countries (most relevant for CÈCHÉMOI)
   { code: 'CI', name: 'Côte d\'Ivoire', dialCode: '+225', flag: '🇨🇮' },
   { code: 'SN', name: 'Sénégal', dialCode: '+221', flag: '🇸🇳' },
   { code: 'BF', name: 'Burkina Faso', dialCode: '+226', flag: '🇧🇫' },

@@ -50,7 +50,7 @@ export async function sendStandalonePaymentNotification(
       customer_name: payment.customerName,
       amount: formattedAmount,
       reference: payment.reference,
-      store_name: 'Cave Express',
+      store_name: 'CÈCHÉMOI',
       store_phone: '+225 0707517917',
     }
 

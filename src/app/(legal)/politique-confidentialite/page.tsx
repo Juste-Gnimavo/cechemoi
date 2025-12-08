@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { Shield, Database, Share2, Lock, UserCheck, RefreshCw, HelpCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Politique de Confidentialité | Cave Express',
-  description: 'Découvrez comment Cave Express protège vos données personnelles. Notre politique de confidentialité détaille la collecte, l\'utilisation et la protection de vos informations.',
+  title: 'Politique de Confidentialité | CÈCHÉMOI',
+  description: 'Découvrez comment CÈCHÉMOI protège vos données personnelles. Notre politique de confidentialité détaille la collecte, l\'utilisation et la protection de vos informations.',
 }
 
 export default function PolitiqueConfidentialitePage() {
@@ -22,11 +22,11 @@ export default function PolitiqueConfidentialitePage() {
       {/* Introduction */}
       <section className="mb-10">
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          Cave Express, située à Faya Cité Genie 2000, Abidjan, Côte d&apos;Ivoire (ci-après « nous »,
+          CÈCHÉMOI, située à Cocody Riviera Palmeraie, Abidjan, Côte d&apos;Ivoire (ci-après « nous »,
           « notre », ou « nos »), s&apos;engage à protéger la vie privée et les données personnelles de
           ses visiteurs et clients (ci-après « vous » ou « votre ») accédant à notre site web
-          <a href="https://www.cave-express.ci" className="text-copper-500 hover:underline mx-1">
-            https://www.cave-express.ci
+          <a href="https://www.cechemoi.com" className="text-copper-500 hover:underline mx-1">
+            https://www.cechemoi.com
           </a>
           et nos applications mobiles disponibles sur l&apos;Apple App Store, Google Play Store,
           Huawei AppGallery, etc.
@@ -196,20 +196,20 @@ export default function PolitiqueConfidentialitePage() {
         <div className="bg-gray-100 dark:bg-dark-800 rounded-xl p-4 mt-4 not-prose space-y-2">
           <p className="text-gray-600 dark:text-gray-300 text-sm">
             <span className="text-gray-500">Email :</span>{' '}
-            <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">
-              serviceclient@cave-express.ci
+            <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">
+              cechemoicreations@gmail.com
             </a>
           </p>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
             <span className="text-gray-500">Téléphone :</span>{' '}
-            <a href="tel:+2250556791431" className="text-copper-500 hover:underline">
-              +225 0556791431
+            <a href="tel:+2250759545410" className="text-copper-500 hover:underline">
+              +225 0759545410
             </a>
           </p>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
             <span className="text-gray-500">WhatsApp :</span>{' '}
-            <a href="https://wa.me/2250556791431" className="text-copper-500 hover:underline">
-              wa.me/2250556791431
+            <a href="https://wa.me/2250759545410" className="text-copper-500 hover:underline">
+              wa.me/2250759545410
             </a>
           </p>
         </div>
@@ -239,13 +239,13 @@ export default function PolitiqueConfidentialitePage() {
           veuillez nous contacter à l&apos;adresse suivante :
         </p>
         <div className="bg-gradient-to-br from-copper-500/10 dark:from-copper-500/20 to-transparent rounded-xl p-6 border border-copper-500/20 dark:border-copper-500/30">
-          <p className="text-gray-900 dark:text-white font-semibold text-lg mb-2">Cave Express</p>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Faya Cité Genie 2000, Abidjan, Côte d&apos;Ivoire</p>
+          <p className="text-gray-900 dark:text-white font-semibold text-lg mb-2">CÈCHÉMOI</p>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">Cocody Riviera Palmeraie, Abidjan, Côte d&apos;Ivoire</p>
           <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
-            Email : <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">serviceclient@cave-express.ci</a>
+            Email : <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">cechemoicreations@gmail.com</a>
           </p>
           <p className="text-gray-600 dark:text-gray-300 text-sm">
-            Téléphone : <a href="tel:+2250556791431" className="text-copper-500 hover:underline">+225 0556791431</a>
+            Téléphone : <a href="tel:+2250759545410" className="text-copper-500 hover:underline">+225 0759545410</a>
           </p>
         </div>
       </section>

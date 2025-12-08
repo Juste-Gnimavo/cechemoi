@@ -23,12 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!post) {
     return {
-      title: 'Article non trouvé - Cave Express'
+      title: 'Article non trouvé - CÈCHÉMOI'
     }
   }
 
   return {
-    title: post.metaTitle || `${post.title} - Cave Express`,
+    title: post.metaTitle || `${post.title} - CÈCHÉMOI`,
     description: post.metaDescription || post.excerpt || '',
     openGraph: {
       title: post.metaTitle || post.title,

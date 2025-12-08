@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 /**
  * Login page - Redirects to phone OTP login
- * Cave Express uses OTP-only authentication (no password required)
+ * CÈCHÉMOI uses OTP-only authentication (no password required)
  */
 export default function LoginPage() {
   const router = useRouter()

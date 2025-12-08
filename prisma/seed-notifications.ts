@@ -22,8 +22,8 @@ async function main() {
       content: `Bonjour {customer_name},
 Votre commande de vin {order_product_with_qty} a été créée et est en cours de traitement. Commande: {order_number}. Montant: {order_total}.
 
-WhatsApp: https://wa.me/2250556791431
-Site: www.cave-express.ci`,
+WhatsApp: https://wa.me/2250759545410
+Site: www.cechemoi.com`,
       enabled: true,
     },
   })
@@ -37,8 +37,8 @@ Site: www.cave-express.ci`,
       name: 'Order Placed - WhatsApp',
       description: 'Sent when customer places an order',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
-Bonjour *{billing_first_name}*, Bienvenu(e) chez *CAVE EXPRESS*. _La QUALITÉ du vin, livrée à votre porte._
+      content: `*[CÈCHÉMOI]*
+Bonjour *{billing_first_name}*, Bienvenu(e) chez *CÈCHÉMOI*. _Mode sur-mesure et prêt-à-porter de qualité._
 
 Votre *nouvelle commande* de vin *{order_product_with_qty}* numéro: *{order_number}*, Montant: *{order_total}* a été bien reçue.
 
@@ -58,11 +58,11 @@ WAVE: +225 05 5679 1431
 N'hésitez pas à répondre à ce message si vous avez des questions.
 
 ++++++++++++++++++++++
-Adresse: Faya Cité Genie 2000, Abidjan
-Service Client 7j/7: +225 0556791431
-Site web: www.cave-express.ci
-WhatsApp: https://wa.me/2250556791431
-Facebook: @cave express
+Adresse: Cocody Riviera Palmeraie, Abidjan
+Service Client 7j/7: +225 0759545410
+Site web: www.cechemoi.com
+WhatsApp: https://wa.me/2250759545410
+Instagram: @cechemoi
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -80,8 +80,8 @@ Facebook: @cave express
       recipientType: 'customer',
       content: `Le paiement de votre commande {order_number} montant {order_total} pour le(s) vin(s) {order_product} a été reçu. Votre vin arrive très bientôt ! Merci !
 
-WhatsApp: https://wa.me/2250556791431
-Site: www.cave-express.ci`,
+WhatsApp: https://wa.me/2250759545410
+Site: www.cechemoi.com`,
       enabled: true,
     },
   })
@@ -102,13 +102,13 @@ Le paiement de votre commande *{order_number}* montant *{order_total}* pour le(s
 Un grand merci pour votre fidélité. Votre vin arrive très bientôt !
 
 ++++++++++++++++++++++
-*Cave Express*,
+*CÈCHÉMOI*,
 _La QUALITÉ du vin, livrée à votre porte. Livraison rapide partout à Abidjan. Vin Blanc, Rouge, Rosé, Mousseux, Moelleux, Sec Abidjan Côte d'Ivoire_
-Adresse: *Faya Cité Genie 2000, Abidjan Côte d'Ivoire*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
-Facebook: *@cave express*
+Adresse: *Cocody Riviera Palmeraie, Abidjan Côte d'Ivoire*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
+Instagram: *@cechemoi*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -126,8 +126,8 @@ Facebook: *@cave express*
       recipientType: 'customer',
       content: `Votre commande #{order_number} pour le(s) vin(s): {order_product} a été récupérée et est en cours de livraison. Numéro de suivi: {tracking_number}. Merci pour votre patience.
 
-WhatsApp: https://wa.me/2250556791431
-Site: www.cave-express.ci`,
+WhatsApp: https://wa.me/2250759545410
+Site: www.cechemoi.com`,
       enabled: true,
     },
   })
@@ -151,13 +151,13 @@ Votre commande *#{order_number}* pour le(s) vin(s): *{order_product}* a été r�
 Merci pour votre patience.
 
 ++++++++++++++++++++++
-*Cave Express*,
+*CÈCHÉMOI*,
 _La QUALITÉ du vin, livrée à votre porte. Livraison rapide partout à Abidjan._
-Adresse: *Faya Cité Genie 2000, Abidjan*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
-Facebook: *@cave express*
+Adresse: *Cocody Riviera Palmeraie, Abidjan*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
+Instagram: *@cechemoi*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -173,10 +173,10 @@ Facebook: *@cave express*
       name: 'Order Delivered - SMS',
       description: 'Sent when order is delivered',
       recipientType: 'customer',
-      content: `Votre commande de vin {order_product}, montant: {order_total} a été livrée avec succès! Cave Express vous remercie.
+      content: `Votre commande {order_product}, montant: {order_total} a été livrée avec succès! CÈCHÉMOI vous remercie.
 
-WhatsApp: https://wa.me/2250556791431
-Site: www.cave-express.ci`,
+WhatsApp: https://wa.me/2250759545410
+Site: www.cechemoi.com`,
       enabled: true,
     },
   })
@@ -199,13 +199,13 @@ Merci pour votre achat et votre confiance. Nous espérons que vous apprécierez 
 💬 N'hésitez pas à laisser un avis sur notre site.
 
 ++++++++++++++++++++++
-*Cave Express*,
+*CÈCHÉMOI*,
 _La QUALITÉ du vin, livrée à votre porte._
-Adresse: *Faya Cité Genie 2000, Abidjan*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
-Facebook: *@cave express*
+Adresse: *Cocody Riviera Palmeraie, Abidjan*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
+Instagram: *@cechemoi*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -221,9 +221,9 @@ Facebook: *@cave express*
       name: 'Order Cancelled - SMS',
       description: 'Sent when order is cancelled',
       recipientType: 'customer',
-      content: `Votre commande #{order_number} a été annulée. Si vous n'êtes pas à l'origine de cette annulation, contactez-nous au +225 0556791431.
+      content: `Votre commande #{order_number} a été annulée. Si vous n'êtes pas à l'origine de cette annulation, contactez-nous au +225 0759545410.
 
-Site: www.cave-express.ci`,
+Site: www.cechemoi.com`,
       enabled: false,
     },
   })
@@ -244,10 +244,10 @@ Votre commande *#{order_number}* d'un montant de *{order_total}* a été annulé
 Si vous n'êtes pas à l'origine de cette annulation ou si vous avez des questions, n'hésitez pas à nous contacter.
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
+*CÈCHÉMOI*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -265,7 +265,7 @@ WhatsApp: *https://wa.me/2250556791431*
       recipientType: 'customer',
       content: `Un remboursement de {order_total} pour votre commande #{order_number} a été traité. Les fonds seront disponibles sous 3-5 jours ouvrables.
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: false,
     },
   })
@@ -292,9 +292,9 @@ Les fonds seront crédités sur votre compte sous peu.
 Si vous avez des questions, n'hésitez pas à nous contacter.
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
+*CÈCHÉMOI*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -310,9 +310,9 @@ Site web: https://www.cave-express.ci
       name: 'Payment Failed - SMS',
       description: 'Sent when payment fails',
       recipientType: 'customer',
-      content: `Le paiement de votre commande #{order_number} a échoué. Veuillez réessayer ou contactez-nous au +225 0556791431.
+      content: `Le paiement de votre commande #{order_number} a échoué. Veuillez réessayer ou contactez-nous au +225 0759545410.
 
-Site: www.cave-express.ci`,
+Site: www.cechemoi.com`,
       enabled: true,
     },
   })
@@ -341,9 +341,9 @@ MTN MOMO: +225 05 5679 1431
 WAVE: +225 05 5679 1431
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client 7j/7: *+225 0556791431*
-Site web: https://www.cave-express.ci
+*CÈCHÉMOI*
+Service Client 7j/7: *+225 0759545410*
+Site web: https://www.cechemoi.com
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -359,9 +359,9 @@ Site web: https://www.cave-express.ci
       name: 'Customer Note - SMS',
       description: 'Sent when admin adds a customer note',
       recipientType: 'customer',
-      content: `[Cave Express] Note concernant votre commande #{order_number}: {note_content}
+      content: `[CÈCHÉMOI] Note concernant votre commande #{order_number}: {note_content}
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: false,
     },
   })
@@ -384,8 +384,8 @@ Contact: +225 0556791431`,
 Si vous avez des questions, n'hésitez pas à répondre à ce message.
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client 7j/7: *+225 0556791431*
+*CÈCHÉMOI*
+Service Client 7j/7: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -401,7 +401,7 @@ Service Client 7j/7: *+225 0556791431*
       name: 'New Account - SMS',
       description: 'Sent when customer registers',
       recipientType: 'customer',
-      content: `Bienvenue chez Cave Express! Votre compte a été créé avec succès. Découvrez nos vins sur www.cave-express.ci
+      content: `Bienvenue chez CÈCHÉMOI! Votre compte a été créé avec succès. Découvrez notre collection sur www.cechemoi.com
 
 Téléphone: {billing_phone}`,
       enabled: true,
@@ -417,7 +417,7 @@ Téléphone: {billing_phone}`,
       name: 'New Account - WhatsApp',
       description: 'Sent when customer registers',
       recipientType: 'customer',
-      content: `*Bienvenue chez Cave Express!* 🍷
+      content: `*Bienvenue chez CÈCHÉMOI!* 🍷
 
 Bonjour *{customer_name}*,
 
@@ -434,10 +434,10 @@ Vous pouvez maintenant:
 Découvrez notre sélection sur notre site web.
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -453,11 +453,11 @@ WhatsApp: *https://wa.me/2250556791431*
       name: 'Password Reset - SMS',
       description: 'Sent when password reset is requested (admin only)',
       recipientType: 'customer',
-      content: `[Cave Express] Code de réinitialisation: {reset_code}
+      content: `[CÈCHÉMOI] Code de réinitialisation: {reset_code}
 
 Utilisez ce code pour réinitialiser votre mot de passe. Valide 15 minutes.
 
-Site: www.cave-express.ci`,
+Site: www.cechemoi.com`,
       enabled: false,
     },
   })
@@ -482,9 +482,9 @@ Vous avez demandé la réinitialisation de votre mot de passe.
 Si vous n'avez pas fait cette demande, ignorez ce message.
 
 ++++++++++++++++++++++
-*Cave Express*
-Sécurité: +225 0556791431
-Site web: https://www.cave-express.ci
+*CÈCHÉMOI*
+Sécurité: +225 0759545410
+Site web: https://www.cechemoi.com
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -502,7 +502,7 @@ Site web: https://www.cave-express.ci
       recipientType: 'customer',
       content: `Félicitations! Vous avez gagné {points_earned} points de fidélité. Solde total: {points_balance} points.
 
-www.cave-express.ci`,
+www.cechemoi.com`,
       enabled: false,
     },
   })
@@ -526,8 +526,8 @@ Vous avez gagné *{points_earned} points de fidélité* suite à votre commande 
 Utilisez vos points lors de votre prochain achat!
 
 ++++++++++++++++++++++
-*Cave Express*
-Site web: https://www.cave-express.ci
+*CÈCHÉMOI*
+Site web: https://www.cechemoi.com
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -545,7 +545,7 @@ Site web: https://www.cave-express.ci
       recipientType: 'customer',
       content: `Vous avez oublié quelque chose! {cart_items_count} article(s) vous attend(ent) dans votre panier. Finalisez votre commande maintenant.
 
-www.cave-express.ci`,
+www.cechemoi.com`,
       enabled: false,
     },
   })
@@ -572,9 +572,9 @@ Ne manquez pas ces vins! Finalisez votre commande maintenant et profitez de la l
 🎁 *Offre spéciale*: -10% avec le code RETOUR10
 
 ++++++++++++++++++++++
-*Cave Express*
-Site web: https://www.cave-express.ci
-WhatsApp: *https://wa.me/2250556791431*
+*CÈCHÉMOI*
+Site web: https://www.cechemoi.com
+WhatsApp: *https://wa.me/2250759545410*
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -592,7 +592,7 @@ WhatsApp: *https://wa.me/2250556791431*
       recipientType: 'customer',
       content: `Bonne nouvelle! Le vin "{product_name}" est de nouveau en stock. Commandez vite avant rupture!
 
-www.cave-express.ci`,
+www.cechemoi.com`,
       enabled: false,
     },
   })
@@ -616,8 +616,8 @@ Le vin *"{product_name}"* que vous attendiez est de nouveau en stock!
 ⚡ Commandez vite avant rupture!
 
 ++++++++++++++++++++++
-*Cave Express*
-Site web: https://www.cave-express.ci
+*CÈCHÉMOI*
+Site web: https://www.cechemoi.com
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -633,7 +633,7 @@ Site web: https://www.cave-express.ci
       name: 'New Order Alert - Admin SMS',
       description: 'Sent to admin when new order is placed',
       recipientType: 'admin',
-      content: `[CaveExpress] - NOTIFICATION ADMIN: Nouvelle commande #{order_number} - de {customer_name} - montant {order_total}. Veuillez traiter.`,
+      content: `[CÈCHÉMOI] - NOTIFICATION ADMIN: Nouvelle commande #{order_number} - de {customer_name} - montant {order_total}. Veuillez traiter.`,
       enabled: true,
     },
   })
@@ -648,7 +648,7 @@ Site web: https://www.cave-express.ci
       description: 'Sent to admin when new order is placed',
       recipientType: 'admin',
       content: `+++++++++++++++++
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 🆕 NOUVELLE COMMANDE
 +++++++++++++++++
 
@@ -672,8 +672,8 @@ Site web: https://www.cave-express.ci
 ⚠️ *ACTION REQUISE*: Traiter cette commande
 
 ++++++++++++++++++++++
-Cave Express - Admin Panel
-Site: https://www.cave-express.ci/admin
+CÈCHÉMOI - Admin Panel
+Site: https://www.cechemoi.com/admin
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -705,7 +705,7 @@ Site: https://www.cave-express.ci/admin
       recipientType: 'admin',
       content: `+++++++++++++++++
 ✅ *PAIEMENT CONFIRMÉ*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 💰 *Montant reçu*: {order_total}
@@ -723,8 +723,8 @@ Site: https://www.cave-express.ci/admin
 ⚠️ *PROCHAINE ÉTAPE*: Préparer la livraison
 
 ++++++++++++++++++++++
-Cave Express - Admin Panel
-Site: https://www.cave-express.ci/admin
+CÈCHÉMOI - Admin Panel
+Site: https://www.cechemoi.com/admin
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -756,7 +756,7 @@ Site: https://www.cave-express.ci/admin
       recipientType: 'admin',
       content: `+++++++++++++++++
 ⚠️ *ALERTE STOCK BAS*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 🍷 *Produit*: {product_name}
@@ -766,8 +766,8 @@ Site: https://www.cave-express.ci/admin
 🔴 *ACTION REQUISE*: Réapprovisionner ce produit rapidement pour éviter une rupture de stock.
 
 ++++++++++++++++++++++
-Cave Express - Gestion Inventaire
-Site: https://www.cave-express.ci/admin/inventory
+CÈCHÉMOI - Gestion Inventaire
+Site: https://www.cechemoi.com/admin/inventory
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -799,7 +799,7 @@ Site: https://www.cave-express.ci/admin/inventory
       recipientType: 'admin',
       content: `+++++++++++++++++
 🔴 *RUPTURE DE STOCK*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 🍷 *Produit*: {product_name}
@@ -813,8 +813,8 @@ Site: https://www.cave-express.ci/admin/inventory
 🔴 *ACTION URGENTE*: Réapprovisionner immédiatement
 
 ++++++++++++++++++++++
-Cave Express - Gestion Inventaire
-Site: https://www.cave-express.ci/admin/inventory
+CÈCHÉMOI - Gestion Inventaire
+Site: https://www.cechemoi.com/admin/inventory
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -847,7 +847,7 @@ Site: https://www.cave-express.ci/admin/inventory
       description: 'Sent to admin when new customer registers',
       content: `+++++++++++++++++
 ✅ *NOUVEAU CLIENT*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 👤 *Client*:
@@ -860,7 +860,7 @@ Site: https://www.cave-express.ci/admin/inventory
 📅 *Date d'inscription*: {registration_date}
 
 ++++++++++++++++++++++
-Cave Express - Gestion Clients
+CÈCHÉMOI - Gestion Clients
 Total clients: {total_customers}
 ++++++++++++++++++++++`,
       enabled: true,
@@ -873,7 +873,7 @@ Total clients: {total_customers}
       recipientType: 'admin',
       content: `+++++++++++++++++
 ✅ *NOUVEAU CLIENT*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 👤 *Client*:
@@ -886,7 +886,7 @@ Total clients: {total_customers}
 📅 *Date d'inscription*: {registration_date}
 
 ++++++++++++++++++++++
-Cave Express - Gestion Clients
+CÈCHÉMOI - Gestion Clients
 Total clients: {total_customers}
 ++++++++++++++++++++++`,
       enabled: true,
@@ -919,7 +919,7 @@ Total clients: {total_customers}
       recipientType: 'admin',
       content: `+++++++++++++++++
 ⭐ *NOUVEL AVIS CLIENT*
-[CaveExpress] - NOTIFICATION ADMIN
+[CÈCHÉMOI] - NOTIFICATION ADMIN
 +++++++++++++++++
 
 🍷 *Produit*: {product_name}
@@ -933,8 +933,8 @@ Total clients: {total_customers}
 ⚠️ *ACTION REQUISE*: Modérer cet avis
 
 ++++++++++++++++++++++
-Cave Express - Gestion Avis
-Site: https://www.cave-express.ci/admin/reviews
+CÈCHÉMOI - Gestion Avis
+Site: https://www.cechemoi.com/admin/reviews
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -966,7 +966,7 @@ Site: https://www.cave-express.ci/admin/reviews
       recipientType: 'admin',
       content: `+++++++++++++++++
 📊 *RAPPORT JOURNALIER*
-[CaveExpress] - {report_date}
+[CÈCHÉMOI] - {report_date}
 +++++++++++++++++
 
 💰 *CHIFFRE D'AFFAIRES*: {total_revenue} CFA
@@ -987,8 +987,8 @@ Site: https://www.cave-express.ci/admin/reviews
 • Stock bas: {low_stock_products}
 
 ++++++++++++++++++++++
-Cave Express - Tableau de Bord
-Site: https://www.cave-express.ci/admin
+CÈCHÉMOI - Tableau de Bord
+Site: https://www.cechemoi.com/admin
 ++++++++++++++++++++++`,
       enabled: false,
     },
@@ -1000,9 +1000,9 @@ Site: https://www.cave-express.ci/admin
     update: {
       name: 'Invoice Created - SMS',
       description: 'Sent when invoice is generated with link',
-      content: `[CaveExpress] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
+      content: `[CÈCHÉMOI] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
     create: {
@@ -1011,9 +1011,9 @@ Contact: +225 0556791431`,
       name: 'Invoice Created - SMS',
       description: 'Sent when invoice is generated with link',
       recipientType: 'customer',
-      content: `[CaveExpress] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
+      content: `[CÈCHÉMOI] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
   })
@@ -1023,7 +1023,7 @@ Contact: +225 0556791431`,
     update: {
       name: 'Invoice Created - WhatsApp',
       description: 'Sent when invoice is generated with link in message',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 📄 *VOTRE FACTURE EST PRÊTE*
 
 Bonjour *{customer_name}*,
@@ -1039,9 +1039,9 @@ Votre facture pour la commande *#{order_number}* est maintenant disponible.
 {invoice_url}
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0556791431*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1051,7 +1051,7 @@ Service Client: *+225 0556791431*
       name: 'Invoice Created - WhatsApp',
       description: 'Sent when invoice is generated with link in message',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 📄 *VOTRE FACTURE EST PRÊTE*
 
 Bonjour *{customer_name}*,
@@ -1067,9 +1067,9 @@ Votre facture pour la commande *#{order_number}* est maintenant disponible.
 {invoice_url}
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0556791431*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1081,9 +1081,9 @@ Service Client: *+225 0556791431*
     update: {
       name: 'Invoice Paid - SMS',
       description: 'Sent when invoice is marked as paid',
-      content: `[CaveExpress] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
+      content: `[CÈCHÉMOI] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
     create: {
@@ -1092,9 +1092,9 @@ Contact: +225 0556791431`,
       name: 'Invoice Paid - SMS',
       description: 'Sent when invoice is marked as paid',
       recipientType: 'customer',
-      content: `[CaveExpress] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
+      content: `[CÈCHÉMOI] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
   })
@@ -1104,7 +1104,7 @@ Contact: +225 0556791431`,
     update: {
       name: 'Invoice Paid - WhatsApp',
       description: 'Sent when invoice is marked as paid with link in message',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 ✅ *FACTURE ACQUITTÉE*
 
 Bonjour *{customer_name}*,
@@ -1122,9 +1122,9 @@ Merci! Votre paiement pour la facture *#{invoice_number}* a été confirmé.
 Votre commande est maintenant en préparation. Nous vous tiendrons informé de l'expédition.
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0556791431*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1134,7 +1134,7 @@ Service Client: *+225 0556791431*
       name: 'Invoice Paid - WhatsApp',
       description: 'Sent when invoice is marked as paid with link in message',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 ✅ *FACTURE ACQUITTÉE*
 
 Bonjour *{customer_name}*,
@@ -1152,9 +1152,9 @@ Merci! Votre paiement pour la facture *#{invoice_number}* a été confirmé.
 Votre commande est maintenant en préparation. Nous vous tiendrons informé de l'expédition.
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0556791431*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1172,7 +1172,7 @@ Service Client: *+225 0556791431*
       name: 'Review Request - SMS',
       description: 'Sent 24 hours after delivery to ask for Trustpilot review',
       recipientType: 'customer',
-      content: `Vous avez goûté un vin de Cave Express? Dites-nous tout! Laissez votre avis: https://fr.trustpilot.com/evaluate/cave-express.ci Merci!`,
+      content: `Satisfait(e) de votre commande CÈCHÉMOI? Dites-nous tout! Laissez votre avis: https://fr.trustpilot.com/evaluate/cechemoi.com Merci!`,
       enabled: true,
     },
   })
@@ -1188,16 +1188,16 @@ Service Client: *+225 0556791431*
       name: 'Review Request - WhatsApp',
       description: 'Sent 24 hours after delivery to ask for Trustpilot review',
       recipientType: 'customer',
-      content: `Vous avez goûté un vin de *Cave Express* ? 😋
+      content: `Vous avez goûté un vin de *CÈCHÉMOI* ? 😋
 Dites-nous tout : le goût, la livraison, l'expérience… On veut tout savoir ! 🍷
 
 👉 *Cliquez ici pour laisser votre avis:*
-https://fr.trustpilot.com/evaluate/cave-express.ci
+https://fr.trustpilot.com/evaluate/cechemoi.com
 
 💡 Chaque avis nous aide à sélectionner encore de meilleurs vins pour vous. 🥂
 
 ++++++++++++++++++++++
-*Cave Express*
+*CÈCHÉMOI*
 _La QUALITÉ du vin, livrée à votre porte._
 ++++++++++++++++++++++`,
       enabled: true,
@@ -1214,7 +1214,7 @@ _La QUALITÉ du vin, livrée à votre porte._
       name: 'Payment Reminder 1 - SMS',
       description: 'Sent 1 day after unpaid order',
       recipientType: 'customer',
-      content: `[CaveExpress] Rappel: Votre commande #{order_number} ({order_total}) est en attente de paiement. Payez maintenant pour recevoir vos vins!
+      content: `[CÈCHÉMOI] Rappel: Votre commande #{order_number} ({order_total}) est en attente de paiement. Payez maintenant pour recevoir vos vins!
 
 ORANGE: +225 07 0346 0426
 MTN/WAVE: +225 05 5679 1431`,
@@ -1231,7 +1231,7 @@ MTN/WAVE: +225 05 5679 1431`,
       name: 'Payment Reminder 1 - WhatsApp',
       description: 'Sent 1 day after unpaid order',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 ⏰ *RAPPEL DE PAIEMENT*
 
 Bonjour *{customer_name}*,
@@ -1250,8 +1250,8 @@ Votre commande *#{order_number}* est toujours en attente de paiement.
 Réglez maintenant pour recevoir vos vins rapidement! 🍷
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client: *+225 0556791431*
+*CÈCHÉMOI*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1267,9 +1267,9 @@ Service Client: *+225 0556791431*
       name: 'Payment Reminder 2 - SMS',
       description: 'Sent 3 days after unpaid order',
       recipientType: 'customer',
-      content: `[CaveExpress] Votre commande #{order_number} expire bientôt! Montant: {order_total}. Payez vite pour ne pas manquer vos vins!
+      content: `[CÈCHÉMOI] Votre commande #{order_number} expire bientôt! Montant: {order_total}. Payez vite pour ne pas manquer vos vins!
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
   })
@@ -1283,7 +1283,7 @@ Contact: +225 0556791431`,
       name: 'Payment Reminder 2 - WhatsApp',
       description: 'Sent 3 days after unpaid order',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 ⚠️ *COMMANDE EN ATTENTE - 2ème Rappel*
 
 Bonjour *{customer_name}*,
@@ -1304,8 +1304,8 @@ Votre commande *#{order_number}* est en attente de paiement depuis 3 jours.
 Besoin d'aide? Répondez à ce message. 💬
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client: *+225 0556791431*
+*CÈCHÉMOI*
+Service Client: *+225 0759545410*
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1321,9 +1321,9 @@ Service Client: *+225 0556791431*
       name: 'Payment Reminder 3 - SMS',
       description: 'Sent 5 days after unpaid order - Final reminder',
       recipientType: 'customer',
-      content: `[CaveExpress] DERNIER RAPPEL: Commande #{order_number} ({order_total}) sera annulée sous 24h sans paiement. Agissez maintenant!
+      content: `[CÈCHÉMOI] DERNIER RAPPEL: Commande #{order_number} ({order_total}) sera annulée sous 24h sans paiement. Agissez maintenant!
 
-Contact: +225 0556791431`,
+Contact: +225 0759545410`,
       enabled: true,
     },
   })
@@ -1337,7 +1337,7 @@ Contact: +225 0556791431`,
       name: 'Payment Reminder 3 - WhatsApp',
       description: 'Sent 5 days after unpaid order - Final reminder',
       recipientType: 'customer',
-      content: `*[CaveExpress]*
+      content: `*[CÈCHÉMOI]*
 🚨 *DERNIER RAPPEL - COMMANDE EN ATTENTE*
 
 Bonjour *{customer_name}*,
@@ -1356,9 +1356,9 @@ Bonjour *{customer_name}*,
 ❓ Un problème avec le paiement? Contactez-nous, nous sommes là pour vous aider!
 
 ++++++++++++++++++++++
-*Cave Express*
-Service Client 7j/7: *+225 0556791431*
-WhatsApp: https://wa.me/2250556791431
+*CÈCHÉMOI*
+Service Client 7j/7: *+225 0759545410*
+WhatsApp: https://wa.me/2250759545410
 ++++++++++++++++++++++`,
       enabled: true,
     },
@@ -1374,19 +1374,19 @@ WhatsApp: https://wa.me/2250556791431
     update: {},
     create: {
       id: 'default',
-      adminPhones: ['+2250556791431'],
-      adminWhatsApp: '+2250556791431',
+      adminPhones: ['+2250759545410'],
+      adminWhatsApp: '+2250759545410',
       adminEmails: [],
       smsProvider: 'SMSING',
       smsApiKey: process.env.SMSING_SMS_WHATSAPP_BUSINESS_API_KEY || '',
-      smsSenderId: 'CAVEEXPRESS',
+      smsSenderId: 'CECHEMOI',
       whatsappProvider: 'SMSING',
       whatsappApiKey: process.env.SMSING_SMS_WHATSAPP_BUSINESS_API_KEY || '',
-      whatsappPhoneId: process.env.SMSING_FROM || 'CaveExpress',
+      whatsappPhoneId: process.env.SMSING_FROM || 'CECHEMOI',
       emailProvider: 'RESEND',
       emailApiKey: '',
       emailFromAddress: '',
-      emailFromName: 'Cave Express',
+      emailFromName: 'CÈCHÉMOI',
       smsEnabled: true,
       whatsappEnabled: true,
       emailEnabled: false,

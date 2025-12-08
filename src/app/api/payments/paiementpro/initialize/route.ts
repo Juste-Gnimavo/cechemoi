@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       customerFirstName: order.shippingAddress.fullName.split(' ')[0],
       customerLastName: order.shippingAddress.fullName.split(' ').slice(1).join(' ') || order.shippingAddress.fullName,
       customerPhoneNumber: order.shippingAddress.phone,
-      description: `Commande #${order.orderNumber} - Cave Express`,
+      description: `Commande #${order.orderNumber} - CÈCHÉMOI`,
       customerId: order.userId,
       channel: channel as any,
       returnContext: {

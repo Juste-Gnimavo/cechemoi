@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const phone = user.twoFactorPhone || user.phone
     await smsingService.sendSMS({
       to: phone,
-      message: `Votre code de vérification CAVE EXPRESS: ${otp.code}. Valable 5 minutes.`,
+      message: `Votre code de verification CÈCHÉMOI: ${otp.code}. Valable 5 minutes.`,
     })
 
     return NextResponse.json({

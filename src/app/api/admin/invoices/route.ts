@@ -206,7 +206,7 @@ export async function POST(req: NextRequest) {
     if ((sendSMS || sendWhatsApp) && invoice.status !== 'DRAFT' && customerPhone) {
       try {
         // Generate invoice PDF URL
-        const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci'
+        const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com'
         const invoiceUrl = `${baseUrl}/api/invoices/${invoice.id}/pdf`
 
         // Send text notification with template
@@ -228,7 +228,7 @@ export async function POST(req: NextRequest) {
         // Send PDF attachment via WhatsApp (if WhatsApp is enabled)
         if (sendWhatsApp) {
           try {
-            const pdfMessage = `Facture #${invoiceNumber} - Cave Express`
+            const pdfMessage = `Facture #${invoiceNumber} - CÈCHÉMOI`
             await smsingService.sendWhatsAppBusiness({
               to: customerPhone,
               message: pdfMessage,

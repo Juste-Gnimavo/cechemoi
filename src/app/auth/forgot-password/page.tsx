@@ -78,8 +78,8 @@ export default function ForgotPasswordPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
+              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
+              alt="CÈCHÉMOI"
               width={220}
               height={60}
               className="mx-auto dark:brightness-100 brightness-0"
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="admin@cave-express.ci"
+                  placeholder="admin@cechemoi.com"
                 />
               </div>
             </div>

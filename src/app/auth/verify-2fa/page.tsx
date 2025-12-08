@@ -203,8 +203,8 @@ function Verify2FAForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
+              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
+              alt="CÈCHÉMOI"
               width={220}
               height={60}
               className="mx-auto filter brightness-0"

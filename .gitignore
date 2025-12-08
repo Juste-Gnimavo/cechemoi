@@ -1,5 +1,7 @@
 # Dependencies
 /node_modules
+legacy-cechemoi
+/legacy-cechemoi
 /mobile-app/node_modules
 /.pnp
 .pnp.js

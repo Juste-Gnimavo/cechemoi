@@ -1737,3 +1737,147 @@ model PushNotificationLog {
   @@index([userId])
   @@index([status])
 }
+
+// ========================================
+// CONSULTATION / APPOINTMENT SYSTEM
+// ========================================
+
+enum AppointmentStatus {
+  PENDING       // Waiting for confirmation
+  CONFIRMED     // Admin confirmed
+  COMPLETED     // Done
+  CANCELLED     // Cancelled by admin or customer
+  NO_SHOW       // Customer didn't show up
+}
+
+enum AppointmentPaymentStatus {
+  UNPAID        // Not paid yet
+  PAID          // Paid (online or in-person)
+  REFUNDED      // Refunded
+}
+
+// Types of consultations offered
+model ConsultationType {
+  id            String   @id @default(cuid())
+  name          String   // e.g., "Analyse Morphologique", "Personal Shopping"
+  slug          String   @unique
+  description   String?  @db.Text
+
+  // Pricing
+  price         Int      @default(0) // Price in XOF (0 = Sur devis / Free)
+  duration      Int      @default(60) // Duration in minutes
+
+  // Features (shown on booking page)
+  features      String[] // e.g., ["Analyse complète", "Rapport PDF", ...]
+
+  // Appearance
+  color         String?  // Hex color for UI
+  icon          String?  // Icon name or emoji
+
+  // Settings
+  enabled       Boolean  @default(true)
+  requiresPayment Boolean @default(true) // Must pay before confirmation
+
+  // Order for display
+  sortOrder     Int      @default(0)
+
+  appointments  Appointment[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([enabled])
+  @@index([sortOrder])
+}
+
+// Admin availability slots (recurring or specific dates)
+model AdminAvailability {
+  id            String   @id @default(cuid())
+
+  // Day of week (0=Sunday, 1=Monday, ..., 6=Saturday) OR specific date
+  dayOfWeek     Int?     // For recurring weekly slots
+  specificDate  DateTime? // For specific date slots (overrides dayOfWeek)
+
+  // Time slots
+  startTime     String   // e.g., "09:00"
+  endTime       String   // e.g., "18:00"
+
+  // Slot configuration
+  slotDuration  Int      @default(60) // Minutes per appointment
+  breakBetween  Int      @default(15) // Break between appointments
+
+  // Availability
+  enabled       Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([dayOfWeek])
+  @@index([specificDate])
+  @@index([enabled])
+}
+
+// Customer appointments
+model Appointment {
+  id            String   @id @default(cuid())
+  reference     String   @unique // e.g., "RDV-2025-ABC123"
+
+  // Type of consultation
+  typeId        String
+  type          ConsultationType @relation(fields: [typeId], references: [id])
+
+  // Customer info (can be logged-in user or guest)
+  userId        String?  // If registered user
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  customerNotes String?  @db.Text // What customer wants to discuss
+
+  // Scheduling
+  date          DateTime // Date of appointment
+  time          String   // e.g., "14:00"
+  duration      Int      // Duration in minutes
+
+  // Status
+  status        AppointmentStatus @default(PENDING)
+  paymentStatus AppointmentPaymentStatus @default(UNPAID)
+
+  // Pricing
+  price         Int      @default(0) // Price in XOF
+  paidAmount    Int      @default(0) // Amount paid
+  paymentMethod String?  // CASH, ORANGE_MONEY, MTN, WAVE, CARD, etc.
+  paymentReference String? // Transaction reference
+
+  // Admin notes (internal)
+  adminNotes    String?  @db.Text
+
+  // Reminders
+  reminderSent  Boolean  @default(false)
+  reminderSentAt DateTime?
+
+  // Confirmation
+  confirmedAt   DateTime?
+  confirmedBy   String?  // Admin user ID
+
+  // Cancellation
+  cancelledAt   DateTime?
+  cancelledBy   String?  // 'customer' or admin user ID
+  cancelReason  String?
+
+  // Completion
+  completedAt   DateTime?
+  completedBy   String?  // Admin user ID
+  completionNotes String? @db.Text
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([reference])
+  @@index([typeId])
+  @@index([userId])
+  @@index([customerPhone])
+  @@index([date])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}

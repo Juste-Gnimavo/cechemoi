@@ -1,6 +1,6 @@
-# CAVE EXPRESS - CURRENT STATUS & IMPLEMENTATION ROADMAP
+# CÈCHÉMOI - CURRENT STATUS & IMPLEMENTATION ROADMAP
 
-**Project**: Cave Express Wine Store
+**Project**: CÈCHÉMOI Fashion Store
 **Stack**: Next.js 14, Prisma, PostgreSQL, NextAuth
 **Status**: Admin Dashboard 100% | Customer Frontend 95% | Notifications Ready
 **Last Updated**: 2025-11-23

@@ -93,8 +93,8 @@ const pushNotificationTemplates: Record<NotificationTrigger, {
   },
 
   NEW_ACCOUNT: {
-    title: 'Bienvenue chez Cave Express!',
-    body: 'Votre compte a ete cree. Decouvrez notre selection de vins premium!',
+    title: 'Bienvenue chez CÈCHÉMOI!',
+    body: 'Votre compte a ete cree. Decouvrez notre collection de mode sur-mesure!',
     name: 'Nouveau compte - Push',
     description: 'Notification push de bienvenue',
     recipientType: 'customer',

@@ -62,10 +62,10 @@ export async function POST(
       '{product_name}': 'Vin Rouge Bordeaux 2020',
       '{product_quantity}': '2',
       '{low_stock_quantity}': '5',
-      '{store_name}': 'CAVE EXPRESS',
-      '{store_url}': 'https://cave-express.ci',
-      '{store_phone}': '+2250556791431',
-      '{store_whatsapp}': '+2250556791431',
+      '{store_name}': 'CÈCHÉMOI',
+      '{store_url}': 'https://cechemoi.com',
+      '{store_phone}': '+2250759545410',
+      '{store_whatsapp}': '+2250759545410',
     }
 
     let renderedContent = template.content

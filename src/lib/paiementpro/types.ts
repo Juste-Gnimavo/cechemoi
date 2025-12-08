@@ -1,5 +1,5 @@
 /**
- * PaiementPro Type Definitions for CAVE EXPRESS
+ * PaiementPro Type Definitions for CÈCHÉMOI
  * West African Payment Gateway Integration
  */
 

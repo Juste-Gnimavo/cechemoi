@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
       console.error('Invoice creation error:', invoiceError)
     }
 
-    const baseUrl = process.env.NEXTAUTH_URL || 'https://cave-express.ci'
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://cechemoi.com'
     invoiceUrl = createdInvoice
       ? `${baseUrl}/api/invoices/${createdInvoice.id}/pdf`
       : `${baseUrl}/account/orders/${order.id}`
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
           customerFirstName: order.shippingAddress.fullName.split(' ')[0],
           customerLastName: order.shippingAddress.fullName.split(' ').slice(1).join(' ') || order.shippingAddress.fullName,
           customerPhoneNumber: order.shippingAddress.phone,
-          description: `Commande #${order.orderNumber} - Cave Express`,
+          description: `Commande #${order.orderNumber} - CÈCHÉMOI`,
           customerId: order.userId,
           channel: paymentChannel as any,
           returnContext: {

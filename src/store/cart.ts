@@ -133,7 +133,7 @@ export const useCart = create<CartState>()(
       },
     }),
     {
-      name: 'cave-express-cart',
+      name: 'cechemoi-cart',
     }
   )
 )

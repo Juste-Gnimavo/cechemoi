@@ -58,8 +58,8 @@ export function ManagerHeader() {
           {/* Logo */}
           <Link href="/admin" className="flex items-center">
             <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
+              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
+              alt="CÈCHÉMOI"
               width={180}
               height={40}
               className="h-10 w-auto dark:brightness-100 brightness-0"

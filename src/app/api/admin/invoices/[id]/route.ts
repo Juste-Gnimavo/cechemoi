@@ -211,7 +211,7 @@ export async function PUT(
         // Only send notification if sendNotification is not explicitly false
         if (sendNotification !== false) {
           // Build invoice URL for notification
-          const baseUrl = process.env.NEXTAUTH_URL || 'https://cave-express.ci'
+          const baseUrl = process.env.NEXTAUTH_URL || 'https://cechemoi.com'
           const invoiceUrl = `${baseUrl}/api/invoices/${invoice.id}/pdf`
 
           notificationService.sendPaymentReceived(invoice.orderId, invoiceUrl).catch((error) => {

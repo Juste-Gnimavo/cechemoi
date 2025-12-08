@@ -354,7 +354,7 @@ export default function NewCategoryPage() {
                     </div>
                     <p className="text-xs text-gray-500 mt-2 flex items-center">
                       <ImageIcon className="h-3 w-3 mr-1" />
-                      Si aucune image n'est fournie, le logo Cave Express sera utilisé par défaut
+                      Si aucune image n'est fournie, le logo CÈCHÉMOI sera utilisé par défaut
                     </p>
                   </>
                 )}

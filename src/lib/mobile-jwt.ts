@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { prisma } from '@/lib/prisma'
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'cave-express-mobile-secret'
+const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'cechemoi-mobile-secret'
 const ACCESS_TOKEN_EXPIRY = '7d' // 7 days
 const REFRESH_TOKEN_EXPIRY = '30d' // 30 days
 

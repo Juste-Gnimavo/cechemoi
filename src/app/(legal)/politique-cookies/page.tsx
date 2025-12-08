@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { Cookie, Shield, BarChart3, Settings, Target, HelpCircle, ExternalLink } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Politique des Cookies | Cave Express',
-  description: 'Découvrez comment Cave Express utilise les cookies sur son site web. Informations sur les types de cookies et comment les gérer.',
+  title: 'Politique des Cookies | CÈCHÉMOI',
+  description: 'Découvrez comment CÈCHÉMOI utilise les cookies sur son site web. Informations sur les types de cookies et comment les gérer.',
 }
 
 export default function PolitiqueCookiesPage() {
@@ -22,9 +22,9 @@ export default function PolitiqueCookiesPage() {
       {/* Introduction */}
       <section className="mb-10">
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          Cave Express (« nous », « notre », ou « nos ») utilise des cookies sur le site web
-          <a href="https://www.cave-express.ci" className="text-copper-500 hover:underline mx-1">
-            https://www.cave-express.ci
+          CÈCHÉMOI (« nous », « notre », ou « nos ») utilise des cookies sur le site web
+          <a href="https://www.cechemoi.com" className="text-copper-500 hover:underline mx-1">
+            https://www.cechemoi.com
           </a>
           (ci-après désigné par « Service »). En utilisant le Service, vous consentez à l&apos;utilisation
           des cookies.
@@ -233,14 +233,14 @@ export default function PolitiqueCookiesPage() {
           <div className="space-y-2">
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par email :</span>{' '}
-              <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">
-                serviceclient@cave-express.ci
+              <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">
+                cechemoicreations@gmail.com
               </a>
             </p>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par téléphone :</span>{' '}
-              <a href="tel:+2250556791431" className="text-copper-500 hover:underline">
-                +225 0556791431
+              <a href="tel:+2250759545410" className="text-copper-500 hover:underline">
+                +225 0759545410
               </a>
             </p>
           </div>

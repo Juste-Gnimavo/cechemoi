@@ -31,9 +31,9 @@ export default function SMSCampaignPage() {
     { key: '{order_count}', label: 'Nombre de commandes', example: '5' },
     { key: '{total_spent}', label: 'Montant total dépensé', example: '125,000 FCFA' },
     { key: '{last_order_date}', label: 'Date dernière commande', example: '15/11/2024' },
-    { key: '{store_name}', label: 'Nom du magasin', example: 'CAVE EXPRESS' },
-    { key: '{store_phone}', label: 'Téléphone magasin', example: '+225 05 56 79 14 31' },
-    { key: '{store_url}', label: 'URL du magasin', example: 'https://cave-express.ci' },
+    { key: '{store_name}', label: 'Nom du magasin', example: 'CÈCHÉMOI' },
+    { key: '{store_phone}', label: 'Téléphone magasin', example: '+225 0759545410' },
+    { key: '{store_url}', label: 'URL du magasin', example: 'https://cechemoi.com' },
   ]
 
   // Fetch customer count on load

@@ -207,7 +207,7 @@ export async function PUT(
 
         // Send notifications only if enabled
         if (sendNotification !== false) {
-          const baseUrl = process.env.NEXTAUTH_URL || 'https://cave-express.ci'
+          const baseUrl = process.env.NEXTAUTH_URL || 'https://cechemoi.com'
           const invoiceUrl = invoice
             ? `${baseUrl}/api/invoices/${invoice.id}/pdf`
             : `${baseUrl}/account/orders/${params.id}`

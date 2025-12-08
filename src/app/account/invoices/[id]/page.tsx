@@ -197,10 +197,10 @@ export default function InvoiceDetailPage() {
       <div className="hidden print:block p-8 border-b border-gray-300">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">CAVE EXPRESS</h1>
-            <p className="text-gray-600">Vente de vins et spiritueux</p>
+            <h1 className="text-3xl font-bold text-gray-900">CÈCHÉMOI</h1>
+            <p className="text-gray-600">Boutique de mode africaine</p>
             <p className="text-gray-600">Abidjan, Côte d'Ivoire</p>
-            <p className="text-gray-600">Tel: +225 05 56 79 14 31</p>
+            <p className="text-gray-600">Tel: +225 0759545410</p>
           </div>
           <div className="text-right">
             <h2 className="text-2xl font-bold text-gray-900">FACTURE</h2>
@@ -430,8 +430,8 @@ export default function InvoiceDetailPage() {
       {/* Print Footer */}
       <div className="hidden print:block p-8 border-t border-gray-300 text-center text-gray-600 text-sm">
         <p className="font-medium">Merci pour votre confiance!</p>
-        <p className="mt-2">CAVE EXPRESS - contact@cave-express.ci - +225 05 56 79 14 31</p>
-        <p>www.cave-express.ci</p>
+        <p className="mt-2">CÈCHÉMOI - cechemoicreations@gmail.com - +225 0759545410</p>
+        <p>www.cechemoi.com</p>
       </div>
 
       <div className="print:hidden">

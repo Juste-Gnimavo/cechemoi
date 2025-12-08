@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build invoice URL for notifications
-    const baseUrl = process.env.NEXTAUTH_URL || 'https://cave-express.ci'
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://cechemoi.com'
     const invoiceUrl = createdInvoice
       ? `${baseUrl}/api/invoices/${createdInvoice.id}/pdf`
       : `${baseUrl}/account/orders/${order.id}`

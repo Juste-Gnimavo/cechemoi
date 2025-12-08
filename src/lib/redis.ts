@@ -8,7 +8,7 @@ const redisConfig = {
   username: process.env.REDIS_USER || undefined,
   db: parseInt(process.env.REDIS_DB || '0'),
   tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
-  keyPrefix: process.env.REDIS_PREFIX ? `${process.env.REDIS_PREFIX}:` : 'caveexpress:',
+  keyPrefix: process.env.REDIS_PREFIX ? `${process.env.REDIS_PREFIX}:` : 'cechemoi:',
   retryDelayOnFailover: 100,
   maxRetriesPerRequest: 3,
   lazyConnect: true, // Don't connect immediately

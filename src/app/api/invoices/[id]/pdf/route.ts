@@ -157,7 +157,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     })
   } catch (error) {
     // Fallback: Draw text logo if image fails
-    page.drawText('CAVE EXPRESS', {
+    page.drawText('CÈCHÉMOI', {
       x: margin,
       y: yPos,
       size: 24,
@@ -170,7 +170,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   // HEADER - Company Info (next to logo)
   // =============================================
   const headerX = margin + 80
-  page.drawText('CAVE EXPRESS', {
+  page.drawText('CÈCHÉMOI', {
     x: headerX,
     y: yPos,
     size: 22,
@@ -179,7 +179,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 16
-  page.drawText('Vente de vins et spiritueux premium', {
+  page.drawText('Boutique de mode sur-mesure et pret-a-porter', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -197,7 +197,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 11
-  page.drawText('Tel / WhatsApp: +225 05 56 79 14 31', {
+  page.drawText('Tel / WhatsApp: +225 0759545410', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -206,7 +206,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 11
-  page.drawText('www.cave-express.ci | contact@cave-express.ci', {
+  page.drawText('www.cechemoi.com | cechemoicreations@gmail.com', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -754,7 +754,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Tagline
-  const taglineText = 'CAVE EXPRESS - La qualite du vin, livree a votre porte. Livraison rapide partout a Abidjan'
+  const taglineText = 'CÈCHÉMOI - Elegance africaine sur-mesure. Mode feminine personnalisee a Abidjan'
   const taglineWidth = helveticaBold.widthOfTextAtSize(taglineText, 8)
   page.drawText(taglineText, {
     x: (width - taglineWidth) / 2,
@@ -765,7 +765,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Contact info
-  const contactText = 'Cocody Faya, Cite genie 2000 | email: serviceclient@cave-express.ci | Tel: +225 05 56 79 14 31 | Site web: www.cave-express.ci'
+  const contactText = 'Abidjan, Cote d\'Ivoire | email: cechemoicreations@gmail.com | Tel: +225 0759545410 | Site web: www.cechemoi.com'
   const contactWidth = helvetica.widthOfTextAtSize(contactText, 8)
   page.drawText(contactText, {
     x: (width - contactWidth) / 2,
@@ -773,17 +773,6 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     size: 8,
     font: helvetica,
     color: lightGray,
-  })
-
-  // Adult disclaimer (18+ for Ivory Coast)
-  const disclaimerText = "La vente d'alcool est interdite aux mineurs de moins de 18 ans. L'abus d'alcool est dangereux pour la sante."
-  const disclaimerWidth = helvetica.widthOfTextAtSize(disclaimerText, 7)
-  page.drawText(disclaimerText, {
-    x: (width - disclaimerWidth) / 2,
-    y: footerY - 16,
-    size: 7,
-    font: helvetica,
-    color: rgb(0.6, 0.6, 0.6),
   })
 
   // Thank you message

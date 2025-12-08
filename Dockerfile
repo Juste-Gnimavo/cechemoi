@@ -1,5 +1,5 @@
 # ===================================================
-# Cave Express - Production Dockerfile for EasyPanel
+# CÈCHÉMOI - Production Dockerfile for EasyPanel
 # ===================================================
 # Uses multi-stage build for optimal image size
 # Node.js 22 LTS with Alpine for smallest footprint
@@ -33,8 +33,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build arguments for build-time environment (with production defaults)
-ARG NEXT_PUBLIC_SITE_URL=https://cave-express.ci
-ARG NEXT_PUBLIC_APP_URL=https://cave-express.ci
+ARG NEXT_PUBLIC_SITE_URL=https://cechemoi.com
+ARG NEXT_PUBLIC_APP_URL=https://cechemoi.com
 ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
 
@@ -63,7 +63,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ENV NEXTAUTH_URL=https://cave-express.ci
+ENV NEXTAUTH_URL=https://cechemoi.com
 
 # Copy built application
 COPY --from=builder /app/public ./public

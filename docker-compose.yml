@@ -12,10 +12,10 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
-      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://cave-express.ci}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://cechemoi.com}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://cave-express.ci}
-      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://cave-express.ci}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://cechemoi.com}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://cechemoi.com}
       # Redis
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
@@ -23,7 +23,7 @@ services:
       - REDIS_USER=${REDIS_USER:-default}
       - REDIS_TLS=${REDIS_TLS:-false}
       - REDIS_DB=${REDIS_DB:-0}
-      - REDIS_PREFIX=${REDIS_PREFIX:-caveexpress}
+      - REDIS_PREFIX=${REDIS_PREFIX:-cechemoi}
       - REDIS_TTL=${REDIS_TTL:-3600}
       # Email
       - SMTPHOST=${SMTPHOST}

@@ -8,7 +8,7 @@ import { IPhoneMessagePreview } from '@/components/admin/iphone-message-preview'
 import { ConfirmationModal, useConfirmationModal } from '@/components/admin/confirmation-modal'
 
 // Site URL for full URLs (WhatsApp needs absolute URLs)
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://cave-express.ci'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://cechemoi.com'
 
 interface MediaFile {
   id: string
@@ -56,9 +56,9 @@ export default function WhatsAppCampaignPage() {
     { key: '{order_count}', label: 'Nombre de commandes', example: '5' },
     { key: '{total_spent}', label: 'Montant total dépensé', example: '125,000 FCFA' },
     { key: '{last_order_date}', label: 'Date dernière commande', example: '15/11/2024' },
-    { key: '{store_name}', label: 'Nom du magasin', example: 'CAVE EXPRESS' },
-    { key: '{store_phone}', label: 'Téléphone magasin', example: '+225 05 56 79 14 31' },
-    { key: '{store_url}', label: 'URL du magasin', example: 'https://cave-express.ci' },
+    { key: '{store_name}', label: 'Nom du magasin', example: 'CÈCHÉMOI' },
+    { key: '{store_phone}', label: 'Téléphone magasin', example: '+225 0759545410' },
+    { key: '{store_url}', label: 'URL du magasin', example: 'https://cechemoi.com' },
   ]
 
   useEffect(() => {

@@ -178,7 +178,7 @@ export async function seedTax() {
     },
     create: {
       id: 'default-settings',
-      siteName: 'Cave Express',
+      siteName: 'CÈCHÉMOI',
       currency: 'XOF',
       currencySymbol: 'CFA',
       taxRate: 18.0,

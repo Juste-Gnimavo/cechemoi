@@ -190,7 +190,7 @@ export default function NotificationSettingsPage() {
                 type="tel"
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
-                placeholder="+2250556791431"
+                placeholder="+2250759545410"
                 className="flex-1 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <button
@@ -226,7 +226,7 @@ export default function NotificationSettingsPage() {
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="admin@cave-express.ci"
+                placeholder="admin@cechemoi.com"
                 className="flex-1 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <button
@@ -291,7 +291,7 @@ export default function NotificationSettingsPage() {
                     onChange={(e) =>
                       setSettings({ ...settings, smsProviderSenderId: e.target.value })
                     }
-                    placeholder="CAVEEXPRESS"
+                    placeholder="CECHEMOI"
                     className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 text-gray-900 dark:text-white placeholder-gray-500 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -343,7 +343,7 @@ export default function NotificationSettingsPage() {
                     onChange={(e) =>
                       setSettings({ ...settings, whatsappPhoneId: e.target.value })
                     }
-                    placeholder="+2250556791431"
+                    placeholder="+2250759545410"
                     className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 text-gray-900 dark:text-white placeholder-gray-500 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
@@ -462,7 +462,7 @@ export default function NotificationSettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, testPhone: e.target.value })
                   }
-                  placeholder="+2250556791431"
+                  placeholder="+2250759545410"
                   className="w-full px-3 py-2 bg-white dark:bg-dark-700 border border-gray-200 dark:border-dark-600 text-gray-900 dark:text-white placeholder-gray-500 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
                 <p className="text-xs text-gray-500 mt-1">

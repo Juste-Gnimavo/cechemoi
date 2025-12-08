@@ -49,7 +49,7 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"CAVE EXPRESS" <${process.env.SMTPREPLYTO || process.env.SMTPUSERNAME}>`,
+        from: `"CÈCHÉMOI" <${process.env.SMTPREPLYTO || process.env.SMTPUSERNAME}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,
@@ -66,7 +66,7 @@ class EmailService {
   }
 
   async sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<boolean> {
-    const subject = 'Réinitialisation de mot de passe - CAVE EXPRESS'
+    const subject = 'Réinitialisation de mot de passe - CÈCHÉMOI'
 
     const html = `
       <!DOCTYPE html>
@@ -126,13 +126,13 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🍷 CAVE EXPRESS</h1>
+            <h1>👗 CÈCHÉMOI</h1>
             <p>Réinitialisation de mot de passe</p>
           </div>
           <div class="content">
             <p>Bonjour <strong>${name}</strong>,</p>
 
-            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte administrateur CAVE EXPRESS.</p>
+            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte administrateur CÈCHÉMOI.</p>
 
             <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
 
@@ -158,12 +158,12 @@ class EmailService {
 
             <p>
               Cordialement,<br>
-              <strong>L'équipe CAVE EXPRESS</strong>
+              <strong>L'équipe CÈCHÉMOI</strong>
             </p>
           </div>
           <div class="footer">
-            <p>CAVE EXPRESS - Votre cave à vin en ligne</p>
-            <p>📞 +225 05 56 79 14 31 | 🌐 https://cave-express.ci</p>
+            <p>CÈCHÉMOI - Mode et Vêtements à Abidjan</p>
+            <p>📞 +225 0759545410 | 🌐 https://cechemoi.com</p>
             <p style="margin-top: 10px;">
               Cet email a été envoyé automatiquement, merci de ne pas y répondre.
             </p>
@@ -176,7 +176,7 @@ class EmailService {
     const text = `
 Bonjour ${name},
 
-Vous avez demandé la réinitialisation de votre mot de passe pour votre compte administrateur CAVE EXPRESS.
+Vous avez demandé la réinitialisation de votre mot de passe pour votre compte administrateur CÈCHÉMOI.
 
 Cliquez sur le lien ci-dessous pour créer un nouveau mot de passe :
 ${resetUrl}
@@ -187,18 +187,18 @@ ${resetUrl}
 - Si vous n'avez pas fait cette demande, ignorez cet email
 
 Cordialement,
-L'équipe CAVE EXPRESS
+L'équipe CÈCHÉMOI
 
 ---
-CAVE EXPRESS - Votre cave à vin en ligne
-📞 +225 05 56 79 14 31 | 🌐 https://cave-express.ci
+CÈCHÉMOI - Mode et Vêtements à Abidjan
+📞 +225 0759545410 | 🌐 https://cechemoi.com
     `
 
     return this.sendEmail({ to, subject, html, text })
   }
 
   async sendPasswordChangedEmail(to: string, name: string): Promise<boolean> {
-    const subject = 'Mot de passe modifié - CAVE EXPRESS'
+    const subject = 'Mot de passe modifié - CÈCHÉMOI'
 
     const html = `
       <!DOCTYPE html>
@@ -249,7 +249,7 @@ CAVE EXPRESS - Votre cave à vin en ligne
       <body>
         <div class="container">
           <div class="header">
-            <h1>✅ CAVE EXPRESS</h1>
+            <h1>✅ CÈCHÉMOI</h1>
             <p>Confirmation de changement de mot de passe</p>
           </div>
           <div class="content">
@@ -261,17 +261,17 @@ CAVE EXPRESS - Votre cave à vin en ligne
 
             <div class="alert">
               <strong>🔒 Sécurité :</strong><br>
-              Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement au +225 05 56 79 14 31
+              Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement au +225 0759545410
             </div>
 
             <p>
               Cordialement,<br>
-              <strong>L'équipe CAVE EXPRESS</strong>
+              <strong>L'équipe CÈCHÉMOI</strong>
             </p>
           </div>
           <div class="footer">
-            <p>CAVE EXPRESS - Votre cave à vin en ligne</p>
-            <p>📞 +225 05 56 79 14 31 | 🌐 https://cave-express.ci</p>
+            <p>CÈCHÉMOI - Mode et Vêtements à Abidjan</p>
+            <p>📞 +225 0759545410 | 🌐 https://cechemoi.com</p>
           </div>
         </div>
       </body>
@@ -286,14 +286,14 @@ Votre mot de passe a été réinitialisé avec succès.
 Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
 
 🔒 Sécurité :
-Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement au +225 05 56 79 14 31
+Si vous n'êtes pas à l'origine de ce changement, contactez-nous immédiatement au +225 0759545410
 
 Cordialement,
-L'équipe CAVE EXPRESS
+L'équipe CÈCHÉMOI
 
 ---
-CAVE EXPRESS - Votre cave à vin en ligne
-📞 +225 05 56 79 14 31 | 🌐 https://cave-express.ci
+CÈCHÉMOI - Mode et Vêtements à Abidjan
+📞 +225 0759545410 | 🌐 https://cechemoi.com
     `
 
     return this.sendEmail({ to, subject, html, text })

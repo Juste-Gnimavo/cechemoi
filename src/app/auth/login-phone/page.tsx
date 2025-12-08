@@ -164,7 +164,7 @@ function LoginPhoneContent() {
           isOpen: true,
           type: 'success',
           title: 'Connexion réussie !',
-          message: 'Bienvenue sur Cave Express',
+          message: 'Bienvenue sur CÈCHÉMOI',
           secondaryMessage: 'Redirection en cours...',
           autoClose: 1500,
         })
@@ -195,16 +195,6 @@ function LoginPhoneContent() {
       <div className="max-w-md w-full">
        {/* Logo & Title */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-6">
-            <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
-              width={220}
-              height={60}
-              className="mx-auto dark:brightness-100 brightness-0"
-              priority
-            />
-          </Link>
 
           <div className="flex items-center justify-center gap-2 mb-2">
             <ShieldCheck className="h-6 w-6 text-primary-500" />

@@ -70,7 +70,7 @@ export const authOptions: NextAuthOptions = {
           const phone = user.twoFactorPhone || user.phone
           await smsingService.sendSMS({
             to: phone,
-            message: `Votre code de vérification CAVE EXPRESS: ${otp.code}. Valable 5 minutes.`,
+            message: `Votre code de vérification CÈCHÉMOI: ${otp.code}. Valable 5 minutes.`,
           })
 
           // Create temporary token for 2FA flow

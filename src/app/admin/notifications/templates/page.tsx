@@ -528,11 +528,11 @@ export default function NotificationTemplatesPage() {
                     type="tel"
                     value={testPhone}
                     onChange={(e) => setTestPhone(e.target.value)}
-                    placeholder="+2250556791431"
+                    placeholder="+2250759545410"
                     className="w-full px-4 py-3 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    Format international avec indicatif pays (ex: +2250556791431)
+                    Format international avec indicatif pays (ex: +2250759545410)
                   </p>
                 </div>
 

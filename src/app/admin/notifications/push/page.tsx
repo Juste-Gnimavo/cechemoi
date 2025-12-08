@@ -490,9 +490,9 @@ export default function PushNotificationTemplatesPage() {
                 <div className="bg-gray-800 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-6 h-6 bg-purple-600 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">CE</span>
+                      <span className="text-white text-xs font-bold">CM</span>
                     </div>
-                    <span className="text-white text-sm font-medium">Cave Express</span>
+                    <span className="text-white text-sm font-medium">CÈCHÉMOI</span>
                     <span className="text-gray-400 text-xs ml-auto">maintenant</span>
                   </div>
                   <div className="text-white font-medium text-sm">

@@ -1,5 +1,5 @@
 /**
- * PaiementPro Client for CAVE EXPRESS
+ * PaiementPro Client for CÈCHÉMOI
  * Uses JSON API (like the official JS SDK)
  */
 
@@ -48,7 +48,7 @@ export class PaiementProClient {
     reference: string;
     error?: string;
   }> {
-    const reference = params.referenceNumber || generateReference('CAVE');
+    const reference = params.referenceNumber || generateReference('CCM');
 
     try {
       // Build request body EXACTLY like the official JS SDK
@@ -179,7 +179,7 @@ export function getPaiementProClient(): PaiementProClient {
       throw new Error('PAIEMENTPRO_CREDENTIAL_ID is not configured');
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com';
 
     clientInstance = new PaiementProClient({
       merchantId: process.env.PAIEMENTPRO_MERCHANT_ID,

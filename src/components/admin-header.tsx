@@ -38,7 +38,8 @@ import {
   Newspaper,
   BadgeInfo,
   Sun,
-  Moon
+  Moon,
+  CalendarDays
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useTheme } from '@/store/theme'
@@ -96,6 +97,19 @@ export function AdminHeader() {
         { href: '/admin/customers/send-sms', label: 'Envoyez un SMS à un client' },
         { href: '/admin/customers/send-whatsapp', label: 'Envoyez un message WhatsApp' },
         { href: '/admin/reviews', label: 'Voir Avis clients' },
+      ],
+    },
+    {
+      label: 'Rendez-vous',
+      icon: CalendarDays,
+      items: [
+        { href: '/admin/appointments', label: 'Tableau de bord' },
+        { href: '/admin/appointments/list', label: 'Tous les rendez-vous' },
+        { href: '/admin/appointments?status=pending', label: 'En attente', badge: 'NEW' },
+        { href: '/admin/appointments?status=confirmed', label: 'Confirmés' },
+        { href: '/admin/appointments?status=completed', label: 'Terminés' },
+        { href: '/admin/appointments/availability', label: 'Définir disponibilités' },
+        { href: '/admin/appointments/services', label: 'Types de consultation' },
       ],
     },
     {
@@ -281,8 +295,8 @@ export function AdminHeader() {
           {/* Logo */}
           <Link href="/admin" className="flex items-center">
             <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
+              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
+              alt="CÈCHÉMOI"
               width={180}
               height={40}
               style={{ height: '40px', width: 'auto' }}

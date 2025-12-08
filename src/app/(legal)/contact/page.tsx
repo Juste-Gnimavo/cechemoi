@@ -13,6 +13,15 @@ function WhatsAppIcon({ className }: { className?: string }) {
   )
 }
 
+// Custom TikTok icon component
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+    </svg>
+  )
+}
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -61,7 +70,7 @@ export default function ContactPage() {
         <div className="space-y-6">
           {/* Company Info */}
           <div className="bg-gray-100 dark:bg-dark-800 rounded-xl p-6">
-            <h2 className="text-gray-900 dark:text-white font-semibold text-xl mb-6">Cave Express Vin Abidjan</h2>
+            <h2 className="text-gray-900 dark:text-white font-semibold text-xl mb-6">CÈCHÉMOI</h2>
 
             <div className="space-y-4">
               <div className="flex items-start gap-4">
@@ -70,8 +79,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">Téléphone</p>
-                  <a href="tel:+2250556791431" className="text-gray-900 dark:text-white font-medium hover:text-copper-500 transition-colors">
-                    +225 0556791431
+                  <a href="tel:+2250759545410" className="text-gray-900 dark:text-white font-medium hover:text-copper-500 transition-colors">
+                    +225 0759545410
                   </a>
                 </div>
               </div>
@@ -82,8 +91,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">Email</p>
-                  <a href="mailto:contact@cave-express.ci" className="text-gray-900 dark:text-white font-medium hover:text-copper-500 transition-colors">
-                    contact@cave-express.ci
+                  <a href="mailto:cechemoicreations@gmail.com" className="text-gray-900 dark:text-white font-medium hover:text-copper-500 transition-colors">
+                    cechemoicreations@gmail.com
                   </a>
                 </div>
               </div>
@@ -95,7 +104,7 @@ export default function ContactPage() {
                 <div>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">Adresse</p>
                   <p className="text-gray-900 dark:text-white font-medium">
-                    Faya Cité Genie 2000<br />
+                    Cocody Riviera Palmeraie<br />
                     Abidjan, Côte d&apos;Ivoire
                   </p>
                 </div>
@@ -120,7 +129,7 @@ export default function ContactPage() {
             <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-4">Contact rapide</h3>
             <div className="space-y-3">
               <a
-                href="https://wa.me/2250556791431"
+                href="https://wa.me/2250759545410"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-3 transition-colors"
@@ -129,7 +138,7 @@ export default function ContactPage() {
                 <span className="font-medium">Contactez-nous sur WhatsApp</span>
               </a>
               <a
-                href="tel:+2250556791431"
+                href="tel:+2250759545410"
                 className="flex items-center gap-3 bg-gray-200 dark:bg-dark-700 hover:bg-gray-300 dark:hover:bg-dark-600 text-gray-900 dark:text-white rounded-lg px-4 py-3 transition-colors"
               >
                 <Phone className="h-5 w-5 text-copper-500" />
@@ -143,7 +152,7 @@ export default function ContactPage() {
             <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-4">Suivez-nous</h3>
             <div className="flex gap-3">
               <a
-                href="https://facebook.com/Cave.Express.Abidjan.Vin.Blanc.Rouge"
+                href="https://web.facebook.com/cechemoi"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 bg-gray-200 dark:bg-dark-700 hover:bg-[#1877F2] rounded-full flex items-center justify-center transition-colors group"
@@ -151,7 +160,7 @@ export default function ContactPage() {
                 <Facebook className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-white" />
               </a>
               <a
-                href="https://instagram.com/cave_express_abidjan"
+                href="https://www.instagram.com/cechemoi.ci"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 bg-gray-200 dark:bg-dark-700 hover:bg-gradient-to-br hover:from-[#833AB4] hover:via-[#FD1D1D] hover:to-[#F77737] rounded-full flex items-center justify-center transition-all group"
@@ -159,12 +168,20 @@ export default function ContactPage() {
                 <Instagram className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-white" />
               </a>
               <a
-                href="https://wa.me/2250556791431"
+                href="https://wa.me/2250759545410"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 bg-gray-200 dark:bg-dark-700 hover:bg-[#25D366] rounded-full flex items-center justify-center transition-colors group"
               >
                 <WhatsAppIcon className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-white" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@cechemoi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 bg-gray-200 dark:bg-dark-700 hover:bg-black rounded-full flex items-center justify-center transition-colors group"
+              >
+                <TikTokIcon className="h-5 w-5 text-gray-500 dark:text-gray-400 group-hover:text-white" />
               </a>
             </div>
           </div>
@@ -323,7 +340,7 @@ export default function ContactPage() {
             />
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-4 text-center">
-            Faya Cité Genie 2000, Abidjan, Côte d&apos;Ivoire
+            Cocody Riviera Palmeraie, Abidjan, Côte d&apos;Ivoire
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { RotateCcw, CheckCircle, XCircle, Clock, Phone, Mail, MessageCircle, CreditCard, HelpCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Politique de Retour | Cave Express',
+  title: 'Politique de Retour | CÈCHÉMOI',
   description: 'Découvrez notre politique de retour d\'articles. Retours acceptés sous 24h pour les produits non ouverts. Remboursement sous 72h après inspection.',
 }
 
@@ -26,7 +26,7 @@ export default function PolitiqueRetourPage() {
           Conditions de retour
         </h2>
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-          À Cave Express, nous nous engageons à offrir à nos clients des produits de qualité.
+          À CÈCHÉMOI, nous nous engageons à offrir à nos clients des produits de qualité.
           Si, pour une raison quelconque, vous n&apos;êtes pas entièrement satisfait de votre achat,
           nous vous offrons la possibilité de nous retourner les articles sous certaines conditions.
         </p>
@@ -107,17 +107,17 @@ export default function PolitiqueRetourPage() {
                 <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center gap-2">
                   <Phone className="h-4 w-4 text-copper-500" />
                   <span>Téléphone : </span>
-                  <a href="tel:+2250556791431" className="text-copper-500 hover:underline">+225 0556791431</a>
+                  <a href="tel:+2250759545410" className="text-copper-500 hover:underline">+225 0759545410</a>
                 </p>
                 <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center gap-2">
                   <Mail className="h-4 w-4 text-copper-500" />
                   <span>Email : </span>
-                  <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">serviceclient@cave-express.ci</a>
+                  <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">cechemoicreations@gmail.com</a>
                 </p>
                 <p className="text-gray-600 dark:text-gray-300 text-sm flex items-center gap-2">
                   <MessageCircle className="h-4 w-4 text-copper-500" />
                   <span>WhatsApp : </span>
-                  <a href="https://wa.me/2250556791431" className="text-copper-500 hover:underline">wa.me/2250556791431</a>
+                  <a href="https://wa.me/2250759545410" className="text-copper-500 hover:underline">wa.me/2250759545410</a>
                 </p>
               </div>
             </div>
@@ -243,15 +243,15 @@ export default function PolitiqueRetourPage() {
           <div className="space-y-2">
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par téléphone :</span>{' '}
-              <a href="tel:+2250556791431" className="text-copper-500 hover:underline">+225 0556791431</a>
+              <a href="tel:+2250759545410" className="text-copper-500 hover:underline">+225 0759545410</a>
             </p>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par email :</span>{' '}
-              <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">serviceclient@cave-express.ci</a>
+              <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">cechemoicreations@gmail.com</a>
             </p>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Via WhatsApp :</span>{' '}
-              <a href="https://wa.me/2250556791431" className="text-copper-500 hover:underline">wa.me/2250556791431</a>
+              <a href="https://wa.me/2250759545410" className="text-copper-500 hover:underline">wa.me/2250759545410</a>
             </p>
           </div>
         </div>

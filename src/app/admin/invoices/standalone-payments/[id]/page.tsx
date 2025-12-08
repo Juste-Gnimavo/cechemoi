@@ -235,7 +235,7 @@ export default function StandalonePaymentDetailPage() {
                     /payer/{payment.amount}
                   </code>
                   <button
-                    onClick={() => copyToClipboard(`https://cave-express.ci/payer/${payment.amount}`, 'Lien')}
+                    onClick={() => copyToClipboard(`https://cechemoi.com/payer/${payment.amount}`, 'Lien')}
                     className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded"
                   >
                     <Copy className="h-4 w-4 text-gray-400" />
@@ -397,7 +397,7 @@ export default function StandalonePaymentDetailPage() {
               </button>
 
               <button
-                onClick={() => copyToClipboard(`https://cave-express.ci/payer/${payment.amount}`, 'Lien de paiement')}
+                onClick={() => copyToClipboard(`https://cechemoi.com/payer/${payment.amount}`, 'Lien de paiement')}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
               >
                 <Copy className="h-4 w-4" />

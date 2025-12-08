@@ -1,5 +1,5 @@
 /**
- * PaiementPro Utility Functions for CAVE EXPRESS
+ * PaiementPro Utility Functions for CÈCHÉMOI
  */
 
 import crypto from 'crypto';

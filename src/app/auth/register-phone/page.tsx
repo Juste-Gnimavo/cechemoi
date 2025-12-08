@@ -188,7 +188,7 @@ function RegisterPhoneContent() {
           isOpen: true,
           type: 'success',
           title: 'Compte créé !',
-          message: `Bienvenue ${formData.firstName} sur Cave Express`,
+          message: `Bienvenue ${formData.firstName} sur CÈCHÉMOI`,
           secondaryMessage: 'Redirection vers votre espace client...',
         })
         // Wait a moment for session to be established, then redirect
@@ -221,8 +221,8 @@ function RegisterPhoneContent() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
             <Image
-              src="/logo/home-page-horizontal-logo-vin-cave-express-abidjan-white.png"
-              alt="Cave Express"
+              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
+              alt="CÈCHÉMOI"
               width={220}
               height={60}
               className="mx-auto dark:brightness-100 brightness-0"
@@ -235,7 +235,7 @@ function RegisterPhoneContent() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Créer un compte</h1>
           </div>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Rejoignez Cave Express et profitez de nos offres exclusives
+            Rejoignez CÈCHÉMOI et profitez de nos offres exclusives
           </p>
         </div>
 

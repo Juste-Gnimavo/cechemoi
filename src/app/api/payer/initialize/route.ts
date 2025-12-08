@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate email from phone
-    const email = `contact+${formattedPhone}@cave-express.ci`;
+    const email = `contact+${formattedPhone}@cechemoi.com`;
 
     // Parse name
     const nameParts = body.customerName.trim().split(' ');
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const reference = generateReference('PRODUIT');
 
     // Get base URL for callbacks
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com';
 
     // Create PaiementPro client with custom return URL for /payer
     const client = new PaiementProClient({

@@ -845,7 +845,7 @@ export default function SettingsPage() {
                   value={settings.emailFromAddress || ''}
                   onChange={(e) => setSettings({ ...settings, emailFromAddress: e.target.value })}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
-                  placeholder="noreply@caveexpress.com"
+                  placeholder="noreply@cechemoi.com"
                 />
               </div>
             </div>
@@ -902,7 +902,7 @@ export default function SettingsPage() {
                     value={settings.lowStockEmailRecipient || ''}
                     onChange={(e) => setSettings({ ...settings, lowStockEmailRecipient: e.target.value })}
                     className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
-                    placeholder="admin@caveexpress.com"
+                    placeholder="admin@cechemoi.com"
                   />
                 </div>
               )}

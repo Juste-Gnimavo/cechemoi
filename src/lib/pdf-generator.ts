@@ -3,7 +3,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import QRCode from 'qrcode'
 
 // Get base URL from environment
-const getBaseUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci'
+const getBaseUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com'
 
 interface OrderData {
   orderNumber: string
@@ -48,7 +48,7 @@ export class PDFGeneratorService {
           margin: 50,
           info: {
             Title: `Facture ${order.orderNumber}`,
-            Author: 'Cave Express',
+            Author: 'CÈCHÉMOI',
             Subject: `Facture pour commande ${order.orderNumber}`,
           },
         })
@@ -66,12 +66,12 @@ export class PDFGeneratorService {
 
         // Company Info
         doc.fontSize(12).fillColor('#000000')
-        doc.text('Cave Express', 50, 100)
+        doc.text('CÈCHÉMOI', 50, 100)
         doc.fontSize(10).fillColor('#666666')
         doc.text('Faya Cité Génie 2000', 50, 118)
         doc.text('Abidjan, Côte d\'Ivoire', 50, 133)
-        doc.text('Tél: +225 0556791431', 50, 148)
-        doc.text('Email: contact@cave-express.ci', 50, 163)
+        doc.text('Tél: +225 0759545410', 50, 148)
+        doc.text('Email: cechemoicreations@gmail.com', 50, 163)
 
         // Invoice Number and Date
         doc.fontSize(10).fillColor('#000000')
@@ -184,7 +184,7 @@ export class PDFGeneratorService {
         // Footer
         doc.fontSize(8).fillColor('#666666')
         doc.text(
-          'Merci pour votre confiance! Pour toute question, contactez-nous au +225 0556791431',
+          'Merci pour votre confiance! Pour toute question, contactez-nous au +225 0759545410',
           50,
           750,
           { align: 'center', width: 495 }
@@ -220,10 +220,10 @@ export class PDFGeneratorService {
         doc.moveDown(2)
 
         // Company Info
-        doc.fontSize(12).fillColor('#000000').text('Cave Express', { align: 'center' })
+        doc.fontSize(12).fillColor('#000000').text('CÈCHÉMOI', { align: 'center' })
         doc.fontSize(10).fillColor('#666666')
         doc.text('Faya Cité Génie 2000, Abidjan', { align: 'center' })
-        doc.text('Tél: +225 0556791431', { align: 'center' })
+        doc.text('Tél: +225 0759545410', { align: 'center' })
         doc.moveDown(2)
 
         // Receipt Info

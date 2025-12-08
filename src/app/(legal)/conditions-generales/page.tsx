@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { FileText, ShoppingCart, Package, CreditCard, Truck, RotateCcw, Shield, Scale, AlertTriangle, RefreshCw, Gavel, HelpCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Conditions Générales de Vente | Cave Express',
-  description: 'Consultez les conditions générales de vente de Cave Express. Informations sur les commandes, paiements, livraisons et retours pour vos achats de vins à Abidjan.',
+  title: 'Conditions Générales de Vente | CÈCHÉMOI',
+  description: 'Consultez les conditions générales de vente de CÈCHÉMOI. Informations sur les commandes, paiements, livraisons et retours pour vos achats de vins à Abidjan.',
 }
 
 export default function ConditionsGeneralesPage() {
@@ -24,11 +24,11 @@ export default function ConditionsGeneralesPage() {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Préambule</h2>
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
           Ces conditions générales de vente (ci-après &quot;CGV&quot;) s&apos;appliquent sans restriction ni réserve
-          à l&apos;ensemble des ventes conclues par Cave Express (&quot;le Vendeur&quot;) auprès d&apos;acheteurs non
+          à l&apos;ensemble des ventes conclues par CÈCHÉMOI (&quot;le Vendeur&quot;) auprès d&apos;acheteurs non
           professionnels (&quot;les Clients ou le Client&quot;), désirant acquérir les produits proposés à la
           vente (&quot;les Produits&quot;) par le Vendeur sur le site
-          <a href="https://www.cave-express.ci" className="text-[#C27B43] hover:underline mx-1">
-            https://www.cave-express.ci
+          <a href="https://www.cechemoi.com" className="text-[#C27B43] hover:underline mx-1">
+            https://www.cechemoi.com
           </a>
           ainsi que sur ses applications mobiles disponibles sur diverses plateformes (Apple App Store,
           Google Play Store, Huawei AppGallery, etc.). Ces CGV sont accessibles à tout moment sur le
@@ -238,15 +238,15 @@ export default function ConditionsGeneralesPage() {
           <div className="space-y-2">
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par téléphone :</span>{' '}
-              <a href="tel:+2250556791431" className="text-copper-500 hover:underline">+225 0556791431</a>
+              <a href="tel:+2250759545410" className="text-copper-500 hover:underline">+225 0759545410</a>
             </p>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Par email :</span>{' '}
-              <a href="mailto:serviceclient@cave-express.ci" className="text-copper-500 hover:underline">serviceclient@cave-express.ci</a>
+              <a href="mailto:cechemoicreations@gmail.com" className="text-copper-500 hover:underline">cechemoicreations@gmail.com</a>
             </p>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               <span className="text-gray-500">Via WhatsApp :</span>{' '}
-              <a href="https://wa.me/2250556791431" className="text-copper-500 hover:underline">wa.me/2250556791431</a>
+              <a href="https://wa.me/2250759545410" className="text-copper-500 hover:underline">wa.me/2250759545410</a>
             </p>
           </div>
         </div>

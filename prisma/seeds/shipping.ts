@@ -31,7 +31,7 @@ export async function seedShipping() {
       description: 'Livraison dans toute la Côte d\'Ivoire',
       enabled: true,
       costType: 'price_based',
-      cost: 2000,
+      cost: 5000,
       estimatedDays: '2-5 jours',
       taxable: false,
       priceRanges: [

@@ -1,7 +1,7 @@
 {
-  "name": "Cave Express - Online Wine Store",
-  "short_name": "Cave Express",
-  "description": "Your premium wine delivery service in Côte d'Ivoire",
+  "name": "CÈCHÉMOI Originalité, Créativité et Beauté de Chez Moi",
+  "short_name": "CÈCHÉMOI",
+  "description": "Découvrez notre collection exclusive de vêtements prêt-à-porter, créés par nos stylistes pour sublimer votre silhouette.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

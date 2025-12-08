@@ -49,7 +49,7 @@ export default function PayerAmountPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b px-4 py-3">
-          <Image src="/logo-dark-rect.png" alt="Cave Express" width={120} height={36} className="h-7 w-auto" />
+          <Image src="/logo-dark-rect.png" alt="CÈCHÉMOI" width={120} height={36} className="h-7 w-auto" />
         </header>
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-sm border p-6 text-center">
@@ -130,7 +130,7 @@ export default function PayerAmountPage() {
         >
           <ArrowLeft className="h-5 w-5 text-gray-600" />
         </button>
-        <Image src="/logo-dark-rect.png" alt="Cave Express" width={100} height={30} className="h-6 w-auto" />
+        <Image src="/logo-dark-rect.png" alt="CÈCHÉMOI" width={100} height={30} className="h-6 w-auto" />
       </header>
 
       {/* Main Content */}

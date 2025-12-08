@@ -29,7 +29,7 @@ export const useTheme = create<ThemeState>()(
       },
     }),
     {
-      name: 'cave-express-theme',
+      name: 'cechemoi-theme',
       onRehydrateStorage: () => (state) => {
         // Apply theme on rehydration
         if (state && typeof window !== 'undefined') {

@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use default image if no image provided
-    const DEFAULT_CATEGORY_IMAGE = '/logo/web/logo-cave-express-transparent-dark-mode.png'
+    const DEFAULT_CATEGORY_IMAGE = '/logo/web/logo-cechemoi-transparent-dark-mode.png'
     const categoryImage = image || DEFAULT_CATEGORY_IMAGE
 
     const category = await prisma.category.create({

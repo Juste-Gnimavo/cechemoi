@@ -248,11 +248,11 @@ export class NotificationService {
     const vars: Record<string, any> = {}
 
     // Add store variables (always included)
-    vars.store_name = 'Cave Express'
-    vars.store_url = 'www.cave-express.ci'
-    vars.store_phone = '+225 0556791431'
-    vars.store_whatsapp = 'https://wa.me/2250556791431'
-    vars.store_address = 'Faya Cité Genie 2000, Abidjan'
+    vars.store_name = 'CÈCHÉMOI'
+    vars.store_url = 'www.cechemoi.com'
+    vars.store_phone = '+225 0759545410'
+    vars.store_whatsapp = 'https://wa.me/2250759545410'
+    vars.store_address = 'Cocody Riviera Palmeraie, Abidjan'
 
     // Order-related triggers (including invoice and review request)
     // Only query order if orderId is provided (standalone invoices don't have orderId)
@@ -966,7 +966,7 @@ export class NotificationService {
       const invoiceNumber = order.invoice?.invoiceNumber || order.orderNumber
 
       // Simple message - PDF is attached as media
-      const message = `Facture #${invoiceNumber} - Cave Express`
+      const message = `Facture #${invoiceNumber} - CÈCHÉMOI`
 
       // Send WhatsApp with PDF as media attachment (not logo)
       const result = await smsingService.sendWhatsAppBusiness({
@@ -1021,7 +1021,7 @@ export class NotificationService {
       const invoiceNumber = order.invoice?.invoiceNumber || order.orderNumber
 
       // Simple message - PDF is attached as media
-      const message = `Facture PAYEE #${invoiceNumber} - Cave Express`
+      const message = `Facture PAYEE #${invoiceNumber} - CÈCHÉMOI`
 
       // Send WhatsApp with PDF as media attachment (not logo)
       const result = await smsingService.sendWhatsAppBusiness({
@@ -1306,7 +1306,7 @@ export class NotificationService {
    * Send OTP code (existing functionality)
    */
   async sendOTP(phone: string, code: string): Promise<NotificationResult> {
-    const message = `Votre code de vérification Cave Express est: ${code}\n\nCe code expire dans 10 minutes.\n\nNe partagez jamais ce code.`
+    const message = `Votre code de vérification CÈCHÉMOI est: ${code}\n\nCe code expire dans 10 minutes.\n\nNe partagez jamais ce code.`
 
     try {
       // Try dual send (SMS + WhatsApp)

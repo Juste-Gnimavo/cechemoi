@@ -22,7 +22,7 @@ async function seedStandaloneNotifications() {
       channel: 'SMS' as const,
       name: 'Paiement autonome reçu - SMS',
       description: 'SMS envoyé quand un paiement autonome est confirmé',
-      content: `Paiement recu! {amount} FCFA - Ref: {reference}. Merci {customer_name}! Cave Express {store_phone}`,
+      content: `Paiement recu! {amount} FCFA - Ref: {reference}. Merci {customer_name}! CÈCHÉMOI {store_phone}`,
       recipientType: 'customer',
       enabled: true,
     },
@@ -39,7 +39,7 @@ Référence: {reference}
 
 Merci {customer_name} pour votre confiance!
 
-🍷 *Cave Express*
+👗 *CÈCHÉMOI*
 📞 {store_phone}`,
       recipientType: 'customer',
       enabled: true,
@@ -50,7 +50,7 @@ Merci {customer_name} pour votre confiance!
       channel: 'SMS' as const,
       name: 'Paiement autonome échoué - SMS',
       description: 'SMS envoyé quand un paiement autonome échoue',
-      content: `Paiement echoue - {amount} FCFA. Ref: {reference}. Reessayez: cave-express.ci/payer/{amount}. Cave Express {store_phone}`,
+      content: `Paiement echoue - {amount} FCFA. Ref: {reference}. Reessayez: cechemoi.com/payer/{amount}. CÈCHÉMOI {store_phone}`,
       recipientType: 'customer',
       enabled: true,
     },
@@ -66,11 +66,11 @@ Montant: *{amount} FCFA*
 Référence: {reference}
 
 Veuillez réessayer en cliquant sur le lien ci-dessous:
-👉 cave-express.ci/payer/{amount}
+👉 cechemoi.com/payer/{amount}
 
 Si le problème persiste, contactez-nous.
 
-🍷 *Cave Express*
+👗 *CÈCHÉMOI*
 📞 {store_phone}`,
       recipientType: 'customer',
       enabled: true,

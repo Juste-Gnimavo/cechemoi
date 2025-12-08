@@ -73,7 +73,7 @@ export async function POST(
     const reference = generateReference('INV');
 
     // Get base URL for callbacks
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com';
 
     // Create PaiementPro client with invoice-specific return URL
     const client = new PaiementProClient({
@@ -93,7 +93,7 @@ export async function POST(
     const lastName = nameParts.slice(1).join(' ') || firstName;
 
     // Generate email if not present
-    const customerEmail = invoice.customerEmail || `invoice+${customerPhone}@cave-express.ci`;
+    const customerEmail = invoice.customerEmail || `invoice+${customerPhone}@cechemoi.com`;
 
     // Initialize payment
     const result = await client.initializePayment({

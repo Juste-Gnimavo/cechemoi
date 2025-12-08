@@ -40,7 +40,7 @@ export default function PayerPage() {
       <header className="bg-white border-b px-4 py-3 safe-area-top">
         <Image
           src="/logo-dark-rect.png"
-          alt="Cave Express"
+          alt="CÈCHÉMOI"
           width={120}
           height={36}
           className="h-7 w-auto"

@@ -79,7 +79,7 @@ export function getBaseUrl(): string {
     return window.location.origin
   }
   // On server, use env var or production default
-  return process.env.NEXT_PUBLIC_APP_URL || 'https://cave-express.ci'
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://cechemoi.com'
 }
 
 export function buildProductUrl(

@@ -201,7 +201,7 @@ export default function WhatsAppCloudCampaignPage() {
           <textarea
             value={templateText}
             onChange={(e) => setTemplateText(e.target.value)}
-            placeholder="content:cave_express|lang=fr|body=01234|header=image:https://cave-express.ci/wp-content/uploads/2025/11/logo.png"
+            placeholder="content:cechemoi|lang=fr|body=01234|header=image:https://cechemoi.com/wp-content/uploads/2025/11/logo.png"
             rows={4}
             className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm placeholder:text-gray-500"
           />
@@ -219,7 +219,7 @@ export default function WhatsAppCloudCampaignPage() {
               <div className="border-t border-gray-200 dark:border-dark-600 pt-2">
                 <span className="text-gray-500">Exemple avec logo:</span>
                 <code className="block text-green-600 dark:text-green-400 mt-1 break-all">
-                  content:cave_express|lang=fr|body=01234|header=image:https://cave-express.ci/wp-content/uploads/2025/11/logo.png
+                  content:cechemoi|lang=fr|body=01234|header=image:https://cechemoi.com/wp-content/uploads/2025/11/logo.png
                 </code>
               </div>
               <div>

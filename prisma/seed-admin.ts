@@ -27,14 +27,14 @@ async function main() {
   // Create admin user
   const admin = await prisma.user.create({
     data: {
-      name: 'Thales',
+      name: 'Marthe',
       email: adminEmail,
       password: hashedPassword,
       phone: adminPhone,
       phoneVerified: new Date(),
-      whatsappNumber: '+2250709757296',
+      whatsappNumber: '+2250151092627',
       role: 'ADMIN',
-      city: 'COTONOU',
+      city: 'ABIDJAN',
       country: 'Ivory Coast',
       countryCode: 'CI',
       emailVerified: new Date(),
@@ -48,8 +48,8 @@ async function main() {
   console.log('🆔 ID:', admin.id)
   console.log('\n🔐 Login credentials:')
   console.log('   Email:', adminEmail)
-  console.log('   Password: LM345FCX3xsThales')
-  console.log('\n🔗 Admin login URL: http://localhost:3000/auth/stephy-po')
+  console.log('   Password: JusteMarthe2026@')
+  console.log('\n🔗 Admin login URL: http://localhost:3000/auth/admin')
 }
 
 main()

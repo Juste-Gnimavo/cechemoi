@@ -606,8 +606,8 @@ export default function InvoiceDetailPage() {
       <div className="hidden print:block mb-8">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">CAVE EXPRESS</h1>
-            <p className="text-gray-600">Vente de vins et spiritueux</p>
+            <h1 className="text-3xl font-bold text-gray-900">CÈCHÉMOI</h1>
+            <p className="text-gray-600">Mode sur-mesure et prêt-à-porter</p>
             <p className="text-gray-600">Abidjan, Côte d'Ivoire</p>
           </div>
           <div className="text-right">
@@ -1042,7 +1042,7 @@ export default function InvoiceDetailPage() {
       <div className="hidden print:block mt-8 pt-4 border-t border-gray-300">
         <div className="text-center text-gray-600 text-sm">
           <p>Merci pour votre confiance!</p>
-          <p>CAVE EXPRESS - contact@caveexpress.ci - +225 XX XX XX XX</p>
+          <p>CÈCHÉMOI - cechemoicreations@gmail.com - +225 0759545410</p>
         </div>
       </div>
 
