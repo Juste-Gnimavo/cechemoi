@@ -234,6 +234,9 @@ function RegisterPhoneContent() {
             <UserPlus className="h-6 w-6 text-primary-500" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Créer un compte</h1>
           </div>
+          <p className="text-gray-500 dark:text-gray-500 text-xs mb-1">
+            Espace Client - Gestion de la Relation Client
+          </p>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
             Rejoignez CÈCHÉMOI et profitez de nos offres exclusives
           </p>

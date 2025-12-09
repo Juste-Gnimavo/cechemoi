@@ -242,8 +242,11 @@ function AdminLoginContent() {
 
           <div className="flex items-center justify-center gap-2 mb-2">
             <ShieldCheck className="h-6 w-6 text-primary-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Espace Administration</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">CRM E-commerce</h1>
           </div>
+          <p className="text-gray-500 dark:text-gray-500 text-xs mb-2">
+            Gestion de la Relation Client
+          </p>
           <p className="text-gray-600 dark:text-gray-400 text-sm">
             Connexion réservée aux Administrateurs, Managers et Staff
           </p>
