@@ -22,6 +22,9 @@ export async function GET(request: NextRequest) {
       where.status = status.toUpperCase()
     }
 
+    // Get total count for pagination
+    const totalCount = await prisma.appointment.count({ where })
+
     // Get appointments
     const appointments = await prisma.appointment.findMany({
       where,
@@ -40,6 +43,8 @@ export async function GET(request: NextRequest) {
       take: limit,
       skip: (page - 1) * limit
     })
+
+    const totalPages = Math.ceil(totalCount / limit)
 
     // Get stats
     const today = new Date()
@@ -81,6 +86,14 @@ export async function GET(request: NextRequest) {
         confirmed,
         completedToday,
         totalThisWeek
+      },
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
       }
     })
   } catch (error) {

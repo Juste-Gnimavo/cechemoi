@@ -18,6 +18,8 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react'
+import { CountrySelector } from '@/components/country-selector'
+import { defaultCountry, formatPhoneWithCountry, type Country } from '@/lib/countries'
 
 interface ConsultationType {
   id: string
@@ -70,9 +72,27 @@ export default function ConsultationPage() {
 
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
+  const [selectedCountry, setSelectedCountry] = useState<Country>(defaultCountry)
 
   useEffect(() => {
     fetchServices()
+    // Auto-detect country from geolocation
+    async function detectCountry() {
+      try {
+        const response = await fetch('https://ipapi.co/json/')
+        const data = await response.json()
+        if (data.country_code) {
+          const { getCountryByCode } = await import('@/lib/countries')
+          const detectedCountry = getCountryByCode(data.country_code)
+          if (detectedCountry) {
+            setSelectedCountry(detectedCountry)
+          }
+        }
+      } catch (error) {
+        console.error('Error detecting country:', error)
+      }
+    }
+    detectCountry()
   }, [])
 
   useEffect(() => {
@@ -179,6 +199,9 @@ export default function ConsultationPage() {
     setSubmitting(true)
 
     try {
+      // Format phone number with country code
+      const fullPhone = formatPhoneWithCountry(booking.customerPhone, selectedCountry.dialCode)
+
       const res = await fetch('/api/consultations/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -187,7 +210,7 @@ export default function ConsultationPage() {
           date: booking.date?.toISOString(),
           time: booking.time,
           customerName: booking.customerName,
-          customerPhone: booking.customerPhone,
+          customerPhone: fullPhone,
           customerEmail: booking.customerEmail,
           customerNotes: booking.customerNotes
         })
@@ -484,17 +507,23 @@ export default function ConsultationPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Téléphone WhatsApp *
+                      Telephone WhatsApp *
                     </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <div className="flex gap-2">
+                      <CountrySelector
+                        value={selectedCountry}
+                        onChange={setSelectedCountry}
+                      />
                       <input
                         type="tel"
                         required
                         value={booking.customerPhone}
-                        onChange={(e) => setBooking(prev => ({ ...prev, customerPhone: e.target.value }))}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
-                        placeholder="07 XX XX XX XX"
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/[^\d\s]/g, '')
+                          setBooking(prev => ({ ...prev, customerPhone: cleaned }))
+                        }}
+                        className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white"
+                        placeholder="XX XX XX XX XX"
                       />
                     </div>
                   </div>

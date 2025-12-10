@@ -75,11 +75,20 @@ export async function POST(request: NextRequest) {
       attempts++
     }
 
-    // Create appointment
+    // Search for existing customer by phone + CUSTOMER role
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        phone: customerPhone,
+        role: 'CUSTOMER'
+      }
+    })
+
+    // Create appointment (linked to user if found)
     const appointment = await prisma.appointment.create({
       data: {
         reference,
         typeId: serviceId,
+        userId: existingUser?.id || null,
         customerName,
         customerPhone,
         customerEmail: customerEmail || null,
@@ -108,8 +117,23 @@ export async function POST(request: NextRequest) {
       ? `${service.price.toLocaleString('fr-FR')} FCFA`
       : 'Sur devis'
 
-    // Send customer notification (WhatsApp first, then SMS fallback)
+    // Send customer notification (SMS + WhatsApp simultaneously)
     const customerMessage = `Bonjour ${customerName},
+
+Votre rendez-vous chez CECHEMOI est enregistre !
+
+Ref: ${reference}
+Service: ${service.name}
+Date: ${formattedDate}
+Heure: ${time}
+Prix: ${priceText}
+
+Vous recevrez une confirmation definitive sous peu.
+
+CECHEMOI - Originalite, Creativite et Beaute`
+
+    // WhatsApp version with emojis
+    const customerWhatsAppMessage = `Bonjour ${customerName},
 
 Votre rendez-vous chez CÈCHÉMOI est enregistré !
 
@@ -123,19 +147,23 @@ Vous recevrez une confirmation définitive sous peu.
 
 CÈCHÉMOI - Originalité, Créativité et Beauté`
 
-    try {
-      await smsingService.sendWhatsAppBusiness({ to: customerPhone, message: customerMessage })
-    } catch {
-      try {
-        await smsingService.sendSMS({ to: customerPhone, message: customerMessage })
-      } catch (smsError) {
-        console.error('Failed to send customer notification:', smsError)
-      }
-    }
+    // Send to customer (both SMS + WhatsApp in parallel)
+    Promise.all([
+      smsingService.sendSMS({ to: customerPhone, message: customerMessage }),
+      smsingService.sendWhatsAppBusiness({ to: customerPhone, message: customerWhatsAppMessage })
+    ]).catch(err => console.error('Failed to send customer notification:', err))
 
-    // Send admin notification
+    // Send admin notification (SMS + WhatsApp simultaneously)
     const adminPhone = process.env.ADMIN_PHONE || '2250759545410'
-    const adminMessage = `🗓️ NOUVEAU RENDEZ-VOUS
+
+    const adminSmsMessage = `NOUVEAU RDV - Ref: ${reference}
+Client: ${customerName} (${customerPhone})
+Service: ${service.name}
+Date: ${formattedDate} a ${time}
+Prix: ${priceText}
+${customerNotes ? `Notes: ${customerNotes}` : ''}`
+
+    const adminWhatsAppMessage = `🗓️ NOUVEAU RENDEZ-VOUS
 
 Réf: ${reference}
 Client: ${customerName}
@@ -148,15 +176,11 @@ ${customerNotes ? `Notes: ${customerNotes}` : ''}
 
 Confirmez dans l'admin: /admin/appointments`
 
-    try {
-      await smsingService.sendWhatsAppBusiness({ to: adminPhone, message: adminMessage })
-    } catch {
-      try {
-        await smsingService.sendSMS({ to: adminPhone, message: adminMessage })
-      } catch (adminSmsError) {
-        console.error('Failed to send admin notification:', adminSmsError)
-      }
-    }
+    // Send to admin (both SMS + WhatsApp in parallel)
+    Promise.all([
+      smsingService.sendSMS({ to: adminPhone, message: adminSmsMessage }),
+      smsingService.sendWhatsAppBusiness({ to: adminPhone, message: adminWhatsAppMessage })
+    ]).catch(err => console.error('Failed to send admin notification:', err))
 
     return NextResponse.json({
       success: true,

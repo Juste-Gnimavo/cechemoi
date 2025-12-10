@@ -276,6 +276,19 @@ export async function POST(request: NextRequest) {
         console.error('Payment initialization error:', paymentError)
       }
 
+       // PAIEMENTPRO - Send notifications in background (same as CASH_ON_DELIVERY)
+      Promise.all([
+        notificationService.sendOrderPlaced(order.id, invoiceUrl),
+        notificationService.sendInvoiceCreated(order.id, invoiceUrl),
+        notificationService.sendInvoicePdfCreated(order.id, invoiceUrl),
+      ]).catch(err => {
+        console.error('Notification error:', err)
+      })
+
+      notificationService.sendNewOrderAdmin(order.id).catch(err => {
+        console.error('Admin notification error:', err)
+      })
+
       return NextResponse.json({
         success: true,
         orderId: order.id,

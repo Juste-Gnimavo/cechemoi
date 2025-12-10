@@ -23,7 +23,8 @@ import {
   Store,
   LayoutDashboard,
   Sun,
-  Moon
+  Moon,
+  CalendarDays
 } from 'lucide-react'
 import { useCart } from '@/store/cart'
 import { useTheme } from '@/store/theme'
@@ -41,6 +42,7 @@ export function CustomerHeader() {
   const menuItems = [
     { href: '/account', label: 'Tableau de bord', icon: Home },
     { href: '/account/orders', label: 'Mes Commandes', icon: Package },
+    { href: '/account/appointments', label: 'Mes Rendez-vous', icon: CalendarDays },
     { href: '/account/invoices', label: 'Mes Factures', icon: FileText },
     { href: '/account/profile', label: 'Mon Profil', icon: User },
     { href: '/account/addresses', label: 'Adresses', icon: MapPin },

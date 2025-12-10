@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/utils'
 import { CreditCard, Truck, MapPin, Navigation, Loader2, Tag, X, ChevronDown, Plus } from 'lucide-react'
+import Image from 'next/image'
 import { toast } from 'react-hot-toast'
 
 interface ShippingMethod {
@@ -601,77 +602,107 @@ export default function CheckoutPage() {
                         Choisir votre moyen de paiement:
                       </p>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
-                          <input
-                            type="radio"
-                            name="paymentChannel"
-                            value=""
-                            checked={formData.paymentChannel === ''}
-                            onChange={handleInputChange}
-                            className="text-primary-500"
-                          />
-                          <span className="text-gray-900 dark:text-white text-sm">Page de paiement</span>
-                        </label>
-
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'OMCIV2'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
                           <input
                             type="radio"
                             name="paymentChannel"
                             value="OMCIV2"
                             checked={formData.paymentChannel === 'OMCIV2'}
                             onChange={handleInputChange}
+                            className="sr-only"
                           />
-                          <div className="w-3 h-3 bg-orange-500 rounded" />
-                          <span className="text-gray-900 dark:text-white text-sm">Orange Money</span>
+                          <Image src="/logo/orange.svg" alt="Orange Money" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">Orange Money</span>
                         </label>
 
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'MOMOCI'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
                           <input
                             type="radio"
                             name="paymentChannel"
                             value="MOMOCI"
                             checked={formData.paymentChannel === 'MOMOCI'}
                             onChange={handleInputChange}
+                            className="sr-only"
                           />
-                          <div className="w-3 h-3 bg-yellow-500 rounded" />
-                          <span className="text-gray-900 dark:text-white text-sm">MTN MoMo</span>
+                          <Image src="/logo/mtn.svg" alt="MTN MoMo" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">MTN MoMo</span>
                         </label>
 
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'FLOOZ'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
                           <input
                             type="radio"
                             name="paymentChannel"
                             value="FLOOZ"
                             checked={formData.paymentChannel === 'FLOOZ'}
                             onChange={handleInputChange}
+                            className="sr-only"
                           />
-                          <div className="w-3 h-3 bg-blue-400 rounded" />
-                          <span className="text-gray-900 dark:text-white text-sm">Moov Money</span>
+                          <Image src="/logo/moov.svg" alt="Moov Money" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">Moov Money</span>
                         </label>
 
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'WAVECI'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
                           <input
                             type="radio"
                             name="paymentChannel"
                             value="WAVECI"
                             checked={formData.paymentChannel === 'WAVECI'}
                             onChange={handleInputChange}
+                            className="sr-only"
                           />
-                          <div className="w-3 h-3 bg-blue-600 rounded" />
-                          <span className="text-gray-900 dark:text-white text-sm">Wave</span>
+                          <Image src="/logo/wave.svg" alt="Wave" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">Wave</span>
                         </label>
 
-                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 p-2 rounded">
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'CARD'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
                           <input
                             type="radio"
                             name="paymentChannel"
                             value="CARD"
                             checked={formData.paymentChannel === 'CARD'}
                             onChange={handleInputChange}
+                            className="sr-only"
                           />
-                          <CreditCard className="h-3 w-3 text-gray-500 dark:text-gray-400" />
-                          <span className="text-gray-900 dark:text-white text-sm">PayPal / Carte bancaire</span>
+                          <Image src="/logo/visa.svg" alt="Carte bancaire" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">Carte bancaire</span>
+                        </label>
+
+                        <label className={`flex flex-col items-center gap-2 cursor-pointer p-3 rounded-lg border-2 transition-all ${
+                          formData.paymentChannel === 'PAYPAL'
+                            ? 'border-primary-500 bg-primary-500/10'
+                            : 'border-gray-200 dark:border-dark-600 hover:border-primary-500/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="paymentChannel"
+                            value="PAYPAL"
+                            checked={formData.paymentChannel === 'PAYPAL'}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+                          <Image src="/logo/paypal.png" alt="PayPal" width={40} height={40} className="object-contain" />
+                          <span className="text-gray-900 dark:text-white text-xs font-medium">PayPal</span>
                         </label>
                       </div>
                     </div>
