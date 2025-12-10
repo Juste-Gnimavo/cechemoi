@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { Search, X, Loader2, Package } from 'lucide-react'
 
@@ -35,13 +35,15 @@ export function ProductMultiSelect({
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const initialFetchDone = useRef(false)
 
-  // Fetch selected products details on mount
+  // Fetch selected products details on mount (only once)
   useEffect(() => {
-    if (selectedIds.length > 0) {
-      fetchSelectedProducts()
+    if (selectedIds.length > 0 && !initialFetchDone.current) {
+      initialFetchDone.current = true
+      fetchSelectedProducts(selectedIds)
     }
-  }, [])
+  }, [selectedIds])
 
   // Search products when search term changes
   useEffect(() => {
@@ -52,8 +54,9 @@ export function ProductMultiSelect({
       return () => clearTimeout(debounce)
     } else {
       setSearchResults([])
+      setIsOpen(false)
     }
-  }, [searchTerm])
+  }, [searchTerm, excludeId])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -67,9 +70,10 @@ export function ProductMultiSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const fetchSelectedProducts = async () => {
+  const fetchSelectedProducts = async (ids: string[]) => {
+    if (ids.length === 0) return
     try {
-      const promises = selectedIds.map(id =>
+      const promises = ids.map(id =>
         fetch(`/api/admin/products/${id}`).then(res => res.json())
       )
       const results = await Promise.all(promises)
