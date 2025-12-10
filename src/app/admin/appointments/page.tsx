@@ -106,12 +106,14 @@ export default function AppointmentsDashboard() {
     const styles: Record<string, string> = {
       UNPAID: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
       PAID: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-      REFUNDED: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+      REFUNDED: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+      QUOTE_PENDING: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
     }
     const labels: Record<string, string> = {
       UNPAID: 'Non payé',
       PAID: 'Payé',
-      REFUNDED: 'Remboursé'
+      REFUNDED: 'Remboursé',
+      QUOTE_PENDING: 'Sur devis'
     }
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || styles.UNPAID}`}>

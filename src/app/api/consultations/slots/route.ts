@@ -5,6 +5,15 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const dateStr = searchParams.get('date')
+    const getAvailability = searchParams.get('getAvailability')
+
+    // Return all availability settings
+    if (getAvailability === 'true') {
+      const availability = await prisma.adminAvailability.findMany({
+        orderBy: { dayOfWeek: 'asc' }
+      })
+      return NextResponse.json({ availability })
+    }
 
     if (!dateStr) {
       return NextResponse.json({ error: 'Date requise' }, { status: 400 })

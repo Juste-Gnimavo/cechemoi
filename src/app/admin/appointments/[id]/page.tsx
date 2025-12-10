@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import {
   ChevronLeft,
   Phone,
@@ -74,8 +74,9 @@ const paymentConfig: Record<string, { label: string; color: string; bgColor: str
   QUOTE_PENDING: { label: 'Sur devis', color: 'text-purple-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' }
 }
 
-export default function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function AppointmentDetailPage() {
+  const params = useParams()
+  const id = params.id as string
   const router = useRouter()
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [loading, setLoading] = useState(true)
