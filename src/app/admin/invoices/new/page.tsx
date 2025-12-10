@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Plus, Trash2, Loader2, Search, User, Phone, Mail, MapPin, Bell, Send, MessageSquare, ChevronDown, Truck, CreditCard, Package, ExternalLink, FileText } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, Save, Plus, Trash2, Loader2, Search, User, Phone, Mail, MapPin, Bell, Send, MessageSquare, ChevronDown, Truck, CreditCard, Package, ExternalLink, FileText, Banknote } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
 
@@ -905,11 +906,22 @@ export default function NewInvoicePage() {
                       className="text-purple-500"
                     />
                     <div className="flex items-center gap-2">
-                      {method.code === 'CASH_ON_DELIVERY' && <Truck className="w-4 h-4 text-gray-400" />}
-                      {method.code === 'ORANGE_MONEY' && <div className="w-3 h-3 bg-orange-500 rounded" />}
-                      {method.code === 'MTN_MOBILE_MONEY' && <div className="w-3 h-3 bg-yellow-500 rounded" />}
-                      {method.code === 'WAVE' && <div className="w-3 h-3 bg-blue-500 rounded" />}
-                      {method.code === 'PAIEMENTPRO' && <CreditCard className="w-4 h-4 text-gray-400" />}
+                      {method.code === 'CASH_ON_DELIVERY' && <Banknote className="w-5 h-5 text-green-500" />}
+                      {method.code === 'ORANGE_MONEY' && (
+                        <Image src="/logo/orange.svg" alt="Orange Money" width={20} height={20} className="object-contain" />
+                      )}
+                      {method.code === 'MTN_MOBILE_MONEY' && (
+                        <Image src="/logo/mtn.svg" alt="MTN MoMo" width={20} height={20} className="object-contain" />
+                      )}
+                      {method.code === 'WAVE' && (
+                        <Image src="/logo/wave.svg" alt="Wave" width={20} height={20} className="object-contain" />
+                      )}
+                      {method.code === 'PAIEMENTPRO' && (
+                        <div className="flex items-center gap-1">
+                          <Image src="/logo/visa.svg" alt="Visa" width={20} height={20} className="object-contain" />
+                          <Image src="/logo/paypal.png" alt="PayPal" width={20} height={20} className="object-contain" />
+                        </div>
+                      )}
                       <span className="text-gray-900 dark:text-white">{method.name}</span>
                     </div>
                   </label>
