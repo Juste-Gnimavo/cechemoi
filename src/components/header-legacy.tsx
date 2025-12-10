@@ -210,17 +210,17 @@ export function Header() {
                 title="Connexion"
               >
                 <User className="w-5 h-5" />
-                <span className="hidden md:inline text-sm font-medium">Connexion</span>
+                <span className="hidden md:inline text-sm font-medium">Login</span>
               </Link>
             )}
 
             {/* Rendez-vous CTA Button */}
             <Link
               href="/consultation"
-              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-full transition-all text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+              className="hidden md:flex items-center justify-center p-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-full transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+              title="Prendre rendez-vous"
             >
-              <CalendarDays className="w-4 h-4" />
-              <span>Rendez-vous</span>
+              <CalendarDays className="w-5 h-5" />
             </Link>
 
             {/* Theme Toggle */}
