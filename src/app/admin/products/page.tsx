@@ -192,7 +192,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Gestion des produits</h2>
-          <p className="text-gray-500 dark:text-gray-400">Gerez votre catalogue de vins et spiritueux</p>
+          <p className="text-gray-500 dark:text-gray-400">Gerez votre catalogue de produits et services</p>
         </div>
         <Link
           href="/admin/products/new"
