@@ -540,6 +540,65 @@ export default function AdminDashboard() {
             )}
           </div>
 
+          {/* Appointments Section */}
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 dark:border-dark-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-pink-500/10 rounded-lg">
+                  <CalendarDays className="h-5 w-5 text-pink-500" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Rendez-vous
+                </h2>
+              </div>
+              <a
+                href="/admin/appointments"
+                className="text-sm text-primary-500 hover:text-primary-400 font-medium"
+              >
+                Voir tout
+              </a>
+            </div>
+            <div className="p-6">
+              {/* Stats Row */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="text-center p-3 bg-gray-100 dark:bg-dark-800 rounded-lg">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{appointmentStats?.total || 0}</p>
+                  <p className="text-xs text-gray-500">Total</p>
+                </div>
+                <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-yellow-600">{appointmentStats?.pending || 0}</p>
+                  <p className="text-xs text-gray-500">En attente</p>
+                </div>
+                <div className="text-center p-3 bg-green-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{appointmentStats?.confirmed || 0}</p>
+                  <p className="text-xs text-gray-500">Confirmes</p>
+                </div>
+                <div className="text-center p-3 bg-pink-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-pink-600">{appointmentStats?.today || 0}</p>
+                  <p className="text-xs text-gray-500">Aujourd'hui</p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex gap-3">
+                <a
+                  href="/admin/appointments"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors font-medium"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Gerer les RDV
+                </a>
+                <a
+                  href="/admin/appointments/availability"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors font-medium border border-gray-200 dark:border-dark-700"
+                >
+                  <Clock className="h-4 w-4" />
+                  Disponibilites
+                </a>
+              </div>
+            </div>
+          </div>
+
           {/* Top Products */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-dark-800">
