@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Header } from '@/components/header-legacy'
 import { Footer } from '@/components/footer'
 import Image from 'next/image'
@@ -16,7 +17,8 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
-  Loader2
+  Loader2,
+  UserCircle
 } from 'lucide-react'
 import { CountrySelector } from '@/components/country-selector'
 import { defaultCountry, formatPhoneWithCountry, type Country } from '@/lib/countries'
@@ -52,6 +54,9 @@ const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
 const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 export default function ConsultationPage() {
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === 'authenticated' && session?.user
+
   const [services, setServices] = useState<ConsultationType[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -74,10 +79,33 @@ export default function ConsultationPage() {
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [selectedCountry, setSelectedCountry] = useState<Country>(defaultCountry)
 
+  // Pre-fill user data if logged in
+  useEffect(() => {
+    if (isLoggedIn && session?.user) {
+      const user = session.user as any
+      setBooking(prev => ({
+        ...prev,
+        customerName: user.name || prev.customerName,
+        customerPhone: user.phone ? user.phone.replace(/^\+\d{1,3}/, '') : prev.customerPhone,
+        customerEmail: user.email || prev.customerEmail
+      }))
+      // Set country from user's phone if available
+      if (user.countryCode) {
+        import('@/lib/countries').then(({ getCountryByCode }) => {
+          const userCountry = getCountryByCode(user.countryCode)
+          if (userCountry) {
+            setSelectedCountry(userCountry)
+          }
+        })
+      }
+    }
+  }, [isLoggedIn, session])
+
   useEffect(() => {
     fetchServices()
-    // Auto-detect country from geolocation
+    // Auto-detect country from geolocation (only if not logged in)
     async function detectCountry() {
+      if (isLoggedIn) return // Skip if user is logged in (use their saved country)
       try {
         const response = await fetch('https://ipapi.co/json/')
         const data = await response.json()
@@ -93,7 +121,7 @@ export default function ConsultationPage() {
       }
     }
     detectCountry()
-  }, [])
+  }, [isLoggedIn])
 
   useEffect(() => {
     if (booking.date) {
@@ -478,6 +506,14 @@ export default function ConsultationPage() {
                   Vos informations
                 </h2>
 
+                {/* Logged in indicator */}
+                {isLoggedIn && (
+                  <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-lg p-3 mb-4 text-sm">
+                    <UserCircle className="w-5 h-5" />
+                    <span>Connecté en tant que <strong>{(session?.user as any)?.name || (session?.user as any)?.phone}</strong></span>
+                  </div>
+                )}
+
                 {/* Booking Summary */}
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-6">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -621,6 +657,15 @@ export default function ConsultationPage() {
                   >
                     Retour à l'accueil
                   </Link>
+                  {isLoggedIn && (
+                    <Link
+                      href="/account"
+                      className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <UserCircle className="w-4 h-4" />
+                      Espace client
+                    </Link>
+                  )}
                   <a
                     href={`https://wa.me/2250759545410?text=Bonjour, j'ai réservé un rendez-vous (${appointmentRef})`}
                     target="_blank"
