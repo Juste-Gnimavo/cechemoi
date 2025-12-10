@@ -14,7 +14,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Loader2
+  Loader2,
+  CalendarDays
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -86,6 +87,13 @@ interface AdminProfile {
   createdAt: string
 }
 
+interface AppointmentStats {
+  total: number
+  pending: number
+  confirmed: number
+  today: number
+}
+
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
   PROCESSING: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
@@ -108,6 +116,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null)
+  const [appointmentStats, setAppointmentStats] = useState<AppointmentStats | null>(null)
   const [loading, setLoading] = useState(true)
   const { celebration, success } = useConfetti()
   const confettiFired = useRef(false)
@@ -146,17 +155,19 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
 
-      // Fetch analytics, orders, and profile in parallel
-      const [analyticsRes, ordersRes, profileRes] = await Promise.all([
+      // Fetch analytics, orders, profile, and appointments in parallel
+      const [analyticsRes, ordersRes, profileRes, appointmentsRes] = await Promise.all([
         fetch('/api/admin/analytics/overview'),
         fetch('/api/admin/orders?limit=5&sortBy=createdAt&sortOrder=desc'),
-        fetch('/api/admin/profile')
+        fetch('/api/admin/profile'),
+        fetch('/api/admin/appointments?limit=1000')
       ])
 
-      const [analyticsData, ordersData, profileData] = await Promise.all([
+      const [analyticsData, ordersData, profileData, appointmentsData] = await Promise.all([
         analyticsRes.json(),
         ordersRes.json(),
-        profileRes.json()
+        profileRes.json(),
+        appointmentsRes.json()
       ])
 
       if (analyticsData.success) {
@@ -169,6 +180,18 @@ export default function AdminDashboard() {
 
       if (profileData.success) {
         setAdminProfile(profileData.user)
+      }
+
+      // Calculate appointment stats
+      if (appointmentsData.appointments) {
+        const appointments = appointmentsData.appointments
+        const today = new Date().toDateString()
+        setAppointmentStats({
+          total: appointmentsData.pagination?.total || appointments.length,
+          pending: appointments.filter((a: any) => a.status === 'PENDING').length,
+          confirmed: appointments.filter((a: any) => a.status === 'CONFIRMED').length,
+          today: appointments.filter((a: any) => new Date(a.date).toDateString() === today).length
+        })
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -266,7 +289,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Key Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* Revenue net of all paid invoices  */}
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
           <div className="flex items-center justify-between mb-3">
@@ -376,6 +399,28 @@ export default function AdminDashboard() {
             Catalogue actif
           </p>
         </div>
+
+        {/* Appointments */}
+        <a href="/admin/appointments" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-pink-500/30 transition-all cursor-pointer block">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-pink-500/10 rounded-lg">
+              <CalendarDays className="h-5 w-5 text-pink-500" />
+            </div>
+            {appointmentStats && appointmentStats.today > 0 && (
+              <div className="flex items-center gap-1 text-xs font-semibold text-pink-500">
+                <Clock className="h-3 w-3" />
+                {appointmentStats.today} aujourd'hui
+              </div>
+            )}
+          </div>
+          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Rendez-vous</h3>
+          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            {appointmentStats?.total || 0}
+          </p>
+          <p className="text-xs text-gray-500">
+            {appointmentStats?.pending || 0} en attente
+          </p>
+        </a>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -713,6 +758,15 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Analytics détaillés</span>
                   <TrendingUp className="h-4 w-4" />
+                </div>
+              </a>
+              <a
+                href="/admin/appointments"
+                className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-pink-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Gérer les rendez-vous</span>
+                  <CalendarDays className="h-4 w-4" />
                 </div>
               </a>
             </div>
