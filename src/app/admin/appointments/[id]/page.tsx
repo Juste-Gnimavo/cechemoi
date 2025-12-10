@@ -70,7 +70,8 @@ const statusConfig: Record<string, { label: string; color: string; bgColor: stri
 const paymentConfig: Record<string, { label: string; color: string; bgColor: string }> = {
   UNPAID: { label: 'Non paye', color: 'text-orange-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' },
   PAID: { label: 'Paye', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
-  REFUNDED: { label: 'Rembourse', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-900/30' }
+  REFUNDED: { label: 'Rembourse', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-900/30' },
+  QUOTE_PENDING: { label: 'Sur devis', color: 'text-purple-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' }
 }
 
 export default function AppointmentDetailPage({ params }: { params: Promise<{ id: string }> }) {

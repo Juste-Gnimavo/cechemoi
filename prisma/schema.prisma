@@ -1760,6 +1760,7 @@ enum AppointmentPaymentStatus {
   UNPAID        // Not paid yet
   PAID          // Paid (online or in-person)
   REFUNDED      // Refunded
+  QUOTE_PENDING // Price to be determined (Sur devis)
 }
 
 // Types of consultations offered

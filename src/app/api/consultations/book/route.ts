@@ -83,6 +83,11 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Determine payment status based on service configuration
+    // - If requiresPayment is false (Sur devis): QUOTE_PENDING
+    // - Otherwise: UNPAID (needs to be paid)
+    const paymentStatus = service.requiresPayment ? 'UNPAID' : 'QUOTE_PENDING'
+
     // Create appointment (linked to user if found)
     const appointment = await prisma.appointment.create({
       data: {
@@ -98,7 +103,7 @@ export async function POST(request: NextRequest) {
         duration: service.duration,
         price: service.price,
         status: 'PENDING',
-        paymentStatus: service.price === 0 ? 'PAID' : 'UNPAID'
+        paymentStatus
       },
       include: {
         type: true

@@ -62,13 +62,15 @@ const statusLabels: Record<string, string> = {
 const paymentStatusColors: Record<string, string> = {
   UNPAID: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   PAID: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  REFUNDED: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  REFUNDED: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+  QUOTE_PENDING: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
 }
 
 const paymentLabels: Record<string, string> = {
   UNPAID: 'Non paye',
   PAID: 'Paye',
-  REFUNDED: 'Rembourse'
+  REFUNDED: 'Rembourse',
+  QUOTE_PENDING: 'Sur devis'
 }
 
 export default function AppointmentsListPage() {
