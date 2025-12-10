@@ -47,7 +47,7 @@ curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=kPFZo3mT8xwiZ1OPBAiA
 ### Send WhatsApp Cloud Message with OTP. Replace 01234 with your dynamic otp
 
 ```bash
-curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=oRB98eaWYeGCJxzb3BzTwQlCSN8e1c6M&apitoken=Z0wT1763917240&type=whatsapp&from=CaveExpress&to=2250151092627&text=text=content:official_otp_code_template|lang=en|body=01234|button=01234"
+curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=oRB98eaWYeGCJxzb3BzTwQlCSN8e1c6M&apitoken=Z0wT1763917240&type=whatsapp&from=CaveExpress&to=2250151092627&text=text=content:official_otp_code_template|lang=fr|body=4598|button=4598"
 ```
 
 ```bash

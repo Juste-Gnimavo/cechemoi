@@ -12,58 +12,70 @@ async function main() {
   // 1. CUSTOMER NOTIFICATIONS - ORDER_PLACED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_PLACED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Bonjour {customer_name}, votre commande {order_number} de {order_total} a été reçue. Merci pour votre confiance!
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ORDER_PLACED',
       channel: 'SMS',
-      name: 'Order Placed - SMS',
-      description: 'Sent when customer places an order',
+      name: 'Commande créée - SMS',
+      description: 'Envoyé quand le client passe une commande',
       recipientType: 'customer',
-      content: `Bonjour {customer_name},
-Votre commande de vin {order_product_with_qty} a été créée et est en cours de traitement. Commande: {order_number}. Montant: {order_total}.
+      content: `Bonjour {customer_name}, votre commande {order_number} de {order_total} a été reçue. Merci pour votre confiance!
 
-WhatsApp: https://wa.me/2250759545410
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_PLACED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{billing_first_name}*,
+
+Votre commande *{order_number}* a été reçue.
+
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
+*Téléphone:* {billing_phone}
+*Adresse:* {billing_address}
+
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'ORDER_PLACED',
       channel: 'WHATSAPP',
-      name: 'Order Placed - WhatsApp',
-      description: 'Sent when customer places an order',
+      name: 'Commande créée - WhatsApp',
+      description: 'Envoyé quand le client passe une commande',
       recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
-Bonjour *{billing_first_name}*, Bienvenu(e) chez *CÈCHÉMOI*. _Mode sur-mesure et prêt-à-porter de qualité._
+      content: `*CÈCHÉMOI*
 
-Votre *nouvelle commande* de vin *{order_product_with_qty}* numéro: *{order_number}*, Montant: *{order_total}* a été bien reçue.
+Bonjour *{billing_first_name}*,
 
-*DETAILS DE VOTRE COMMANDE* :
-• Date: {order_date}
-• Total: {order_total}
-• Nom: {billing_first_name} {billing_last_name}
-• Téléphone: {billing_phone}
-• Adresse: {billing_address}
+Votre commande *{order_number}* a été reçue.
 
-*NUMEROS MOBILE DE PAIEMENT*
-Veuillez effectuer votre dépôt sur le numéro correspondant:
-ORANGE MONEY: +225 07 0346 0426
-MTN MOMO: +225 05 5679 1431
-WAVE: +225 05 5679 1431
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
+*Téléphone:* {billing_phone}
+*Adresse:* {billing_address}
 
-N'hésitez pas à répondre à ce message si vous avez des questions.
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
 
-++++++++++++++++++++++
-Adresse: Cocody Riviera Palmeraie, Abidjan
-Service Client 7j/7: +225 0759545410
-Site web: www.cechemoi.com
-WhatsApp: https://wa.me/2250759545410
-Instagram: @cechemoi
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -71,45 +83,60 @@ Instagram: @cechemoi
   // 2. PAYMENT_RECEIVED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_RECEIVED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Paiement reçu pour votre commande {order_number} ({order_total}). Préparation en cours. Merci!
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PAYMENT_RECEIVED',
       channel: 'SMS',
-      name: 'Payment Received - SMS',
-      description: 'Sent when payment is confirmed',
+      name: 'Paiement reçu - SMS',
+      description: 'Envoyé quand le paiement est confirmé',
       recipientType: 'customer',
-      content: `Le paiement de votre commande {order_number} montant {order_total} pour le(s) vin(s) {order_product} a été reçu. Votre vin arrive très bientôt ! Merci !
+      content: `Paiement reçu pour votre commande {order_number} ({order_total}). Préparation en cours. Merci!
 
-WhatsApp: https://wa.me/2250759545410
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_RECEIVED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+Votre paiement de *{order_total}* pour la commande *{order_number}* a été confirmé.
+
+Nous préparons votre commande avec soin.
+
+Merci pour votre confiance!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'PAYMENT_RECEIVED',
       channel: 'WHATSAPP',
-      name: 'Payment Received - WhatsApp',
-      description: 'Sent when payment is confirmed',
+      name: 'Paiement reçu - WhatsApp',
+      description: 'Envoyé quand le paiement est confirmé',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-Le paiement de votre commande *{order_number}* montant *{order_total}* pour le(s) vin(s) *{order_product}* a été reçu. La livraison de vos vins est maintenant en cours de préparation. Nous vous tiendrons informé de l'avancement.
+Bonjour *{customer_name}*,
 
-Un grand merci pour votre fidélité. Votre vin arrive très bientôt !
+Votre paiement de *{order_total}* pour la commande *{order_number}* a été confirmé.
 
-++++++++++++++++++++++
-*CÈCHÉMOI*,
-_La QUALITÉ du vin, livrée à votre porte. Livraison rapide partout à Abidjan. Vin Blanc, Rouge, Rosé, Mousseux, Moelleux, Sec Abidjan Côte d'Ivoire_
-Adresse: *Cocody Riviera Palmeraie, Abidjan Côte d'Ivoire*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-Instagram: *@cechemoi*
-++++++++++++++++++++++`,
+Nous préparons votre commande avec soin.
+
+Merci pour votre confiance!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -117,48 +144,58 @@ Instagram: *@cechemoi*
   // 3. ORDER_SHIPPED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_SHIPPED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Votre commande {order_number} est en livraison! Suivi: {tracking_number}. À très bientôt!
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ORDER_SHIPPED',
       channel: 'SMS',
-      name: 'Order Shipped - SMS',
-      description: 'Sent when order is shipped',
+      name: 'Commande expédiée - SMS',
+      description: 'Envoyé quand la commande est expédiée',
       recipientType: 'customer',
-      content: `Votre commande #{order_number} pour le(s) vin(s): {order_product} a été récupérée et est en cours de livraison. Numéro de suivi: {tracking_number}. Merci pour votre patience.
+      content: `Votre commande {order_number} est en livraison! Suivi: {tracking_number}. À très bientôt!
 
-WhatsApp: https://wa.me/2250759545410
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_SHIPPED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+Votre commande *{order_number}* est en route!
+
+📦 *Suivi:* {tracking_number}
+🚚 *Livraison prévue:* {delivery_date}
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'ORDER_SHIPPED',
       channel: 'WHATSAPP',
-      name: 'Order Shipped - WhatsApp',
-      description: 'Sent when order is shipped',
+      name: 'Commande expédiée - WhatsApp',
+      description: 'Envoyé quand la commande est expédiée',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-Votre commande *#{order_number}* pour le(s) vin(s): *{order_product}* a été récupérée et est en cours de livraison.
+Bonjour *{customer_name}*,
 
-📦 *Numéro de suivi*: {tracking_number}
-🚚 *Livraison estimée*: {delivery_date}
+Votre commande *{order_number}* est en route!
 
-Merci pour votre patience.
+📦 *Suivi:* {tracking_number}
+🚚 *Livraison prévue:* {delivery_date}
 
-++++++++++++++++++++++
-*CÈCHÉMOI*,
-_La QUALITÉ du vin, livrée à votre porte. Livraison rapide partout à Abidjan._
-Adresse: *Cocody Riviera Palmeraie, Abidjan*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-Instagram: *@cechemoi*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -166,47 +203,60 @@ Instagram: *@cechemoi*
   // 4. ORDER_DELIVERED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_DELIVERED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Votre commande {order_number} a été livrée! Merci d'avoir choisi CÈCHÉMOI.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ORDER_DELIVERED',
       channel: 'SMS',
-      name: 'Order Delivered - SMS',
-      description: 'Sent when order is delivered',
+      name: 'Commande livrée - SMS',
+      description: 'Envoyé quand la commande est livrée',
       recipientType: 'customer',
-      content: `Votre commande {order_product}, montant: {order_total} a été livrée avec succès! CÈCHÉMOI vous remercie.
+      content: `Votre commande {order_number} a été livrée! Merci d'avoir choisi CÈCHÉMOI.
 
-WhatsApp: https://wa.me/2250759545410
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_DELIVERED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+✅ Votre commande *{order_number}* a été livrée!
+
+Nous espérons que vos articles vous plairont. N'hésitez pas à partager votre expérience.
+
+Merci pour votre confiance!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'ORDER_DELIVERED',
       channel: 'WHATSAPP',
-      name: 'Order Delivered - WhatsApp',
-      description: 'Sent when order is delivered',
+      name: 'Commande livrée - WhatsApp',
+      description: 'Envoyé quand la commande est livrée',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-✅ Votre commande de vin *{order_product}*, montant: *{order_total}* a été livrée avec succès!
+Bonjour *{customer_name}*,
 
-Merci pour votre achat et votre confiance. Nous espérons que vous apprécierez vos vins!
+✅ Votre commande *{order_number}* a été livrée!
 
-💬 N'hésitez pas à laisser un avis sur notre site.
+Nous espérons que vos articles vous plairont. N'hésitez pas à partager votre expérience.
 
-++++++++++++++++++++++
-*CÈCHÉMOI*,
-_La QUALITÉ du vin, livrée à votre porte._
-Adresse: *Cocody Riviera Palmeraie, Abidjan*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-Instagram: *@cechemoi*
-++++++++++++++++++++++`,
+Merci pour votre confiance!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -214,41 +264,54 @@ Instagram: *@cechemoi*
   // 5. ORDER_CANCELLED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_CANCELLED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Votre commande {order_number} a été annulée. Questions? Appelez-nous au +225 07 59 54 54 10.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ORDER_CANCELLED',
       channel: 'SMS',
-      name: 'Order Cancelled - SMS',
-      description: 'Sent when order is cancelled',
+      name: 'Commande annulée - SMS',
+      description: 'Envoyé quand la commande est annulée',
       recipientType: 'customer',
-      content: `Votre commande #{order_number} a été annulée. Si vous n'êtes pas à l'origine de cette annulation, contactez-nous au +225 0759545410.
+      content: `Votre commande {order_number} a été annulée. Questions? Appelez-nous au +225 07 59 54 54 10.
 
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_CANCELLED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+Votre commande *{order_number}* ({order_total}) a été annulée.
+
+Si vous n'êtes pas à l'origine de cette annulation, contactez-nous.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'ORDER_CANCELLED',
       channel: 'WHATSAPP',
-      name: 'Order Cancelled - WhatsApp',
-      description: 'Sent when order is cancelled',
+      name: 'Commande annulée - WhatsApp',
+      description: 'Envoyé quand la commande est annulée',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-Votre commande *#{order_number}* d'un montant de *{order_total}* a été annulée.
+Bonjour *{customer_name}*,
 
-Si vous n'êtes pas à l'origine de cette annulation ou si vous avez des questions, n'hésitez pas à nous contacter.
+Votre commande *{order_number}* ({order_total}) a été annulée.
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-++++++++++++++++++++++`,
+Si vous n'êtes pas à l'origine de cette annulation, contactez-nous.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -256,46 +319,54 @@ WhatsApp: *https://wa.me/2250759545410*
   // 6. ORDER_REFUNDED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_REFUNDED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Remboursement de {order_total} traité pour la commande {order_number}. Délai: 3-5 jours.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ORDER_REFUNDED',
       channel: 'SMS',
-      name: 'Order Refunded - SMS',
-      description: 'Sent when refund is processed',
+      name: 'Remboursement - SMS',
+      description: 'Envoyé quand le remboursement est traité',
       recipientType: 'customer',
-      content: `Un remboursement de {order_total} pour votre commande #{order_number} a été traité. Les fonds seront disponibles sous 3-5 jours ouvrables.
+      content: `Remboursement de {order_total} traité pour la commande {order_number}. Délai: 3-5 jours.
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ORDER_REFUNDED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+Votre remboursement de *{order_total}* pour la commande *{order_number}* a été traité.
+
+Délai: 3-5 jours ouvrables.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'ORDER_REFUNDED',
       channel: 'WHATSAPP',
-      name: 'Order Refunded - WhatsApp',
-      description: 'Sent when refund is processed',
+      name: 'Remboursement - WhatsApp',
+      description: 'Envoyé quand le remboursement est traité',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-Un remboursement de *{order_total}* pour votre commande *#{order_number}* a été traité avec succès.
+Bonjour *{customer_name}*,
 
-💰 *Montant remboursé*: {order_total}
-⏱️ *Délai*: 3-5 jours ouvrables
-💳 *Méthode*: {payment_method}
+Votre remboursement de *{order_total}* pour la commande *{order_number}* a été traité.
 
-Les fonds seront crédités sur votre compte sous peu.
+Délai: 3-5 jours ouvrables.
 
-Si vous avez des questions, n'hésitez pas à nous contacter.
-
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -303,48 +374,62 @@ Site web: https://www.cechemoi.com
   // 7. PAYMENT_FAILED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_FAILED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Échec du paiement pour la commande {order_number}. Veuillez réessayer ou contactez-nous.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PAYMENT_FAILED',
       channel: 'SMS',
-      name: 'Payment Failed - SMS',
-      description: 'Sent when payment fails',
+      name: 'Paiement échoué - SMS',
+      description: 'Envoyé quand le paiement échoue',
       recipientType: 'customer',
-      content: `Le paiement de votre commande #{order_number} a échoué. Veuillez réessayer ou contactez-nous au +225 0759545410.
+      content: `Échec du paiement pour la commande {order_number}. Veuillez réessayer ou contactez-nous.
 
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_FAILED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+❌ Le paiement de votre commande *{order_number}* ({order_total}) n'a pas abouti.
+
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
+
+Besoin d'aide? Répondez à ce message.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'PAYMENT_FAILED',
       channel: 'WHATSAPP',
-      name: 'Payment Failed - WhatsApp',
-      description: 'Sent when payment fails',
+      name: 'Paiement échoué - WhatsApp',
+      description: 'Envoyé quand le paiement échoue',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-❌ Le paiement de votre commande *#{order_number}* d'un montant de *{order_total}* n'a pas pu être traité.
+Bonjour *{customer_name}*,
 
-*Que faire?*
-1. Vérifiez votre solde
-2. Réessayez le paiement
-3. Contactez-nous pour assistance
+❌ Le paiement de votre commande *{order_number}* ({order_total}) n'a pas abouti.
 
-*NUMEROS MOBILE DE PAIEMENT*
-ORANGE MONEY: +225 07 0346 0426
-MTN MOMO: +225 05 5679 1431
-WAVE: +225 05 5679 1431
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client 7j/7: *+225 0759545410*
-Site web: https://www.cechemoi.com
-++++++++++++++++++++++`,
+Besoin d'aide? Répondez à ce message.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -352,41 +437,58 @@ Site web: https://www.cechemoi.com
   // 8. CUSTOMER_NOTE (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'CUSTOMER_NOTE', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Note concernant votre commande {order_number}: {note_content}
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'CUSTOMER_NOTE',
       channel: 'SMS',
-      name: 'Customer Note - SMS',
-      description: 'Sent when admin adds a customer note',
+      name: 'Note client - SMS',
+      description: 'Envoyé quand l\'admin ajoute une note client',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Note concernant votre commande #{order_number}: {note_content}
+      content: `Note concernant votre commande {order_number}: {note_content}
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'CUSTOMER_NOTE', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'CUSTOMER_NOTE',
-      channel: 'WHATSAPP',
-      name: 'Customer Note - WhatsApp',
-      description: 'Sent when admin adds a customer note',
-      recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+    update: {
+      content: `*CÈCHÉMOI*
 
-📝 *Note concernant votre commande #{order_number}*:
+Bonjour *{customer_name}*,
+
+📝 *Note pour votre commande {order_number}:*
 
 {note_content}
 
-Si vous avez des questions, n'hésitez pas à répondre à ce message.
+Des questions? Répondez à ce message.
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client 7j/7: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'CUSTOMER_NOTE',
+      channel: 'WHATSAPP',
+      name: 'Note client - WhatsApp',
+      description: 'Envoyé quand l\'admin ajoute une note client',
+      recipientType: 'customer',
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+📝 *Note pour votre commande {order_number}:*
+
+{note_content}
+
+Des questions? Répondez à ce message.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -394,51 +496,66 @@ Service Client 7j/7: *+225 0759545410*
   // 9. NEW_ACCOUNT (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_ACCOUNT', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Bienvenue chez CÈCHÉMOI! Votre compte est créé. Découvrez notre collection sur cechemoi.com
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'NEW_ACCOUNT',
       channel: 'SMS',
-      name: 'New Account - SMS',
-      description: 'Sent when customer registers',
+      name: 'Nouveau compte - SMS',
+      description: 'Envoyé quand un client s\'inscrit',
       recipientType: 'customer',
-      content: `Bienvenue chez CÈCHÉMOI! Votre compte a été créé avec succès. Découvrez notre collection sur www.cechemoi.com
+      content: `Bienvenue chez CÈCHÉMOI! Votre compte est créé. Découvrez notre collection sur cechemoi.com
 
-Téléphone: {billing_phone}`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_ACCOUNT', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'NEW_ACCOUNT',
-      channel: 'WHATSAPP',
-      name: 'New Account - WhatsApp',
-      description: 'Sent when customer registers',
-      recipientType: 'customer',
-      content: `*Bienvenue chez CÈCHÉMOI!* 🍷
+    update: {
+      content: `*Bienvenue chez CÈCHÉMOI!* 👗
 
 Bonjour *{customer_name}*,
 
-Votre compte a été créé avec succès!
+Votre compte est créé!
 
 Vous pouvez maintenant:
-✅ Commander nos vins premium
+✅ Commander nos créations
 ✅ Suivre vos commandes
-✅ Accumuler des points de fidélité
-✅ Profiter d'offres exclusives
+✅ Cumuler des points fidélité
 
-*Votre numéro*: {billing_phone}
+Découvrez notre collection sur cechemoi.com
 
-Découvrez notre sélection sur notre site web.
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'NEW_ACCOUNT',
+      channel: 'WHATSAPP',
+      name: 'Nouveau compte - WhatsApp',
+      description: 'Envoyé quand un client s\'inscrit',
+      recipientType: 'customer',
+      content: `*Bienvenue chez CÈCHÉMOI!* 👗
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-++++++++++++++++++++++`,
+Bonjour *{customer_name}*,
+
+Votre compte est créé!
+
+Vous pouvez maintenant:
+✅ Commander nos créations
+✅ Suivre vos commandes
+✅ Cumuler des points fidélité
+
+Découvrez notre collection sur cechemoi.com
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -446,46 +563,54 @@ WhatsApp: *https://wa.me/2250759545410*
   // 10. PASSWORD_RESET (SMS + WHATSAPP) - For admin only
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PASSWORD_RESET', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Code de réinitialisation CÈCHÉMOI: {reset_code}. Valide 15 minutes.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PASSWORD_RESET',
       channel: 'SMS',
-      name: 'Password Reset - SMS',
-      description: 'Sent when password reset is requested (admin only)',
+      name: 'Réinitialisation mot de passe - SMS',
+      description: 'Envoyé quand une réinitialisation est demandée (admin)',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Code de réinitialisation: {reset_code}
+      content: `Code de réinitialisation CÈCHÉMOI: {reset_code}. Valide 15 minutes.
 
-Utilisez ce code pour réinitialiser votre mot de passe. Valide 15 minutes.
-
-Site: www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PASSWORD_RESET', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*,
+
+🔐 *Code de réinitialisation:* {reset_code}
+
+Valide 15 minutes. Si vous n'avez pas fait cette demande, ignorez ce message.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'PASSWORD_RESET',
       channel: 'WHATSAPP',
-      name: 'Password Reset - WhatsApp',
-      description: 'Sent when password reset is requested (admin only)',
+      name: 'Réinitialisation mot de passe - WhatsApp',
+      description: 'Envoyé quand une réinitialisation est demandée (admin)',
       recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+      content: `*CÈCHÉMOI*
 
-Vous avez demandé la réinitialisation de votre mot de passe.
+Bonjour *{customer_name}*,
 
-🔐 *Code de réinitialisation*: {reset_code}
+🔐 *Code de réinitialisation:* {reset_code}
 
-⏱️ Ce code est valide pendant 15 minutes.
+Valide 15 minutes. Si vous n'avez pas fait cette demande, ignorez ce message.
 
-Si vous n'avez pas fait cette demande, ignorez ce message.
-
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Sécurité: +225 0759545410
-Site web: https://www.cechemoi.com
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -493,42 +618,60 @@ Site web: https://www.cechemoi.com
   // 11. LOYALTY_POINTS_EARNED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'LOYALTY_POINTS_EARNED', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Bravo! +{points_earned} points fidélité. Solde: {points_balance} points.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'LOYALTY_POINTS_EARNED',
       channel: 'SMS',
-      name: 'Loyalty Points Earned - SMS',
-      description: 'Sent when customer earns loyalty points',
+      name: 'Points fidélité gagnés - SMS',
+      description: 'Envoyé quand le client gagne des points',
       recipientType: 'customer',
-      content: `Félicitations! Vous avez gagné {points_earned} points de fidélité. Solde total: {points_balance} points.
+      content: `Bravo! +{points_earned} points fidélité. Solde: {points_balance} points.
 
-www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'LOYALTY_POINTS_EARNED', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+🎉 Bravo *{customer_name}*!
+
++*{points_earned}* points fidélité pour la commande {order_number}.
+
+💰 *Solde:* {points_balance} points
+🎁 *Valeur:* {points_value} CFA
+
+Utilisez-les lors de votre prochain achat!
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
     create: {
       trigger: 'LOYALTY_POINTS_EARNED',
       channel: 'WHATSAPP',
-      name: 'Loyalty Points Earned - WhatsApp',
-      description: 'Sent when customer earns loyalty points',
+      name: 'Points fidélité gagnés - WhatsApp',
+      description: 'Envoyé quand le client gagne des points',
       recipientType: 'customer',
-      content: `🎉 *Félicitations {customer_name}!*
+      content: `*CÈCHÉMOI*
 
-Vous avez gagné *{points_earned} points de fidélité* suite à votre commande #{order_number}.
+🎉 Bravo *{customer_name}*!
 
-💰 *Solde total*: {points_balance} points
-🎁 *Équivalent*: {points_value} CFA de réduction
++*{points_earned}* points fidélité pour la commande {order_number}.
 
-Utilisez vos points lors de votre prochain achat!
+💰 *Solde:* {points_balance} points
+🎁 *Valeur:* {points_value} CFA
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Site web: https://www.cechemoi.com
-++++++++++++++++++++++`,
+Utilisez-les lors de votre prochain achat!
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -536,46 +679,64 @@ Site web: https://www.cechemoi.com
   // 12. ABANDONED_CART (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ABANDONED_CART', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Vous avez oublié {cart_items_count} article(s) dans votre panier! Finalisez votre commande sur cechemoi.com
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'ABANDONED_CART',
       channel: 'SMS',
-      name: 'Abandoned Cart - SMS',
-      description: 'Sent 1 hour after cart abandonment',
+      name: 'Panier abandonné - SMS',
+      description: 'Envoyé 1h après abandon du panier',
       recipientType: 'customer',
-      content: `Vous avez oublié quelque chose! {cart_items_count} article(s) vous attend(ent) dans votre panier. Finalisez votre commande maintenant.
+      content: `Vous avez oublié {cart_items_count} article(s) dans votre panier! Finalisez votre commande sur cechemoi.com
 
-www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'ABANDONED_CART', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'ABANDONED_CART',
-      channel: 'WHATSAPP',
-      name: 'Abandoned Cart - WhatsApp',
-      description: 'Sent 1 hour after cart abandonment',
-      recipientType: 'customer',
-      content: `Bonjour *{customer_name}*,
+    update: {
+      content: `*CÈCHÉMOI*
 
-🛒 Vous avez laissé *{cart_items_count} article(s)* dans votre panier:
+Bonjour *{customer_name}*,
+
+🛒 Vous avez laissé *{cart_items_count}* article(s) dans votre panier:
 
 {cart_items_list}
 
-*Total*: {cart_total}
+*Total:* {cart_total}
 
-Ne manquez pas ces vins! Finalisez votre commande maintenant et profitez de la livraison rapide.
+Finalisez votre commande maintenant!
 
-🎁 *Offre spéciale*: -10% avec le code RETOUR10
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'ABANDONED_CART',
+      channel: 'WHATSAPP',
+      name: 'Panier abandonné - WhatsApp',
+      description: 'Envoyé 1h après abandon du panier',
+      recipientType: 'customer',
+      content: `*CÈCHÉMOI*
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Site web: https://www.cechemoi.com
-WhatsApp: *https://wa.me/2250759545410*
-++++++++++++++++++++++`,
+Bonjour *{customer_name}*,
+
+🛒 Vous avez laissé *{cart_items_count}* article(s) dans votre panier:
+
+{cart_items_list}
+
+*Total:* {cart_total}
+
+Finalisez votre commande maintenant!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_
++225 07 59 54 54 10`,
       enabled: false,
     },
   })
@@ -583,42 +744,60 @@ WhatsApp: *https://wa.me/2250759545410*
   // 13. BACK_IN_STOCK (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'BACK_IN_STOCK', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Bonne nouvelle! "{product_name}" est de retour en stock. Commandez vite sur cechemoi.com
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'BACK_IN_STOCK',
       channel: 'SMS',
-      name: 'Back in Stock - SMS',
-      description: 'Sent when product is back in stock',
+      name: 'Retour en stock - SMS',
+      description: 'Envoyé quand un produit est de retour en stock',
       recipientType: 'customer',
-      content: `Bonne nouvelle! Le vin "{product_name}" est de nouveau en stock. Commandez vite avant rupture!
+      content: `Bonne nouvelle! "{product_name}" est de retour en stock. Commandez vite sur cechemoi.com
 
-www.cechemoi.com`,
+— CÈCHÉMOI`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'BACK_IN_STOCK', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*CÈCHÉMOI*
+
+Bonne nouvelle *{customer_name}*! 👗
+
+*{product_name}* est de retour en stock!
+
+💰 *Prix:* {product_price}
+📦 *Quantité:* {product_stock}
+
+Commandez vite avant rupture!
+
+— *CÈCHÉMOI*
+cechemoi.com`,
+    },
     create: {
       trigger: 'BACK_IN_STOCK',
       channel: 'WHATSAPP',
-      name: 'Back in Stock - WhatsApp',
-      description: 'Sent when product is back in stock',
+      name: 'Retour en stock - WhatsApp',
+      description: 'Envoyé quand un produit est de retour en stock',
       recipientType: 'customer',
-      content: `*Bonne nouvelle {customer_name}!* 🍷
+      content: `*CÈCHÉMOI*
 
-Le vin *"{product_name}"* que vous attendiez est de nouveau en stock!
+Bonne nouvelle *{customer_name}*! 👗
 
-💰 *Prix*: {product_price}
-📦 *Quantité disponible*: {product_stock}
+*{product_name}* est de retour en stock!
 
-⚡ Commandez vite avant rupture!
+💰 *Prix:* {product_price}
+📦 *Quantité:* {product_stock}
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Site web: https://www.cechemoi.com
-++++++++++++++++++++++`,
+Commandez vite avant rupture!
+
+— *CÈCHÉMOI*
+cechemoi.com`,
       enabled: false,
     },
   })
@@ -626,55 +805,66 @@ Site web: https://www.cechemoi.com
   // 14. NEW_ORDER_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_ORDER_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] Nouvelle commande {order_number} - {customer_name} - {order_total}`,
+    },
     create: {
       trigger: 'NEW_ORDER_ADMIN',
       channel: 'SMS',
-      name: 'New Order Alert - Admin SMS',
-      description: 'Sent to admin when new order is placed',
+      name: 'Nouvelle commande - Admin SMS',
+      description: 'Envoyé à l\'admin quand une commande est passée',
       recipientType: 'admin',
-      content: `[CÈCHÉMOI] - NOTIFICATION ADMIN: Nouvelle commande #{order_number} - de {customer_name} - montant {order_total}. Veuillez traiter.`,
+      content: `[ADMIN] Nouvelle commande {order_number} - {customer_name} - {order_total}`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_ORDER_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
+🆕 *NOUVELLE COMMANDE*
+
+📋 *Commande:* {order_number}
+💰 *Montant:* {order_total}
+📅 *Date:* {order_date}
+
+👤 *Client:*
+• {billing_first_name} {billing_last_name}
+• {billing_phone}
+• {billing_address}
+
+📦 *Articles:*
+{order_product_with_qty}
+
+💳 *Paiement:* {payment_method} - {payment_status}
+
+⚠️ *ACTION:* Traiter cette commande`,
+    },
     create: {
       trigger: 'NEW_ORDER_ADMIN',
       channel: 'WHATSAPP',
-      name: 'New Order Alert - Admin WhatsApp',
-      description: 'Sent to admin when new order is placed',
+      name: 'Nouvelle commande - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand une commande est passée',
       recipientType: 'admin',
-      content: `+++++++++++++++++
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-🆕 NOUVELLE COMMANDE
-+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
+🆕 *NOUVELLE COMMANDE*
 
-📋 *Commande ID*: #{order_number}
-💰 *Montant*: {order_total}
-📊 *Statut*: {order_status}
-📅 *Date*: {order_date}
+📋 *Commande:* {order_number}
+💰 *Montant:* {order_total}
+📅 *Date:* {order_date}
 
-👤 *CLIENT*:
-• Nom: {billing_first_name} {billing_last_name}
-• Téléphone: {billing_phone}
-• Adresse: {billing_address}
+👤 *Client:*
+• {billing_first_name} {billing_last_name}
+• {billing_phone}
+• {billing_address}
 
-🍷 *ARTICLES COMMANDÉS*:
+📦 *Articles:*
 {order_product_with_qty}
 
-💳 *PAIEMENT*:
-• Méthode: {payment_method}
-• Statut: {payment_status}
+💳 *Paiement:* {payment_method} - {payment_status}
 
-⚠️ *ACTION REQUISE*: Traiter cette commande
-
-++++++++++++++++++++++
-CÈCHÉMOI - Admin Panel
-Site: https://www.cechemoi.com/admin
-++++++++++++++++++++++`,
+⚠️ *ACTION:* Traiter cette commande`,
       enabled: true,
     },
   })
@@ -682,50 +872,60 @@ Site: https://www.cechemoi.com/admin
   // 15. PAYMENT_RECEIVED_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_RECEIVED_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] 💰 Paiement reçu {order_number} - {order_total} - {customer_name}`,
+    },
     create: {
       trigger: 'PAYMENT_RECEIVED_ADMIN',
       channel: 'SMS',
-      name: 'Payment Received - Admin SMS',
-      description: 'Sent to admin when payment is confirmed',
+      name: 'Paiement reçu - Admin SMS',
+      description: 'Envoyé à l\'admin quand un paiement est confirmé',
       recipientType: 'admin',
-      content: `💰 PAIEMENT RECU #{order_number} - {order_total} - {customer_name}`,
+      content: `[ADMIN] 💰 Paiement reçu {order_number} - {order_total} - {customer_name}`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_RECEIVED_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
+✅ *PAIEMENT CONFIRMÉ*
+
+💰 *Montant:* {order_total}
+📋 *Commande:* {order_number}
+💳 *Méthode:* {payment_method}
+
+👤 *Client:*
+• {billing_first_name} {billing_last_name}
+• {billing_phone}
+
+📦 *Articles:*
+{order_product_with_qty}
+
+⚠️ *ACTION:* Préparer la livraison`,
+    },
     create: {
       trigger: 'PAYMENT_RECEIVED_ADMIN',
       channel: 'WHATSAPP',
-      name: 'Payment Received - Admin WhatsApp',
-      description: 'Sent to admin when payment is confirmed',
+      name: 'Paiement reçu - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand un paiement est confirmé',
       recipientType: 'admin',
-      content: `+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
 ✅ *PAIEMENT CONFIRMÉ*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
 
-💰 *Montant reçu*: {order_total}
-📋 *Commande*: #{order_number}
-💳 *Méthode*: {payment_method}
-📅 *Date*: {order_date}
+💰 *Montant:* {order_total}
+📋 *Commande:* {order_number}
+💳 *Méthode:* {payment_method}
 
-👤 *CLIENT*:
-• Nom: {billing_first_name} {billing_last_name}
-• Téléphone: {billing_phone}
+👤 *Client:*
+• {billing_first_name} {billing_last_name}
+• {billing_phone}
 
-🍷 *ARTICLES*:
+📦 *Articles:*
 {order_product_with_qty}
 
-⚠️ *PROCHAINE ÉTAPE*: Préparer la livraison
-
-++++++++++++++++++++++
-CÈCHÉMOI - Admin Panel
-Site: https://www.cechemoi.com/admin
-++++++++++++++++++++++`,
+⚠️ *ACTION:* Préparer la livraison`,
       enabled: true,
     },
   })
@@ -733,42 +933,46 @@ Site: https://www.cechemoi.com/admin
   // 16. LOW_STOCK_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'LOW_STOCK_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] ⚠️ Stock bas: "{product_name}" - {low_stock_quantity} unités restantes`,
+    },
     create: {
       trigger: 'LOW_STOCK_ADMIN',
       channel: 'SMS',
-      name: 'Low Stock Alert - Admin SMS',
-      description: 'Sent to admin when product stock is low',
+      name: 'Stock bas - Admin SMS',
+      description: 'Envoyé à l\'admin quand le stock est bas',
       recipientType: 'admin',
-      content: `⚠️ ALERTE STOCK BAS: "{product_name}" - Stock restant: {low_stock_quantity} unités. Réapprovisionner.`,
+      content: `[ADMIN] ⚠️ Stock bas: "{product_name}" - {low_stock_quantity} unités restantes`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'LOW_STOCK_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
+⚠️ *STOCK BAS*
+
+👗 *Produit:* {product_name}
+📦 *Stock actuel:* {low_stock_quantity} unités
+⚠️ *Seuil:* {low_stock_threshold} unités
+
+🔴 *ACTION:* Réapprovisionner`,
+    },
     create: {
       trigger: 'LOW_STOCK_ADMIN',
       channel: 'WHATSAPP',
-      name: 'Low Stock Alert - Admin WhatsApp',
-      description: 'Sent to admin when product stock is low',
+      name: 'Stock bas - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand le stock est bas',
       recipientType: 'admin',
-      content: `+++++++++++++++++
-⚠️ *ALERTE STOCK BAS*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
+⚠️ *STOCK BAS*
 
-🍷 *Produit*: {product_name}
-📦 *Stock actuel*: {low_stock_quantity} unités
-⚠️ *Seuil d'alerte*: {low_stock_threshold} unités
+👗 *Produit:* {product_name}
+📦 *Stock actuel:* {low_stock_quantity} unités
+⚠️ *Seuil:* {low_stock_threshold} unités
 
-🔴 *ACTION REQUISE*: Réapprovisionner ce produit rapidement pour éviter une rupture de stock.
-
-++++++++++++++++++++++
-CÈCHÉMOI - Gestion Inventaire
-Site: https://www.cechemoi.com/admin/inventory
-++++++++++++++++++++++`,
+🔴 *ACTION:* Réapprovisionner`,
       enabled: true,
     },
   })
@@ -776,46 +980,52 @@ Site: https://www.cechemoi.com/admin/inventory
   // 17. OUT_OF_STOCK_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'OUT_OF_STOCK_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] 🔴 Rupture: "{product_name}" - Action urgente requise`,
+    },
     create: {
       trigger: 'OUT_OF_STOCK_ADMIN',
       channel: 'SMS',
-      name: 'Out of Stock Alert - Admin SMS',
-      description: 'Sent to admin when product is out of stock',
+      name: 'Rupture de stock - Admin SMS',
+      description: 'Envoyé à l\'admin quand un produit est en rupture',
       recipientType: 'admin',
-      content: `🔴 RUPTURE DE STOCK: "{product_name}" est en rupture de stock. Action immédiate requise.`,
+      content: `[ADMIN] 🔴 Rupture: "{product_name}" - Action urgente requise`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'OUT_OF_STOCK_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
+🔴 *RUPTURE DE STOCK*
+
+👗 *Produit:* {product_name}
+📦 *Stock:* 0 unités
+
+⚠️ *Impact:*
+• Produit invisible sur le site
+• Perte de ventes potentielles
+
+🔴 *ACTION URGENTE:* Réapprovisionner`,
+    },
     create: {
       trigger: 'OUT_OF_STOCK_ADMIN',
       channel: 'WHATSAPP',
-      name: 'Out of Stock Alert - Admin WhatsApp',
-      description: 'Sent to admin when product is out of stock',
+      name: 'Rupture de stock - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand un produit est en rupture',
       recipientType: 'admin',
-      content: `+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
 🔴 *RUPTURE DE STOCK*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
 
-🍷 *Produit*: {product_name}
-📦 *Stock actuel*: 0 unités
+👗 *Produit:* {product_name}
+📦 *Stock:* 0 unités
 
-⚠️ *IMPACT*:
+⚠️ *Impact:*
 • Produit invisible sur le site
 • Perte de ventes potentielles
-• Clients sur liste d'attente
 
-🔴 *ACTION URGENTE*: Réapprovisionner immédiatement
-
-++++++++++++++++++++++
-CÈCHÉMOI - Gestion Inventaire
-Site: https://www.cechemoi.com/admin/inventory
-++++++++++++++++++++++`,
+🔴 *ACTION URGENTE:* Réapprovisionner`,
       enabled: true,
     },
   })
@@ -824,18 +1034,18 @@ Site: https://www.cechemoi.com/admin/inventory
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_CUSTOMER_ADMIN', channel: 'SMS' } },
     update: {
-      name: 'New Customer - Admin SMS',
-      description: 'Sent to admin when new customer registers',
-      content: `✅ Nouveau client enregistré: {customer_name} - {billing_phone} - {billing_city}`,
+      name: 'Nouveau client - Admin SMS',
+      description: 'Envoyé à l\'admin quand un nouveau client s\'inscrit',
+      content: `[ADMIN] ✅ Nouveau client: {customer_name} - {billing_phone} - {billing_city}`,
       enabled: true,
     },
     create: {
       trigger: 'NEW_CUSTOMER_ADMIN',
       channel: 'SMS',
-      name: 'New Customer - Admin SMS',
-      description: 'Sent to admin when new customer registers',
+      name: 'Nouveau client - Admin SMS',
+      description: 'Envoyé à l\'admin quand un nouveau client s\'inscrit',
       recipientType: 'admin',
-      content: `✅ Nouveau client enregistré: {customer_name} - {billing_phone} - {billing_city}`,
+      content: `[ADMIN] ✅ Nouveau client: {customer_name} - {billing_phone} - {billing_city}`,
       enabled: true,
     },
   })
@@ -843,52 +1053,38 @@ Site: https://www.cechemoi.com/admin/inventory
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_CUSTOMER_ADMIN', channel: 'WHATSAPP' } },
     update: {
-      name: 'New Customer - Admin WhatsApp',
-      description: 'Sent to admin when new customer registers',
-      content: `+++++++++++++++++
+      name: 'Nouveau client - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand un nouveau client s\'inscrit',
+      content: `*[ADMIN CÈCHÉMOI]*
 ✅ *NOUVEAU CLIENT*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
 
-👤 *Client*:
+👤 *Client:*
 • Nom: {customer_name}
 • Téléphone: {billing_phone}
 • Email: {billing_email}
 • Ville: {billing_city}
-• Pays: {billing_country}
 
-📅 *Date d'inscription*: {registration_date}
-
-++++++++++++++++++++++
-CÈCHÉMOI - Gestion Clients
-Total clients: {total_customers}
-++++++++++++++++++++++`,
+📅 *Inscription:* {registration_date}
+👥 *Total clients:* {total_customers}`,
       enabled: true,
     },
     create: {
       trigger: 'NEW_CUSTOMER_ADMIN',
       channel: 'WHATSAPP',
-      name: 'New Customer - Admin WhatsApp',
-      description: 'Sent to admin when new customer registers',
+      name: 'Nouveau client - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand un nouveau client s\'inscrit',
       recipientType: 'admin',
-      content: `+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
 ✅ *NOUVEAU CLIENT*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
 
-👤 *Client*:
+👤 *Client:*
 • Nom: {customer_name}
 • Téléphone: {billing_phone}
 • Email: {billing_email}
 • Ville: {billing_city}
-• Pays: {billing_country}
 
-📅 *Date d'inscription*: {registration_date}
-
-++++++++++++++++++++++
-CÈCHÉMOI - Gestion Clients
-Total clients: {total_customers}
-++++++++++++++++++++++`,
+📅 *Inscription:* {registration_date}
+👥 *Total clients:* {total_customers}`,
       enabled: true,
     },
   })
@@ -896,46 +1092,54 @@ Total clients: {total_customers}
   // 19. NEW_REVIEW_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_REVIEW_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] ⭐ Nouvel avis: {customer_name} sur "{product_name}" - {rating}/5`,
+    },
     create: {
       trigger: 'NEW_REVIEW_ADMIN',
       channel: 'SMS',
-      name: 'New Review - Admin SMS',
-      description: 'Sent to admin when new review is submitted',
+      name: 'Nouvel avis - Admin SMS',
+      description: 'Envoyé à l\'admin quand un avis est soumis',
       recipientType: 'admin',
-      content: `⭐ Nouvel avis soumis par {customer_name} sur "{product_name}" - {rating}/5 étoiles. Modération requise.`,
+      content: `[ADMIN] ⭐ Nouvel avis: {customer_name} sur "{product_name}" - {rating}/5`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'NEW_REVIEW_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
+⭐ *NOUVEL AVIS*
+
+👗 *Produit:* {product_name}
+👤 *Client:* {customer_name}
+⭐ *Note:* {rating}/5
+✅ *Achat vérifié:* {verified_purchase}
+
+💬 *Commentaire:*
+"{review_comment}"
+
+⚠️ *ACTION:* Modérer cet avis`,
+    },
     create: {
       trigger: 'NEW_REVIEW_ADMIN',
       channel: 'WHATSAPP',
-      name: 'New Review - Admin WhatsApp',
-      description: 'Sent to admin when new review is submitted',
+      name: 'Nouvel avis - Admin WhatsApp',
+      description: 'Envoyé à l\'admin quand un avis est soumis',
       recipientType: 'admin',
-      content: `+++++++++++++++++
-⭐ *NOUVEL AVIS CLIENT*
-[CÈCHÉMOI] - NOTIFICATION ADMIN
-+++++++++++++++++
+      content: `*[ADMIN CÈCHÉMOI]*
+⭐ *NOUVEL AVIS*
 
-🍷 *Produit*: {product_name}
-👤 *Client*: {customer_name}
-⭐ *Note*: {rating}/5 étoiles
-✅ *Achat vérifié*: {verified_purchase}
+👗 *Produit:* {product_name}
+👤 *Client:* {customer_name}
+⭐ *Note:* {rating}/5
+✅ *Achat vérifié:* {verified_purchase}
 
-💬 *Commentaire*:
+💬 *Commentaire:*
 "{review_comment}"
 
-⚠️ *ACTION REQUISE*: Modérer cet avis
-
-++++++++++++++++++++++
-CÈCHÉMOI - Gestion Avis
-Site: https://www.cechemoi.com/admin/reviews
-++++++++++++++++++++++`,
+⚠️ *ACTION:* Modérer cet avis`,
       enabled: false,
     },
   })
@@ -943,77 +1147,92 @@ Site: https://www.cechemoi.com/admin/reviews
   // 20. DAILY_REPORT_ADMIN (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'DAILY_REPORT_ADMIN', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `[ADMIN] 📊 Rapport: {orders_count} commandes - {total_revenue} CFA - {new_customers} nouveaux clients`,
+    },
     create: {
       trigger: 'DAILY_REPORT_ADMIN',
       channel: 'SMS',
-      name: 'Daily Report - Admin SMS',
-      description: 'Sent daily at 8 PM to admin',
+      name: 'Rapport journalier - Admin SMS',
+      description: 'Envoyé chaque jour à 20h',
       recipientType: 'admin',
-      content: `📊 Rapport journalier: {orders_count} commandes - {total_revenue} CFA - {new_customers} nouveaux clients`,
+      content: `[ADMIN] 📊 Rapport: {orders_count} commandes - {total_revenue} CFA - {new_customers} nouveaux clients`,
       enabled: false,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'DAILY_REPORT_ADMIN', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'DAILY_REPORT_ADMIN',
-      channel: 'WHATSAPP',
-      name: 'Daily Report - Admin WhatsApp',
-      description: 'Sent daily at 8 PM to admin',
-      recipientType: 'admin',
-      content: `+++++++++++++++++
+    update: {
+      content: `*[ADMIN CÈCHÉMOI]*
 📊 *RAPPORT JOURNALIER*
-[CÈCHÉMOI] - {report_date}
-+++++++++++++++++
+{report_date}
 
-💰 *CHIFFRE D'AFFAIRES*: {total_revenue} CFA
+💰 *Chiffre d'affaires:* {total_revenue} CFA
 
-📦 *COMMANDES*:
+📦 *Commandes:*
 • Total: {orders_count}
 • En attente: {pending_orders}
-• Traitées: {processing_orders}
+• En cours: {processing_orders}
 • Livrées: {delivered_orders}
-• Annulées: {cancelled_orders}
 
-👥 *CLIENTS*:
+👥 *Clients:*
 • Nouveaux: {new_customers}
 • Total: {total_customers}
 
-🍷 *PRODUITS*:
-• Ventes: {products_sold} unités
-• Stock bas: {low_stock_products}
+👗 *Produits:*
+• Vendus: {products_sold} unités
+• Stock bas: {low_stock_products}`,
+    },
+    create: {
+      trigger: 'DAILY_REPORT_ADMIN',
+      channel: 'WHATSAPP',
+      name: 'Rapport journalier - Admin WhatsApp',
+      description: 'Envoyé chaque jour à 20h',
+      recipientType: 'admin',
+      content: `*[ADMIN CÈCHÉMOI]*
+📊 *RAPPORT JOURNALIER*
+{report_date}
 
-++++++++++++++++++++++
-CÈCHÉMOI - Tableau de Bord
-Site: https://www.cechemoi.com/admin
-++++++++++++++++++++++`,
+💰 *Chiffre d'affaires:* {total_revenue} CFA
+
+📦 *Commandes:*
+• Total: {orders_count}
+• En attente: {pending_orders}
+• En cours: {processing_orders}
+• Livrées: {delivered_orders}
+
+👥 *Clients:*
+• Nouveaux: {new_customers}
+• Total: {total_customers}
+
+👗 *Produits:*
+• Vendus: {products_sold} unités
+• Stock bas: {low_stock_products}`,
       enabled: false,
     },
   })
 
-  // 21. INVOICE_CREATED (SMS + WHATSAPP) - Sent with invoice link
+  // 21. INVOICE_CREATED (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'INVOICE_CREATED', channel: 'SMS' } },
     update: {
-      name: 'Invoice Created - SMS',
-      description: 'Sent when invoice is generated with link',
-      content: `[CÈCHÉMOI] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
+      name: 'Facture créée - SMS',
+      description: 'Envoyé quand la facture est générée',
+      content: `Votre facture {invoice_number} ({order_total}) est prête: {invoice_url}
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
     create: {
       trigger: 'INVOICE_CREATED',
       channel: 'SMS',
-      name: 'Invoice Created - SMS',
-      description: 'Sent when invoice is generated with link',
+      name: 'Facture créée - SMS',
+      description: 'Envoyé quand la facture est générée',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Votre facture #{invoice_number} est disponible. Montant: {order_total}. Consultez-la ici: {invoice_url}
+      content: `Votre facture {invoice_number} ({order_total}) est prête: {invoice_url}
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
@@ -1021,80 +1240,70 @@ Contact: +225 0759545410`,
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'INVOICE_CREATED', channel: 'WHATSAPP' } },
     update: {
-      name: 'Invoice Created - WhatsApp',
-      description: 'Sent when invoice is generated with link in message',
-      content: `*[CÈCHÉMOI]*
-📄 *VOTRE FACTURE EST PRÊTE*
+      name: 'Facture créée - WhatsApp',
+      description: 'Envoyé quand la facture est générée',
+      content: `*CÈCHÉMOI*
+📄 *VOTRE FACTURE*
 
 Bonjour *{customer_name}*,
 
-Votre facture pour la commande *#{order_number}* est maintenant disponible.
+Votre facture pour la commande *{order_number}* est prête.
 
-*Détails de la facture:*
 • Numéro: *{invoice_number}*
 • Montant: *{order_total}*
-• Date: {order_date}
 
-📥 *Télécharger votre facture PDF:*
+📥 *Télécharger:*
 {invoice_url}
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
     create: {
       trigger: 'INVOICE_CREATED',
       channel: 'WHATSAPP',
-      name: 'Invoice Created - WhatsApp',
-      description: 'Sent when invoice is generated with link in message',
+      name: 'Facture créée - WhatsApp',
+      description: 'Envoyé quand la facture est générée',
       recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
-📄 *VOTRE FACTURE EST PRÊTE*
+      content: `*CÈCHÉMOI*
+📄 *VOTRE FACTURE*
 
 Bonjour *{customer_name}*,
 
-Votre facture pour la commande *#{order_number}* est maintenant disponible.
+Votre facture pour la commande *{order_number}* est prête.
 
-*Détails de la facture:*
 • Numéro: *{invoice_number}*
 • Montant: *{order_total}*
-• Date: {order_date}
 
-📥 *Télécharger votre facture PDF:*
+📥 *Télécharger:*
 {invoice_url}
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
 
-  // 22. INVOICE_PAID (SMS + WHATSAPP) - Sent when invoice is marked paid
+  // 22. INVOICE_PAID (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'INVOICE_PAID', channel: 'SMS' } },
     update: {
-      name: 'Invoice Paid - SMS',
-      description: 'Sent when invoice is marked as paid',
-      content: `[CÈCHÉMOI] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
+      name: 'Facture payée - SMS',
+      description: 'Envoyé quand la facture est payée',
+      content: `Paiement reçu! Facture {invoice_number} ({order_total}). Télécharger: {invoice_url}
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
     create: {
       trigger: 'INVOICE_PAID',
       channel: 'SMS',
-      name: 'Invoice Paid - SMS',
-      description: 'Sent when invoice is marked as paid',
+      name: 'Facture payée - SMS',
+      description: 'Envoyé quand la facture est payée',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Paiement reçu! Facture #{invoice_number} - {order_total}. Merci! Votre facture acquittée: {invoice_url}
+      content: `Paiement reçu! Facture {invoice_number} ({order_total}). Télécharger: {invoice_url}
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
@@ -1102,77 +1311,72 @@ Contact: +225 0759545410`,
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'INVOICE_PAID', channel: 'WHATSAPP' } },
     update: {
-      name: 'Invoice Paid - WhatsApp',
-      description: 'Sent when invoice is marked as paid with link in message',
-      content: `*[CÈCHÉMOI]*
+      name: 'Facture payée - WhatsApp',
+      description: 'Envoyé quand la facture est payée',
+      content: `*CÈCHÉMOI*
 ✅ *FACTURE ACQUITTÉE*
 
 Bonjour *{customer_name}*,
 
-Merci! Votre paiement pour la facture *#{invoice_number}* a été confirmé.
+Merci! Votre paiement pour la facture *{invoice_number}* est confirmé.
 
-*Récapitulatif:*
-• Commande: *#{order_number}*
-• Montant payé: *{order_total}*
-• Méthode: {payment_method}
+• Commande: *{order_number}*
+• Montant: *{order_total}*
 
-📥 *Télécharger votre facture acquittée:*
+📥 *Facture acquittée:*
 {invoice_url}
 
-Votre commande est maintenant en préparation. Nous vous tiendrons informé de l'expédition.
+Votre commande est en préparation!
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
     create: {
       trigger: 'INVOICE_PAID',
       channel: 'WHATSAPP',
-      name: 'Invoice Paid - WhatsApp',
-      description: 'Sent when invoice is marked as paid with link in message',
+      name: 'Facture payée - WhatsApp',
+      description: 'Envoyé quand la facture est payée',
       recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
+      content: `*CÈCHÉMOI*
 ✅ *FACTURE ACQUITTÉE*
 
 Bonjour *{customer_name}*,
 
-Merci! Votre paiement pour la facture *#{invoice_number}* a été confirmé.
+Merci! Votre paiement pour la facture *{invoice_number}* est confirmé.
 
-*Récapitulatif:*
-• Commande: *#{order_number}*
-• Montant payé: *{order_total}*
-• Méthode: {payment_method}
+• Commande: *{order_number}*
+• Montant: *{order_total}*
 
-📥 *Télécharger votre facture acquittée:*
+📥 *Facture acquittée:*
 {invoice_url}
 
-Votre commande est maintenant en préparation. Nous vous tiendrons informé de l'expédition.
+Votre commande est en préparation!
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
 
-  // 23. REVIEW_REQUEST (SMS + WHATSAPP) - Ask for Trustpilot review 24h after delivery
+  // 23. REVIEW_REQUEST (SMS + WHATSAPP)
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'REVIEW_REQUEST', channel: 'SMS' } },
     update: {
-      description: 'Sent 24 hours after delivery to ask for Trustpilot review',
+      description: 'Envoyé 24h après livraison pour demander un avis Trustpilot',
+      content: `Satisfait(e) de votre achat CÈCHÉMOI? Donnez votre avis: https://fr.trustpilot.com/evaluate/cechemoi.com Merci!
+
+— CÈCHÉMOI`,
     },
     create: {
       trigger: 'REVIEW_REQUEST',
       channel: 'SMS',
-      name: 'Review Request - SMS',
-      description: 'Sent 24 hours after delivery to ask for Trustpilot review',
+      name: 'Demande d\'avis - SMS',
+      description: 'Envoyé 24h après livraison pour demander un avis Trustpilot',
       recipientType: 'customer',
-      content: `Satisfait(e) de votre commande CÈCHÉMOI? Dites-nous tout! Laissez votre avis: https://fr.trustpilot.com/evaluate/cechemoi.com Merci!`,
+      content: `Satisfait(e) de votre achat CÈCHÉMOI? Donnez votre avis: https://fr.trustpilot.com/evaluate/cechemoi.com Merci!
+
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
@@ -1180,26 +1384,44 @@ Service Client: *+225 0759545410*
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'REVIEW_REQUEST', channel: 'WHATSAPP' } },
     update: {
-      description: 'Sent 24 hours after delivery to ask for Trustpilot review',
+      description: 'Envoyé 24h après livraison pour demander un avis Trustpilot',
+      content: `*CÈCHÉMOI*
+
+Bonjour *{customer_name}*! 👗
+
+Comment trouvez-vous votre commande?
+
+Votre avis nous aide à nous améliorer!
+
+👉 *Donnez votre avis:*
+https://fr.trustpilot.com/evaluate/cechemoi.com
+
+Merci pour votre confiance!
+
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_`,
     },
     create: {
       trigger: 'REVIEW_REQUEST',
       channel: 'WHATSAPP',
-      name: 'Review Request - WhatsApp',
-      description: 'Sent 24 hours after delivery to ask for Trustpilot review',
+      name: 'Demande d\'avis - WhatsApp',
+      description: 'Envoyé 24h après livraison pour demander un avis Trustpilot',
       recipientType: 'customer',
-      content: `Vous avez goûté un vin de *CÈCHÉMOI* ? 😋
-Dites-nous tout : le goût, la livraison, l'expérience… On veut tout savoir ! 🍷
+      content: `*CÈCHÉMOI*
 
-👉 *Cliquez ici pour laisser votre avis:*
+Bonjour *{customer_name}*! 👗
+
+Comment trouvez-vous votre commande?
+
+Votre avis nous aide à nous améliorer!
+
+👉 *Donnez votre avis:*
 https://fr.trustpilot.com/evaluate/cechemoi.com
 
-💡 Chaque avis nous aide à sélectionner encore de meilleurs vins pour vous. 🥂
+Merci pour votre confiance!
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-_La QUALITÉ du vin, livrée à votre porte._
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
+_Originalité, Créativité et Beauté_`,
       enabled: true,
     },
   })
@@ -1207,52 +1429,66 @@ _La QUALITÉ du vin, livrée à votre porte._
   // 24. PAYMENT_REMINDER_1 (SMS + WHATSAPP) - 1 day after unpaid order
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_1', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Rappel: Votre commande {order_number} ({order_total}) attend votre paiement. Orange: +225 07 0346 0426 | MTN/Wave: +225 05 5679 1431
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PAYMENT_REMINDER_1',
       channel: 'SMS',
-      name: 'Payment Reminder 1 - SMS',
-      description: 'Sent 1 day after unpaid order',
+      name: 'Rappel paiement 1 - SMS',
+      description: 'Envoyé 1 jour après commande impayée',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Rappel: Votre commande #{order_number} ({order_total}) est en attente de paiement. Payez maintenant pour recevoir vos vins!
+      content: `Rappel: Votre commande {order_number} ({order_total}) attend votre paiement. Orange: +225 07 0346 0426 | MTN/Wave: +225 05 5679 1431
 
-ORANGE: +225 07 0346 0426
-MTN/WAVE: +225 05 5679 1431`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_1', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'PAYMENT_REMINDER_1',
-      channel: 'WHATSAPP',
-      name: 'Payment Reminder 1 - WhatsApp',
-      description: 'Sent 1 day after unpaid order',
-      recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
-⏰ *RAPPEL DE PAIEMENT*
+    update: {
+      content: `*CÈCHÉMOI*
+⏰ *RAPPEL PAIEMENT*
 
 Bonjour *{customer_name}*,
 
-Votre commande *#{order_number}* est toujours en attente de paiement.
+Votre commande *{order_number}* attend votre paiement.
 
-*Détails:*
-• Produits: {order_product_with_qty}
-• Montant: *{order_total}*
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
 
-*MOYENS DE PAIEMENT:*
-💰 ORANGE MONEY: +225 07 0346 0426
-💰 MTN MOMO: +225 05 5679 1431
-💰 WAVE: +225 05 5679 1431
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
 
-Réglez maintenant pour recevoir vos vins rapidement! 🍷
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'PAYMENT_REMINDER_1',
+      channel: 'WHATSAPP',
+      name: 'Rappel paiement 1 - WhatsApp',
+      description: 'Envoyé 1 jour après commande impayée',
+      recipientType: 'customer',
+      content: `*CÈCHÉMOI*
+⏰ *RAPPEL PAIEMENT*
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+Bonjour *{customer_name}*,
+
+Votre commande *{order_number}* attend votre paiement.
+
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
+
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -1260,53 +1496,74 @@ Service Client: *+225 0759545410*
   // 25. PAYMENT_REMINDER_2 (SMS + WHATSAPP) - 3 days after unpaid order
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_2', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `Votre commande {order_number} ({order_total}) expire bientôt. Réglez pour recevoir vos articles!
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PAYMENT_REMINDER_2',
       channel: 'SMS',
-      name: 'Payment Reminder 2 - SMS',
-      description: 'Sent 3 days after unpaid order',
+      name: 'Rappel paiement 2 - SMS',
+      description: 'Envoyé 3 jours après commande impayée',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] Votre commande #{order_number} expire bientôt! Montant: {order_total}. Payez vite pour ne pas manquer vos vins!
+      content: `Votre commande {order_number} ({order_total}) expire bientôt. Réglez pour recevoir vos articles!
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_2', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'PAYMENT_REMINDER_2',
-      channel: 'WHATSAPP',
-      name: 'Payment Reminder 2 - WhatsApp',
-      description: 'Sent 3 days after unpaid order',
-      recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
-⚠️ *COMMANDE EN ATTENTE - 2ème Rappel*
+    update: {
+      content: `*CÈCHÉMOI*
+⚠️ *COMMANDE EN ATTENTE*
 
 Bonjour *{customer_name}*,
 
-Votre commande *#{order_number}* est en attente de paiement depuis 3 jours.
+Votre commande *{order_number}* est en attente depuis 3 jours.
 
-*Récapitulatif:*
-• Produits: {order_product_with_qty}
-• Total: *{order_total}*
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
 
-❗ *Attention*: Les stocks peuvent être limités. Réglez votre commande pour garantir la disponibilité de vos vins.
+❗ Les stocks peuvent être limités.
 
-*MOYENS DE PAIEMENT:*
-💰 ORANGE MONEY: +225 07 0346 0426
-💰 MTN MOMO: +225 05 5679 1431
-💰 WAVE: +225 05 5679 1431
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
 
-Besoin d'aide? Répondez à ce message. 💬
+Besoin d'aide? Répondez à ce message.
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client: *+225 0759545410*
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'PAYMENT_REMINDER_2',
+      channel: 'WHATSAPP',
+      name: 'Rappel paiement 2 - WhatsApp',
+      description: 'Envoyé 3 jours après commande impayée',
+      recipientType: 'customer',
+      content: `*CÈCHÉMOI*
+⚠️ *COMMANDE EN ATTENTE*
+
+Bonjour *{customer_name}*,
+
+Votre commande *{order_number}* est en attente depuis 3 jours.
+
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
+
+❗ Les stocks peuvent être limités.
+
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
+
+Besoin d'aide? Répondez à ce message.
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
@@ -1314,52 +1571,70 @@ Service Client: *+225 0759545410*
   // 26. PAYMENT_REMINDER_3 (SMS + WHATSAPP) - 5 days after unpaid order
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_3', channel: 'SMS' } },
-    update: {},
+    update: {
+      content: `DERNIER RAPPEL: Commande {order_number} ({order_total}) sera annulée sous 24h sans paiement.
+
+— CÈCHÉMOI`,
+    },
     create: {
       trigger: 'PAYMENT_REMINDER_3',
       channel: 'SMS',
-      name: 'Payment Reminder 3 - SMS',
-      description: 'Sent 5 days after unpaid order - Final reminder',
+      name: 'Rappel paiement 3 - SMS',
+      description: 'Envoyé 5 jours après commande impayée - Dernier rappel',
       recipientType: 'customer',
-      content: `[CÈCHÉMOI] DERNIER RAPPEL: Commande #{order_number} ({order_total}) sera annulée sous 24h sans paiement. Agissez maintenant!
+      content: `DERNIER RAPPEL: Commande {order_number} ({order_total}) sera annulée sous 24h sans paiement.
 
-Contact: +225 0759545410`,
+— CÈCHÉMOI`,
       enabled: true,
     },
   })
 
   await prisma.notificationTemplate.upsert({
     where: { trigger_channel: { trigger: 'PAYMENT_REMINDER_3', channel: 'WHATSAPP' } },
-    update: {},
-    create: {
-      trigger: 'PAYMENT_REMINDER_3',
-      channel: 'WHATSAPP',
-      name: 'Payment Reminder 3 - WhatsApp',
-      description: 'Sent 5 days after unpaid order - Final reminder',
-      recipientType: 'customer',
-      content: `*[CÈCHÉMOI]*
-🚨 *DERNIER RAPPEL - COMMANDE EN ATTENTE*
+    update: {
+      content: `*CÈCHÉMOI*
+🚨 *DERNIER RAPPEL*
 
 Bonjour *{customer_name}*,
 
-⚠️ *Votre commande #{order_number} sera automatiquement annulée sous 24h* si le paiement n'est pas effectué.
+⚠️ Votre commande *{order_number}* sera annulée sous 24h sans paiement.
 
-*Votre commande:*
-• Produits: {order_product_with_qty}
-• Total: *{order_total}*
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
 
-*Pour conserver votre commande, réglez maintenant:*
-💰 ORANGE MONEY: +225 07 0346 0426
-💰 MTN MOMO: +225 05 5679 1431
-💰 WAVE: +225 05 5679 1431
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
 
-❓ Un problème avec le paiement? Contactez-nous, nous sommes là pour vous aider!
+Un problème? Contactez-nous!
 
-++++++++++++++++++++++
-*CÈCHÉMOI*
-Service Client 7j/7: *+225 0759545410*
-WhatsApp: https://wa.me/2250759545410
-++++++++++++++++++++++`,
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
+    },
+    create: {
+      trigger: 'PAYMENT_REMINDER_3',
+      channel: 'WHATSAPP',
+      name: 'Rappel paiement 3 - WhatsApp',
+      description: 'Envoyé 5 jours après commande impayée - Dernier rappel',
+      recipientType: 'customer',
+      content: `*CÈCHÉMOI*
+🚨 *DERNIER RAPPEL*
+
+Bonjour *{customer_name}*,
+
+⚠️ Votre commande *{order_number}* sera annulée sous 24h sans paiement.
+
+*Articles:* {order_product_with_qty}
+*Total:* {order_total}
+
+*Paiement Mobile Money:*
+• Orange: +225 07 0346 0426
+• MTN/Wave: +225 05 5679 1431
+
+Un problème? Contactez-nous!
+
+— *CÈCHÉMOI*
++225 07 59 54 54 10`,
       enabled: true,
     },
   })
