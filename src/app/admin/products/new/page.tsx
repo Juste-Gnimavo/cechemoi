@@ -44,20 +44,20 @@ export default function NewProductPage() {
   const [taxClassId, setTaxClassId] = useState('')
   const [published, setPublished] = useState(true)
   const [featured, setFeatured] = useState(false)
-  const [isWine, setIsWine] = useState(true) // Product type toggle
+  const [isWine, setIsWine] = useState(true) // Has clothing details toggle
 
   // Marketing - Related and Upsell
   const [relatedProducts, setRelatedProducts] = useState<string[]>([])
   const [upsellProducts, setUpsellProducts] = useState<string[]>([])
 
-  // Wine specific
-  const [vintage, setVintage] = useState('')
-  const [region, setRegion] = useState('')
-  const [country, setCountry] = useState('France')
-  const [grapeVariety, setGrapeVariety] = useState('')
-  const [alcoholContent, setAlcoholContent] = useState('')
-  const [volume, setVolume] = useState('750ml')
-  const [wineType, setWineType] = useState('')
+  // Clothing specific (using same field names for API compatibility)
+  const [vintage, setVintage] = useState('') // Collection
+  const [region, setRegion] = useState('') // Style
+  const [country, setCountry] = useState('Cote d\'Ivoire') // Origine
+  const [grapeVariety, setGrapeVariety] = useState('') // Tissu/Matiere
+  const [alcoholContent, setAlcoholContent] = useState('') // Not used for clothing
+  const [volume, setVolume] = useState('') // Tailles disponibles
+  const [wineType, setWineType] = useState('') // Type de vetement
 
   // Metadata
   const [weight, setWeight] = useState('')
@@ -342,7 +342,7 @@ export default function NewProductPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Ex: Château Margaux 2015"
+                  placeholder="Ex: Robe Elegance Wax"
                   required
                 />
               </div>
@@ -354,7 +354,7 @@ export default function NewProductPage() {
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="chateau-margaux-2015"
+                  placeholder="robe-elegance-wax"
                 />
                 <p className="text-gray-500 text-xs mt-1">
                   Généré automatiquement si vide
@@ -429,7 +429,7 @@ export default function NewProductPage() {
                   value={sku}
                   onChange={(e) => setSku(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="CM-2015-750"
+                  placeholder="ROBE-WAX-001"
                   required
                 />
               </div>
@@ -494,14 +494,14 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* Wine Specific Information */}
+          {/* Clothing Specific Information */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Informations sur le vin
+                Caracteristiques du vetement
               </h2>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Ce produit est un vin ?</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Afficher les details ?</span>
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-dark-700">
                   <button
                     type="button"
@@ -531,136 +531,119 @@ export default function NewProductPage() {
 
             {!isWine && (
               <p className="text-gray-500 text-sm italic">
-                Les informations sur le vin sont masquées car ce produit n'est pas un vin (accessoire, cours vidéo, etc.)
+                Les caracteristiques sont masquees (utile pour accessoires, cartes cadeaux, etc.)
               </p>
             )}
 
             {isWine && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vin</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vetement</label>
                 <select
                   value={wineType}
                   onChange={(e) => setWineType(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
-<option value="">Sélectionner</option>
-<option value="Rouge">Rouge</option>
-<option value="Rouge">Rouge Fruité</option>
-<option value="Rouge Sec">Rouge Sec</option>
-<option value="Rouge Demi-sec">Rouge Demi-sec</option>
-<option value="Rouge Moelleux">Rouge Moelleux</option>
-<option value="Rouge Liquoreux">Rouge Liquoreux</option>
-
-<option value="Blanc">Blanc</option>
-<option value="Blanc">Blanc Fruité</option>
-<option value="Blanc Sec">Blanc Sec</option>
-<option value="Blanc Demi-sec">Blanc Demi-sec</option>
-<option value="Blanc Moelleux">Blanc Moelleux</option>
-<option value="Blanc Liquoreux">Blanc Liquoreux</option>
-
-<option value="Rosé">Rosé</option>
-<option value="Rosé Sec">Rosé Sec</option>
-<option value="Rosé Fruité">Rosé Fruité</option>
-<option value="Rosé Demi-sec">Rosé Demi-sec</option>
-<option value="Rosé Moelleux">Rosé Moelleux</option>
-<option value="Rosé Liquoreux">Rosé Liquoreux</option>
-
-<option value="Bio">Bio</option>
-<option value="Biodynamique">Biodynamique</option>
-<option value="Nature">Nature</option>
-
-<option value="Effervescent Sec">Effervescent Sec</option>
-<option value="Effervescent Demi-sec">Effervescent Demi-sec</option>
-<option value="Effervescent Brut">Effervescent Brut</option>
-<option value="Effervescent Extra Brut">Effervescent Extra Brut</option>
-
-<option value="Champagne Brut">Champagne Brut</option>
-<option value="Champagne Rosé">Champagne Rosé</option>
-<option value="Champagne Demi-sec">Champagne Demi-sec</option>
-
-
+                  <option value="">Selectionner</option>
+                  <option value="Robe">Robe</option>
+                  <option value="Robe de soiree">Robe de soiree</option>
+                  <option value="Robe de mariee">Robe de mariee</option>
+                  <option value="Robe traditionnelle">Robe traditionnelle</option>
+                  <option value="Ensemble">Ensemble</option>
+                  <option value="Ensemble homme">Ensemble homme</option>
+                  <option value="Ensemble femme">Ensemble femme</option>
+                  <option value="Boubou">Boubou</option>
+                  <option value="Chemise">Chemise</option>
+                  <option value="Pantalon">Pantalon</option>
+                  <option value="Jupe">Jupe</option>
+                  <option value="Veste">Veste</option>
+                  <option value="Costume">Costume</option>
+                  <option value="Accessoire">Accessoire</option>
+                  <option value="Sac">Sac</option>
+                  <option value="Bijou">Bijou</option>
+                  <option value="Chaussure">Chaussure</option>
+                  <option value="Foulard">Foulard</option>
+                  <option value="Sur-mesure">Sur-mesure</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Millésime</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Collection</label>
                 <input
                   type="text"
                   value={vintage}
                   onChange={(e) => setVintage(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="2015"
+                  placeholder="Collection 2025"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Région</label>
-                <input
-                  type="text"
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Style</label>
+                <select
                   value={region}
                   onChange={(e) => setRegion(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Bordeaux"
-                />
+                >
+                  <option value="">Selectionner</option>
+                  <option value="Traditionnel">Traditionnel</option>
+                  <option value="Moderne">Moderne</option>
+                  <option value="Casual">Casual</option>
+                  <option value="Chic">Chic</option>
+                  <option value="Ceremonie">Ceremonie</option>
+                  <option value="Mariage">Mariage</option>
+                  <option value="Soiree">Soiree</option>
+                  <option value="Travail">Travail</option>
+                  <option value="Streetwear">Streetwear</option>
+                </select>
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Pays</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Origine</label>
                 <input
                   type="text"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="France"
+                  placeholder="Cote d'Ivoire"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Cépage</label>
-                <input
-                  type="text"
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tissu / Matiere</label>
+                <select
                   value={grapeVariety}
                   onChange={(e) => setGrapeVariety(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Cabernet Sauvignon"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Volume</label>
-                <select
-                  value={['375ml', '750ml', '1.5L', '3L'].includes(volume) ? volume : 'other'}
-                  onChange={(e) => setVolume(e.target.value === 'other' ? '' : e.target.value)}
-                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
-                  <option value="375ml">375ml (Demi)</option>
-                  <option value="750ml">750ml (Standard)</option>
-                  <option value="1.5L">1.5L (Magnum)</option>
-                  <option value="3L">3L (Double Magnum)</option>
-                  <option value="other">Autre (saisie manuelle)...</option>
+                  <option value="">Selectionner</option>
+                  <option value="Wax">Wax</option>
+                  <option value="Kente">Kente</option>
+                  <option value="Bazin">Bazin</option>
+                  <option value="Soie">Soie</option>
+                  <option value="Coton">Coton</option>
+                  <option value="Lin">Lin</option>
+                  <option value="Satin">Satin</option>
+                  <option value="Velours">Velours</option>
+                  <option value="Dentelle">Dentelle</option>
+                  <option value="Pagne">Pagne</option>
+                  <option value="Bogolan">Bogolan</option>
+                  <option value="Ankara">Ankara</option>
+                  <option value="Cuir">Cuir</option>
+                  <option value="Jean">Jean</option>
+                  <option value="Polyester">Polyester</option>
+                  <option value="Mixte">Mixte</option>
                 </select>
-                {!['375ml', '750ml', '1.5L', '3L'].includes(volume) && (
-                  <input
-                    type="text"
-                    value={volume}
-                    onChange={(e) => setVolume(e.target.value)}
-                    className="w-full mt-2 bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                    placeholder="Saisir le volume (ex: 50ml, 100ml, 500ml, 5L...)"
-                  />
-                )}
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">
-                  Degré d'alcool (%)
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tailles disponibles</label>
                 <input
                   type="text"
-                  value={alcoholContent}
-                  onChange={(e) => setAlcoholContent(e.target.value)}
-                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="13.5"
+                  value={volume}
+                  onChange={(e) => setVolume(e.target.value)}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
+                  placeholder="S, M, L, XL ou Sur-mesure"
                 />
               </div>
             </div>
