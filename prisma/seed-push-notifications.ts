@@ -267,6 +267,50 @@ const pushNotificationTemplates: Record<NotificationTrigger, {
     description: 'Notification push paiement autonome echoue',
     recipientType: 'customer',
   },
+
+  // ============================================
+  // APPOINTMENT NOTIFICATIONS
+  // ============================================
+
+  APPOINTMENT_BOOKED: {
+    title: 'RDV enregistre',
+    body: '{service_name} le {appointment_date} a {appointment_time}. Confirmation sous 24h.',
+    name: 'RDV enregistre - Push',
+    description: 'Notification push RDV enregistre',
+    recipientType: 'customer',
+  },
+
+  APPOINTMENT_CONFIRMED: {
+    title: 'RDV confirme!',
+    body: '{service_name} le {appointment_date} a {appointment_time}. A bientot!',
+    name: 'RDV confirme - Push',
+    description: 'Notification push RDV confirme',
+    recipientType: 'customer',
+  },
+
+  APPOINTMENT_REMINDER: {
+    title: 'Rappel RDV demain',
+    body: '{service_name} demain a {appointment_time}. Lieu: Cocody Riviera Palmeraie.',
+    name: 'Rappel RDV - Push',
+    description: 'Notification push rappel RDV',
+    recipientType: 'customer',
+  },
+
+  APPOINTMENT_CANCELLED: {
+    title: 'RDV annule',
+    body: 'Votre RDV du {appointment_date} a ete annule. Contactez-nous pour reprogrammer.',
+    name: 'RDV annule - Push',
+    description: 'Notification push RDV annule',
+    recipientType: 'customer',
+  },
+
+  APPOINTMENT_BOOKED_ADMIN: {
+    title: 'Nouveau RDV!',
+    body: '{customer_name} - {service_name} le {appointment_date} a {appointment_time}',
+    name: 'Nouveau RDV Admin - Push',
+    description: 'Notification push admin nouveau RDV',
+    recipientType: 'admin',
+  },
 }
 
 async function seedPushTemplates() {

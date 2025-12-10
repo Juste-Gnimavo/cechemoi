@@ -1309,6 +1309,12 @@ enum NotificationTrigger {
   // Standalone payments (/payer/ flow)
   STANDALONE_PAYMENT_RECEIVED
   STANDALONE_PAYMENT_FAILED
+  // Appointment notifications
+  APPOINTMENT_BOOKED           // Customer: Confirmation after booking
+  APPOINTMENT_CONFIRMED        // Customer: Admin confirms appointment
+  APPOINTMENT_REMINDER         // Customer: Reminder before appointment
+  APPOINTMENT_CANCELLED        // Customer: Appointment cancelled
+  APPOINTMENT_BOOKED_ADMIN     // Admin: New appointment notification
 }
 
 model NotificationTemplate {
