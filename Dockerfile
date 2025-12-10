@@ -3,6 +3,7 @@
 # ===================================================
 # Uses multi-stage build for optimal image size
 # Node.js 22 LTS with Alpine for smallest footprint
+# Force rebuild: 2025-12-10-v2
 # ===================================================
 
 # Stage 1: Dependencies
