@@ -243,7 +243,7 @@ export default function NewCategoryPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Vins rouges"
+              placeholder=""
               required
               className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
@@ -262,7 +262,7 @@ export default function NewCategoryPage() {
                   setSlug(e.target.value)
                   setAutoSlug(false)
                 }}
-                placeholder="vins-rouges"
+                placeholder=""
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <p className="text-xs text-gray-500">
