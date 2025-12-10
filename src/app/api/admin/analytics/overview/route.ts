@@ -205,6 +205,126 @@ export async function GET(req: NextRequest) {
       return acc
     }, {})
 
+    // ====== PREVIOUS PERIOD COMPARISON ======
+    // Compare last 30 days with previous 30 days
+    const currentPeriodEnd = now
+    const currentPeriodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const previousPeriodEnd = new Date(currentPeriodStart.getTime() - 1) // Day before current period
+    const previousPeriodStart = new Date(previousPeriodEnd.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+    // Get previous period orders
+    const previousPeriodOrders = await prisma.order.findMany({
+      where: {
+        createdAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Get previous period standalone invoices
+    const previousPeriodInvoices = await prisma.invoice.findMany({
+      where: {
+        orderId: null,
+        status: 'PAID',
+        createdAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Previous period revenue (PAID orders only)
+    const previousPaidOrders = previousPeriodOrders.filter(o => o.paymentStatus === 'COMPLETED')
+    const previousOrderRevenue = previousPaidOrders.reduce((sum, o) => sum + o.total, 0)
+    const previousInvoiceRevenue = previousPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
+    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue
+
+    // Previous period orders count
+    const previousOrdersCount = previousPeriodOrders.length
+
+    // Current period stats (last 30 days)
+    const currentPeriodPaidOrders = paidOrders.filter(o => {
+      const orderDate = new Date(o.createdAt)
+      return orderDate >= currentPeriodStart && orderDate <= currentPeriodEnd
+    })
+    const currentPeriodAllOrders = orders.filter(o => {
+      const orderDate = new Date(o.createdAt)
+      return orderDate >= currentPeriodStart && orderDate <= currentPeriodEnd
+    })
+    const currentPeriodInvoices = paidStandaloneInvoices.filter(inv => {
+      const invDate = new Date(inv.createdAt)
+      return invDate >= currentPeriodStart && invDate <= currentPeriodEnd
+    })
+
+    const currentPeriodRevenue =
+      currentPeriodPaidOrders.reduce((sum, o) => sum + o.total, 0) +
+      currentPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
+    const currentPeriodOrdersCount = currentPeriodAllOrders.length
+
+    // Previous period customers (new customers registered)
+    const previousCustomerCount = await prisma.user.count({
+      where: {
+        role: 'CUSTOMER',
+        createdAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Current period new customers
+    const currentCustomerCount = await prisma.user.count({
+      where: {
+        role: 'CUSTOMER',
+        createdAt: {
+          gte: currentPeriodStart,
+          lte: currentPeriodEnd,
+        },
+      },
+    })
+
+    // Previous period products count
+    const previousProductCount = await prisma.product.count({
+      where: {
+        published: true,
+        createdAt: {
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Calculate percentage changes
+    const calculateChange = (current: number, previous: number) => {
+      if (previous === 0) {
+        return current > 0 ? 100 : 0
+      }
+      return ((current - previous) / previous) * 100
+    }
+
+    const comparison = {
+      revenue: {
+        current: currentPeriodRevenue,
+        previous: previousTotalRevenue,
+        change: calculateChange(currentPeriodRevenue, previousTotalRevenue),
+      },
+      orders: {
+        current: currentPeriodOrdersCount,
+        previous: previousOrdersCount,
+        change: calculateChange(currentPeriodOrdersCount, previousOrdersCount),
+      },
+      customers: {
+        current: currentCustomerCount,
+        previous: previousCustomerCount,
+        change: calculateChange(currentCustomerCount, previousCustomerCount),
+      },
+      products: {
+        current: productCount,
+        previous: previousProductCount,
+        change: calculateChange(productCount, previousProductCount),
+      },
+    }
+
     return NextResponse.json({
       success: true,
       analytics: {
@@ -240,6 +360,7 @@ export async function GET(req: NextRequest) {
         },
         revenueByDay,
         topProducts,
+        comparison, // 30 days vs previous 30 days
       },
     })
   } catch (error) {

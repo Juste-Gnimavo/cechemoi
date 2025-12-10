@@ -21,6 +21,12 @@ import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
 import { UserProfileCard } from '@/components/user-profile-card'
 
+interface ComparisonData {
+  current: number
+  previous: number
+  change: number
+}
+
 interface DashboardStats {
   revenue: {
     total: number
@@ -56,6 +62,12 @@ interface DashboardStats {
     quantity: number
     revenue: number
   }>
+  comparison?: {
+    revenue: ComparisonData
+    orders: ComparisonData
+    customers: ComparisonData
+    products: ComparisonData
+  }
 }
 
 interface RecentOrder {
@@ -237,12 +249,6 @@ export default function AdminDashboard() {
     return `${amount.toLocaleString('fr-FR')} CFA`
   }
 
-  const calculateChange = (current: number, previous: number) => {
-    if (previous === 0) return { value: 0, isPositive: true }
-    const change = ((current - previous) / previous) * 100
-    return { value: Math.abs(change), isPositive: change >= 0 }
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -259,11 +265,19 @@ export default function AdminDashboard() {
     )
   }
 
-  // Calculate some trend data (simplified - comparing to previous period would require backend changes)
-  const revenueChange = { value: 12.5, isPositive: true }
-  const ordersChange = { value: 8.2, isPositive: true }
-  const customersChange = { value: 5.3, isPositive: true }
-  const productsChange = { value: 2.1, isPositive: true }
+  // Use real comparison data from API (last 30 days vs previous 30 days)
+  const revenueChange = stats.comparison
+    ? { value: Math.abs(stats.comparison.revenue.change), isPositive: stats.comparison.revenue.change >= 0 }
+    : { value: 0, isPositive: true }
+  const ordersChange = stats.comparison
+    ? { value: Math.abs(stats.comparison.orders.change), isPositive: stats.comparison.orders.change >= 0 }
+    : { value: 0, isPositive: true }
+  const customersChange = stats.comparison
+    ? { value: Math.abs(stats.comparison.customers.change), isPositive: stats.comparison.customers.change >= 0 }
+    : { value: 0, isPositive: true }
+  const productsChange = stats.comparison
+    ? { value: Math.abs(stats.comparison.products.change), isPositive: stats.comparison.products.change >= 0 }
+    : { value: 0, isPositive: true }
 
   return (
     <div className="space-y-8">
