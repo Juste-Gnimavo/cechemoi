@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon } from 'lucide-react'
+import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon, CalendarDays } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { SearchModal } from '@/components/search-modal'
 import { MiniCart } from '@/components/mini-cart'
@@ -162,6 +162,14 @@ export function Header() {
                           Mes commandes
                         </Link>
                         <Link
+                          href="/account/appointments"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
+                        >
+                          <CalendarDays className="w-4 h-4" />
+                          Mes rendez-vous
+                        </Link>
+                        <Link
                           href="/account/settings"
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
@@ -205,6 +213,15 @@ export function Header() {
                 <span className="hidden md:inline text-sm font-medium">Connexion</span>
               </Link>
             )}
+
+            {/* Rendez-vous CTA Button */}
+            <Link
+              href="/consultation"
+              className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-full transition-all text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+            >
+              <CalendarDays className="w-4 h-4" />
+              <span>Rendez-vous</span>
+            </Link>
 
             {/* Theme Toggle */}
             <button
@@ -300,6 +317,14 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sur-Mesure ✨
+              </Link>
+              <Link
+                href="/consultation"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg transition-colors font-medium mt-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <CalendarDays className="w-4 h-4" />
+                Prendre Rendez-vous
               </Link>
               {session && (
                 <button
