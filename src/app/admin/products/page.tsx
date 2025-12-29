@@ -192,7 +192,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Gestion des produits</h2>
-          <p className="text-gray-500 dark:text-gray-400">Gerez votre catalogue de produits et services</p>
+          <p className="text-gray-500 dark:text-gray-400">Gérez votre catalogue de produits et services</p>
         </div>
         <Link
           href="/admin/products/new"
@@ -208,7 +208,7 @@ export default function ProductsPage() {
         <AdminStatsHeader
           stats={[
             { label: 'Total', value: stats.total, icon: Package, color: 'primary' },
-            { label: 'Publies', value: stats.published, icon: CheckCircle, color: 'green' },
+            { label: 'Publiés', value: stats.published, icon: CheckCircle, color: 'green' },
             { label: 'Vedettes', value: stats.featured, icon: Star, color: 'yellow' },
             { label: 'Rupture', value: stats.outOfStock, icon: AlertTriangle, color: 'red' },
             { label: 'Stock faible', value: stats.lowStock, icon: AlertTriangle, color: 'yellow' },
@@ -238,7 +238,7 @@ export default function ProductsPage() {
             onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })}
             className="bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
           >
-            <option value="">Toutes categories</option>
+            <option value="">Toutes catégories</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -252,7 +252,7 @@ export default function ProductsPage() {
             className="bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
           >
             <option value="">Tous statuts</option>
-            <option value="true">Publie</option>
+            <option value="true">Publié</option>
             <option value="false">Brouillon</option>
           </select>
 
@@ -274,7 +274,7 @@ export default function ProductsPage() {
         <div className="bg-primary-500/10 border border-primary-500 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-white font-semibold">
-              {selectedProducts.length} produit(s) selectionne(s)
+              {selectedProducts.length} produit(s) sélectionné(s)
             </span>
             <div className="flex gap-2">
               <button
@@ -287,7 +287,7 @@ export default function ProductsPage() {
                 onClick={() => handleBulkAction('unpublish')}
                 className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-sm"
               >
-                Depublier
+                Dépublier
               </button>
               <button
                 onClick={() => handleBulkAction('feature')}
@@ -309,7 +309,7 @@ export default function ProductsPage() {
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Package className="h-12 w-12 text-gray-600 mb-4" />
-            <p className="text-gray-400 text-lg mb-2">Aucun produit trouve</p>
+            <p className="text-gray-400 text-lg mb-2">Aucun produit trouvé</p>
             <p className="text-gray-500 text-sm mb-4">
               Commencez par ajouter votre premier produit
             </p>
@@ -427,7 +427,7 @@ export default function ProductsPage() {
                                 : 'bg-gray-500/10 text-gray-400'
                             }`}
                           >
-                            {product.published ? 'Publie' : 'Brouillon'}
+                            {product.published ? 'Publié' : 'Brouillon'}
                           </span>
                         </td>
                         <td className="px-6 py-4">

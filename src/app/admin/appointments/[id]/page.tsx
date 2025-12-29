@@ -61,16 +61,16 @@ interface Appointment {
 
 const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
   PENDING: { label: 'En attente', color: 'text-yellow-600', bgColor: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  CONFIRMED: { label: 'Confirme', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
-  COMPLETED: { label: 'Termine', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
-  CANCELLED: { label: 'Annule', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
+  CONFIRMED: { label: 'Confirmé', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
+  COMPLETED: { label: 'Terminé', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
+  CANCELLED: { label: 'Annulé', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
   NO_SHOW: { label: 'Absent', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-900/30' }
 }
 
 const paymentConfig: Record<string, { label: string; color: string; bgColor: string }> = {
-  UNPAID: { label: 'Non paye', color: 'text-orange-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' },
-  PAID: { label: 'Paye', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
-  REFUNDED: { label: 'Rembourse', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-900/30' },
+  UNPAID: { label: 'Non payé', color: 'text-orange-600', bgColor: 'bg-orange-100 dark:bg-orange-900/30' },
+  PAID: { label: 'Payé', color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' },
+  REFUNDED: { label: 'Remboursé', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-900/30' },
   QUOTE_PENDING: { label: 'Sur devis', color: 'text-purple-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' }
 }
 
@@ -102,7 +102,7 @@ export default function AppointmentDetailPage() {
         setAppointment(data.appointment)
         setAdminNotes(data.appointment.adminNotes || '')
       } else {
-        toast.error('Rendez-vous non trouve')
+        toast.error('Rendez-vous non trouvé')
         router.push('/admin/appointments/list')
       }
     } catch (error) {
@@ -153,13 +153,13 @@ export default function AppointmentDetailPage() {
       if (response.ok) {
         const data = await response.json()
         setAppointment(data.appointment)
-        toast.success(`Statut mis a jour: ${statusConfig[newStatus]?.label}`)
+        toast.success(`Statut mis à jour: ${statusConfig[newStatus]?.label}`)
       } else {
-        toast.error('Erreur lors de la mise a jour')
+        toast.error('Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error updating status:', error)
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setUpdating(false)
     }
@@ -179,13 +179,13 @@ export default function AppointmentDetailPage() {
       if (response.ok) {
         const data = await response.json()
         setAppointment(data.appointment)
-        toast.success(`Paiement mis a jour: ${paymentConfig[newPaymentStatus]?.label}`)
+        toast.success(`Paiement mis à jour: ${paymentConfig[newPaymentStatus]?.label}`)
       } else {
-        toast.error('Erreur lors de la mise a jour')
+        toast.error('Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error updating payment:', error)
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setUpdating(false)
     }
@@ -206,7 +206,7 @@ export default function AppointmentDetailPage() {
         const data = await response.json()
         setAppointment(data.appointment)
         setEditingNotes(false)
-        toast.success('Notes enregistrees')
+        toast.success('Notes enregistrées')
       } else {
         toast.error('Erreur lors de l\'enregistrement')
       }
@@ -242,7 +242,7 @@ export default function AppointmentDetailPage() {
         const channels = []
         if (data.channels?.sms) channels.push('SMS')
         if (data.channels?.whatsapp) channels.push('WhatsApp')
-        toast.success(`Notification envoyee (${channels.join(' + ')})`)
+        toast.success(`Notification envoyée (${channels.join(' + ')})`)
         setCustomMessage('')
       } else {
         toast.error(data.error || 'Erreur lors de l\'envoi')
@@ -266,9 +266,9 @@ export default function AppointmentDetailPage() {
   if (!appointment) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">Rendez-vous non trouve</p>
+        <p className="text-gray-500 dark:text-gray-400">Rendez-vous non trouvé</p>
         <Link href="/admin/appointments/list" className="text-primary-500 hover:underline mt-2 inline-block">
-          Retour a la liste
+          Retour à la liste
         </Link>
       </div>
     )
@@ -293,7 +293,7 @@ export default function AppointmentDetailPage() {
               Rendez-vous #{appointment.reference}
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Cree le {formatDateTime(appointment.createdAt)}
+              Créé le {formatDateTime(appointment.createdAt)}
             </p>
           </div>
         </div>
@@ -338,7 +338,7 @@ export default function AppointmentDetailPage() {
                     <Phone className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Telephone</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Téléphone</p>
                     <a href={`tel:${appointment.customerPhone}`} className="text-gray-900 dark:text-white font-medium hover:text-primary-500">
                       {appointment.customerPhone}
                     </a>
@@ -395,7 +395,7 @@ export default function AppointmentDetailPage() {
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <CalendarDays className="w-5 h-5 text-gray-500" />
-              Details du rendez-vous
+              Détails du rendez-vous
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -424,7 +424,7 @@ export default function AppointmentDetailPage() {
               </div>
 
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Duree</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Durée</p>
                 <p className="text-gray-900 dark:text-white font-medium">{appointment.duration} minutes</p>
               </div>
 
@@ -435,7 +435,7 @@ export default function AppointmentDetailPage() {
 
               {appointment.paidAmount > 0 && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Montant paye</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Montant payé</p>
                   <p className="text-green-600 font-semibold text-lg">{formatPrice(appointment.paidAmount)}</p>
                 </div>
               )}
@@ -447,24 +447,24 @@ export default function AppointmentDetailPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 rounded-full bg-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">Cree le {formatDateTime(appointment.createdAt)}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Créé le {formatDateTime(appointment.createdAt)}</span>
                 </div>
                 {appointment.confirmedAt && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 rounded-full bg-blue-500" />
-                    <span className="text-gray-600 dark:text-gray-400">Confirme le {formatDateTime(appointment.confirmedAt)}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Confirmé le {formatDateTime(appointment.confirmedAt)}</span>
                   </div>
                 )}
                 {appointment.completedAt && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-gray-600 dark:text-gray-400">Termine le {formatDateTime(appointment.completedAt)}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Terminé le {formatDateTime(appointment.completedAt)}</span>
                   </div>
                 )}
                 {appointment.cancelledAt && (
                   <div className="flex items-center gap-3 text-sm">
                     <div className="w-2 h-2 rounded-full bg-red-500" />
-                    <span className="text-gray-600 dark:text-gray-400">Annule le {formatDateTime(appointment.cancelledAt)}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Annulé le {formatDateTime(appointment.cancelledAt)}</span>
                   </div>
                 )}
               </div>
@@ -580,7 +580,7 @@ export default function AppointmentDetailPage() {
                 disabled={updating || appointment.paymentStatus === 'PAID'}
                 className="w-full px-4 py-3 bg-green-500 hover:bg-green-600 disabled:bg-green-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
               >
-                Marquer paye
+                Marquer payé
               </button>
               <button
                 onClick={() => handlePaymentUpdate('REFUNDED')}
@@ -629,7 +629,7 @@ export default function AppointmentDetailPage() {
 
             {/* Custom Message */}
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Message personnalise</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Message personnalisé</p>
               <textarea
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}

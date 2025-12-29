@@ -28,9 +28,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email et mot de passe requis')
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
           where: {
             email: credentials.email,
+            role: { in: ['ADMIN', 'MANAGER', 'STAFF'] },
           },
         })
 

@@ -15,7 +15,8 @@ import {
   CheckCircle,
   Clock,
   Loader2,
-  CalendarDays
+  CalendarDays,
+  Scissors
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -34,6 +35,13 @@ interface DashboardStats {
     tax: number
     shipping: number
     discount: number
+    fromOrders?: number
+    fromCustomOrders?: number
+    fromStandaloneInvoices?: number
+  }
+  customOrders?: {
+    receiptsCount: number
+    revenue: number
   }
   orders: {
     total: number
@@ -443,12 +451,29 @@ export default function AdminDashboard() {
           {/* Revenue Breakdown */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Détail du Revenu</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
-                <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Sous-total</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(stats.revenue.subtotal)}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <ShoppingCart className="h-4 w-4 text-green-600" />
+                  <p className="text-green-700 dark:text-green-400 text-xs">Boutique</p>
+                </div>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(stats.revenue.fromOrders || stats.revenue.subtotal)}
                 </p>
+              </div>
+              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Scissors className="h-4 w-4 text-purple-600" />
+                  <p className="text-purple-700 dark:text-purple-400 text-xs">Sur-Mesure</p>
+                </div>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                  {formatCurrency(stats.revenue.fromCustomOrders || 0)}
+                </p>
+                {stats.customOrders && stats.customOrders.receiptsCount > 0 && (
+                  <p className="text-xs text-purple-500 mt-1">
+                    {stats.customOrders.receiptsCount} reçu(s)
+                  </p>
+                )}
               </div>
               <div className="p-4 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
                 <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Taxes</p>
@@ -585,7 +610,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-center p-3 bg-green-500/10 rounded-lg">
                   <p className="text-2xl font-bold text-green-600">{appointmentStats?.confirmed || 0}</p>
-                  <p className="text-xs text-gray-500">Confirmes</p>
+                  <p className="text-xs text-gray-500">Confirmés</p>
                 </div>
                 <div className="text-center p-3 bg-pink-500/10 rounded-lg">
                   <p className="text-2xl font-bold text-pink-600">{appointmentStats?.today || 0}</p>
@@ -600,14 +625,14 @@ export default function AdminDashboard() {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-lg transition-colors font-medium"
                 >
                   <CalendarDays className="h-4 w-4" />
-                  Gerer les RDV
+                  Gérer les RDV
                 </a>
                 <a
                   href="/admin/appointments/availability"
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors font-medium border border-gray-200 dark:border-dark-700"
                 >
                   <Clock className="h-4 w-4" />
-                  Disponibilites
+                  Disponibilités
                 </a>
               </div>
             </div>

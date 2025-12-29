@@ -53,9 +53,9 @@ const statusColors: Record<string, string> = {
 
 const statusLabels: Record<string, string> = {
   PENDING: 'En attente',
-  CONFIRMED: 'Confirme',
-  COMPLETED: 'Termine',
-  CANCELLED: 'Annule',
+  CONFIRMED: 'Confirmé',
+  COMPLETED: 'Terminé',
+  CANCELLED: 'Annulé',
   NO_SHOW: 'Absent'
 }
 
@@ -67,9 +67,9 @@ const paymentStatusColors: Record<string, string> = {
 }
 
 const paymentLabels: Record<string, string> = {
-  UNPAID: 'Non paye',
-  PAID: 'Paye',
-  REFUNDED: 'Rembourse',
+  UNPAID: 'Non payé',
+  PAID: 'Payé',
+  REFUNDED: 'Remboursé',
   QUOTE_PENDING: 'Sur devis'
 }
 
@@ -233,7 +233,7 @@ export default function AppointmentsListPage() {
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Confirmes ({stats.confirmed})
+          Confirmés ({stats.confirmed})
         </button>
         <button
           onClick={() => setActiveTab('completed')}
@@ -243,7 +243,7 @@ export default function AppointmentsListPage() {
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Termines
+          Terminés
         </button>
         <button
           onClick={() => setActiveTab('cancelled')}
@@ -253,7 +253,7 @@ export default function AppointmentsListPage() {
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Annules
+          Annulés
         </button>
       </div>
 
@@ -264,7 +264,7 @@ export default function AppointmentsListPage() {
             <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher par nom, tel, reference..."
+              placeholder="Rechercher par nom, tél, référence..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-gray-600"
@@ -278,9 +278,9 @@ export default function AppointmentsListPage() {
           >
             <option value="">Tous les statuts</option>
             <option value="PENDING">En attente</option>
-            <option value="CONFIRMED">Confirme</option>
-            <option value="COMPLETED">Termine</option>
-            <option value="CANCELLED">Annule</option>
+            <option value="CONFIRMED">Confirmé</option>
+            <option value="COMPLETED">Terminé</option>
+            <option value="CANCELLED">Annulé</option>
             <option value="NO_SHOW">Absent</option>
           </select>
 
@@ -290,9 +290,9 @@ export default function AppointmentsListPage() {
             className="bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-gray-600"
           >
             <option value="">Paiement</option>
-            <option value="UNPAID">Non paye</option>
-            <option value="PAID">Paye</option>
-            <option value="REFUNDED">Rembourse</option>
+            <option value="UNPAID">Non payé</option>
+            <option value="PAID">Payé</option>
+            <option value="REFUNDED">Remboursé</option>
           </select>
         </div>
       </div>
@@ -307,7 +307,7 @@ export default function AppointmentsListPage() {
         ) : appointments.length === 0 ? (
           <div className="p-12 text-center">
             <CalendarDays className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">Aucun rendez-vous trouve</p>
+            <p className="text-gray-500 dark:text-gray-400">Aucun rendez-vous trouvé</p>
           </div>
         ) : (
           <>
@@ -412,7 +412,7 @@ export default function AppointmentsListPage() {
                           <Link
                             href={`/admin/appointments/${appointment.id}`}
                             className="p-2 text-primary-500 hover:bg-primary-500/10 rounded transition-colors"
-                            title="Voir details"
+                            title="Voir détails"
                           >
                             <Eye className="h-4 w-4" />
                           </Link>

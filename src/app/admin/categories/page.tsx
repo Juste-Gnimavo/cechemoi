@@ -227,7 +227,7 @@ export default function CategoriesPage() {
         stats={[
           { label: 'Total', value: totalCategories, icon: FolderTree, color: 'primary' },
           { label: 'Racines', value: rootCount, icon: FolderTree, color: 'blue' },
-          { label: 'Sous-categories', value: subCategories, icon: Layers, color: 'purple' },
+          { label: 'Sous-catégories', value: subCategories, icon: Layers, color: 'purple' },
           { label: 'Produits', value: totalProducts, icon: Package, color: 'green' },
           { label: 'Vides', value: emptyCategories, icon: AlertCircle, color: 'yellow' },
         ]}

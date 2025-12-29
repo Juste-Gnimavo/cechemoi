@@ -18,9 +18,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+    // Find user (admin/manager/staff only - customers use phone)
+    const user = await prisma.user.findFirst({
+      where: { email: email.toLowerCase(), role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
     })
 
     // Don't reveal if user exists (security best practice)

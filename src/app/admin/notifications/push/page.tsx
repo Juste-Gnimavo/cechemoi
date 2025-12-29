@@ -43,29 +43,29 @@ interface TemplateStats {
 }
 
 const TRIGGER_LABELS: Record<string, string> = {
-  ORDER_PLACED: 'Commande passee',
-  ORDER_PROCESSING: 'Commande en preparation',
-  PAYMENT_RECEIVED: 'Paiement recu',
-  ORDER_SHIPPED: 'Commande expediee',
-  ORDER_DELIVERED: 'Commande livree',
-  ORDER_CANCELLED: 'Commande annulee',
+  ORDER_PLACED: 'Commande passée',
+  ORDER_PROCESSING: 'Commande en préparation',
+  PAYMENT_RECEIVED: 'Paiement reçu',
+  ORDER_SHIPPED: 'Commande expédiée',
+  ORDER_DELIVERED: 'Commande livrée',
+  ORDER_CANCELLED: 'Commande annulée',
   ORDER_REFUNDED: 'Remboursement',
-  PAYMENT_FAILED: 'Paiement echoue',
+  PAYMENT_FAILED: 'Paiement échoué',
   CUSTOMER_NOTE: 'Note client',
   NEW_ACCOUNT: 'Nouveau compte',
   PASSWORD_RESET: 'Reset mot de passe',
-  LOYALTY_POINTS_EARNED: 'Points fidelite',
-  ABANDONED_CART: 'Panier abandonne',
+  LOYALTY_POINTS_EARNED: 'Points fidélité',
+  ABANDONED_CART: 'Panier abandonné',
   BACK_IN_STOCK: 'Retour en stock',
   NEW_ORDER_ADMIN: 'Nouvelle commande (Admin)',
-  PAYMENT_RECEIVED_ADMIN: 'Paiement recu (Admin)',
+  PAYMENT_RECEIVED_ADMIN: 'Paiement reçu (Admin)',
   LOW_STOCK_ADMIN: 'Stock bas (Admin)',
   OUT_OF_STOCK_ADMIN: 'Rupture stock (Admin)',
   NEW_CUSTOMER_ADMIN: 'Nouveau client (Admin)',
   NEW_REVIEW_ADMIN: 'Nouvel avis (Admin)',
   DAILY_REPORT_ADMIN: 'Rapport journalier (Admin)',
-  INVOICE_CREATED: 'Facture creee',
-  INVOICE_PAID: 'Facture payee',
+  INVOICE_CREATED: 'Facture créée',
+  INVOICE_PAID: 'Facture payée',
   REVIEW_REQUEST: 'Demande avis',
   PAYMENT_REMINDER_1: 'Rappel paiement 1',
   PAYMENT_REMINDER_2: 'Rappel paiement 2',
@@ -74,14 +74,14 @@ const TRIGGER_LABELS: Record<string, string> = {
 
 const AVAILABLE_VARIABLES = [
   { name: '{customer_name}', description: 'Nom du client' },
-  { name: '{order_number}', description: 'Numero de commande' },
+  { name: '{order_number}', description: 'Numéro de commande' },
   { name: '{order_total}', description: 'Total de commande' },
-  { name: '{tracking_number}', description: 'Numero de suivi' },
+  { name: '{tracking_number}', description: 'Numéro de suivi' },
   { name: '{product_name}', description: 'Nom du produit' },
-  { name: '{points_earned}', description: 'Points gagnes' },
+  { name: '{points_earned}', description: 'Points gagnés' },
   { name: '{points_balance}', description: 'Solde de points' },
-  { name: '{invoice_number}', description: 'Numero de facture' },
-  { name: '{reset_code}', description: 'Code de reinitialisation' },
+  { name: '{invoice_number}', description: 'Numéro de facture' },
+  { name: '{reset_code}', description: 'Code de réinitialisation' },
 ]
 
 export default function PushNotificationTemplatesPage() {
@@ -125,7 +125,7 @@ export default function PushNotificationTemplatesPage() {
       }
     } catch (error) {
       console.error('Error fetching templates:', error)
-      toast.error('Erreur lors du chargement des modeles')
+      toast.error('Erreur lors du chargement des modèles')
     } finally {
       setLoading(false)
     }
@@ -152,12 +152,12 @@ export default function PushNotificationTemplatesPage() {
       })
 
       if (response.ok) {
-        toast.success('Modele mis a jour')
+        toast.success('Modèle mis à jour')
         fetchTemplates()
         setModalMode(null)
         setEditingTemplate(null)
       } else {
-        toast.error('Erreur lors de la mise a jour')
+        toast.error('Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error saving template:', error)
@@ -174,7 +174,7 @@ export default function PushNotificationTemplatesPage() {
       })
 
       if (response.ok) {
-        toast.success(template.enabled ? 'Modele desactive' : 'Modele active')
+        toast.success(template.enabled ? 'Modèle désactivé' : 'Modèle activé')
         fetchTemplates()
       }
     } catch (error) {
@@ -207,7 +207,7 @@ export default function PushNotificationTemplatesPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('Notification test envoyee!')
+        toast.success('Notification test envoyée!')
         setModalMode(null)
       } else {
         toast.error(data.error || 'Erreur lors de l\'envoi')
@@ -241,7 +241,7 @@ export default function PushNotificationTemplatesPage() {
             Notifications Push
           </h1>
           <p className="text-gray-500 mt-1">
-            Gerez les modeles de notifications push pour iOS et Android
+            Gérez les modèles de notifications push pour iOS et Android
           </p>
         </div>
         <div className="flex gap-3">
@@ -331,9 +331,9 @@ export default function PushNotificationTemplatesPage() {
       ) : filteredTemplates.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <AlertCircle className="w-12 h-12 mx-auto text-gray-400" />
-          <p className="mt-2 text-gray-500">Aucun modele push trouve</p>
+          <p className="mt-2 text-gray-500">Aucun modèle push trouvé</p>
           <p className="text-sm text-gray-400 mt-1">
-            Executez le seed pour creer les modeles: npx ts-node prisma/seed-push-notifications.ts
+            Exécutez le seed pour créer les modèles: npx ts-node prisma/seed-push-notifications.ts
           </p>
         </div>
       ) : (
@@ -362,7 +362,7 @@ export default function PushNotificationTemplatesPage() {
                     </h3>
                     {!template.enabled && (
                       <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded">
-                        Desactive
+                        Désactivé
                       </span>
                     )}
                   </div>
@@ -375,10 +375,10 @@ export default function PushNotificationTemplatesPage() {
                       <span className="text-xs text-gray-500">Apercu notification</span>
                     </div>
                     <div className="font-medium text-gray-900 text-sm">
-                      {template.pushTitle || 'Titre non defini'}
+                      {template.pushTitle || 'Titre non défini'}
                     </div>
                     <div className="text-gray-600 text-sm mt-1">
-                      {template.pushBody || 'Corps non defini'}
+                      {template.pushBody || 'Corps non défini'}
                     </div>
                   </div>
                 </div>
@@ -405,7 +405,7 @@ export default function PushNotificationTemplatesPage() {
                         ? 'text-green-600 hover:bg-green-50'
                         : 'text-red-600 hover:bg-red-50'
                     }`}
-                    title={template.enabled ? 'Desactiver' : 'Activer'}
+                    title={template.enabled ? 'Désactiver' : 'Activer'}
                   >
                     {template.enabled ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
                   </button>
@@ -435,7 +435,7 @@ export default function PushNotificationTemplatesPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Titre (max 65 caracteres)
+                  Titre (max 65 caractères)
                 </label>
                 <input
                   type="text"
@@ -445,13 +445,13 @@ export default function PushNotificationTemplatesPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
                 <div className="text-xs text-gray-500 mt-1">
-                  {editTitle.length}/65 caracteres
+                  {editTitle.length}/65 caractères
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Corps du message (max 240 caracteres)
+                  Corps du message (max 240 caractères)
                 </label>
                 <textarea
                   value={editBody}
@@ -461,7 +461,7 @@ export default function PushNotificationTemplatesPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
                 <div className="text-xs text-gray-500 mt-1">
-                  {editBody.length}/240 caracteres
+                  {editBody.length}/240 caractères
                 </div>
               </div>
 
@@ -560,7 +560,7 @@ export default function PushNotificationTemplatesPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Le token FCM est affiche dans la console de l&apos;app mobile au login
+                  Le token FCM est affiché dans la console de l&apos;app mobile au login
                 </p>
               </div>
             </div>

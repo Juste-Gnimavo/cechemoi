@@ -19,9 +19,15 @@ import {
   Pencil,
   X,
   Save,
+  Ruler,
+  Download,
+  User,
+  History,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { UserProfileCard } from '@/components/user-profile-card'
+import { MeasurementsForm } from '@/components/admin/measurements-form'
+import { MeasurementsDisplay } from '@/components/measurements-display'
 
 interface CustomerDetail {
   id: string
@@ -43,6 +49,10 @@ interface CustomerDetail {
   emailVerified?: string | null
   createdAt: string
   updatedAt?: string
+  createdByStaffId?: string | null
+  createdByStaffName?: string | null
+  dateOfBirth?: string | null
+  howDidYouHearAboutUs?: string | null
   orders: any[]
   addresses: any[]
   reviews: any[]
@@ -63,6 +73,37 @@ interface CustomerDetail {
     reviews: number
     wishlist: number
   }
+}
+
+interface Measurement {
+  id: string
+  measurementDate: string
+  unit: string
+  takenByStaffId?: string | null
+  takenByStaffName?: string | null
+  dos?: number | null
+  carrureDevant?: number | null
+  carrureDerriere?: number | null
+  epaule?: number | null
+  epauleManche?: number | null
+  poitrine?: number | null
+  tourDeTaille?: number | null
+  longueurDetaille?: number | null
+  bassin?: number | null
+  longueurManches?: string | null
+  tourDeManche?: number | null
+  poignets?: number | null
+  pinces?: number | null
+  longueurTotale?: number | null
+  longueurRobes?: string | null
+  longueurTunique?: number | null
+  ceinture?: number | null
+  longueurPantalon?: number | null
+  frappe?: number | null
+  cuisse?: number | null
+  genoux?: number | null
+  longueurJupe?: string | null
+  autresMesures?: string | null
 }
 
 export default function CustomerDetailPage() {
@@ -96,8 +137,17 @@ export default function CustomerDetailPage() {
     inscriptionDate: '',
   })
 
+  // Measurements state
+  const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null)
+  const [measurementHistory, setMeasurementHistory] = useState<Measurement[]>([])
+  const [showMeasurementModal, setShowMeasurementModal] = useState(false)
+  const [measurementFormData, setMeasurementFormData] = useState<any>({})
+  const [savingMeasurement, setSavingMeasurement] = useState(false)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
+
   useEffect(() => {
     fetchCustomer()
+    fetchMeasurements()
   }, [params.id])
 
   // Initialize edit form when customer loads
@@ -221,6 +271,79 @@ export default function CustomerDetailPage() {
     }
   }
 
+  const fetchMeasurements = async () => {
+    try {
+      const response = await fetch(`/api/admin/customers/${params.id}/measurements`)
+      const data = await response.json()
+
+      if (data.success) {
+        setCurrentMeasurement(data.currentMeasurement)
+        setMeasurementHistory(data.measurementHistory || [])
+      }
+    } catch (error) {
+      console.error('Error fetching measurements:', error)
+    }
+  }
+
+  const saveMeasurement = async () => {
+    try {
+      setSavingMeasurement(true)
+      const response = await fetch(`/api/admin/customers/${params.id}/measurements`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(measurementFormData),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('Mensurations enregistrées avec succès')
+        setShowMeasurementModal(false)
+        setMeasurementFormData({})
+        fetchMeasurements()
+      } else {
+        toast.error(data.error || 'Erreur lors de l\'enregistrement')
+      }
+    } catch (error) {
+      console.error('Error saving measurement:', error)
+      toast.error('Erreur lors de l\'enregistrement')
+    } finally {
+      setSavingMeasurement(false)
+    }
+  }
+
+  const downloadMeasurementPdf = async (measurementId?: string) => {
+    try {
+      setDownloadingPdf(true)
+      const url = measurementId
+        ? `/api/admin/customers/${params.id}/measurements-pdf?measurementId=${measurementId}`
+        : `/api/admin/customers/${params.id}/measurements-pdf`
+
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du téléchargement')
+      }
+
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `mensurations-${customer?.name || 'client'}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+
+      toast.success('PDF téléchargé avec succès')
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      toast.error('Erreur lors du téléchargement du PDF')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
+
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -326,6 +449,20 @@ export default function CustomerDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {currentMeasurement && (
+            <button
+              onClick={() => downloadMeasurementPdf()}
+              disabled={downloadingPdf}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50"
+            >
+              {downloadingPdf ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              <span>Fiche PDF</span>
+            </button>
+          )}
           <button
             onClick={() => setShowEditModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
@@ -475,6 +612,50 @@ export default function CustomerDetailPage() {
             </div>
           </div>
 
+          {/* Measurements Section */}
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-800 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Ruler className="h-5 w-5 text-primary-500" />
+                Mensurations
+                {measurementHistory.length > 0 && (
+                  <span className="text-xs bg-primary-500/20 text-primary-500 px-2 py-0.5 rounded-full">
+                    {measurementHistory.length} enregistrement{measurementHistory.length > 1 ? 's' : ''}
+                  </span>
+                )}
+              </h2>
+              <button
+                onClick={() => setShowMeasurementModal(true)}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Ajouter
+              </button>
+            </div>
+            <div className="p-6">
+              {currentMeasurement ? (
+                <MeasurementsDisplay
+                  measurement={currentMeasurement}
+                  measurementHistory={measurementHistory}
+                  showHistory={true}
+                />
+              ) : (
+                <div className="text-center py-8">
+                  <Ruler className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Aucune mensuration enregistrée pour ce client
+                  </p>
+                  <button
+                    onClick={() => setShowMeasurementModal(true)}
+                    className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                  >
+                    Ajouter des mensurations
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Customer Notes */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-dark-800">
@@ -568,6 +749,35 @@ export default function CustomerDetailPage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Created By Info */}
+          {customer.createdByStaffName && (
+            <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <User className="h-5 w-5 text-primary-500" />
+                Fiche créée par
+              </h2>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                  <span className="text-white font-medium text-sm">
+                    {customer.createdByStaffName?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {customer.createdByStaffName}
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    {new Date(customer.createdAt).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Quick Notification Sender */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -884,6 +1094,58 @@ export default function CustomerDetailPage() {
                   <Save className="h-4 w-4" />
                 )}
                 <span>{saving ? 'Enregistrement...' : 'Enregistrer'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Measurement Modal */}
+      {showMeasurementModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowMeasurementModal(false)} />
+          <div className="relative bg-white dark:bg-dark-900 rounded-2xl border border-gray-200 dark:border-dark-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Ruler className="h-5 w-5 text-primary-500" />
+                Ajouter des mensurations
+              </h2>
+              <button
+                onClick={() => setShowMeasurementModal(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <MeasurementsForm
+                onChange={(data) => setMeasurementFormData(data)}
+                collapsed={false}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
+              <button
+                onClick={() => setShowMeasurementModal(false)}
+                className="px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-white rounded-lg transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={saveMeasurement}
+                disabled={savingMeasurement}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                {savingMeasurement ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                <span>{savingMeasurement ? 'Enregistrement...' : 'Enregistrer'}</span>
               </button>
             </div>
           </div>

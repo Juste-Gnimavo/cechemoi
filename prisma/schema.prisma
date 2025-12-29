@@ -14,6 +14,7 @@ enum UserRole {
   ADMIN
   MANAGER
   STAFF
+  TAILOR    // Couturier - can view assigned orders and update production status
 }
 
 enum OrderStatus {
@@ -49,7 +50,7 @@ enum PaymentMethod {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?   // Not unique alone - same person can have multiple roles with same email
   emailVerified DateTime?
   password      String?   // Only for ADMIN, MANAGER, STAFF
   phone         String    // Not unique alone - same person can have multiple roles
@@ -57,6 +58,14 @@ model User {
   whatsappNumber String?  // May be different from phone
   image         String?
   role          UserRole  @default(CUSTOMER)
+
+  // Customer profile fields
+  dateOfBirth          DateTime?  // Date d'anniversaire
+  howDidYouHearAboutUs String?    // Comment avez-vous connu CÈCHÉMOI?
+
+  // Staff tracking - who created this customer
+  createdByStaffId    String?
+  createdByStaffName  String?
 
   // Geolocation data (captured during registration)
   ipAddress     String?
@@ -100,13 +109,22 @@ model User {
   deviceTokens  DeviceToken[]
   pushCampaigns PushCampaign[] @relation("CampaignCreator")
   pushLogs      PushNotificationLog[]
+  measurements  CustomerMeasurement[]
+
+  // Custom Orders (Sur-Mesure)
+  customerCustomOrders  CustomOrder[]        @relation("CustomerCustomOrders") // Orders placed by this customer
+  staffCustomOrders     CustomOrder[]        @relation("StaffCustomOrders")    // Orders created by this staff
+  tailorAssignments     CustomOrderItem[]    @relation("TailorAssignments")    // Items assigned to this tailor
+  receivedPayments      CustomOrderPayment[] @relation("PaymentReceiver")      // Payments received by this staff
 
   @@unique([phone, role]) // A person can have same phone for different roles (e.g. CUSTOMER + ADMIN)
+  @@unique([email, role]) // A person can have same email for different roles
   @@index([phone])
   @@index([email])
   @@index([whatsappNumber])
   @@index([createdAt])
   @@index([role])
+  @@index([createdByStaffId])
 }
 
 model CustomerNote {
@@ -503,6 +521,10 @@ model Invoice {
   orderId         String?       @unique
   order           Order?        @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
+  // Custom Order relation - OPTIONAL (for custom orders/sur-mesure)
+  customOrderId   String?       @unique
+  customOrder     CustomOrder?  @relation(fields: [customOrderId], references: [id], onDelete: SetNull)
+
   // Customer info (required even for standalone invoices)
   customerName    String
   customerEmail   String?
@@ -544,12 +566,16 @@ model Invoice {
   // Payment tracking (for installments/deposits)
   payments        InvoicePayment[]
 
+  // Receipts generated for payments
+  receipts        Receipt[]
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   @@index([invoiceNumber])
   @@index([status])
   @@index([orderId])
+  @@index([customOrderId])
   @@index([createdById])
   @@index([issueDate])
   @@index([customerEmail])
@@ -598,6 +624,9 @@ model InvoicePayment {
   // Audit
   createdById     String?
   createdBy       User?         @relation("InvoicePaymentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Receipt relation
+  receipt         Receipt?
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -1886,5 +1915,292 @@ model Appointment {
   @@index([date])
   @@index([status])
   @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+// ========================================
+// CUSTOMER MEASUREMENTS (Body measurements for fashion)
+// ========================================
+
+model CustomerMeasurement {
+  id              String   @id @default(cuid())
+  customerId      String
+  customer        User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Staff tracking - who took these measurements
+  takenByStaffId    String?
+  takenByStaffName  String?
+  measurementDate   DateTime @default(now())
+
+  // Measurement unit
+  unit              String   @default("cm") // cm or inches
+
+  // === 22 BODY MEASUREMENTS ===
+  // Upper body (1-9)
+  dos               Float?   // 1. DOS (back)
+  carrureDevant     Float?   // 2. CARRURE DEVANT (front width)
+  carrureDerriere   Float?   // 3. CARRURE DERRIERE (back width)
+  epaule            Float?   // 4. EPAULE (shoulder)
+  epauleManche      Float?   // 5. EPAULE MANCHE (shoulder to sleeve)
+  poitrine          Float?   // 6. POITRINE (chest/bust)
+  tourDeTaille      Float?   // 7. TOUR DE TAILLE (waist)
+  longueurDetaille  Float?   // 8. LONGUEUR DETAILLE
+  bassin            Float?   // 9. BASSIN (hip)
+
+  // Arms (10-12)
+  longueurManches   String?  // 10. LONGUEUR DES MANCHES (option OR custom cm value)
+  tourDeManche      Float?   // 11. TOUR DE MANCHE (sleeve circumference)
+  poignets          Float?   // 12. POIGNETS (wrists)
+
+  // Torso (13-17)
+  pinces            Float?   // 13. PINCES (darts)
+  longueurTotale    Float?   // 14. LONGUEUR TOTALE (total length)
+  longueurRobes     String?  // 15. LONGUEUR DES ROBES (option OR custom cm value)
+  longueurTunique   Float?   // 16. LONGUEUR TUNIQUE (tunic length)
+  ceinture          Float?   // 17. CEINTURE (belt/waist)
+
+  // Lower body (18-22)
+  longueurPantalon  Float?   // 18. LONGUEUR PANTALON (pants length)
+  frappe            Float?   // 19. FRAPPE
+  cuisse            Float?   // 20. CUISSE (thigh)
+  genoux            Float?   // 21. GENOUX (knees)
+  longueurJupe      String?  // 22. LONGUEUR JUPE (option OR custom cm value)
+
+  // Notes
+  autresMesures     String?  @db.Text // AUTRES MESURES OU OBSERVATIONS
+
+  // PDF Storage (S3)
+  pdfUrl            String?  // Full S3 URL of the generated PDF
+  pdfKey            String?  // S3 key for deletion/retrieval
+  pdfGeneratedAt    DateTime? // When the PDF was last generated
+
+  createdAt         DateTime @default(now())
+
+  @@index([customerId])
+  @@index([takenByStaffId])
+  @@index([measurementDate])
+
+  // Relation to custom orders using these measurements
+  customOrders  CustomOrder[]
+}
+
+// ========================================
+// CUSTOM ORDERS (Commandes Sur-Mesure)
+// ========================================
+
+enum CustomOrderStatus {
+  PENDING         // En attente
+  IN_PRODUCTION   // En production
+  FITTING         // Essayage prévu
+  ALTERATIONS     // Retouches en cours
+  READY           // Prêt
+  DELIVERED       // Livré
+  CANCELLED       // Annulé
+}
+
+enum CustomOrderPriority {
+  NORMAL          // Standard (14 jours)
+  URGENT          // Urgent (+50% prix)
+  VIP             // Rush (+100% prix)
+}
+
+enum ItemProductionStatus {
+  PENDING         // En attente
+  CUTTING         // Coupe en cours
+  SEWING          // Couture en cours
+  FITTING         // Essayage
+  ALTERATIONS     // Retouches
+  FINISHING       // Finitions
+  COMPLETED       // Terminé
+  DELIVERED       // Livré
+}
+
+enum CustomPaymentType {
+  DEPOSIT         // Avance initiale
+  INSTALLMENT     // Paiement intermédiaire
+  FINAL           // Solde final
+}
+
+model CustomOrder {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique  // Format: SM-2025-001
+
+  // Client
+  customerId      String
+  customer        User     @relation("CustomerCustomOrders", fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Dates clés
+  orderDate       DateTime @default(now())
+  pickupDate      DateTime // Date retrait (défaut: +14 jours)
+  customerDeadline DateTime? // Délai souhaité client
+
+  // Financier (style Excel)
+  totalCost       Float    @default(0) // Coût total tenues
+  materialCost    Float    @default(0) // Coût matériel
+  // Note: deposit et reliquat calculés via CustomOrderPayment
+
+  // Statut global
+  status          CustomOrderStatus @default(PENDING)
+  priority        CustomOrderPriority @default(NORMAL)
+
+  // Mensurations utilisées (optional - can use existing or create new)
+  measurementId   String?
+  measurement     CustomerMeasurement? @relation(fields: [measurementId], references: [id])
+
+  // Staff qui a créé la commande
+  createdById     String
+  createdBy       User     @relation("StaffCustomOrders", fields: [createdById], references: [id])
+
+  notes           String?  @db.Text
+
+  // Relations
+  items           CustomOrderItem[]
+  payments        CustomOrderPayment[]
+  timeline        CustomOrderTimeline[]
+
+  // Invoice relation (auto-generated)
+  invoice         Invoice?
+
+  // Receipts for payments
+  receipts        Receipt[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([createdById])
+  @@index([status])
+  @@index([orderDate])
+  @@index([pickupDate])
+}
+
+model CustomOrderItem {
+  id              String   @id @default(cuid())
+  customOrderId   String
+  customOrder     CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  // Description
+  garmentType     String   // "Robe de soirée", "Boubou", "Ensemble tunique", etc.
+  customType      String?  // Si garmentType = "Autre", saisie personnalisée
+  description     String?  @db.Text // Détails spécifiques (couleur, tissu, etc.)
+  quantity        Int      @default(1)
+  unitPrice       Float    @default(0)
+
+  // Production
+  status          ItemProductionStatus @default(PENDING)
+  tailorId        String?  // Couturier assigné
+  tailor          User?    @relation("TailorAssignments", fields: [tailorId], references: [id])
+
+  // Temps
+  estimatedHours  Float?   // Heures estimées
+  actualHours     Float?   // Heures réelles (cumulées)
+
+  // Dates production
+  startedAt       DateTime?
+  completedAt     DateTime?
+
+  notes           String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([customOrderId])
+  @@index([tailorId])
+  @@index([status])
+}
+
+model CustomOrderPayment {
+  id              String   @id @default(cuid())
+  customOrderId   String
+  customOrder     CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  amount          Float
+  paymentType     CustomPaymentType @default(DEPOSIT)
+  paymentMethod   String?  // CASH, WAVE, ORANGE_MONEY, etc.
+
+  // Staff qui a reçu le paiement
+  receivedById    String?
+  receivedBy      User?    @relation("PaymentReceiver", fields: [receivedById], references: [id])
+
+  paidAt          DateTime @default(now())
+  notes           String?
+
+  // Receipt relation
+  receipt         Receipt?
+
+  // Synced invoice payment
+  invoicePaymentId String? @unique
+
+  @@index([customOrderId])
+  @@index([paidAt])
+}
+
+model CustomOrderTimeline {
+  id              String   @id @default(cuid())
+  customOrderId   String
+  customOrder     CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  // Event info
+  event           String   // Ex: "Commande créée", "Coupe terminée", "Essayage effectué"
+  description     String?
+
+  // Who did it
+  userId          String?
+  userName        String?
+
+  // Photos (URLs from media upload)
+  photos          String[] @default([])
+
+  createdAt       DateTime @default(now())
+
+  @@index([customOrderId])
+  @@index([createdAt])
+}
+
+// ========================================
+// RECEIPTS (Reçus pour paiements)
+// ========================================
+
+model Receipt {
+  id              String   @id @default(cuid())
+  receiptNumber   String   @unique  // Format: REC-DDMMYY-0001
+
+  // Liens vers les paiements
+  customOrderPaymentId String?  @unique
+  customOrderPayment   CustomOrderPayment? @relation(fields: [customOrderPaymentId], references: [id], onDelete: SetNull)
+  invoicePaymentId     String?  @unique
+  invoicePayment       InvoicePayment? @relation(fields: [invoicePaymentId], references: [id], onDelete: SetNull)
+
+  // Info client
+  customerName    String
+  customerPhone   String?
+  customerEmail   String?
+
+  // Détails paiement
+  amount          Float
+  paymentMethod   String
+  paymentDate     DateTime @default(now())
+
+  // Références
+  invoiceId       String?
+  invoice         Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  customOrderId   String?
+  customOrder     CustomOrder? @relation(fields: [customOrderId], references: [id], onDelete: SetNull)
+
+  // PDF stockage
+  pdfUrl          String?
+  pdfKey          String?
+
+  // Audit
+  createdById     String?
+  createdByName   String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([receiptNumber])
+  @@index([customOrderId])
+  @@index([invoiceId])
+  @@index([paymentDate])
   @@index([createdAt])
 }

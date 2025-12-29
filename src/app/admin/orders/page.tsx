@@ -52,10 +52,10 @@ const statusColors: Record<string, string> = {
 const statusLabels: Record<string, string> = {
   PENDING: 'En attente',
   PROCESSING: 'En traitement',
-  SHIPPED: 'Expedie',
-  DELIVERED: 'Livre',
-  CANCELLED: 'Annule',
-  REFUNDED: 'Rembourse',
+  SHIPPED: 'Expédié',
+  DELIVERED: 'Livré',
+  CANCELLED: 'Annulé',
+  REFUNDED: 'Remboursé',
 }
 
 const paymentStatusColors: Record<string, string> = {
@@ -153,7 +153,7 @@ export default function OrdersPage() {
 
   const handleBulkAction = async (action: string) => {
     if (selectedOrders.length === 0) {
-      alert('Veuillez selectionner au moins une commande')
+      alert('Veuillez sélectionner au moins une commande')
       return
     }
 
@@ -170,15 +170,15 @@ export default function OrdersPage() {
       const data = await response.json()
 
       if (data.success) {
-        alert(`${data.count} commande(s) mise(s) a jour avec succes`)
+        alert(`${data.count} commande(s) mise(s) à jour avec succès`)
         setSelectedOrders([])
         fetchOrders()
       } else {
-        alert(data.error || 'Erreur lors de l\'action groupee')
+        alert(data.error || 'Erreur lors de l\'action groupée')
       }
     } catch (error) {
       console.error('Error performing bulk action:', error)
-      alert('Erreur lors de l\'action groupee')
+      alert('Erreur lors de l\'action groupée')
     }
   }
 
@@ -241,7 +241,7 @@ export default function OrdersPage() {
             Gestion des commandes
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
-            Gerez toutes vos commandes et leur statut
+            Gérez toutes vos commandes et leur statut
           </p>
         </div>
         <div className="flex gap-3">
@@ -273,8 +273,8 @@ export default function OrdersPage() {
             { label: 'Total', value: stats.total, icon: ShoppingBag, color: 'primary' },
             { label: 'En attente', value: stats.pending, icon: Clock, color: 'yellow' },
             { label: 'En cours', value: stats.processing, icon: Truck, color: 'blue' },
-            { label: 'Livrees', value: stats.delivered, icon: CheckCircle, color: 'green' },
-            { label: 'Annulees', value: stats.cancelled, icon: XCircle, color: 'red' },
+            { label: 'Livrées', value: stats.delivered, icon: CheckCircle, color: 'green' },
+            { label: 'Annulées', value: stats.cancelled, icon: XCircle, color: 'red' },
             { label: "Aujourd'hui", value: stats.today, icon: Calendar, color: 'blue' },
             { label: 'Cette semaine', value: stats.week, icon: TrendingUp, color: 'purple' },
             { label: 'Ce mois', value: stats.month, icon: TrendingUp, color: 'default' },
@@ -322,7 +322,7 @@ export default function OrdersPage() {
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Livrees ({stats?.delivered || 0})
+          Livrées ({stats?.delivered || 0})
         </button>
         <button
           onClick={() => setActiveTab('cancelled')}
@@ -332,7 +332,7 @@ export default function OrdersPage() {
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           }`}
         >
-          Annulees ({stats?.cancelled || 0})
+          Annulées ({stats?.cancelled || 0})
         </button>
       </div>
 
@@ -358,10 +358,10 @@ export default function OrdersPage() {
             <option value="">Tous les statuts</option>
             <option value="PENDING">En attente</option>
             <option value="PROCESSING">En traitement</option>
-            <option value="SHIPPED">Expedie</option>
-            <option value="DELIVERED">Livre</option>
-            <option value="CANCELLED">Annule</option>
-            <option value="REFUNDED">Rembourse</option>
+            <option value="SHIPPED">Expédié</option>
+            <option value="DELIVERED">Livré</option>
+            <option value="CANCELLED">Annulé</option>
+            <option value="REFUNDED">Remboursé</option>
           </select>
 
           <select
@@ -371,9 +371,9 @@ export default function OrdersPage() {
           >
             <option value="">Paiement</option>
             <option value="PENDING">En attente</option>
-            <option value="COMPLETED">Paye</option>
-            <option value="FAILED">Echoue</option>
-            <option value="REFUNDED">Rembourse</option>
+            <option value="COMPLETED">Payé</option>
+            <option value="FAILED">Échoué</option>
+            <option value="REFUNDED">Remboursé</option>
           </select>
 
           <input
@@ -390,7 +390,7 @@ export default function OrdersPage() {
         <div className="bg-primary-500/10 border border-primary-500 rounded-lg p-4 mb-6">
           <div className="flex items-center justify-between">
             <span className="text-gray-900 dark:text-white font-semibold">
-              {selectedOrders.length} commande(s) selectionnee(s)
+              {selectedOrders.length} commande(s) sélectionnée(s)
             </span>
             <div className="flex gap-2">
               <button
@@ -403,13 +403,13 @@ export default function OrdersPage() {
                 onClick={() => handleBulkAction('markShipped')}
                 className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded text-sm"
               >
-                Marquer comme expedie
+                Marquer comme expédié
               </button>
               <button
                 onClick={() => handleBulkAction('markDelivered')}
                 className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
               >
-                Marquer comme livre
+                Marquer comme livré
               </button>
             </div>
           </div>
@@ -424,7 +424,7 @@ export default function OrdersPage() {
           </div>
         ) : orders.length === 0 ? (
           <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-            Aucune commande trouvee
+            Aucune commande trouvée
           </div>
         ) : (
           <>
@@ -498,7 +498,7 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${paymentStatusColors[order.paymentStatus]}`}>
-                          {order.paymentStatus === 'COMPLETED' ? 'Paye' : order.paymentStatus}
+                          {order.paymentStatus === 'COMPLETED' ? 'Payé' : order.paymentStatus}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-gray-900 dark:text-white font-semibold">
@@ -509,7 +509,7 @@ export default function OrdersPage() {
                           <Link
                             href={`/admin/orders/${order.id}`}
                             className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800 rounded transition-all duration-200"
-                            title="Voir details"
+                            title="Voir détails"
                           >
                             <Eye className="h-4 w-4" />
                           </Link>

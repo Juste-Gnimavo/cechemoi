@@ -107,7 +107,7 @@ export default function CouponsPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('Coupon supprime avec succes')
+        toast.success('Coupon supprimé avec succès')
         fetchCoupons()
       } else {
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -129,23 +129,23 @@ export default function CouponsPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success(currentActive ? 'Coupon desactive' : 'Coupon active')
+        toast.success(currentActive ? 'Coupon désactivé' : 'Coupon activé')
         fetchCoupons()
       } else {
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error toggling coupon:', error)
-      toast.error('Erreur lors de la mise a jour du coupon')
+      toast.error('Erreur lors de la mise à jour du coupon')
     }
   }
 
   const getStatusBadge = (coupon: Coupon) => {
     const statusConfig: Record<string, { color: string; label: string }> = {
       active: { color: 'bg-green-500/10 text-green-500 border-green-500/20', label: 'Actif' },
-      expired: { color: 'bg-red-500/10 text-red-500 border-red-500/20', label: 'Expire' },
-      scheduled: { color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', label: 'Programme' },
-      depleted: { color: 'bg-orange-500/10 text-orange-500 border-orange-500/20', label: 'Epuise' },
+      expired: { color: 'bg-red-500/10 text-red-500 border-red-500/20', label: 'Expiré' },
+      scheduled: { color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', label: 'Programmé' },
+      depleted: { color: 'bg-orange-500/10 text-orange-500 border-orange-500/20', label: 'Épuisé' },
       inactive: { color: 'bg-gray-500/10 text-gray-400 border-gray-500/20', label: 'Inactif' },
     }
 
@@ -179,7 +179,7 @@ export default function CouponsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestion des coupons</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Creez et gerez vos codes de reduction</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Créez et gérez vos codes de réduction</p>
         </div>
         <Link
           href="/admin/coupons/new"
@@ -196,7 +196,7 @@ export default function CouponsPage() {
           stats={[
             { label: 'Total', value: stats.total, icon: Tag, color: 'primary' },
             { label: 'Actifs', value: stats.active, icon: CheckCircle, color: 'green' },
-            { label: 'Expires', value: stats.expired, icon: XCircle, color: 'red' },
+            { label: 'Expirés', value: stats.expired, icon: XCircle, color: 'red' },
             { label: "Aujourd'hui", value: stats.today, icon: Calendar, color: 'blue' },
             { label: 'Ce mois', value: stats.month, icon: TrendingUp, color: 'purple' },
           ]}
@@ -263,12 +263,12 @@ export default function CouponsPage() {
         ) : coupons.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Tag className="h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
-            <div className="text-gray-500 dark:text-gray-400">Aucun coupon trouve</div>
+            <div className="text-gray-500 dark:text-gray-400">Aucun coupon trouvé</div>
             <Link
               href="/admin/coupons/new"
               className="mt-4 text-primary-500 hover:text-primary-400"
             >
-              Creer votre premier coupon
+              Créer votre premier coupon
             </Link>
           </div>
         ) : (
@@ -281,13 +281,13 @@ export default function CouponsPage() {
                       Code
                     </th>
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                      Reduction
+                      Réduction
                     </th>
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Utilisation
                     </th>
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                      Validite
+                      Validité
                     </th>
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Statut
@@ -344,7 +344,7 @@ export default function CouponsPage() {
                                 })}
                               </span>
                             ) : (
-                              <span className="text-gray-500">Illimite</span>
+                              <span className="text-gray-500">Illimité</span>
                             )}
                           </div>
                         </div>
@@ -360,7 +360,7 @@ export default function CouponsPage() {
                                 : 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
                             }`}
                           >
-                            {coupon.active ? 'Desactiver' : 'Activer'}
+                            {coupon.active ? 'Désactiver' : 'Activer'}
                           </button>
                           <Link
                             href={`/admin/coupons/${coupon.id}`}

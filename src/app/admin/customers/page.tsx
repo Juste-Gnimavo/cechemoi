@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, User, DollarSign, ShoppingBag, Star, Users, Calendar, TrendingUp } from 'lucide-react'
+import { Search, User, DollarSign, ShoppingBag, Star, Users, Calendar, TrendingUp, Eye, Pencil, FileText, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
@@ -55,6 +55,8 @@ export default function CustomersPage() {
     search: '',
     segment: '',
   })
+  const [downloadingPdfId, setDownloadingPdfId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchCustomers()
@@ -126,6 +128,68 @@ export default function CustomersPage() {
     return null
   }
 
+  const handleDownloadPdf = async (e: React.MouseEvent, customerId: string, customerName: string | null) => {
+    e.stopPropagation()
+    try {
+      setDownloadingPdfId(customerId)
+      const response = await fetch(`/api/admin/customers/${customerId}/measurements-pdf`)
+
+      if (!response.ok) {
+        const data = await response.json()
+        if (response.status === 404) {
+          toast.error('Aucune mensuration trouvée pour ce client')
+          return
+        }
+        throw new Error(data.error || 'Erreur')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `mensurations-${customerName?.replace(/\s+/g, '_') || customerId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('PDF téléchargé avec succès')
+    } catch (error) {
+      console.error('PDF download error:', error)
+      toast.error('Erreur lors du téléchargement')
+    } finally {
+      setDownloadingPdfId(null)
+    }
+  }
+
+  const handleDeleteCustomer = async (e: React.MouseEvent, customerId: string, customerName: string | null) => {
+    e.stopPropagation()
+    if (!confirm(`Voulez-vous vraiment supprimer le client ${customerName || customerId}?`)) {
+      return
+    }
+
+    try {
+      setDeletingId(customerId)
+      const response = await fetch(`/api/admin/customers/${customerId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('Client supprimé avec succès')
+        fetchCustomers()
+      } else {
+        toast.error(data.error || 'Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Erreur lors de la suppression')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, page }))
   }
@@ -145,7 +209,7 @@ export default function CustomersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestion des clients</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Gerez votre base de clients</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Gérez votre base de clients</p>
         </div>
       </div>
 
@@ -157,7 +221,7 @@ export default function CustomersPage() {
             { label: "Aujourd'hui", value: stats.today, icon: Calendar, color: 'green' },
             { label: 'Cette semaine', value: stats.week, icon: TrendingUp, color: 'blue' },
             { label: 'Ce mois', value: stats.month, icon: TrendingUp, color: 'purple' },
-            { label: 'Cette annee', value: stats.year, icon: TrendingUp, color: 'default' },
+            { label: 'Cette année', value: stats.year, icon: TrendingUp, color: 'default' },
           ]}
         />
       )}
@@ -169,7 +233,7 @@ export default function CustomersPage() {
             <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher par nom, telephone, email..."
+              placeholder="Rechercher par nom, téléphone, email..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -199,7 +263,7 @@ export default function CustomersPage() {
           </div>
         ) : customers.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <div className="text-gray-500 dark:text-gray-400">Aucun client trouve</div>
+            <div className="text-gray-500 dark:text-gray-400">Aucun client trouvé</div>
           </div>
         ) : (
           <>
@@ -227,6 +291,9 @@ export default function CustomersPage() {
                     </th>
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Segment
+                    </th>
+                    <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -299,6 +366,61 @@ export default function CustomersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">{getSegmentBadge(customer.segments)}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1">
+                          {/* View */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.location.href = `/admin/customers/${customer.id}`
+                            }}
+                            className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+                            title="Voir le détail"
+                          >
+                            <Eye className="h-4 w-4 text-gray-400 group-hover:text-blue-500" />
+                          </button>
+
+                          {/* Edit */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              window.location.href = `/admin/customers/${customer.id}?edit=true`
+                            }}
+                            className="p-2 hover:bg-orange-500/10 rounded-lg transition-colors group"
+                            title="Modifier"
+                          >
+                            <Pencil className="h-4 w-4 text-gray-400 group-hover:text-orange-500" />
+                          </button>
+
+                          {/* PDF Download */}
+                          <button
+                            onClick={(e) => handleDownloadPdf(e, customer.id, customer.name)}
+                            disabled={downloadingPdfId === customer.id}
+                            className="p-2 hover:bg-green-500/10 rounded-lg transition-colors group disabled:opacity-50"
+                            title="Télécharger PDF"
+                          >
+                            {downloadingPdfId === customer.id ? (
+                              <Loader2 className="h-4 w-4 text-green-500 animate-spin" />
+                            ) : (
+                              <FileText className="h-4 w-4 text-gray-400 group-hover:text-green-500" />
+                            )}
+                          </button>
+
+                          {/* Delete */}
+                          <button
+                            onClick={(e) => handleDeleteCustomer(e, customer.id, customer.name)}
+                            disabled={deletingId === customer.id}
+                            className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group disabled:opacity-50"
+                            title="Supprimer"
+                          >
+                            {deletingId === customer.id ? (
+                              <Loader2 className="h-4 w-4 text-red-500 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
+                            )}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

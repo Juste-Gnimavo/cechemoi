@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         phone: true,
         role: true,
         createdAt: true,
-        metadata: true,
+        lastLoginAt: true,
       },
       orderBy: [
         { role: 'asc' }, // ADMIN first, then MANAGER, then STAFF
@@ -47,13 +47,11 @@ export async function GET(req: NextRequest) {
       staff: members.filter((m) => m.role === 'STAFF').length,
     }
 
-    // Extract last login from metadata
+    // Map lastLoginAt to lastLogin for frontend compatibility
     const membersWithLastLogin = members.map((member) => ({
       ...member,
-      lastLogin: member.metadata && typeof member.metadata === 'object' && 'lastLogin' in member.metadata
-        ? (member.metadata as any).lastLogin
-        : null,
-      metadata: undefined, // Remove metadata from response
+      lastLogin: member.lastLoginAt,
+      lastLoginAt: undefined, // Remove from response
     }))
 
     return NextResponse.json({
@@ -99,13 +97,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if email already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    // Check if email+role already exists (same email can have different roles)
+    const existingUser = await prisma.user.findFirst({
+      where: { email, role },
     })
 
     if (existingUser) {
-      return NextResponse.json({ error: 'Cet email est déjà utilisé' }, { status: 400 })
+      return NextResponse.json({ error: 'Cet email est deja utilise pour ce role' }, { status: 400 })
+    }
+
+    // Check if phone+role already exists
+    const existingPhone = await prisma.user.findUnique({
+      where: { phone_role: { phone, role } },
+    })
+
+    if (existingPhone) {
+      return NextResponse.json({ error: 'Ce telephone est deja utilise pour ce role' }, { status: 400 })
     }
 
     // Hash password

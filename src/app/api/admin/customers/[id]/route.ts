@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { prisma } from '@/lib/prisma'
+import { deleteFromS3 } from '@/lib/s3-client'
 
 
 // Force dynamic rendering for API routes using auth
@@ -276,6 +277,66 @@ export async function PUT(
     console.error('Error updating customer:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du client' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/admin/customers/[id] - Delete customer
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
+      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+    }
+
+    // Check if customer exists
+    const customer = await prisma.user.findUnique({
+      where: { id: params.id },
+      include: {
+        orders: { select: { id: true } },
+        measurements: { select: { id: true, pdfKey: true } },
+      },
+    })
+
+    if (!customer) {
+      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+    }
+
+    // Prevent deletion if customer has orders
+    if (customer.orders.length > 0) {
+      return NextResponse.json(
+        { error: 'Impossible de supprimer un client avec des commandes. Vous pouvez desactiver le compte.' },
+        { status: 400 }
+      )
+    }
+
+    // Delete PDFs from S3 if any
+    for (const measurement of customer.measurements) {
+      if (measurement.pdfKey) {
+        try {
+          await deleteFromS3(measurement.pdfKey)
+        } catch (s3Error) {
+          console.error('Failed to delete PDF from S3:', s3Error)
+          // Continue anyway - S3 cleanup can be done later
+        }
+      }
+    }
+
+    // Delete customer (cascades to measurements, notes, etc.)
+    await prisma.user.delete({
+      where: { id: params.id },
+    })
+
+    return NextResponse.json({ success: true, message: 'Client supprime avec succes' })
+  } catch (error) {
+    console.error('Error deleting customer:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors de la suppression du client' },
       { status: 500 }
     )
   }

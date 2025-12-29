@@ -121,9 +121,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user ID from session
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+    // Get user ID from session (admin/manager/staff)
+    const user = await prisma.user.findFirst({
+      where: { email: session.user.email!, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
       select: { id: true },
     })
 

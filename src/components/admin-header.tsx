@@ -39,23 +39,31 @@ import {
   BadgeInfo,
   Sun,
   Moon,
-  CalendarDays
+  CalendarDays,
+  Scissors,
+  UsersRound
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useTheme } from '@/store/theme'
 
-// Types for menu structure
+// Types for menu structure (3 levels support)
 interface SubMenuItem {
   href: string
   label: string
   badge?: string
 }
 
+interface MenuGroup {
+  label: string
+  items: SubMenuItem[]
+}
+
 interface MenuItem {
   href?: string
   label: string
   icon: any
-  items?: SubMenuItem[]
+  items?: SubMenuItem[]   // For simple dropdowns (2 levels)
+  groups?: MenuGroup[]    // For grouped dropdowns (3 levels)
 }
 
 export function AdminHeader() {
@@ -69,36 +77,38 @@ export function AdminHeader() {
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { theme, toggleTheme } = useTheme()
 
-  // Menu structure with dropdowns
+  // Menu structure with dropdowns - Reorganized into 6 main menus with groups
   const menuItems: MenuItem[] = [
+    // 1. TABLEAU DE BORD - Lien direct
     {
       href: '/admin',
       label: 'Tableau de bord',
       icon: LayoutDashboard,
     },
-    {
-      label: 'Campagnes',
-      icon: Send,
-      items: [
-        { href: '/admin/campaigns', label: 'Tableau de bord' },
-        { href: '/admin/campaigns/sms', label: 'SMS' },
-        { href: '/admin/campaigns/whatsapp', label: 'WhatsApp Business' },
-        { href: '/admin/campaigns/whatsapp-cloud', label: 'WhatsApp Cloud' },
-        { href: '/admin/campaigns/push', label: 'Notifications Push', badge: 'NEW' },
-        { href: '/admin/campaigns/reports', label: 'Rapports' },
-      ],
-    },
+
+    // 2. CLIENTS - Gestion + Contact
     {
       label: 'Clients',
       icon: Users,
-      items: [
-        { href: '/admin/customers', label: 'Voir/Chercher des clients' },
-        { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
-        { href: '/admin/customers/send-sms', label: 'Envoyez un SMS à un client' },
-        { href: '/admin/customers/send-whatsapp', label: 'Envoyez un message WhatsApp' },
-        { href: '/admin/reviews', label: 'Voir Avis clients' },
+      groups: [
+        {
+          label: 'Gestion des clients',
+          items: [
+            { href: '/admin/customers', label: 'Voir/Chercher des clients' },
+            { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
+          ],
+        },
+        {
+          label: 'Contacter les clients',
+          items: [
+            { href: '/admin/customers/send-sms', label: 'Envoyez un SMS à un client' },
+            { href: '/admin/customers/send-whatsapp', label: 'Envoyez un message WhatsApp' },
+          ],
+        },
       ],
     },
+
+    // 3. RENDEZ-VOUS - Standalone menu
     {
       label: 'Rendez-vous',
       icon: CalendarDays,
@@ -112,96 +122,172 @@ export function AdminHeader() {
         { href: '/admin/appointments/services', label: 'Types de consultation' },
       ],
     },
+
+    // 4. SUR-MESURE - Commandes personnalisées et production
     {
-      label: 'Commandes',
-      icon: ShoppingBag,
+      label: 'Sur-Mesure',
+      icon: Scissors,
       items: [
-        { href: '/admin/orders', label: 'Voir toutes les commandes' },
-        { href: '/admin/orders?status=pending', label: 'Voir Commandes en attente' },
-        { href: '/admin/orders?status=active', label: 'Voir Commandes actives' },
-        { href: '/admin/orders?status=cancelled', label: 'Voir Commandes annulées' },
-        { href: '/admin/orders/new', label: 'Créer une nouvelle commande', badge: 'NEW' },
+        { href: '/admin/custom-orders', label: 'Toutes les commandes' },
+        { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW' },
+        { href: '/admin/production', label: 'Production (Kanban)' },
       ],
     },
+
+    // 5. ARGENT - Factures + Recus + Ventes
     {
-      label: 'Facturation',
-      icon: FileText,
-      items: [
-        { href: '/admin/invoices', label: 'Voir toutes les Factures' },
-{ href: '/admin/invoices/new', label: 'Créer Nouvelle Facture', badge: 'NEW' },
-        { href: '/admin/invoices?status=paid', label: 'Factures Payées' },
-        { href: '/admin/invoices?status=draft', label: 'Factures Brouillon' },
-        { href: '/admin/invoices?status=unpaid', label: 'Factures Non payées' },
-        { href: '/admin/invoices?status=cancelled', label: 'Factures Annulées' },
-        { href: '/admin/invoices?status=refunded', label: 'Factures Remboursées' },
-        { href: '/admin/invoices/standalone-payments', label: 'Paiements autonomes', badge: 'NEW' },
-        { href: '/admin/invoices/transactions', label: 'Voir toutes les transactions' },
-      ],
-    },
-    {
-      label: 'Ventes',
+      label: 'Argent',
       icon: TrendingUp,
-      items: [
-        { href: '/admin/sales', label: 'Voir toutes les ventes', badge: 'NEW' },
-        { href: '/admin/sales/today', label: "Ventes d'aujourd'hui" },
-        { href: '/admin/sales/week', label: 'Ventes de la semaine' },
-        { href: '/admin/sales/month', label: 'Vente du mois' },
-        { href: '/admin/sales/year', label: "Vente de l'année" },
+      groups: [
+        {
+          label: 'Factures',
+          items: [
+            { href: '/admin/invoices', label: 'Toutes les factures' },
+            { href: '/admin/invoices/new', label: 'Créer une facture', badge: 'NEW' },
+            { href: '/admin/invoices?status=paid', label: 'Factures payées' },
+            { href: '/admin/invoices?status=draft', label: 'Factures brouillon' },
+            { href: '/admin/invoices?status=unpaid', label: 'Factures non payées' },
+            { href: '/admin/invoices?status=cancelled', label: 'Factures annulées' },
+            { href: '/admin/invoices?status=refunded', label: 'Factures remboursées' },
+            { href: '/admin/invoices/standalone-payments', label: 'Paiements autonomes', badge: 'NEW' },
+            { href: '/admin/invoices/transactions', label: 'Toutes les transactions' },
+          ],
+        },
+        {
+          label: 'Recus',
+          items: [
+            { href: '/admin/receipts', label: 'Tous les recus' },
+            { href: '/admin/receipts?today=true', label: "Recus d'aujourd'hui" },
+          ],
+        },
+        {
+          label: 'Ventes',
+          items: [
+            { href: '/admin/sales', label: 'Toutes les ventes', badge: 'NEW' },
+            { href: '/admin/sales/today', label: "Ventes d'aujourd'hui" },
+            { href: '/admin/sales/week', label: 'Ventes de la semaine' },
+            { href: '/admin/sales/month', label: 'Ventes du mois' },
+            { href: '/admin/sales/year', label: "Ventes de l'année" },
+          ],
+        },
       ],
     },
 
+    // 6. BOUTIQUE - Commandes + Catalogue + Stock + Médias
     {
-      label: 'Blog',
-      icon: Newspaper,
-      items: [
-        { href: '/admin/blog', label: 'Tableau de bord' },
-        { href: '/admin/blog/posts', label: 'Tous les articles' },
-        { href: '/admin/blog/posts/new', label: 'Nouvel article', badge: 'NEW' },
-        { href: '/admin/blog/categories', label: 'Catégories' },
-        { href: '/admin/blog/tags', label: 'Étiquettes' },
-      ],
-    },
-    {
-      label: 'Catalogue Produits',
+      label: 'Boutique',
       icon: Package,
-      items: [
-        { href: '/admin/products', label: 'Tous les produits' },
-        { href: '/admin/products/new', label: 'Ajouter un nouveau produit' },
-        { href: '/admin/categories', label: 'Gestion des catégories' },
-        { href: '/admin/categories/new', label: 'Ajouter une nouvelle catégorie' },
-        { href: '/admin/tags', label: 'Gestions des étiquettes (tags)' },
-        { href: '/admin/inventory', label: 'Gestion de stock Inventaire' },
-        { href: '/admin/coupons', label: 'Gestion des coupons' },
-                { href: '/admin/media', label: 'Gestion des images' },
+      groups: [
+        {
+          label: 'Commandes',
+          items: [
+            { href: '/admin/orders', label: 'Voir toutes les commandes' },
+            { href: '/admin/orders?status=pending', label: 'Commandes en attente' },
+            { href: '/admin/orders?status=active', label: 'Commandes actives' },
+            { href: '/admin/orders?status=cancelled', label: 'Commandes annulées' },
+            { href: '/admin/orders/new', label: 'Créer une commande', badge: 'NEW' },
+          ],
+        },
+        {
+          label: 'Produits',
+          items: [
+            { href: '/admin/products', label: 'Tous les produits' },
+            { href: '/admin/products/new', label: 'Ajouter un produit' },
+            { href: '/admin/categories', label: 'Gestion des catégories' },
+            { href: '/admin/categories/new', label: 'Ajouter une catégorie' },
+            { href: '/admin/tags', label: 'Gestion des étiquettes' },
+          ],
+        },
+        {
+          label: 'Stock et Prix',
+          items: [
+            { href: '/admin/inventory', label: 'Gestion du stock' },
+            { href: '/admin/coupons', label: 'Codes promo' },
+          ],
+        },
+        {
+          label: 'Médias',
+          items: [
+            { href: '/admin/media', label: 'Galerie d\'images' },
+          ],
+        },
+      ],
+    },
 
+    // 7. COMMUNICATION - Campagnes + Notifications + Blog
+    {
+      label: 'Communication',
+      icon: Send,
+      groups: [
+        {
+          label: 'Campagnes',
+          items: [
+            { href: '/admin/campaigns', label: 'Tableau de bord' },
+            { href: '/admin/campaigns/sms', label: 'SMS' },
+            { href: '/admin/campaigns/whatsapp', label: 'WhatsApp Business' },
+            { href: '/admin/campaigns/whatsapp-cloud', label: 'WhatsApp Cloud' },
+            { href: '/admin/campaigns/push', label: 'Notifications Push', badge: 'NEW' },
+            { href: '/admin/campaigns/reports', label: 'Rapports' },
+          ],
+        },
+        {
+          label: 'Notifications',
+          items: [
+            { href: '/admin/notifications', label: 'Tableau de bord' },
+            { href: '/admin/notifications/logs', label: 'Logs' },
+            { href: '/admin/notifications/templates', label: 'Templates' },
+            { href: '/admin/notifications/follow-up', label: 'Messages de relance' },
+            { href: '/admin/notifications/settings', label: 'Paramètres' },
+          ],
+        },
+        {
+          label: 'Blog',
+          items: [
+            { href: '/admin/blog', label: 'Tableau de bord' },
+            { href: '/admin/blog/posts', label: 'Tous les articles' },
+            { href: '/admin/blog/posts/new', label: 'Nouvel article', badge: 'NEW' },
+            { href: '/admin/blog/categories', label: 'Catégories' },
+            { href: '/admin/blog/tags', label: 'Étiquettes' },
+          ],
+        },
       ],
     },
+
+    // 7. ÉQUIPE - Gestion du personnel
     {
-      label: 'Notifications',
-      icon: BadgeInfo,
+      label: 'Équipe',
+      icon: UsersRound,
       items: [
-        { href: '/admin/notifications', label: 'Tableau de bord' },
-        { href: '/admin/notifications/logs', label: 'Logs des notifications' },
-        { href: '/admin/notifications/templates', label: 'Templates de notifications' },
-                { href: '/admin/notifications/follow-up', label: 'Messages de Relance' },
-        { href: '/admin/notifications/settings', label: 'Paramètres de notification' },
+        { href: '/admin/team', label: 'Gestion du staff' },
+        { href: '/admin/tailors', label: 'Gestion des couturiers' },
+        { href: '/admin/staff-performance', label: 'Performance équipe' },
       ],
     },
+
+    // 8. RÉGLAGES - Paramètres boutique
     {
-      label: 'Paramètres',
+      label: 'Réglages',
       icon: Settings,
       items: [
         { href: '/admin/settings', label: 'Configuration de la boutique' },
-        { href: '/admin/shipping', label: 'Gestion des Livraisons' },
+        { href: '/admin/shipping', label: 'Gestion des livraisons' },
         { href: '/admin/coupons', label: 'Gestion des coupons' },
-        { href: '/admin/team', label: 'Gestion des utilisateurs' },
       ],
     },
   ]
 
-  const isActive = (href?: string, items?: SubMenuItem[]) => {
+  const isActive = (href?: string, items?: SubMenuItem[], groups?: MenuGroup[]) => {
+    // For grouped menus (3 levels)
+    if (!href && groups) {
+      return groups.some(group =>
+        group.items.some(item => {
+          const cleanPath = item.href.split('?')[0]
+          return pathname?.startsWith(cleanPath)
+        })
+      )
+    }
+    // For simple dropdown menus (2 levels)
     if (!href && items) {
-      // For dropdown menus, check if any submenu item is active
       return items.some(item => {
         const cleanPath = item.href.split('?')[0]
         return pathname?.startsWith(cleanPath)
@@ -288,113 +374,127 @@ export function AdminHeader() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-[9999] bg-white/95 dark:bg-dark-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-dark-800 overflow-visible">
-      <div className="container mx-auto px-4 overflow-visible">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-dark-800">
-          {/* Logo */}
-          <Link href="/admin" className="flex items-center">
-            <Image
-              src="/logo/home-page-horizontal-logo-cechemoi-white.png"
-              alt="CÈCHÉMOI"
-              width={180}
-              height={40}
-              style={{ height: '40px', width: 'auto' }}
-              className="dark:brightness-100 brightness-0"
-              priority
-            />
-          </Link>
+    <header className="sticky top-0 z-[9999] bg-white dark:bg-dark-900 border-b border-gray-200 dark:border-dark-800 overflow-visible shadow-sm">
+      <div className="overflow-visible">
+        {/* Top Bar - Colorful background */}
+        <div className="bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between py-3">
+              {/* Logo with white outline */}
+              <Link href="/admin" className="flex items-center">
+                <Image
+                  src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
+                  alt="CÈCHÉMOI"
+                  width={220}
+                  height={60}
+                  style={{
+                    height: '60px',
+                    width: 'auto',
+                    filter: theme === 'dark' ? 'none' : `
+                      drop-shadow(1px 0 0 white)
 
-          {/* Admin Badge & Actions */}
-          <div className="flex items-center space-x-4">
-            {/* Quick Links */}
-            <Link
-              href="/admin/marketing"
-              className={`hidden lg:flex items-center space-x-1 text-sm transition-colors ${
-                pathname?.startsWith('/admin/marketing')
-                  ? 'text-primary-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <Megaphone className="h-4 w-4" />
-              <span>Marketing</span>
-            </Link>
+                    `
+                  }}
+                  priority
+                />
+              </Link>
 
-            <Link
-              href="/admin/analytics"
-              className={`hidden lg:flex items-center space-x-1 text-sm transition-colors ${
-                pathname?.startsWith('/admin/analytics')
-                  ? 'text-primary-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>Analytics</span>
-            </Link>
+              {/* Admin Badge & Actions */}
+              <div className="flex items-center space-x-3">
+                {/* Quick Links */}
+                <Link
+                  href="/admin/marketing"
+                  className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                    pathname?.startsWith('/admin/marketing')
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Megaphone className="h-4 w-4" />
+                  <span>Marketing</span>
+                </Link>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-              aria-label={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
+                <Link
+                  href="/admin/analytics"
+                  className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                    pathname?.startsWith('/admin/analytics')
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Analytics</span>
+                </Link>
 
+                {/* Separator */}
+                <div className="hidden lg:block w-px h-6 bg-white/30" />
 
-            {/* Admin Badge */}
-            <div className="hidden md:flex items-center space-x-2 bg-primary-500/20 px-3 py-1.5 rounded-full border border-primary-500/30">
-              <UserCog className="h-4 w-4 text-primary-400" />
-              <span className="text-sm font-medium text-primary-400">Administrateur</span>
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                  aria-label={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-5 h-5" />
+                  ) : (
+                    <Moon className="w-5 h-5" />
+                  )}
+                </button>
+
+                {/* Admin Badge */}
+                <div className="hidden md:flex items-center space-x-2 bg-white/15 px-3 py-1.5 rounded-full border border-white/20">
+                  <UserCog className="h-4 w-4 text-white" />
+                  <span className="text-sm font-medium text-white">Admin</span>
+                </div>
+
+                {/* User Name */}
+                {session?.user?.name && (
+                  <span className="hidden sm:inline text-sm text-white/90">
+                    {session.user.name.split(' ')[0]}
+                  </span>
+                )}
+
+                {/* Back to Store */}
+                <Link
+                  href="/"
+                  className="flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  <Store className="h-4 w-4" />
+                  <span className="hidden sm:inline">Boutique</span>
+                </Link>
+
+                {/* Logout */}
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Déconnexion"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+
+                {/* Mobile Menu Toggle */}
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="md:hidden p-2 rounded-lg text-white hover:bg-white/10"
+                >
+                  {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </button>
+              </div>
             </div>
-
-            {/* User Name */}
-            {session?.user?.name && (
-              <span className="hidden sm:inline text-sm text-gray-700 dark:text-gray-300">
-                {session.user.name.split(' ')[0]}
-              </span>
-            )}
-
-            {/* Back to Store */}
-            <Link
-              href="/"
-              className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <Store className="h-4 w-4" />
-              <span className="hidden sm:inline">Boutique</span>
-            </Link>
-
-            {/* Logout */}
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              title="Déconnexion"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
           </div>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:block py-3 overflow-visible bg-gray-50 dark:bg-transparent -mx-4 px-4">
-          <ul className="flex items-center space-x-1 overflow-x-auto" style={{ overflowY: 'visible' }}>
+        <div className="hidden md:block bg-gray-50 dark:bg-dark-800/50 border-t border-gray-100 dark:border-dark-700">
+          <div className="container mx-auto px-4">
+            <nav className="py-2 overflow-visible">
+              <ul className="flex items-center space-x-1" style={{ overflowY: 'visible' }}>
             {menuItems.map((item, index) => {
               const Icon = item.icon
-              const active = isActive(item.href, item.items)
-              const hasDropdown = item.items && item.items.length > 0
+              const active = isActive(item.href, item.items, item.groups)
+              const hasDropdown = (item.items && item.items.length > 0) || (item.groups && item.groups.length > 0)
 
               return (
                 <li
@@ -409,8 +509,8 @@ export function AdminHeader() {
                       href={item.href}
                       className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
                         active
-                          ? 'bg-primary-500/20 text-primary-400 font-medium'
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-dark-800'
+                          ? 'bg-primary-500 text-white font-medium shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -423,8 +523,8 @@ export function AdminHeader() {
                         ref={(el) => { buttonRefs.current[item.label] = el }}
                         className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${
                           active
-                            ? 'bg-primary-500/20 text-primary-400 font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-dark-800'
+                            ? 'bg-primary-500 text-white font-medium shadow-sm'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
                         }`}
                         onClick={() => handleDropdownToggle(item.label)}
                       >
@@ -437,18 +537,20 @@ export function AdminHeader() {
                 </li>
               )
             })}
-          </ul>
-        </nav>
+              </ul>
+            </nav>
+          </div>
+        </div>
 
         {/* Dropdown Menus (Fixed Positioned) */}
         {openDropdown && dropdownPosition && (
           <>
             {menuItems
-              .filter(item => item.label === openDropdown && item.items)
+              .filter(item => item.label === openDropdown && (item.items || item.groups))
               .map((item) => (
                 <div
                   key={item.label}
-                  className="fixed w-72 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl py-2 z-[10000]"
+                  className="fixed w-80 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl py-2 z-[10000] max-h-[80vh] overflow-y-auto"
                   style={{
                     top: `${dropdownPosition.top + 4}px`,
                     left: `${dropdownPosition.left}px`
@@ -456,12 +558,52 @@ export function AdminHeader() {
                   onMouseEnter={keepDropdownOpen}
                   onMouseLeave={closeDropdown}
                 >
-                  {item.items!.map((subItem, subIndex) => (
+                  {/* Render grouped items (3 levels) */}
+                  {item.groups && item.groups.map((group, groupIndex) => (
+                    <div key={group.label + groupIndex}>
+                      {groupIndex > 0 && (
+                        <div className="border-t border-gray-200 dark:border-dark-700 my-2" />
+                      )}
+                      <div className="px-4 py-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-primary-500 dark:text-primary-400">
+                          {group.label}
+                        </span>
+                      </div>
+                      {group.items.map((subItem, subIndex) => (
+                        <Link
+                          key={subItem.href + subIndex}
+                          href={subItem.href}
+                          onClick={() => {
+                            if (closeTimeoutRef.current) {
+                              clearTimeout(closeTimeoutRef.current)
+                              closeTimeoutRef.current = null
+                            }
+                            setOpenDropdown(null)
+                            setDropdownPosition(null)
+                          }}
+                          className={`flex items-center justify-between px-4 py-2 transition-colors ${
+                            pathname === subItem.href.split('?')[0] || pathname === subItem.href
+                              ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                        >
+                          <span className="text-sm">{subItem.label}</span>
+                          {subItem.badge && (
+                            <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full font-medium">
+                              {subItem.badge}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+
+                  {/* Render simple items (2 levels) */}
+                  {item.items && !item.groups && item.items.map((subItem, subIndex) => (
                     <Link
                       key={subItem.href + subIndex}
                       href={subItem.href}
                       onClick={() => {
-                        // Clear any timeouts and close immediately
                         if (closeTimeoutRef.current) {
                           clearTimeout(closeTimeoutRef.current)
                           closeTimeoutRef.current = null
@@ -471,7 +613,7 @@ export function AdminHeader() {
                       }}
                       className={`flex items-center justify-between px-4 py-2.5 transition-colors ${
                         pathname === subItem.href.split('?')[0] || pathname === subItem.href
-                          ? 'bg-primary-500/20 text-primary-400'
+                          ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400'
                           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
@@ -490,100 +632,142 @@ export function AdminHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-gray-200 dark:border-dark-800">
-            <ul className="space-y-1">
-              {menuItems.map((item, index) => {
-                const Icon = item.icon
-                const active = isActive(item.href, item.items)
-                const isExpanded = openMobileSection === item.label
+          <nav className="md:hidden py-4 border-t border-gray-200 dark:border-dark-800 bg-white dark:bg-dark-900">
+            <div className="container mx-auto px-4">
+              <ul className="space-y-1">
+                {menuItems.map((item, index) => {
+                  const Icon = item.icon
+                  const active = isActive(item.href, item.items, item.groups)
+                  const isExpanded = openMobileSection === item.label
+                  const hasSubmenu = (item.items && item.items.length > 0) || (item.groups && item.groups.length > 0)
 
-                return (
-                  <li key={item.label + index}>
-                    {item.href ? (
-                      // Single link (no dropdown)
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                          active
-                            ? 'bg-primary-500/20 text-primary-400 font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800'
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                      </Link>
-                    ) : (
-                      // Expandable section
-                      <div>
-                        <button
-                          onClick={() =>
-                            setOpenMobileSection(isExpanded ? null : item.label)
-                          }
-                          className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors ${
+                  return (
+                    <li key={item.label + index}>
+                      {item.href ? (
+                        // Single link (no dropdown)
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsMenuOpen(false)}
+                          className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                             active
-                              ? 'bg-primary-500/20 text-primary-400 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800'
+                              ? 'bg-primary-500 text-white font-medium'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800'
                           }`}
                         >
-                          <div className="flex items-center space-x-3">
-                            <Icon className="h-5 w-5" />
-                            <span>{item.label}</span>
-                          </div>
-                          <ChevronDown
-                            className={`h-4 w-4 transition-transform ${
-                              isExpanded ? 'rotate-180' : ''
+                          <Icon className="h-5 w-5" />
+                          <span>{item.label}</span>
+                        </Link>
+                      ) : hasSubmenu ? (
+                        // Expandable section
+                        <div>
+                          <button
+                            onClick={() =>
+                              setOpenMobileSection(isExpanded ? null : item.label)
+                            }
+                            className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-colors ${
+                              active
+                                ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400 font-medium'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-800'
                             }`}
-                          />
-                        </button>
+                          >
+                            <div className="flex items-center space-x-3">
+                              <Icon className="h-5 w-5" />
+                              <span>{item.label}</span>
+                            </div>
+                            <ChevronDown
+                              className={`h-4 w-4 transition-transform ${
+                                isExpanded ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
 
-                        {/* Submenu items */}
-                        {isExpanded && item.items && (
-                          <ul className="mt-2 ml-4 space-y-1 border-l-2 border-gray-300 dark:border-dark-700 pl-4">
-                            {item.items.map((subItem, subIndex) => (
-                              <li key={subItem.href + subIndex}>
-                                <Link
-                                  href={subItem.href}
-                                  onClick={() => {
-                                    setIsMenuOpen(false)
-                                    setOpenMobileSection(null)
-                                  }}
-                                  className={`flex items-center justify-between px-3 py-2 rounded transition-colors text-sm ${
-                                    pathname === subItem.href.split('?')[0] ||
-                                    pathname === subItem.href
-                                      ? 'bg-primary-500/20 text-primary-400 font-medium'
-                                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-800'
-                                  }`}
-                                >
-                                  <span>{subItem.label}</span>
-                                  {subItem.badge && (
-                                    <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full font-medium">
-                                      {subItem.badge}
-                                    </span>
-                                  )}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                )
-              })}
-              <li className="pt-3 border-t border-gray-200 dark:border-dark-800">
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false)
-                    signOut({ callbackUrl: '/' })
-                  }}
-                  className="flex items-center space-x-3 px-4 py-3 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-dark-800 rounded-lg transition-colors w-full"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>Déconnexion</span>
-                </button>
-              </li>
-            </ul>
+                          {/* Grouped submenu items (3 levels) */}
+                          {isExpanded && item.groups && (
+                            <div className="mt-2 ml-4 border-l-2 border-primary-200 dark:border-dark-600 pl-4 space-y-4">
+                              {item.groups.map((group, groupIndex) => (
+                                <div key={group.label + groupIndex}>
+                                  <div className="text-xs font-semibold uppercase tracking-wider text-primary-500 dark:text-primary-400 px-3 py-1">
+                                    {group.label}
+                                  </div>
+                                  <ul className="space-y-1">
+                                    {group.items.map((subItem, subIndex) => (
+                                      <li key={subItem.href + subIndex}>
+                                        <Link
+                                          href={subItem.href}
+                                          onClick={() => {
+                                            setIsMenuOpen(false)
+                                            setOpenMobileSection(null)
+                                          }}
+                                          className={`flex items-center justify-between px-3 py-2 rounded transition-colors text-sm ${
+                                            pathname === subItem.href.split('?')[0] ||
+                                            pathname === subItem.href
+                                              ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400 font-medium'
+                                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-800'
+                                          }`}
+                                        >
+                                          <span>{subItem.label}</span>
+                                          {subItem.badge && (
+                                            <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full font-medium">
+                                              {subItem.badge}
+                                            </span>
+                                          )}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Simple submenu items (2 levels) */}
+                          {isExpanded && item.items && !item.groups && (
+                            <ul className="mt-2 ml-4 space-y-1 border-l-2 border-primary-200 dark:border-dark-600 pl-4">
+                              {item.items.map((subItem, subIndex) => (
+                                <li key={subItem.href + subIndex}>
+                                  <Link
+                                    href={subItem.href}
+                                    onClick={() => {
+                                      setIsMenuOpen(false)
+                                      setOpenMobileSection(null)
+                                    }}
+                                    className={`flex items-center justify-between px-3 py-2 rounded transition-colors text-sm ${
+                                      pathname === subItem.href.split('?')[0] ||
+                                      pathname === subItem.href
+                                        ? 'bg-primary-500/10 text-primary-500 dark:text-primary-400 font-medium'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-dark-800'
+                                    }`}
+                                  >
+                                    <span>{subItem.label}</span>
+                                    {subItem.badge && (
+                                      <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full font-medium">
+                                        {subItem.badge}
+                                      </span>
+                                    )}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ) : null}
+                    </li>
+                  )
+                })}
+                <li className="pt-3 border-t border-gray-200 dark:border-dark-700">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      signOut({ callbackUrl: '/' })
+                    }}
+                    className="flex items-center space-x-3 px-4 py-3 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-dark-800 rounded-lg transition-colors w-full"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Déconnexion</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
           </nav>
         )}
       </div>

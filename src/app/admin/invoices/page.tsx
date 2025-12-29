@@ -205,8 +205,8 @@ export default function InvoicesPage() {
         <AdminStatsHeader
           stats={[
             { label: 'Total', value: stats.totalInvoices, icon: FileText, color: 'primary' },
-            { label: 'Payees', value: stats.byStatus.PAID, icon: CheckCircle, color: 'green' },
-            { label: 'Envoyees', value: stats.byStatus.SENT, icon: Mail, color: 'blue' },
+            { label: 'Payées', value: stats.byStatus.PAID, icon: CheckCircle, color: 'green' },
+            { label: 'Envoyées', value: stats.byStatus.SENT, icon: Mail, color: 'blue' },
             { label: 'En retard', value: stats.byStatus.OVERDUE, icon: AlertCircle, color: 'red' },
             { label: 'Brouillons', value: stats.byStatus.DRAFT, icon: FileText, color: 'default' },
             { label: 'Revenu', value: formatCurrency(stats.totalRevenue), icon: TrendingUp, color: 'green' },

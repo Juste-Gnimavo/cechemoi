@@ -86,13 +86,13 @@ export default function AvailabilityPage() {
       })
 
       if (res.ok) {
-        toast.success('Disponibilite mise a jour')
+        toast.success('Disponibilité mise à jour')
         setEditingId(null)
         setEditForm({})
         fetchAvailability()
       } else {
         const data = await res.json()
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error saving:', error)
@@ -111,7 +111,7 @@ export default function AvailabilityPage() {
       })
 
       if (res.ok) {
-        toast.success(slot.enabled ? 'Jour desactive' : 'Jour active')
+        toast.success(slot.enabled ? 'Jour désactivé' : 'Jour activé')
         fetchAvailability()
       }
     } catch (error) {
@@ -130,7 +130,7 @@ export default function AvailabilityPage() {
       })
 
       if (res.ok) {
-        toast.success('Disponibilite ajoutee')
+        toast.success('Disponibilité ajoutée')
         setShowAddForm(false)
         setNewSlot({
           dayOfWeek: 0,
@@ -143,7 +143,7 @@ export default function AvailabilityPage() {
         fetchAvailability()
       } else {
         const data = await res.json()
-        toast.error(data.error || 'Erreur lors de la creation')
+        toast.error(data.error || 'Erreur lors de la création')
       }
     } catch (error) {
       console.error('Error adding:', error)
@@ -154,7 +154,7 @@ export default function AvailabilityPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Supprimer cette disponibilite ?')) return
+    if (!confirm('Supprimer cette disponibilité ?')) return
 
     try {
       const res = await fetch(`/api/admin/appointments/availability?id=${id}`, {
@@ -162,7 +162,7 @@ export default function AvailabilityPage() {
       })
 
       if (res.ok) {
-        toast.success('Disponibilite supprimee')
+        toast.success('Disponibilité supprimée')
         fetchAvailability()
       } else {
         toast.error('Erreur lors de la suppression')
@@ -197,10 +197,10 @@ export default function AvailabilityPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Disponibilites
+              Disponibilités
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Gerez vos horaires d'ouverture pour les rendez-vous
+              Gérez vos horaires d'ouverture pour les rendez-vous
             </p>
           </div>
         </div>
@@ -229,7 +229,7 @@ export default function AvailabilityPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              Ajouter une disponibilite
+              Ajouter une disponibilité
             </h2>
             <div className="space-y-4">
               <div>
@@ -260,7 +260,7 @@ export default function AvailabilityPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Fermeture
+                    Ferméture
                   </label>
                   <input
                     type="time"
@@ -273,7 +273,7 @@ export default function AvailabilityPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Duree creneau (min)
+                    Durée créneau (min)
                   </label>
                   <input
                     type="number"
@@ -327,7 +327,7 @@ export default function AvailabilityPage() {
         ) : sortedAvailability.length === 0 ? (
           <div className="p-8 text-center">
             <Calendar className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400 mb-4">Aucune disponibilite configuree</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">Aucune disponibilité configurée</p>
             <button
               onClick={() => setShowAddForm(true)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
@@ -347,7 +347,7 @@ export default function AvailabilityPage() {
                   Horaires
                 </th>
                 <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                  Duree creneau
+                  Durée créneau
                 </th>
                 <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                   Pause entre RDV
@@ -445,7 +445,7 @@ export default function AvailabilityPage() {
                       ) : (
                         <>
                           <X className="w-3 h-3" />
-                          Ferme
+                          Fermé
                         </>
                       )}
                     </button>
@@ -507,13 +507,13 @@ export default function AvailabilityPage() {
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Duree creneau moyenne</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Durée créneau moyenne</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {Math.round(sortedAvailability.reduce((acc, s) => acc + s.slotDuration, 0) / sortedAvailability.length)} min
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Creneaux par semaine</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Créneaux par semaine</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {sortedAvailability.filter(s => s.enabled).reduce((acc, s) => {
                 const [startH, startM] = s.startTime.split(':').map(Number)
@@ -529,7 +529,7 @@ export default function AvailabilityPage() {
       {/* Help Info */}
       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>Astuce :</strong> Cliquez sur le statut <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs"><Check className="w-3 h-3" />Ouvert</span> ou <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs"><X className="w-3 h-3" />Ferme</span> pour activer/desactiver rapidement un jour.
+          <strong>Astuce :</strong> Cliquez sur le statut <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs"><Check className="w-3 h-3" />Ouvert</span> ou <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs"><X className="w-3 h-3" />Fermé</span> pour activer/désactiver rapidement un jour.
         </p>
       </div>
     </div>

@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
+    // Check if user already exists with same email for admin roles
+    const existingUser = await prisma.user.findFirst({
+      where: { email, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { message: 'Un utilisateur avec cet email existe déjà' },
+        { message: 'Un utilisateur avec cet email existe deja' },
         { status: 400 }
       )
     }

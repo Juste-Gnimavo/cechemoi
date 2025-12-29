@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Mail, Send, User, MapPin, Globe, Image as ImageIcon, ExternalLink, UserPlus } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Mail, Send, User, MapPin, Globe, Image as ImageIcon, ExternalLink, UserPlus, Gift, MessageSquare } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { GeolocationCapture } from '@/components/geolocation-capture'
+import { ImageUpload } from '@/components/image-upload'
 import { useConfetti } from '@/hooks/useConfetti'
+import { MeasurementsForm } from '@/components/admin/measurements-form'
 
 export default function NewCustomerPage() {
   const router = useRouter()
@@ -25,6 +27,11 @@ export default function NewCustomerPage() {
   const [phone, setPhone] = useState('')
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [image, setImage] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [howDidYouHearAboutUs, setHowDidYouHearAboutUs] = useState('')
+
+  // Measurements
+  const [measurementsData, setMeasurementsData] = useState<any>(null)
 
   // Location fields
   const [city, setCity] = useState('')
@@ -131,6 +138,8 @@ export default function NewCustomerPage() {
           phone,
           whatsappNumber: whatsappNumber || phone,
           image: image || null,
+          dateOfBirth: dateOfBirth || null,
+          howDidYouHearAboutUs: howDidYouHearAboutUs || null,
           city: city || null,
           country: country || null,
           countryCode: countryCode || null,
@@ -140,6 +149,7 @@ export default function NewCustomerPage() {
           notes: notes || null,
           inscriptionDate: inscriptionDate || null,
           address: addressData,
+          measurements: measurementsData,
           sendWelcomeSMS,
           sendWelcomeWhatsApp,
         }),
@@ -181,6 +191,9 @@ export default function NewCustomerPage() {
     setPhone('')
     setWhatsappNumber('')
     setImage('')
+    setDateOfBirth('')
+    setHowDidYouHearAboutUs('')
+    setMeasurementsData(null)
     setCity('')
     setCountry('Côte d\'Ivoire')
     setCountryCode('CI')
@@ -300,36 +313,59 @@ export default function NewCustomerPage() {
                 Si vide, utilise le numéro de téléphone principal
               </p>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                <Gift className="h-4 w-4 inline mr-2" />
+                Date d'anniversaire
+              </label>
+              <input
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                <MessageSquare className="h-4 w-4 inline mr-2" />
+                Comment avez-vous connu CECHEMOI ?
+              </label>
+              <select
+                value={howDidYouHearAboutUs}
+                onChange={(e) => setHowDidYouHearAboutUs(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Sélectionner...</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
+                <option value="TikTok">TikTok</option>
+                <option value="Google">Google</option>
+                <option value="Bouche à oreille">Bouche à oreille (ami/famille)</option>
+                <option value="Publicité">Publicité</option>
+                <option value="Événement">Événement / Salon</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
           </div>
 
           {/* Profile Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
               <ImageIcon className="h-4 w-4 inline mr-2" />
-              Photo de profil (URL)
+              Photo de profil
             </label>
-            <input
-              type="url"
+            <ImageUpload
               value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="/images/default-avatar.png"
+              onChange={(url) => setImage(url || '')}
+              category="customers/profiles"
+              useS3={true}
+              maxSizeMB={5}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              URL de l'image de profil du client
+            <p className="text-xs text-gray-500 mt-2">
+              Cliquez ou glissez-déposez une image (JPG, PNG, max. 5 Mo)
             </p>
-            {image && (
-              <div className="mt-3">
-                <img
-                  src={image}
-                  alt="Aperçu"
-                  className="h-20 w-20 rounded-full object-cover border-2 border-gray-200 dark:border-dark-700"
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder-avatar.png'
-                  }}
-                />
-              </div>
-            )}
           </div>
         </div>
 
@@ -393,6 +429,18 @@ export default function NewCustomerPage() {
               </p>
             </div>
           </div>
+        </div>
+
+
+        {/* Measurements Section */}
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+          <MeasurementsForm
+            onChange={(data) => setMeasurementsData(data)}
+            collapsed={true}
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Les mensurations peuvent être ajoutées maintenant ou plus tard depuis la fiche client.
+          </p>
         </div>
 
         {/* Loyalty Program */}

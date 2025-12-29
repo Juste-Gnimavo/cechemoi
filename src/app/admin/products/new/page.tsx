@@ -57,7 +57,7 @@ export default function NewProductPage() {
   const [grapeVariety, setGrapeVariety] = useState('') // Tissu/Matiere
   const [alcoholContent, setAlcoholContent] = useState('') // Not used for clothing
   const [volume, setVolume] = useState('') // Tailles disponibles
-  const [wineType, setWineType] = useState('') // Type de vetement
+  const [wineType, setWineType] = useState('') // Type de vêtement
 
   // Metadata
   const [weight, setWeight] = useState('')
@@ -498,10 +498,10 @@ export default function NewProductPage() {
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Caracteristiques du vetement
+                Caractéristiques du vêtement
               </h2>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Afficher les details ?</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Afficher les détails ?</span>
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-dark-700">
                   <button
                     type="button"
@@ -531,23 +531,23 @@ export default function NewProductPage() {
 
             {!isWine && (
               <p className="text-gray-500 text-sm italic">
-                Les caracteristiques sont masquees (utile pour accessoires, cartes cadeaux, etc.)
+                Les caractéristiques sont masquées (utile pour accessoires, cartes cadeaux, etc.)
               </p>
             )}
 
             {isWine && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vetement</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vêtement</label>
                 <select
                   value={wineType}
                   onChange={(e) => setWineType(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
-                  <option value="">Selectionner</option>
+                  <option value="">Sélectionner</option>
                   <option value="Robe">Robe</option>
-                  <option value="Robe de soiree">Robe de soiree</option>
-                  <option value="Robe de mariee">Robe de mariee</option>
+                  <option value="Robe de soirée">Robe de soirée</option>
+                  <option value="Robe de mariée">Robe de mariée</option>
                   <option value="Robe traditionnelle">Robe traditionnelle</option>
                   <option value="Ensemble">Ensemble</option>
                   <option value="Ensemble homme">Ensemble homme</option>
@@ -585,14 +585,14 @@ export default function NewProductPage() {
                   onChange={(e) => setRegion(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
-                  <option value="">Selectionner</option>
+                  <option value="">Sélectionner</option>
                   <option value="Traditionnel">Traditionnel</option>
                   <option value="Moderne">Moderne</option>
                   <option value="Casual">Casual</option>
                   <option value="Chic">Chic</option>
-                  <option value="Ceremonie">Ceremonie</option>
+                  <option value="Cérémonie">Cérémonie</option>
                   <option value="Mariage">Mariage</option>
-                  <option value="Soiree">Soiree</option>
+                  <option value="Soirée">Soirée</option>
                   <option value="Travail">Travail</option>
                   <option value="Streetwear">Streetwear</option>
                 </select>
@@ -610,13 +610,13 @@ export default function NewProductPage() {
               </div>
 
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tissu / Matiere</label>
+                <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tissu / Matière</label>
                 <select
                   value={grapeVariety}
                   onChange={(e) => setGrapeVariety(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
-                  <option value="">Selectionner</option>
+                  <option value="">Sélectionner</option>
                   <option value="Wax">Wax</option>
                   <option value="Kente">Kente</option>
                   <option value="Bazin">Bazin</option>

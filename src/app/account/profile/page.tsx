@@ -5,10 +5,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { CustomerHeader } from '@/components/customer-header'
 import { Footer } from '@/components/footer'
-import { User, Phone, Mail, MapPin, Calendar, Camera, Loader2 } from 'lucide-react'
+import { User, Phone, Mail, MapPin, Calendar, Camera, Loader2, Ruler, Download } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from 'react-hot-toast'
+import { MeasurementsDisplay } from '@/components/measurements-display'
 
 const DEFAULT_AVATAR = '/images/default-avatar.png'
 
@@ -25,6 +26,36 @@ interface ProfileData {
   createdAt: string
 }
 
+interface Measurement {
+  id: string
+  measurementDate: string
+  unit: string
+  takenByStaffName?: string | null
+  dos?: number | null
+  carrureDevant?: number | null
+  carrureDerriere?: number | null
+  epaule?: number | null
+  epauleManche?: number | null
+  poitrine?: number | null
+  tourDeTaille?: number | null
+  longueurDetaille?: number | null
+  bassin?: number | null
+  longueurManches?: string | null
+  tourDeManche?: number | null
+  poignets?: number | null
+  pinces?: number | null
+  longueurTotale?: number | null
+  longueurRobes?: string | null
+  longueurTunique?: number | null
+  ceinture?: number | null
+  longueurPantalon?: number | null
+  frappe?: number | null
+  cuisse?: number | null
+  genoux?: number | null
+  longueurJupe?: string | null
+  autresMesures?: string | null
+}
+
 export default function ProfilePage() {
   const { data: session, status, update } = useSession()
   const router = useRouter()
@@ -33,6 +64,11 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Measurements state
+  const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null)
+  const [measurementHistory, setMeasurementHistory] = useState<Measurement[]>([])
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
 
   // Form state
   const [name, setName] = useState('')
@@ -66,7 +102,54 @@ export default function ProfilePage() {
     }
 
     fetchProfile()
+    fetchMeasurements()
   }, [session, router, status])
+
+  const fetchMeasurements = async () => {
+    try {
+      const response = await fetch('/api/account/measurements')
+      const data = await response.json()
+
+      if (data.success) {
+        setCurrentMeasurement(data.currentMeasurement)
+        setMeasurementHistory(data.measurementHistory || [])
+      }
+    } catch (error) {
+      console.error('Error fetching measurements:', error)
+    }
+  }
+
+  const downloadMeasurementPdf = async (measurementId?: string) => {
+    try {
+      setDownloadingPdf(true)
+      const url = measurementId
+        ? `/api/account/measurements-pdf?measurementId=${measurementId}`
+        : '/api/account/measurements-pdf'
+
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error('Erreur lors du telechargement')
+      }
+
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `mes-mensurations.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+
+      toast.success('PDF telecharge avec succes')
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      toast.error('Erreur lors du telechargement du PDF')
+    } finally {
+      setDownloadingPdf(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -395,21 +478,61 @@ export default function ProfilePage() {
                 </form>
               </div>
 
+              {/* Measurements Section */}
+              <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Ruler className="h-5 w-5 text-primary-500" />
+                    Mes Mensurations
+                  </h3>
+                  {currentMeasurement && (
+                    <button
+                      onClick={() => downloadMeasurementPdf()}
+                      disabled={downloadingPdf}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <Download className="h-4 w-4" />
+                      {downloadingPdf ? 'Telechargement...' : 'Telecharger PDF'}
+                    </button>
+                  )}
+                </div>
+
+                {currentMeasurement ? (
+                  <MeasurementsDisplay
+                    measurement={currentMeasurement}
+                    measurementHistory={measurementHistory}
+                    showHistory={true}
+                    onDownloadPDF={downloadMeasurementPdf}
+                    isDownloading={downloadingPdf}
+                  />
+                ) : (
+                  <div className="text-center py-8">
+                    <Ruler className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Aucune mensuration enregistree
+                    </p>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                      Rendez-vous en boutique pour prendre vos mensurations
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Security Section */}
               <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 mt-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Sécurité</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Securite</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-dark-800 rounded-lg">
                     <div>
-                      <p className="text-gray-900 dark:text-white font-medium">Authentification par téléphone</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Connexion sécurisée par code OTP</p>
+                      <p className="text-gray-900 dark:text-white font-medium">Authentification par telephone</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Connexion securisee par code OTP</p>
                     </div>
                     <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full">
-                      Activé
+                      Active
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Votre compte est protégé par un code de vérification envoyé par SMS à chaque connexion.
+                    Votre compte est protege par un code de verification envoye par SMS a chaque connexion.
                   </p>
                 </div>
               </div>

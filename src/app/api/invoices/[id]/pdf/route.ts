@@ -141,20 +141,22 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   }
 
   // =============================================
-  // LOGO - Embed PNG logo
+  // LOGO - Embed PNG logo (smaller, aligned top-left)
   // =============================================
+  let logoWidth = 0
   try {
     const logoPath = path.join(process.cwd(), 'public', 'apple-touch-icon.png')
     const logoBytes = fs.readFileSync(logoPath)
     const logoImage = await pdfDoc.embedPng(logoBytes)
-    const logoDims = logoImage.scale(0.35)
+    const logoDims = logoImage.scale(0.15) // Even smaller
 
     page.drawImage(logoImage, {
       x: margin,
-      y: height - margin - logoDims.height + 10,
+      y: height - margin - logoDims.height + 15, // Higher position
       width: logoDims.width,
       height: logoDims.height,
     })
+    logoWidth = logoDims.width
   } catch (error) {
     // Fallback: Draw text logo if image fails
     page.drawText('CÈCHÉMOI', {
@@ -164,16 +166,17 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
       font: helveticaBold,
       color: primaryColor,
     })
+    logoWidth = 60
   }
 
   // =============================================
   // HEADER - Company Info (next to logo)
   // =============================================
-  const headerX = margin + 80
+  const headerX = margin + logoWidth + 10
   page.drawText('CÈCHÉMOI', {
     x: headerX,
     y: yPos,
-    size: 22,
+    size: 20,
     font: helveticaBold,
     color: primaryColor,
   })
@@ -206,7 +209,16 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 11
-  page.drawText('www.cechemoi.com | cechemoicreations@gmail.com', {
+  page.drawText('Siteweb: www.cechemoi.com', {
+    x: headerX,
+    y: yPos,
+    size: 9,
+    font: helvetica,
+    color: lightGray,
+  })
+
+  yPos -= 11
+  page.drawText('Email: cechemoicreations@gmail.com', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -258,7 +270,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   // =============================================
   // DIVIDER LINE
   // =============================================
-  yPos = height - margin - 85
+  yPos = height - margin - 95
   page.drawLine({
     start: { x: margin, y: yPos },
     end: { x: width - margin, y: yPos },
@@ -662,54 +674,39 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // =============================================
-  // ROUND STAMP - PAYEE / NON PAYEE
+  // ROUND STAMP - PAYEE only (green) - No stamp for unpaid
   // Positioned on the left side of totals
   // =============================================
-  const stampCenterX = margin + 80
-  const stampCenterY = totalsY - 70
-  const stampRadius = 45
-
-  // Draw stamp circle (outer)
-  page.drawCircle({
-    x: stampCenterX,
-    y: stampCenterY,
-    size: stampRadius,
-    borderColor: isPaid ? paidStampColor : unpaidStampColor,
-    borderWidth: 5,
-  })
-
-  // Draw stamp circle (inner)
-  page.drawCircle({
-    x: stampCenterX,
-    y: stampCenterY,
-    size: stampRadius - 6,
-    borderColor: isPaid ? paidStampColor : unpaidStampColor,
-    borderWidth: 1,
-  })
-
-  // Stamp text
   if (isPaid) {
+    const stampCenterX = margin + 80
+    const stampCenterY = totalsY - 70
+    const stampRadius = 45
+
+    // Draw stamp circle (outer)
+    page.drawCircle({
+      x: stampCenterX,
+      y: stampCenterY,
+      size: stampRadius,
+      borderColor: paidStampColor,
+      borderWidth: 5,
+    })
+
+    // Draw stamp circle (inner)
+    page.drawCircle({
+      x: stampCenterX,
+      y: stampCenterY,
+      size: stampRadius - 6,
+      borderColor: paidStampColor,
+      borderWidth: 1,
+    })
+
+    // Stamp text
     page.drawText('PAYEE', {
       x: stampCenterX - 28,
       y: stampCenterY - 6,
       size: 16,
       font: helveticaBold,
       color: paidStampColor,
-    })
-  } else {
-    page.drawText('NON', {
-      x: stampCenterX - 18,
-      y: stampCenterY + 5,
-      size: 14,
-      font: helveticaBold,
-      color: unpaidStampColor,
-    })
-    page.drawText('PAYEE', {
-      x: stampCenterX - 28,
-      y: stampCenterY - 12,
-      size: 14,
-      font: helveticaBold,
-      color: unpaidStampColor,
     })
   }
 

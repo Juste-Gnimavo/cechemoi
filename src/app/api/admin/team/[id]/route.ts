@@ -88,14 +88,18 @@ export async function PUT(
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 
-    // Check if email is taken by another user
-    if (email !== existingMember.email) {
-      const emailTaken = await prisma.user.findUnique({
-        where: { email },
+    // Check if email+role is taken by another user
+    if (email !== existingMember.email || role !== existingMember.role) {
+      const emailTaken = await prisma.user.findFirst({
+        where: {
+          email,
+          role,
+          id: { not: params.id }, // Exclude current user
+        },
       })
 
       if (emailTaken) {
-        return NextResponse.json({ error: 'Cet email est déjà utilisé' }, { status: 400 })
+        return NextResponse.json({ error: 'Cet email est deja utilise pour ce role' }, { status: 400 })
       }
     }
 

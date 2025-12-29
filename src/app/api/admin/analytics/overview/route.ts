@@ -45,10 +45,11 @@ export async function GET(req: NextRequest) {
       },
     })
 
-    // Get PAID standalone invoices (invoices without orderId)
+    // Get PAID standalone invoices (invoices without orderId AND without customOrderId)
     const paidStandaloneInvoices = await prisma.invoice.findMany({
       where: {
-        orderId: null, // Standalone invoices only
+        orderId: null, // Not linked to regular order
+        customOrderId: null, // Not linked to custom order
         status: 'PAID',
         ...(hasDateFilter && { createdAt: dateFilter }),
       },
@@ -63,13 +64,28 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // Get all receipts (represents actual money received from custom orders)
+    const receipts = await prisma.receipt.findMany({
+      where: hasDateFilter ? { paymentDate: dateFilter } : {},
+      select: {
+        id: true,
+        amount: true,
+        paymentDate: true,
+        customOrderId: true,
+      },
+    })
+
     // Calculate revenue metrics - ONLY from PAID orders (paymentStatus = COMPLETED)
     const paidOrders = orders.filter(order => order.paymentStatus === 'COMPLETED')
     const orderRevenue = paidOrders.reduce((sum, order) => sum + order.total, 0)
 
     // Add standalone invoice revenue
     const standaloneInvoiceRevenue = paidStandaloneInvoices.reduce((sum, inv) => sum + inv.total, 0)
-    const totalRevenue = orderRevenue + standaloneInvoiceRevenue
+
+    // Add receipts revenue (actual payments from custom orders)
+    const receiptsRevenue = receipts.reduce((sum, r) => sum + r.amount, 0)
+
+    const totalRevenue = orderRevenue + standaloneInvoiceRevenue + receiptsRevenue
     const totalOrders = orders.length
     const paidOrdersCount = paidOrders.length
     const averageOrderValue = paidOrdersCount > 0 ? totalRevenue / paidOrdersCount : 0
@@ -153,7 +169,15 @@ export async function GET(req: NextRequest) {
       })
 
       const dayInvoiceRevenue = dayPaidInvoices.reduce((sum, inv) => sum + inv.total, 0)
-      const dayRevenue = dayOrderRevenue + dayInvoiceRevenue
+
+      // Add receipts revenue for the day (custom orders)
+      const dayReceipts = receipts.filter((r) => {
+        const rDate = new Date(r.paymentDate)
+        return rDate >= dayStart && rDate <= dayEnd
+      })
+
+      const dayReceiptsRevenue = dayReceipts.reduce((sum, r) => sum + r.amount, 0)
+      const dayRevenue = dayOrderRevenue + dayInvoiceRevenue + dayReceiptsRevenue
 
       // Count all orders for the day (regardless of payment status)
       const dayAllOrders = orders.filter((order) => {
@@ -226,8 +250,19 @@ export async function GET(req: NextRequest) {
     const previousPeriodInvoices = await prisma.invoice.findMany({
       where: {
         orderId: null,
+        customOrderId: null,
         status: 'PAID',
         createdAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Get previous period receipts
+    const previousPeriodReceipts = await prisma.receipt.findMany({
+      where: {
+        paymentDate: {
           gte: previousPeriodStart,
           lte: previousPeriodEnd,
         },
@@ -238,7 +273,8 @@ export async function GET(req: NextRequest) {
     const previousPaidOrders = previousPeriodOrders.filter(o => o.paymentStatus === 'COMPLETED')
     const previousOrderRevenue = previousPaidOrders.reduce((sum, o) => sum + o.total, 0)
     const previousInvoiceRevenue = previousPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
-    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue
+    const previousReceiptsRevenue = previousPeriodReceipts.reduce((sum, r) => sum + r.amount, 0)
+    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue + previousReceiptsRevenue
 
     // Previous period orders count
     const previousOrdersCount = previousPeriodOrders.length
@@ -257,9 +293,15 @@ export async function GET(req: NextRequest) {
       return invDate >= currentPeriodStart && invDate <= currentPeriodEnd
     })
 
+    const currentPeriodReceipts = receipts.filter(r => {
+      const rDate = new Date(r.paymentDate)
+      return rDate >= currentPeriodStart && rDate <= currentPeriodEnd
+    })
+
     const currentPeriodRevenue =
       currentPeriodPaidOrders.reduce((sum, o) => sum + o.total, 0) +
-      currentPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
+      currentPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0) +
+      currentPeriodReceipts.reduce((sum, r) => sum + r.amount, 0)
     const currentPeriodOrdersCount = currentPeriodAllOrders.length
 
     // Previous period customers (new customers registered)
@@ -332,6 +374,7 @@ export async function GET(req: NextRequest) {
           total: totalRevenue,
           fromOrders: orderRevenue,
           fromStandaloneInvoices: standaloneInvoiceRevenue,
+          fromCustomOrders: receiptsRevenue,
           subtotal: totalSubtotal,
           tax: totalTax,
           shipping: totalShipping,
@@ -348,6 +391,10 @@ export async function GET(req: NextRequest) {
         standaloneInvoices: {
           total: paidStandaloneInvoices.length,
           revenue: standaloneInvoiceRevenue,
+        },
+        customOrders: {
+          receiptsCount: receipts.length,
+          revenue: receiptsRevenue,
         },
         items: {
           totalSold: totalItemsSold,

@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-
+import { uploadToS3 } from '@/lib/s3-client'
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File
     const category = (formData.get('category') as string) || 'temp'
+    const useS3 = formData.get('useS3') === 'true' // Use S3 if specified
 
     if (!file) {
       return NextResponse.json(
@@ -49,10 +50,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validate file size (50MB)
-    if (file.size > 50 * 1024 * 1024) {
+    // Validate file size (5MB for images, 50MB for documents)
+    const maxSize = file.type.startsWith('image/') ? 5 * 1024 * 1024 : 50 * 1024 * 1024
+    if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'Fichier trop volumineux. Maximum 5MB' },
+        { error: `Fichier trop volumineux. Maximum ${file.type.startsWith('image/') ? '5' : '50'}MB` },
         { status: 400 }
       )
     }
@@ -60,21 +62,27 @@ export async function POST(req: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 9)
-    const ext = path.extname(file.name)
+    const ext = path.extname(file.name) || `.${file.type.split('/')[1]}`
     const filename = `${timestamp}-${randomString}${ext}`
 
-    // Ensure directory exists
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', category)
-    await mkdir(uploadDir, { recursive: true })
-
-    // Save file
+    // Convert file to buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const filepath = path.join(uploadDir, filename)
-    await writeFile(filepath, buffer)
 
-    // Return public URL
-    const publicUrl = `/uploads/${category}/${filename}`
+    let publicUrl: string
+
+    if (useS3) {
+      // Upload to S3
+      const s3Key = `${category}/${filename}`
+      publicUrl = await uploadToS3(s3Key, buffer, file.type)
+    } else {
+      // Save to local filesystem (legacy behavior)
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', category)
+      await mkdir(uploadDir, { recursive: true })
+      const filepath = path.join(uploadDir, filename)
+      await writeFile(filepath, buffer)
+      publicUrl = `/uploads/${category}/${filename}`
+    }
 
     return NextResponse.json({
       success: true,
@@ -82,6 +90,7 @@ export async function POST(req: NextRequest) {
       filename,
       size: file.size,
       type: file.type,
+      storage: useS3 ? 's3' : 'local',
     })
   } catch (error) {
     console.error('Upload error:', error)

@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = validation.data
 
-    // Find admin user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // Find admin user by email (admin/manager/staff only)
+    const user = await prisma.user.findFirst({
+      where: { email, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
       select: {
         id: true,
         email: true,

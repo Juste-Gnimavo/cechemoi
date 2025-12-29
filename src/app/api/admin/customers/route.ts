@@ -245,6 +245,8 @@ export async function POST(req: NextRequest) {
       phone: z.string().min(10, 'Téléphone requis'),
       whatsappNumber: z.string().optional().nullable(),
       image: z.string().url('URL invalide').optional().nullable(),
+      dateOfBirth: z.string().optional().nullable(),
+      howDidYouHearAboutUs: z.string().optional().nullable(),
       city: z.string().optional().nullable(),
       country: z.string().optional().nullable(),
       countryCode: z.string().length(2, 'Code pays doit être 2 lettres').optional().nullable(),
@@ -269,6 +271,7 @@ export async function POST(req: NextRequest) {
         geoSource: z.string().optional().nullable(),
         isDefault: z.boolean().default(true),
       }).optional().nullable(),
+      measurements: z.any().optional().nullable(),
       sendWelcomeSMS: z.boolean().default(false),
       sendWelcomeWhatsApp: z.boolean().default(false),
     })
@@ -290,21 +293,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if email already exists (if provided)
+    // Check if email+role already exists (if provided) - customers can have same email as admin
     if (validatedData.email) {
-      const existingEmail = await prisma.user.findUnique({
-        where: { email: validatedData.email },
+      const existingEmail = await prisma.user.findFirst({
+        where: { email: validatedData.email, role: 'CUSTOMER' },
       })
 
       if (existingEmail) {
         return NextResponse.json(
-          { error: 'Un utilisateur avec cet email existe déjà' },
+          { error: 'Un client avec cet email existe deja' },
           { status: 400 }
         )
       }
     }
 
-    // Create customer
+    // Create customer with staff tracking
     const customer = await prisma.user.create({
       data: {
         name: validatedData.name,
@@ -312,12 +315,17 @@ export async function POST(req: NextRequest) {
         phone: validatedData.phone,
         whatsappNumber: validatedData.whatsappNumber || validatedData.phone,
         image: validatedData.image,
+        dateOfBirth: validatedData.dateOfBirth ? new Date(validatedData.dateOfBirth) : null,
+        howDidYouHearAboutUs: validatedData.howDidYouHearAboutUs,
         city: validatedData.city,
         country: validatedData.country,
         countryCode: validatedData.countryCode,
         role: 'CUSTOMER',
         phoneVerified: new Date(), // Admin created, so mark as verified
         createdAt: validatedData.inscriptionDate ? new Date(validatedData.inscriptionDate) : new Date(),
+        // Staff tracking - who created this customer
+        createdByStaffId: (session.user as any).id,
+        createdByStaffName: (session.user as any).name || 'Admin',
       },
     })
 
@@ -367,6 +375,51 @@ export async function POST(req: NextRequest) {
           isDefault: validatedData.address.isDefault,
         },
       })
+    }
+
+    // Create measurements if provided
+    let createdMeasurement = null
+    if (validatedData.measurements && Object.keys(validatedData.measurements).length > 0) {
+      const m = validatedData.measurements
+      // Check if there are any actual measurement values (not just unit and date)
+      const hasMeasurements = Object.entries(m).some(([key, value]) =>
+        !['measurementDate', 'unit'].includes(key) && value !== null && value !== undefined && value !== ''
+      )
+
+      if (hasMeasurements) {
+        createdMeasurement = await prisma.customerMeasurement.create({
+          data: {
+            customerId: customer.id,
+            measurementDate: m.measurementDate ? new Date(m.measurementDate) : new Date(),
+            unit: m.unit || 'cm',
+            takenByStaffId: (session.user as any).id,
+            takenByStaffName: (session.user as any).name || 'Admin',
+            dos: m.dos || null,
+            carrureDevant: m.carrureDevant || null,
+            carrureDerriere: m.carrureDerriere || null,
+            epaule: m.epaule || null,
+            epauleManche: m.epauleManche || null,
+            poitrine: m.poitrine || null,
+            tourDeTaille: m.tourDeTaille || null,
+            longueurDetaille: m.longueurDetaille || null,
+            bassin: m.bassin || null,
+            longueurManches: m.longueurManches || null,
+            tourDeManche: m.tourDeManche || null,
+            poignets: m.poignets || null,
+            pinces: m.pinces || null,
+            longueurTotale: m.longueurTotale || null,
+            longueurRobes: m.longueurRobes || null,
+            longueurTunique: m.longueurTunique || null,
+            ceinture: m.ceinture || null,
+            longueurPantalon: m.longueurPantalon || null,
+            frappe: m.frappe || null,
+            cuisse: m.cuisse || null,
+            genoux: m.genoux || null,
+            longueurJupe: m.longueurJupe || null,
+            autresMesures: m.autresMesures || null,
+          },
+        })
+      }
     }
 
     // Send welcome notifications if requested (using database templates)

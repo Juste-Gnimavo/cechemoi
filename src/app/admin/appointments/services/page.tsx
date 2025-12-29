@@ -113,13 +113,13 @@ export default function ServicesPage() {
       })
 
       if (res.ok) {
-        toast.success('Service mis a jour')
+        toast.success('Service mis à jour')
         setEditingId(null)
         setEditForm({})
         fetchServices()
       } else {
         const data = await res.json()
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error saving:', error)
@@ -138,7 +138,7 @@ export default function ServicesPage() {
       })
 
       if (res.ok) {
-        toast.success(service.enabled ? 'Service desactive' : 'Service active')
+        toast.success(service.enabled ? 'Service désactivé' : 'Service activé')
         fetchServices()
       }
     } catch (error) {
@@ -165,7 +165,7 @@ export default function ServicesPage() {
       })
 
       if (res.ok) {
-        toast.success('Service ajoute')
+        toast.success('Service ajouté')
         setShowAddModal(false)
         setNewService({
           name: '',
@@ -181,7 +181,7 @@ export default function ServicesPage() {
         fetchServices()
       } else {
         const data = await res.json()
-        toast.error(data.error || 'Erreur lors de la creation')
+        toast.error(data.error || 'Erreur lors de la création')
       }
     } catch (error) {
       console.error('Error adding:', error)
@@ -200,7 +200,7 @@ export default function ServicesPage() {
       })
 
       if (res.ok) {
-        toast.success('Service supprime')
+        toast.success('Service supprimé')
         fetchServices()
       } else {
         const data = await res.json()
@@ -263,7 +263,7 @@ export default function ServicesPage() {
               Types de consultation
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Gerez les services proposes aux clients
+              Gérez les services proposés aux clients
             </p>
           </div>
         </div>
@@ -334,7 +334,7 @@ export default function ServicesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Duree (min)
+                    Durée (min)
                   </label>
                   <input
                     type="number"
@@ -390,7 +390,7 @@ export default function ServicesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Caracteristiques
+                  Caractéristiques
                 </label>
                 {newService.features.map((feature, idx) => (
                   <div key={idx} className="flex gap-2 mb-2">
@@ -415,7 +415,7 @@ export default function ServicesPage() {
                   onClick={addFeature}
                   className="text-sm text-primary-500 hover:text-primary-600"
                 >
-                  + Ajouter une caracteristique
+                  + Ajouter une caractéristique
                 </button>
               </div>
               <div className="flex gap-4">
@@ -505,7 +505,7 @@ export default function ServicesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Duree (min)
+                    Durée (min)
                   </label>
                   <input
                     type="number"
@@ -561,7 +561,7 @@ export default function ServicesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Caracteristiques
+                  Caractéristiques
                 </label>
                 {(editForm.features || []).map((feature, idx) => (
                   <div key={idx} className="flex gap-2 mb-2">
@@ -585,7 +585,7 @@ export default function ServicesPage() {
                   onClick={addEditFeature}
                   className="text-sm text-primary-500 hover:text-primary-600"
                 >
-                  + Ajouter une caracteristique
+                  + Ajouter une caractéristique
                 </button>
               </div>
               <div className="flex gap-4">
@@ -636,13 +636,13 @@ export default function ServicesPage() {
       ) : services.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
           <Sparkles className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun service configure</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun service configuré</p>
           <button
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Creer un service
+            Créer un service
           </button>
         </div>
       ) : (
@@ -762,7 +762,7 @@ export default function ServicesPage() {
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Duree moyenne</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Durée moyenne</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {Math.round(services.reduce((acc, s) => acc + s.duration, 0) / services.length)} min
             </p>
@@ -773,7 +773,7 @@ export default function ServicesPage() {
       {/* Help Info */}
       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          <strong>Astuce :</strong> Cliquez sur le badge <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">Actif</span> pour activer/desactiver rapidement un service sans le supprimer.
+          <strong>Astuce :</strong> Cliquez sur le badge <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">Actif</span> pour activer/désactiver rapidement un service sans le supprimer.
         </p>
       </div>
     </div>

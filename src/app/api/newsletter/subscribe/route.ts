@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // For now, we'll store newsletter subscriptions in the User table with metadata
     // Check if user already exists with this email
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findFirst({
       where: { email },
     })
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
       // Update subscription status
       await prisma.user.update({
-        where: { email },
+        where: { id: existingUser.id },
         data: {
           metadata: {
             ...metadata,
