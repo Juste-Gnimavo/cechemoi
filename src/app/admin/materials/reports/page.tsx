@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Calendar,
   RefreshCw,
+  UserCheck,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -28,6 +29,12 @@ interface ReportData {
   }
   byTailor: Array<{
     tailor: { id: string; name: string; phone: string }
+    count: number
+    totalCost: number
+    totalQuantity: number
+  }>
+  byStaff: Array<{
+    staff: { id: string; name: string; role: string }
     count: number
     totalCost: number
     totalQuantity: number
@@ -317,6 +324,59 @@ export default function MaterialReportsPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-orange-500">
+                            {formatPrice(item.totalCost)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* By Staff (who recorded movements) */}
+            <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
+              <div className="p-4 border-b border-gray-200 dark:border-dark-700">
+                <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <UserCheck className="h-5 w-5 text-blue-500" />
+                  Mouvements par Staff
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Qui a enregistre les mouvements
+                </p>
+              </div>
+              <div className="p-4">
+                {!data.byStaff || data.byStaff.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                    Aucun mouvement sur cette periode
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {data.byStaff.map((item, index) => (
+                      <div
+                        key={item.staff?.id || index}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-700/50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-500/10 rounded-full flex items-center justify-center">
+                            <UserCheck className="h-4 w-4 text-blue-500" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {item.staff?.name || 'Inconnu'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {item.staff?.role === 'ADMIN' ? 'Administrateur' :
+                               item.staff?.role === 'MANAGER' ? 'Manager' :
+                               item.staff?.role === 'STAFF' ? 'Staff' : item.staff?.role}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-blue-600 dark:text-blue-400">
+                            {item.count} mvts
+                          </p>
+                          <p className="text-sm text-gray-500">
                             {formatPrice(item.totalCost)}
                           </p>
                         </div>

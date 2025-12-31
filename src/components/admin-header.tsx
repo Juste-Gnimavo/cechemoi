@@ -133,7 +133,7 @@ export function AdminHeader() {
           items: [
             { href: '/admin/custom-orders', label: 'Toutes les commandes' },
             { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW' },
-            { href: '/admin/production', label: 'Production (Kanban)' },
+            { href: '/admin/production', label: 'Suivi Production' },
           ],
         },
         {
@@ -141,16 +141,16 @@ export function AdminHeader() {
           items: [
             { href: '/admin/materials', label: 'Materiels' },
             { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
-            { href: '/admin/materials/in', label: 'Enregistrer entree' },
+            { href: '/admin/materials/in', label: 'Enregistrer entrée' },
             { href: '/admin/materials/movements', label: 'Historique' },
             { href: '/admin/materials/reports', label: 'Rapports' },
-            { href: '/admin/materials/categories', label: 'Categories' },
+            { href: '/admin/materials/categories', label: 'Catégories' },
           ],
         },
       ],
     },
 
-    // 5. ARGENT - Factures + Recus + Ventes
+    // 5. CAISSE - Factures + Reçus + Ventes + Dépenses
     {
       label: 'Caisse',
       icon: TrendingUp,

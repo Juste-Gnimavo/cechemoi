@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get overall stats for the period
-    const [totalIn, totalOut, outByTailor, outByCategory, topMaterials, recentMovements] =
+    const [totalIn, totalOut, outByTailor, outByStaff, outByCategory, topMaterials, recentMovements] =
       await Promise.all([
         // Total entries
         prisma.materialMovement.aggregate({
@@ -129,6 +129,26 @@ export async function GET(req: NextRequest) {
           orderBy: {
             _sum: {
               totalCost: 'desc',
+            },
+          },
+          take: 10,
+        }),
+
+        // Movements by staff (who recorded them)
+        prisma.materialMovement.groupBy({
+          by: ['createdById'],
+          where: {
+            ...periodWhere,
+            createdById: { not: null },
+          },
+          _sum: {
+            totalCost: true,
+            quantity: true,
+          },
+          _count: true,
+          orderBy: {
+            _count: {
+              createdById: 'desc',
             },
           },
           take: 10,
@@ -202,6 +222,14 @@ export async function GET(req: NextRequest) {
     })
     const tailorMap = new Map(tailors.map((t) => [t.id, t]))
 
+    // Get staff details for the grouped results
+    const staffIds = outByStaff.map((s) => s.createdById).filter(Boolean) as string[]
+    const staffMembers = await prisma.user.findMany({
+      where: { id: { in: staffIds } },
+      select: { id: true, name: true, role: true },
+    })
+    const staffMap = new Map(staffMembers.map((s) => [s.id, s]))
+
     // Get material details for the grouped results
     const materialIds = topMaterials.map((m) => m.materialId)
     const materials = await prisma.material.findMany({
@@ -256,6 +284,12 @@ export async function GET(req: NextRequest) {
         count: t._count,
         totalCost: t._sum.totalCost || 0,
         totalQuantity: t._sum.quantity || 0,
+      })),
+      byStaff: outByStaff.map((s) => ({
+        staff: staffMap.get(s.createdById!),
+        count: s._count,
+        totalCost: s._sum.totalCost || 0,
+        totalQuantity: s._sum.quantity || 0,
       })),
       byCategory: outByCategory.map((c: any) => ({
         categoryId: c.categoryId,
