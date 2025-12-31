@@ -136,22 +136,29 @@ export function AdminHeader() {
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { theme, toggleTheme } = useTheme()
 
+  // Get user role from session
+  const userRole = ((session?.user as any)?.role as UserRole) || 'CUSTOMER'
+  const isAdminOrManager = userRole === 'ADMIN' || userRole === 'MANAGER'
+
   // Menu structure with dropdowns - Reorganized into 6 main menus with groups
-  const menuItems: MenuItem[] = [
-    // 1. TABLEAU DE BORD - Lien direct
+  const allMenuItems: MenuItem[] = [
+    // 1. TABLEAU DE BORD - Lien direct (tous les rôles admin)
     {
       href: '/admin',
       label: 'Tableau de bord',
       icon: LayoutDashboard,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
     },
 
-    // 2. CLIENTS - Gestion + Contact
+    // 2. CLIENTS - Gestion + Contact (ADMIN, MANAGER, STAFF)
     {
       label: 'Clients',
       icon: Users,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
       groups: [
         {
           label: 'Gestion des clients',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/customers', label: 'Voir/Chercher des clients' },
             { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
@@ -159,6 +166,7 @@ export function AdminHeader() {
         },
         {
           label: 'Contacter les clients',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/customers/send-sms', label: 'Envoyez un SMS à un client' },
             { href: '/admin/customers/send-whatsapp', label: 'Envoyez un message WhatsApp' },
@@ -167,18 +175,19 @@ export function AdminHeader() {
       ],
     },
 
-    // 3. RENDEZ-VOUS - Standalone menu
+    // 3. RENDEZ-VOUS - Standalone menu (tous sauf CUSTOMER)
     {
       label: 'Rendez-vous',
       icon: CalendarDays,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
       items: [
         { href: '/admin/appointments', label: 'Tableau de bord' },
         { href: '/admin/appointments/list', label: 'Tous les rendez-vous' },
         { href: '/admin/appointments?status=pending', label: 'En attente', badge: 'NEW' },
         { href: '/admin/appointments?status=confirmed', label: 'Confirmés' },
         { href: '/admin/appointments?status=completed', label: 'Terminés' },
-        { href: '/admin/appointments/availability', label: 'Définir disponibilités' },
-        { href: '/admin/appointments/services', label: 'Types de consultation' },
+        { href: '/admin/appointments/availability', label: 'Définir disponibilités', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
+        { href: '/admin/appointments/services', label: 'Types de consultation', allowedRoles: ['ADMIN', 'MANAGER'] },
       ],
     },
 
@@ -186,17 +195,20 @@ export function AdminHeader() {
     {
       label: 'Sur-Mesure',
       icon: Scissors,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
       groups: [
         {
           label: 'Commandes',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
           items: [
             { href: '/admin/custom-orders', label: 'Toutes les commandes' },
-            { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW' },
+            { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
             { href: '/admin/production', label: 'Suivi Production' },
           ],
         },
         {
           label: 'Stock Atelier',
+          allowedRoles: ['ADMIN', 'MANAGER'], // Pas STAFF ni TAILOR
           items: [
             { href: '/admin/materials', label: 'Materiels' },
             { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
@@ -209,13 +221,15 @@ export function AdminHeader() {
       ],
     },
 
-    // 5. CAISSE - Factures + Reçus + Ventes + Dépenses
+    // 5. CAISSE - Factures + Reçus + Ventes + Dépenses (ADMIN, MANAGER, STAFF)
     {
       label: 'Caisse',
       icon: TrendingUp,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
       groups: [
         {
           label: 'Factures',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/invoices', label: 'Toutes les factures' },
             { href: '/admin/invoices/new', label: 'Créer une facture', badge: 'NEW' },
@@ -230,6 +244,7 @@ export function AdminHeader() {
         },
         {
           label: 'Reçus',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/receipts', label: 'Tous les reçus' },
             { href: '/admin/receipts?today=true', label: "Reçus d'aujourd'hui" },
@@ -237,6 +252,7 @@ export function AdminHeader() {
         },
         {
           label: 'Ventes',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/sales', label: 'Toutes les ventes', badge: 'NEW' },
             { href: '/admin/sales/today', label: "Ventes d'aujourd'hui" },
@@ -247,6 +263,7 @@ export function AdminHeader() {
         },
         {
           label: 'Dépenses',
+          allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
             { href: '/admin/expenses', label: 'Toutes les dépenses' },
             { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
@@ -261,9 +278,11 @@ export function AdminHeader() {
     {
       label: 'Boutique',
       icon: Package,
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
       groups: [
         {
           label: 'Commandes',
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/orders', label: 'Voir toutes les commandes' },
             { href: '/admin/orders?status=pending', label: 'Commandes en attente' },
@@ -274,6 +293,7 @@ export function AdminHeader() {
         },
         {
           label: 'Produits',
+          allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
             { href: '/admin/products', label: 'Tous les produits' },
             { href: '/admin/products/new', label: 'Ajouter un produit' },
@@ -284,6 +304,7 @@ export function AdminHeader() {
         },
         {
           label: 'Stock et Prix',
+          allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
             { href: '/admin/inventory', label: 'Gestion du stock' },
             { href: '/admin/coupons', label: 'Codes promo' },
@@ -291,6 +312,7 @@ export function AdminHeader() {
         },
         {
           label: 'Médias',
+          allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
             { href: '/admin/media', label: 'Galerie d\'images' },
           ],
@@ -298,10 +320,11 @@ export function AdminHeader() {
       ],
     },
 
-    // 7. COMMUNICATION - Campagnes + Notifications + Blog
+    // 7. COMMUNICATION - Campagnes + Notifications + Blog (ADMIN, MANAGER seulement)
     {
       label: 'Communication',
       icon: Send,
+      allowedRoles: ['ADMIN', 'MANAGER'],
       groups: [
         {
           label: 'Campagnes',
@@ -337,10 +360,11 @@ export function AdminHeader() {
       ],
     },
 
-    // 7. ÉQUIPE - Gestion du personnel
+    // 8. ÉQUIPE - Gestion du personnel (ADMIN, MANAGER seulement)
     {
       label: 'Équipe',
       icon: UsersRound,
+      allowedRoles: ['ADMIN', 'MANAGER'],
       items: [
         { href: '/admin/team', label: 'Gestion du staff' },
         { href: '/admin/tailors', label: 'Gestion des couturiers' },
@@ -348,10 +372,11 @@ export function AdminHeader() {
       ],
     },
 
-    // 8. RÉGLAGES - Paramètres boutique
+    // 9. RÉGLAGES - Paramètres boutique (ADMIN, MANAGER seulement)
     {
       label: 'Réglages',
       icon: Settings,
+      allowedRoles: ['ADMIN', 'MANAGER'],
       items: [
         { href: '/admin/settings', label: 'Configuration de la boutique' },
         { href: '/admin/shipping', label: 'Gestion des livraisons' },
@@ -359,6 +384,11 @@ export function AdminHeader() {
       ],
     },
   ]
+
+  // Filter menu based on user role
+  const menuItems = useMemo(() => {
+    return filterMenuByRole(allMenuItems, userRole)
+  }, [userRole])
 
   const isActive = (href?: string, items?: SubMenuItem[], groups?: MenuGroup[]) => {
     // For grouped menus (3 levels)
@@ -485,33 +515,37 @@ export function AdminHeader() {
 
               {/* Admin Badge & Actions */}
               <div className="flex items-center space-x-3">
-                {/* Quick Links */}
-                <Link
-                  href="/admin/marketing"
-                  className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                    pathname?.startsWith('/admin/marketing')
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Megaphone className="h-4 w-4" />
-                  <span>Marketing</span>
-                </Link>
+                {/* Quick Links - Only for ADMIN/MANAGER */}
+                {isAdminOrManager && (
+                  <>
+                    <Link
+                      href="/admin/marketing"
+                      className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                        pathname?.startsWith('/admin/marketing')
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/80 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <Megaphone className="h-4 w-4" />
+                      <span>Marketing</span>
+                    </Link>
 
-                <Link
-                  href="/admin/analytics"
-                  className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                    pathname?.startsWith('/admin/analytics')
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                  <span>Analytics</span>
-                </Link>
+                    <Link
+                      href="/admin/analytics"
+                      className={`hidden lg:flex items-center space-x-1 text-sm px-3 py-1.5 rounded-lg transition-colors ${
+                        pathname?.startsWith('/admin/analytics')
+                          ? 'bg-white/20 text-white'
+                          : 'text-white/80 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span>Analytics</span>
+                    </Link>
 
-                {/* Separator */}
-                <div className="hidden lg:block w-px h-6 bg-white/30" />
+                    {/* Separator */}
+                    <div className="hidden lg:block w-px h-6 bg-white/30" />
+                  </>
+                )}
 
                 {/* Theme Toggle */}
                 <button
@@ -527,10 +561,10 @@ export function AdminHeader() {
                   )}
                 </button>
 
-                {/* Admin Badge */}
+                {/* Role Badge - Dynamic based on user role */}
                 <div className="hidden md:flex items-center space-x-2 bg-white/15 px-3 py-1.5 rounded-full border border-white/20">
                   <UserCog className="h-4 w-4 text-white" />
-                  <span className="text-sm font-medium text-white">Admin</span>
+                  <span className="text-sm font-medium text-white">{getRoleBadgeLabel(userRole)}</span>
                 </div>
 
                 {/* User Name */}

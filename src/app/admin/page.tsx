@@ -33,6 +33,8 @@ import {
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
 import { UserProfileCard } from '@/components/user-profile-card'
+import { UserRole } from '@prisma/client'
+import { hasPermission } from '@/lib/role-permissions'
 
 interface ComparisonData {
   current: number
@@ -399,6 +401,36 @@ export default function AdminDashboard() {
     ? { value: Math.abs(stats.comparison.products.change), isPositive: stats.comparison.products.change >= 0 }
     : { value: 0, isPositive: true }
 
+  // Role-based permissions
+  const userRole = (adminProfile?.role as UserRole) || 'STAFF'
+  const isAdminOrManager = userRole === 'ADMIN' || userRole === 'MANAGER'
+  const isTailor = userRole === 'TAILOR'
+  const canSeeRevenue = hasPermission(userRole, 'invoices') || isAdminOrManager
+  const canSeeCustomers = hasPermission(userRole, 'customers') || isAdminOrManager
+  const canSeeProducts = hasPermission(userRole, 'products') || isAdminOrManager
+  const canSeeOrders = hasPermission(userRole, 'orders') || isAdminOrManager
+  const canSeeMaterials = hasPermission(userRole, 'materials') || isAdminOrManager
+  const canSendNotifications = isAdminOrManager
+
+  // Calculate daily and monthly revenue from revenueByDay
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const yesterdayStr = yesterday.toISOString().split('T')[0]
+  const currentMonth = today.getMonth()
+  const currentYear = today.getFullYear()
+
+  const todayRevenue = stats.revenueByDay?.find(d => d.date === todayStr)?.revenue || 0
+  const yesterdayRevenue = stats.revenueByDay?.find(d => d.date === yesterdayStr)?.revenue || 0
+  const thisMonthRevenue = stats.revenueByDay?.reduce((sum, d) => {
+    const date = new Date(d.date)
+    if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+      return sum + d.revenue
+    }
+    return sum
+  }, 0) || 0
+
   return (
     <div className="space-y-8">
       {/* Header with Profile Card */}
@@ -424,117 +456,125 @@ export default function AdminDashboard() {
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {/* Revenue net of all paid invoices  */}
-        <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-green-500/10 rounded-lg">
-              <DollarSign className="h-5 w-5 text-green-500" />
+        {/* Revenue net of all paid invoices - Only for STAFF+ */}
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-green-500" />
+              </div>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${
+                revenueChange.isPositive ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {revenueChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {revenueChange.value.toFixed(1)}%
+              </div>
             </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              revenueChange.isPositive ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {revenueChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {revenueChange.value.toFixed(1)}%
-            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Revenu Net</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(stats.revenue.total)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {stats.orders.paid} facture{stats.orders.paid > 1 ? 's' : ''} payée{stats.orders.paid > 1 ? 's' : ''}
+            </p>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Revenu Net</h3>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            {formatCurrency(stats.revenue.total)}
-          </p>
-          <p className="text-xs text-gray-500">
-            {stats.orders.paid} facture{stats.orders.paid > 1 ? 's' : ''} payée{stats.orders.paid > 1 ? 's' : ''}
-          </p>
-        </div>
+        )}
 
-         {/* Commandes totale inclu non payee */}
-        <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-yellow-500/30 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-yellow-500/10 rounded-lg">
-              <DollarSign className="h-5 w-5 text-yellow-500" />
+        {/* Today's Revenue */}
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-emerald-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <Zap className="h-5 w-5 text-emerald-500" />
+              </div>
+              {todayRevenue > 0 && (
+                <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                  Actif
+                </span>
+              )}
             </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              revenueChange.isPositive ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {revenueChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {revenueChange.value.toFixed(1)}%
-            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Aujourd'hui</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(todayRevenue)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}
+            </p>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">En attente</h3>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            {stats.orders.total - stats.orders.paid}
-          </p>
-          <p className="text-xs text-gray-500">
-            commande{(stats.orders.total - stats.orders.paid) > 1 ? 's' : ''} non payée{(stats.orders.total - stats.orders.paid) > 1 ? 's' : ''}
-          </p>
-        </div>
+        )}
 
-        {/* Orders */}
-        <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-blue-500/30 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-blue-500/10 rounded-lg">
-              <ShoppingCart className="h-5 w-5 text-blue-500" />
+        {/* Yesterday's Revenue */}
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-blue-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-blue-500" />
+              </div>
+              {yesterdayRevenue > todayRevenue && (
+                <span className="text-xs font-semibold text-blue-500">
+                  <ArrowUp className="h-3 w-3 inline" /> vs aujourd'hui
+                </span>
+              )}
             </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              ordersChange.isPositive ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {ordersChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {ordersChange.value.toFixed(1)}%
-            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Hier</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(yesterdayRevenue)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date(yesterday).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}
+            </p>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Commandes</h3>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            {stats.orders.total}
-          </p>
-          <p className="text-xs text-gray-500">
-            Moy: {formatCurrency(stats.orders.averageValue)}
-          </p>
-        </div>
+        )}
 
-        {/* Customers */}
-        <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-purple-500/30 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-purple-500/10 rounded-lg">
-              <Users className="h-5 w-5 text-purple-500" />
+        {/* This Month Revenue */}
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-indigo-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-indigo-500/10 rounded-lg">
+                <CalendarDays className="h-5 w-5 text-indigo-500" />
+              </div>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${
+                revenueChange.isPositive ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {revenueChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {revenueChange.value.toFixed(1)}%
+              </div>
             </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              customersChange.isPositive ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {customersChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {customersChange.value.toFixed(1)}%
-            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Ce Mois</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(thisMonthRevenue)}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+            </p>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Clients</h3>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            {stats.customers.total}
-          </p>
-          <p className="text-xs text-gray-500">
-            {stats.items.totalSold} articles vendus
-          </p>
-        </div>
+        )}
 
-        {/* Products */}
-        <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-orange-500/30 transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-orange-500/10 rounded-lg">
-              <Package className="h-5 w-5 text-orange-500" />
+        {/* Customers - Only for STAFF+ */}
+        {canSeeCustomers && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-purple-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Users className="h-5 w-5 text-purple-500" />
+              </div>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${
+                customersChange.isPositive ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {customersChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {customersChange.value.toFixed(1)}%
+              </div>
             </div>
-            <div className={`flex items-center gap-1 text-xs font-semibold ${
-              productsChange.isPositive ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {productsChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-              {productsChange.value.toFixed(1)}%
-            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Clients</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {stats.customers.total}
+            </p>
+            <p className="text-xs text-gray-500">
+              {stats.items.totalSold} articles vendus
+            </p>
           </div>
-          <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Produits</h3>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-            {stats.products.total}
-          </p>
-          <p className="text-xs text-gray-500">
-            Catalogue actif
-          </p>
-        </div>
+        )}
 
-        {/* Appointments */}
+        {/* Appointments - All roles */}
         <a href="/admin/appointments" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-pink-500/30 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-pink-500/10 rounded-lg">
@@ -555,12 +595,37 @@ export default function AdminDashboard() {
             {appointmentStats?.pending || 0} en attente
           </p>
         </a>
+
+        {/* Sur-Mesure - For TAILOR to see at a glance */}
+        {isTailor && (
+          <a href="/admin/custom-orders" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-purple-500/30 transition-all cursor-pointer block">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <Scissors className="h-5 w-5 text-purple-500" />
+              </div>
+              {customOrderStats && customOrderStats.inProduction > 0 && (
+                <div className="flex items-center gap-1 text-xs font-semibold text-purple-500">
+                  <Clock className="h-3 w-3" />
+                  {customOrderStats.inProduction} en prod
+                </div>
+              )}
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Sur-Mesure</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {customOrderStats?.total || 0}
+            </p>
+            <p className="text-xs text-gray-500">
+              {customOrderStats?.pending || 0} en attente
+            </p>
+          </a>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Orders & Revenue */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Revenue Breakdown */}
+          {/* Revenue Breakdown - Only for STAFF+ */}
+          {canSeeRevenue && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Détail du Revenu</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -607,8 +672,10 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+          )}
 
-          {/* Financial Overview - Recettes vs Dépenses */}
+          {/* Financial Overview - Recettes vs Dépenses - Only for ADMIN/MANAGER */}
+          {isAdminOrManager && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -709,10 +776,11 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+          )}
 
           {/* Sur-Mesure & Stock Atelier Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Commandes Sur-Mesure */}
+            {/* Commandes Sur-Mesure - All roles except purely STAFF without custom-orders permission */}
             <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -763,7 +831,8 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Stock Atelier */}
+            {/* Stock Atelier - Only for ADMIN/MANAGER */}
+            {canSeeMaterials && (
             <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -847,9 +916,11 @@ export default function AdminDashboard() {
                 </a>
               </div>
             </div>
+            )}
           </div>
 
-          {/* Recent Orders */}
+          {/* Recent Orders - Only for STAFF+ */}
+          {canSeeOrders && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-dark-800">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -931,8 +1002,9 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+          )}
 
-          {/* Appointments Section */}
+          {/* Appointments Section - All roles */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-dark-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -991,7 +1063,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Top Products */}
+          {/* Top Products - Only for ADMIN/MANAGER */}
+          {canSeeProducts && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 overflow-hidden">
             <div className="p-6 border-b border-gray-200 dark:border-dark-800">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -1017,11 +1090,13 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+          )}
         </div>
 
         {/* Right Column - Quick Actions & Order Status */}
         <div className="space-y-6">
-          {/* Quick Notification Sender */}
+          {/* Quick Notification Sender - Only for ADMIN/MANAGER */}
+          {canSendNotifications && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center gap-2 mb-6">
               <Send className="h-5 w-5 text-primary-500" />
@@ -1121,8 +1196,10 @@ export default function AdminDashboard() {
               </button>
             </div>
           </div>
+          )}
 
-          {/* Order Status Overview */}
+          {/* Order Status Overview - Only for STAFF+ */}
+          {canSeeOrders && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
               Statut des Commandes
@@ -1168,13 +1245,15 @@ export default function AdminDashboard() {
               })}
             </div>
           </div>
+          )}
 
-          {/* Quick Links */}
+          {/* Quick Links - Filtered by role */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Actions Rapides
             </h2>
             <div className="space-y-2">
+              {canSeeOrders && (
               <a
                 href="/admin/orders"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1184,6 +1263,8 @@ export default function AdminDashboard() {
                   <ShoppingCart className="h-4 w-4" />
                 </div>
               </a>
+              )}
+              {canSeeProducts && (
               <a
                 href="/admin/products"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1193,6 +1274,8 @@ export default function AdminDashboard() {
                   <Package className="h-4 w-4" />
                 </div>
               </a>
+              )}
+              {canSeeCustomers && (
               <a
                 href="/admin/customers"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1202,6 +1285,8 @@ export default function AdminDashboard() {
                   <Users className="h-4 w-4" />
                 </div>
               </a>
+              )}
+              {isAdminOrManager && (
               <a
                 href="/admin/analytics"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1211,6 +1296,7 @@ export default function AdminDashboard() {
                   <TrendingUp className="h-4 w-4" />
                 </div>
               </a>
+              )}
               <a
                 href="/admin/appointments"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-pink-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1229,6 +1315,7 @@ export default function AdminDashboard() {
                   <Scissors className="h-4 w-4" />
                 </div>
               </a>
+              {canSeeMaterials && (
               <a
                 href="/admin/materials"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-amber-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1238,6 +1325,8 @@ export default function AdminDashboard() {
                   <Boxes className="h-4 w-4" />
                 </div>
               </a>
+              )}
+              {isAdminOrManager && (
               <a
                 href="/admin/expenses"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-red-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1247,6 +1336,7 @@ export default function AdminDashboard() {
                   <Wallet className="h-4 w-4" />
                 </div>
               </a>
+              )}
             </div>
           </div>
         </div>
