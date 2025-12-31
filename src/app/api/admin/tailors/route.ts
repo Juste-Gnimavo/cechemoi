@@ -48,6 +48,28 @@ export async function GET(req: NextRequest) {
             tailorAssignments: true,
           },
         },
+        // Material usage (as tailor)
+        materialUsages: {
+          where: {
+            type: 'OUT',
+          },
+          select: {
+            id: true,
+            totalCost: true,
+            quantity: true,
+            createdAt: true,
+            material: {
+              select: {
+                name: true,
+                unit: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 5, // Last 5 material usages
+        },
       },
       orderBy: {
         name: 'asc',
@@ -55,16 +77,25 @@ export async function GET(req: NextRequest) {
     })
 
     // Add stats for each tailor
-    const tailorsWithStats = tailors.map((tailor) => ({
-      id: tailor.id,
-      name: tailor.name,
-      phone: tailor.phone,
-      email: tailor.email,
-      createdAt: tailor.createdAt,
-      activeItems: tailor.tailorAssignments.length,
-      totalAssigned: tailor._count.tailorAssignments,
-      currentWork: tailor.tailorAssignments.slice(0, 3), // Show first 3 active items
-    }))
+    const tailorsWithStats = tailors.map((tailor) => {
+      const materialTotalCost = tailor.materialUsages.reduce((sum, m) => sum + m.totalCost, 0)
+      const materialUsageCount = tailor.materialUsages.length
+
+      return {
+        id: tailor.id,
+        name: tailor.name,
+        phone: tailor.phone,
+        email: tailor.email,
+        createdAt: tailor.createdAt,
+        activeItems: tailor.tailorAssignments.length,
+        totalAssigned: tailor._count.tailorAssignments,
+        currentWork: tailor.tailorAssignments.slice(0, 3), // Show first 3 active items
+        // Material stats
+        materialTotalCost,
+        materialUsageCount,
+        recentMaterialUsages: tailor.materialUsages.slice(0, 3),
+      }
+    })
 
     return NextResponse.json({
       success: true,

@@ -14,8 +14,17 @@ import {
   Trash2,
   X,
   Pencil,
+  Box,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+
+interface MaterialUsage {
+  id: string
+  totalCost: number
+  quantity: number
+  createdAt: string
+  material: { name: string; unit: string }
+}
 
 interface Tailor {
   id: string
@@ -26,6 +35,13 @@ interface Tailor {
   activeItems: number
   totalAssigned: number
   currentWork: any[]
+  materialTotalCost: number
+  materialUsageCount: number
+  recentMaterialUsages: MaterialUsage[]
+}
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('fr-FR').format(price) + ' CFA'
 }
 
 export default function TailorsPage() {
@@ -313,9 +329,50 @@ export default function TailorsPage() {
                 </div>
               )}
 
+              {/* Material usage section */}
+              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-700">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <Box className="h-3 w-3" />
+                    Materiels utilises
+                  </p>
+                  <Link
+                    href={`/admin/materials/movements?tailorId=${tailor.id}`}
+                    className="text-xs text-primary-500 hover:text-primary-400"
+                  >
+                    Voir historique
+                  </Link>
+                </div>
+                {tailor.materialUsageCount > 0 ? (
+                  <>
+                    <div className="flex items-center gap-4 text-sm mb-2">
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Total: <span className="font-medium text-gray-900 dark:text-white">{formatPrice(tailor.materialTotalCost)}</span>
+                      </span>
+                    </div>
+                    {tailor.recentMaterialUsages && tailor.recentMaterialUsages.length > 0 && (
+                      <div className="space-y-1">
+                        {tailor.recentMaterialUsages.map((usage) => (
+                          <div key={usage.id} className="text-xs flex items-center justify-between">
+                            <span className="text-gray-700 dark:text-gray-300 truncate max-w-[60%]">
+                              {usage.material.name}
+                            </span>
+                            <span className="text-gray-500">
+                              {usage.quantity} {usage.material.unit}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">Aucune sortie materiel</p>
+                )}
+              </div>
+
               <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                Ajouté le {new Date(tailor.createdAt).toLocaleDateString('fr-FR')}
+                Ajoute le {new Date(tailor.createdAt).toLocaleDateString('fr-FR')}
               </p>
             </div>
           ))}

@@ -117,6 +117,10 @@ model User {
   tailorAssignments     CustomOrderItem[]    @relation("TailorAssignments")    // Items assigned to this tailor
   receivedPayments      CustomOrderPayment[] @relation("PaymentReceiver")      // Payments received by this staff
 
+  // Materials Management (Stock Atelier)
+  materialUsages        MaterialMovement[]   @relation("TailorMaterialUsage")  // Materials used by this tailor
+  materialMovements     MaterialMovement[]   @relation("StaffMaterialMovement") // Material movements recorded by this staff
+
   @@unique([phone, role]) // A person can have same phone for different roles (e.g. CUSTOMER + ADMIN)
   @@unique([email, role]) // A person can have same email for different roles
   @@index([phone])
@@ -1985,6 +1989,94 @@ model CustomerMeasurement {
 }
 
 // ========================================
+// MATERIALS MANAGEMENT (Stock Atelier)
+// ========================================
+
+model MaterialCategory {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  isDefault   Boolean    @default(false)
+  sortOrder   Int        @default(0)
+  materials   Material[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([sortOrder])
+}
+
+model Material {
+  id                String             @id @default(cuid())
+  name              String
+  sku               String?            @unique
+  categoryId        String
+  category          MaterialCategory   @relation(fields: [categoryId], references: [id])
+
+  unit              String             // "mètre", "pièce", "bobine", "kg", "rouleau"
+  unitPrice         Float              @default(0)
+  stock             Float              @default(0)
+  lowStockThreshold Float              @default(0)
+
+  description       String?            @db.Text
+  supplier          String?
+  color             String?
+
+  movements         MaterialMovement[]
+  isActive          Boolean            @default(true)
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([stock])
+}
+
+enum MaterialMovementType {
+  IN        // Entrée (achat, réception)
+  OUT       // Sortie (utilisation)
+  ADJUST    // Ajustement d'inventaire
+  RETURN    // Retour (matériel non utilisé)
+}
+
+model MaterialMovement {
+  id                String               @id @default(cuid())
+  materialId        String
+  material          Material             @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  type              MaterialMovementType
+  quantity          Float
+  unitPrice         Float
+  totalCost         Float
+  previousStock     Float
+  newStock          Float
+
+  // Pour les sorties (OUT) - couturier et commande
+  tailorId          String?
+  tailor            User?                @relation("TailorMaterialUsage", fields: [tailorId], references: [id], onDelete: SetNull)
+  customOrderId     String?
+  customOrder       CustomOrder?         @relation(fields: [customOrderId], references: [id], onDelete: SetNull)
+  customOrderItemId String?
+
+  // Traçabilité staff
+  createdById       String?
+  createdBy         User?                @relation("StaffMaterialMovement", fields: [createdById], references: [id], onDelete: SetNull)
+  createdByName     String?
+
+  notes             String?              @db.Text
+  reference         String?              // N° bon de commande fournisseur
+
+  createdAt         DateTime             @default(now())
+
+  @@index([materialId])
+  @@index([tailorId])
+  @@index([customOrderId])
+  @@index([createdById])
+  @@index([createdAt])
+  @@index([type])
+}
+
+// ========================================
 // CUSTOM ORDERS (Commandes Sur-Mesure)
 // ========================================
 
@@ -2063,6 +2155,9 @@ model CustomOrder {
 
   // Receipts for payments
   receipts        Receipt[]
+
+  // Materials used for this order
+  materialUsages  MaterialMovement[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

@@ -27,6 +27,7 @@ import {
   FileText,
   Receipt,
   ExternalLink,
+  Box,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -126,6 +127,17 @@ interface Order {
   createdAt: string
 }
 
+interface MaterialUsage {
+  id: string
+  type: string
+  quantity: number
+  totalCost: number
+  createdAt: string
+  material: { name: string; unit: string }
+  tailor: { name: string } | null
+  createdBy: { name: string } | null
+}
+
 export default function CustomOrderDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -135,6 +147,8 @@ export default function CustomOrderDetailPage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [tailors, setTailors] = useState<any[]>([])
+  const [materialUsages, setMaterialUsages] = useState<MaterialUsage[]>([])
+  const [materialTotalCost, setMaterialTotalCost] = useState(0)
 
   // Modal states
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -146,6 +160,7 @@ export default function CustomOrderDetailPage() {
   const [itemsExpanded, setItemsExpanded] = useState(true)
   const [paymentsExpanded, setPaymentsExpanded] = useState(true)
   const [timelineExpanded, setTimelineExpanded] = useState(true)
+  const [materialsExpanded, setMaterialsExpanded] = useState(true)
 
   // Payment form
   const [paymentAmount, setPaymentAmount] = useState(0)
@@ -162,6 +177,7 @@ export default function CustomOrderDetailPage() {
   useEffect(() => {
     fetchOrder()
     fetchTailors()
+    fetchMaterialUsages()
   }, [orderId])
 
   const fetchOrder = async () => {
@@ -191,6 +207,21 @@ export default function CustomOrderDetailPage() {
       }
     } catch (error) {
       console.error('Error fetching tailors:', error)
+    }
+  }
+
+  const fetchMaterialUsages = async () => {
+    try {
+      const res = await fetch(`/api/admin/materials/movements?customOrderId=${orderId}&limit=50`)
+      const data = await res.json()
+      if (data.success) {
+        setMaterialUsages(data.movements)
+        // Calculate total cost
+        const total = data.movements.reduce((sum: number, m: MaterialUsage) => sum + m.totalCost, 0)
+        setMaterialTotalCost(total)
+      }
+    } catch (error) {
+      console.error('Error fetching material usages:', error)
     }
   }
 
@@ -865,6 +896,96 @@ export default function CustomOrderDetailPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400">{order.notes}</p>
             </div>
           )}
+
+          {/* Material Usages Section */}
+          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
+            <button
+              onClick={() => setMaterialsExpanded(!materialsExpanded)}
+              className="w-full p-6 flex items-center justify-between text-left"
+            >
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Box className="h-4 w-4 text-primary-400" />
+                Materiels utilises ({materialUsages.length})
+              </h3>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/admin/materials/out?customOrderId=${orderId}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors"
+                  title="Ajouter sortie materiel"
+                >
+                  <Plus className="h-4 w-4 text-primary-500" />
+                </Link>
+                {materialsExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+            </button>
+
+            {materialsExpanded && (
+              <div className="px-6 pb-6">
+                {materialUsages.length > 0 ? (
+                  <>
+                    <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Cout total: </span>
+                      <span className="font-semibold text-orange-600 dark:text-orange-400">
+                        {materialTotalCost.toLocaleString()} FCFA
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {materialUsages.map((usage) => (
+                        <div
+                          key={usage.id}
+                          className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
+                        >
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white text-sm">
+                                {usage.material.name}
+                              </p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                {usage.quantity} {usage.material.unit}
+                                {usage.tailor && ` - ${usage.tailor.name}`}
+                              </p>
+                            </div>
+                            <p className="font-medium text-orange-500 text-sm">
+                              {usage.totalCost.toLocaleString()} FCFA
+                            </p>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(usage.createdAt).toLocaleDateString('fr-FR')}
+                            {usage.createdBy && ` par ${usage.createdBy.name}`}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <Link
+                      href={`/admin/materials/movements?customOrderId=${orderId}`}
+                      className="block mt-3 text-center text-sm text-primary-500 hover:text-primary-400"
+                    >
+                      Voir tout l'historique
+                    </Link>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <Box className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Aucun materiel enregistre
+                    </p>
+                    <Link
+                      href={`/admin/materials/out?customOrderId=${orderId}`}
+                      className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-400"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Enregistrer une sortie
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Invoice Section */}
           {order.invoice && (

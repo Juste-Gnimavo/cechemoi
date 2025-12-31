@@ -123,20 +123,36 @@ export function AdminHeader() {
       ],
     },
 
-    // 4. SUR-MESURE - Commandes personnalisées et production
+    // 4. SUR-MESURE - Commandes personnalisées, production et stock atelier
     {
       label: 'Sur-Mesure',
       icon: Scissors,
-      items: [
-        { href: '/admin/custom-orders', label: 'Toutes les commandes' },
-        { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW' },
-        { href: '/admin/production', label: 'Production (Kanban)' },
+      groups: [
+        {
+          label: 'Commandes',
+          items: [
+            { href: '/admin/custom-orders', label: 'Toutes les commandes' },
+            { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW' },
+            { href: '/admin/production', label: 'Production (Kanban)' },
+          ],
+        },
+        {
+          label: 'Stock Atelier',
+          items: [
+            { href: '/admin/materials', label: 'Materiels' },
+            { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
+            { href: '/admin/materials/in', label: 'Enregistrer entree' },
+            { href: '/admin/materials/movements', label: 'Historique' },
+            { href: '/admin/materials/reports', label: 'Rapports' },
+            { href: '/admin/materials/categories', label: 'Categories' },
+          ],
+        },
       ],
     },
 
     // 5. ARGENT - Factures + Recus + Ventes
     {
-      label: 'Argent',
+      label: 'Caisse',
       icon: TrendingUp,
       groups: [
         {
@@ -154,10 +170,10 @@ export function AdminHeader() {
           ],
         },
         {
-          label: 'Recus',
+          label: 'Reçus',
           items: [
-            { href: '/admin/receipts', label: 'Tous les recus' },
-            { href: '/admin/receipts?today=true', label: "Recus d'aujourd'hui" },
+            { href: '/admin/receipts', label: 'Tous les reçus' },
+            { href: '/admin/receipts?today=true', label: "Reçus d'aujourd'hui" },
           ],
         },
         {
