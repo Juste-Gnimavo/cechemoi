@@ -12,7 +12,9 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
+    // Allow ADMIN, MANAGER, STAFF, TAILOR to access dashboard stats
+    const allowedRoles = ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR']
+    if (!session || !allowedRoles.includes((session.user as any).role)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 

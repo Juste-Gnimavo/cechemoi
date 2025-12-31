@@ -574,6 +574,54 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Orders - For STAFF+ */}
+        {canSeeOrders && (
+          <a href="/admin/orders" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-blue-500/30 transition-all cursor-pointer block">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <ShoppingCart className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${
+                ordersChange.isPositive ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {ordersChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {ordersChange.value.toFixed(1)}%
+              </div>
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Commandes</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {stats.orders.total}
+            </p>
+            <p className="text-xs text-gray-500">
+              {stats.orders.paid} payée{stats.orders.paid > 1 ? 's' : ''}
+            </p>
+          </a>
+        )}
+
+        {/* Products - For STAFF+ */}
+        {canSeeProducts && (
+          <a href="/admin/products" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-orange-500/30 transition-all cursor-pointer block">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-orange-500/10 rounded-lg">
+                <Package className="h-5 w-5 text-orange-500" />
+              </div>
+              <div className={`flex items-center gap-1 text-xs font-semibold ${
+                productsChange.isPositive ? 'text-green-500' : 'text-red-500'
+              }`}>
+                {productsChange.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {productsChange.value.toFixed(1)}%
+              </div>
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Produits</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {stats.products.total}
+            </p>
+            <p className="text-xs text-gray-500">
+              Catalogue actif
+            </p>
+          </a>
+        )}
+
         {/* Appointments - All roles */}
         <a href="/admin/appointments" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-pink-500/30 transition-all cursor-pointer block">
           <div className="flex items-center justify-between mb-3">
@@ -596,8 +644,8 @@ export default function AdminDashboard() {
           </p>
         </a>
 
-        {/* Sur-Mesure - For TAILOR to see at a glance */}
-        {isTailor && (
+        {/* Sur-Mesure - For STAFF and TAILOR */}
+        {(hasPermission(userRole, 'custom-orders') || isTailor) && (
           <a href="/admin/custom-orders" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-purple-500/30 transition-all cursor-pointer block">
             <div className="flex items-center justify-between mb-3">
               <div className="p-2 bg-purple-500/10 rounded-lg">
@@ -616,6 +664,30 @@ export default function AdminDashboard() {
             </p>
             <p className="text-xs text-gray-500">
               {customOrderStats?.pending || 0} en attente
+            </p>
+          </a>
+        )}
+
+        {/* Stock Atelier - For STAFF+ */}
+        {canSeeMaterials && (
+          <a href="/admin/materials" className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-amber-500/30 transition-all cursor-pointer block">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Boxes className="h-5 w-5 text-amber-500" />
+              </div>
+              {materialStats && materialStats.summary.lowStockCount > 0 && (
+                <div className="flex items-center gap-1 text-xs font-semibold text-red-500">
+                  <AlertTriangle className="h-3 w-3" />
+                  {materialStats.summary.lowStockCount} alerte{materialStats.summary.lowStockCount > 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Stock Atelier</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {materialStats?.summary.totalMaterials || 0}
+            </p>
+            <p className="text-xs text-gray-500">
+              matériaux en stock
             </p>
           </a>
         )}

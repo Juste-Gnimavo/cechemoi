@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
+    if (!session || !['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user?.role || '')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
+    if (!session || !['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user?.role || '')) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
