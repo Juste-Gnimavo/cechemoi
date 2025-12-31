@@ -16,7 +16,19 @@ import {
   Clock,
   Loader2,
   CalendarDays,
-  Scissors
+  Scissors,
+  Wallet,
+  Boxes,
+  ArrowRightLeft,
+  AlertTriangle,
+  TrendingDown,
+  BarChart3,
+  Zap,
+  Droplets,
+  Car,
+  Sparkles,
+  MoreHorizontal,
+  Eye
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -114,6 +126,49 @@ interface AppointmentStats {
   today: number
 }
 
+interface ExpenseStats {
+  summary: {
+    totalAmount: number
+    count: number
+  }
+  byCategory: {
+    category: {
+      id: string
+      name: string
+      icon: string | null
+      color: string | null
+    }
+    count: number
+    totalAmount: number
+  }[]
+}
+
+interface MaterialStats {
+  summary: {
+    entries: { count: number; totalCost: number; totalQuantity: number }
+    exits: { count: number; totalCost: number; totalQuantity: number }
+    lowStockCount: number
+    totalMaterials: number
+    totalStockValue: number
+  }
+  lowStockItems: {
+    id: string
+    name: string
+    stock: number
+    lowStockThreshold: number
+    unit: string
+    category: { name: string }
+  }[]
+}
+
+interface CustomOrderStats {
+  total: number
+  byStatus: Record<string, number>
+  inProduction: number
+  pending: number
+  completed: number
+}
+
 const statusColors: Record<string, string> = {
   PENDING: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
   PROCESSING: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
@@ -137,6 +192,9 @@ export default function AdminDashboard() {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null)
   const [appointmentStats, setAppointmentStats] = useState<AppointmentStats | null>(null)
+  const [expenseStats, setExpenseStats] = useState<ExpenseStats | null>(null)
+  const [materialStats, setMaterialStats] = useState<MaterialStats | null>(null)
+  const [customOrderStats, setCustomOrderStats] = useState<CustomOrderStats | null>(null)
   const [loading, setLoading] = useState(true)
   const { celebration, success } = useConfetti()
   const confettiFired = useRef(false)
@@ -175,19 +233,41 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
 
-      // Fetch analytics, orders, profile, and appointments in parallel
-      const [analyticsRes, ordersRes, profileRes, appointmentsRes] = await Promise.all([
+      // Fetch all data in parallel
+      const [
+        analyticsRes,
+        ordersRes,
+        profileRes,
+        appointmentsRes,
+        expensesRes,
+        materialsRes,
+        customOrdersRes
+      ] = await Promise.all([
         fetch('/api/admin/analytics/overview'),
         fetch('/api/admin/orders?limit=5&sortBy=createdAt&sortOrder=desc'),
         fetch('/api/admin/profile'),
-        fetch('/api/admin/appointments?limit=1000')
+        fetch('/api/admin/appointments?limit=1000'),
+        fetch('/api/admin/expenses/reports?period=month'),
+        fetch('/api/admin/materials/reports?period=month'),
+        fetch('/api/admin/custom-orders?limit=1000')
       ])
 
-      const [analyticsData, ordersData, profileData, appointmentsData] = await Promise.all([
+      const [
+        analyticsData,
+        ordersData,
+        profileData,
+        appointmentsData,
+        expensesData,
+        materialsData,
+        customOrdersData
+      ] = await Promise.all([
         analyticsRes.json(),
         ordersRes.json(),
         profileRes.json(),
-        appointmentsRes.json()
+        appointmentsRes.json(),
+        expensesRes.json(),
+        materialsRes.json(),
+        customOrdersRes.json()
       ])
 
       if (analyticsData.success) {
@@ -211,6 +291,38 @@ export default function AdminDashboard() {
           pending: appointments.filter((a: any) => a.status === 'PENDING').length,
           confirmed: appointments.filter((a: any) => a.status === 'CONFIRMED').length,
           today: appointments.filter((a: any) => new Date(a.date).toDateString() === today).length
+        })
+      }
+
+      // Set expense stats
+      if (expensesData.success) {
+        setExpenseStats({
+          summary: expensesData.summary,
+          byCategory: expensesData.byCategory || []
+        })
+      }
+
+      // Set material stats
+      if (materialsData.success) {
+        setMaterialStats({
+          summary: materialsData.summary,
+          lowStockItems: materialsData.lowStockItems || []
+        })
+      }
+
+      // Calculate custom order stats
+      if (customOrdersData.orders) {
+        const orders = customOrdersData.orders
+        const byStatus: Record<string, number> = {}
+        orders.forEach((o: any) => {
+          byStatus[o.status] = (byStatus[o.status] || 0) + 1
+        })
+        setCustomOrderStats({
+          total: customOrdersData.pagination?.total || orders.length,
+          byStatus,
+          inProduction: orders.filter((o: any) => o.status === 'IN_PRODUCTION').length,
+          pending: orders.filter((o: any) => o.status === 'PENDING').length,
+          completed: orders.filter((o: any) => o.status === 'COMPLETED' || o.status === 'DELIVERED').length
         })
       }
     } catch (error) {
@@ -492,6 +604,247 @@ export default function AdminDashboard() {
                 <p className="text-lg font-bold text-red-500">
                   -{formatCurrency(stats.revenue.discount)}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Financial Overview - Recettes vs Dépenses */}
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-500/10 rounded-lg">
+                  <BarChart3 className="h-5 w-5 text-emerald-500" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Bilan Financier du Mois</h2>
+              </div>
+              <a href="/admin/expenses/reports" className="text-sm text-primary-500 hover:text-primary-400 font-medium">
+                Voir détails
+              </a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Recettes */}
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-600" />
+                    <p className="text-green-700 dark:text-green-400 font-medium">Recettes</p>
+                  </div>
+                  <ArrowUp className="h-4 w-4 text-green-500" />
+                </div>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {formatCurrency(stats.revenue.total)}
+                </p>
+                <p className="text-xs text-green-500 mt-1">
+                  Total des revenus encaissés
+                </p>
+              </div>
+
+              {/* Dépenses */}
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="h-5 w-5 text-red-600" />
+                    <p className="text-red-700 dark:text-red-400 font-medium">Dépenses</p>
+                  </div>
+                  <ArrowDown className="h-4 w-4 text-red-500" />
+                </div>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {formatCurrency(expenseStats?.summary.totalAmount || 0)}
+                </p>
+                <p className="text-xs text-red-500 mt-1">
+                  {expenseStats?.summary.count || 0} dépense(s) ce mois
+                </p>
+              </div>
+
+              {/* Bénéfice Net */}
+              <div className={`p-4 rounded-lg border ${
+                (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700/50'
+                  : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700/50'
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-emerald-600" />
+                    <p className={`font-medium ${
+                      (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : 'text-orange-700 dark:text-orange-400'
+                    }`}>Bénéfice Net</p>
+                  </div>
+                </div>
+                <p className={`text-2xl font-bold ${
+                  (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-orange-600 dark:text-orange-400'
+                }`}>
+                  {formatCurrency(stats.revenue.total - (expenseStats?.summary.totalAmount || 0))}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Recettes - Dépenses
+                </p>
+              </div>
+            </div>
+
+            {/* Top Expense Categories */}
+            {expenseStats && expenseStats.byCategory.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-dark-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Top Catégories de Dépenses</p>
+                <div className="flex flex-wrap gap-2">
+                  {expenseStats.byCategory.slice(0, 5).map((cat) => (
+                    <div
+                      key={cat.category?.id}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-dark-800 rounded-full text-sm"
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: cat.category?.color || '#64748b' }}
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{cat.category?.name}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {formatCurrency(cat.totalAmount)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Sur-Mesure & Stock Atelier Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Commandes Sur-Mesure */}
+            <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Scissors className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Sur-Mesure</h2>
+                </div>
+                <a href="/admin/custom-orders" className="text-sm text-primary-500 hover:text-primary-400 font-medium">
+                  Voir tout
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="text-center p-3 bg-purple-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-600">{customOrderStats?.total || 0}</p>
+                  <p className="text-xs text-gray-500">Total</p>
+                </div>
+                <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-yellow-600">{customOrderStats?.pending || 0}</p>
+                  <p className="text-xs text-gray-500">En attente</p>
+                </div>
+                <div className="text-center p-3 bg-blue-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600">{customOrderStats?.inProduction || 0}</p>
+                  <p className="text-xs text-gray-500">En production</p>
+                </div>
+                <div className="text-center p-3 bg-green-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{customOrderStats?.completed || 0}</p>
+                  <p className="text-xs text-gray-500">Terminées</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <a
+                  href="/admin/custom-orders/new"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  <Scissors className="h-4 w-4" />
+                  Nouvelle
+                </a>
+                <a
+                  href="/admin/production"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors text-sm font-medium border border-gray-200 dark:border-dark-700"
+                >
+                  <Eye className="h-4 w-4" />
+                  Production
+                </a>
+              </div>
+            </div>
+
+            {/* Stock Atelier */}
+            <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500/10 rounded-lg">
+                    <Boxes className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Stock Atelier</h2>
+                </div>
+                <a href="/admin/materials" className="text-sm text-primary-500 hover:text-primary-400 font-medium">
+                  Voir tout
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="text-center p-3 bg-amber-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-amber-600">{materialStats?.summary.totalMaterials || 0}</p>
+                  <p className="text-xs text-gray-500">Matériels</p>
+                </div>
+                <div className="text-center p-3 bg-blue-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {formatCurrency(materialStats?.summary.totalStockValue || 0).replace(' CFA', '')}
+                  </p>
+                  <p className="text-xs text-gray-500">Valeur stock</p>
+                </div>
+                <div className="text-center p-3 bg-green-500/10 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{materialStats?.summary.entries.count || 0}</p>
+                  <p className="text-xs text-gray-500">Entrées (mois)</p>
+                </div>
+                <div className={`text-center p-3 rounded-lg ${
+                  (materialStats?.summary.lowStockCount || 0) > 0
+                    ? 'bg-red-500/10'
+                    : 'bg-gray-100 dark:bg-dark-800'
+                }`}>
+                  <p className={`text-2xl font-bold ${
+                    (materialStats?.summary.lowStockCount || 0) > 0
+                      ? 'text-red-600'
+                      : 'text-gray-600'
+                  }`}>
+                    {materialStats?.summary.lowStockCount || 0}
+                  </p>
+                  <p className="text-xs text-gray-500">Stock faible</p>
+                </div>
+              </div>
+
+              {/* Low Stock Alert */}
+              {materialStats && materialStats.lowStockItems.length > 0 && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700/50 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                    <span className="text-sm font-medium text-red-700 dark:text-red-400">Stock faible</span>
+                  </div>
+                  <div className="space-y-1">
+                    {materialStats.lowStockItems.slice(0, 3).map((item) => (
+                      <p key={item.id} className="text-xs text-red-600 dark:text-red-400">
+                        • {item.name}: {item.stock} {item.unit}
+                      </p>
+                    ))}
+                    {materialStats.lowStockItems.length > 3 && (
+                      <p className="text-xs text-red-500">
+                        +{materialStats.lowStockItems.length - 3} autres
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <a
+                  href="/admin/materials/out"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                  Sortie
+                </a>
+                <a
+                  href="/admin/materials/in"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors text-sm font-medium border border-gray-200 dark:border-dark-700"
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                  Entrée
+                </a>
               </div>
             </div>
           </div>
@@ -865,6 +1218,33 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Gérer les rendez-vous</span>
                   <CalendarDays className="h-4 w-4" />
+                </div>
+              </a>
+              <a
+                href="/admin/custom-orders"
+                className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-purple-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Commandes sur-mesure</span>
+                  <Scissors className="h-4 w-4" />
+                </div>
+              </a>
+              <a
+                href="/admin/materials"
+                className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-amber-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Stock atelier</span>
+                  <Boxes className="h-4 w-4" />
+                </div>
+              </a>
+              <a
+                href="/admin/expenses"
+                className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-red-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Gérer les dépenses</span>
+                  <Wallet className="h-4 w-4" />
                 </div>
               </a>
             </div>
