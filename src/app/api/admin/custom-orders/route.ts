@@ -64,7 +64,13 @@ export async function GET(req: NextRequest) {
     const where: any = {}
 
     if (status) {
-      where.status = status
+      // Support multiple statuses separated by comma
+      const statuses = status.split(',').map(s => s.trim()).filter(Boolean)
+      if (statuses.length === 1) {
+        where.status = statuses[0]
+      } else if (statuses.length > 1) {
+        where.status = { in: statuses }
+      }
     }
 
     if (priority) {

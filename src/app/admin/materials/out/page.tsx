@@ -58,7 +58,7 @@ function MaterialOutForm() {
       const [matRes, tailorRes, orderRes] = await Promise.all([
         fetch('/api/admin/materials?limit=1000'),
         fetch('/api/admin/tailors'),
-        fetch('/api/admin/custom-orders?status=IN_PRODUCTION,PENDING&limit=100'),
+        fetch('/api/admin/custom-orders?status=PENDING,IN_PRODUCTION,FITTING,ALTERATIONS&limit=100'),
       ])
 
       const matData = await matRes.json()
