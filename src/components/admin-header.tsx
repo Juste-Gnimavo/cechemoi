@@ -44,19 +44,25 @@ import {
   UsersRound,
   Wallet
 } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useTheme } from '@/store/theme'
+import { UserRole } from '@prisma/client'
+import { getRoleBadgeLabel } from '@/lib/role-permissions'
 
 // Types for menu structure (3 levels support)
+type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR'
+
 interface SubMenuItem {
   href: string
   label: string
   badge?: string
+  allowedRoles?: AllowedRole[]
 }
 
 interface MenuGroup {
   label: string
   items: SubMenuItem[]
+  allowedRoles?: AllowedRole[]
 }
 
 interface MenuItem {
@@ -65,6 +71,58 @@ interface MenuItem {
   icon: any
   items?: SubMenuItem[]   // For simple dropdowns (2 levels)
   groups?: MenuGroup[]    // For grouped dropdowns (3 levels)
+  allowedRoles?: AllowedRole[]
+}
+
+// Filter menu items based on user role
+function filterMenuByRole(items: MenuItem[], role: UserRole): MenuItem[] {
+  if (role === 'ADMIN' || role === 'MANAGER') {
+    return items // Full access
+  }
+
+  return items
+    .filter(item => {
+      // If no allowedRoles specified, assume admin-only
+      if (!item.allowedRoles) return false
+      return item.allowedRoles.includes(role as AllowedRole)
+    })
+    .map(item => {
+      // Filter groups if present
+      if (item.groups) {
+        const filteredGroups = item.groups
+          .filter(group => {
+            if (!group.allowedRoles) return true // If no role specified, include
+            return group.allowedRoles.includes(role as AllowedRole)
+          })
+          .map(group => ({
+            ...group,
+            items: group.items.filter(subItem => {
+              if (!subItem.allowedRoles) return true
+              return subItem.allowedRoles.includes(role as AllowedRole)
+            })
+          }))
+          .filter(group => group.items.length > 0)
+
+        return { ...item, groups: filteredGroups }
+      }
+
+      // Filter items if present
+      if (item.items) {
+        const filteredItems = item.items.filter(subItem => {
+          if (!subItem.allowedRoles) return true
+          return subItem.allowedRoles.includes(role as AllowedRole)
+        })
+        return { ...item, items: filteredItems }
+      }
+
+      return item
+    })
+    .filter(item => {
+      // Remove items with empty groups or items
+      if (item.groups && item.groups.length === 0) return false
+      if (item.items && item.items.length === 0) return false
+      return true
+    })
 }
 
 export function AdminHeader() {

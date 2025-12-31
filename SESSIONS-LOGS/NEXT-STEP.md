@@ -1,96 +1,92 @@
-# Next Session: Session 10 COMPLETE - Custom Orders System
+# Prochaine Session - Web App
 
-**Previous Session**: `10-CUSTOM-ORDERS-SYSTEM.md`
-**Status**: COMPLETE (Phase 1 & 2 + Navigation reorganisee + Gestion couturiers)
-
----
-
-## Summary of Completed Work
-
-Systeme de Commandes Sur-Mesure implemente avec succes:
-
-### Phase 1: Fondation
-- Modeles Prisma: CustomOrder, CustomOrderItem, CustomOrderPayment, CustomOrderTimeline
-- Role TAILOR ajoute a UserRole
-- APIs CRUD completes pour commandes, articles, paiements, timeline
-- Page liste des commandes (`/admin/custom-orders`)
-- Page creation de commande (`/admin/custom-orders/new`)
-
-### Phase 2: Production
-- Page detail commande avec timeline (`/admin/custom-orders/[id]`)
-- Tableau Kanban de production (`/admin/production`)
-- Drag & drop pour changer le statut des articles
-- Filtres par couturier
+**Dernière session** : 11 - Module Dépenses et Dashboard Amélioré
+**Date** : 31 Décembre 2024
 
 ---
 
-## Suggested Next Steps
+## Modules Complétés
 
-### Option 1: Phase 3 - Paiements Avances
-- Vue "Fiche Excel" style par client
-- Rapports financiers (benefices, CA par periode)
-- Export PDF/Excel des commandes
-
-### Option 2: Phase 4 - Interface Couturier
-- Dashboard couturier simplifie (`/tailor`)
-- Pages web responsive pour mobile
-- Mise a jour statut depuis interface
-- Notifications d'assignation
-
-### Option 3: Tester le Systeme
-1. Creer des couturiers de test (role TAILOR via API ou Prisma Studio)
-2. Creer des commandes sur-mesure de test
-3. Valider le workflow complet sur le Kanban
-
-### Option 4: Continue Mobile App Development
-Continue with Week 3 of mobile app development as per `MOBILE-SESSIONS-LOGS/NEXT-STEP.md`.
+- ✅ Gestion des Matériels (Stock Atelier)
+- ✅ Gestion des Dépenses (nouveau)
+- ✅ Dashboard Admin amélioré avec overview de tous les modules
+- ✅ Commandes Sur-Mesure
+- ✅ Système de Rendez-vous
+- ✅ Système de Facturation
 
 ---
 
-## Quick Commands
+## Suggestions pour la prochaine session
 
-```bash
-# Apply database changes (already done)
-npx prisma db push
+### Option 1 : Améliorations Dépenses
+- Upload de pièces jointes (photos de factures)
+- Export PDF des rapports de dépenses
+- Graphiques d'évolution mensuelle
 
-# Generate Prisma client (already done)
-npx prisma generate
+### Option 2 : Système de Notifications
+- Seed des 20 templates de notifications
+- Implémentation des triggers (commande, paiement, etc.)
+- UI admin pour gérer les templates
+- Référence : `SESSIONS-LOGS/08-NOTIFICATION-SYSTEM-AND-ADMIN-IMPROVEMENTS-PLAN.md`
 
-# Run development server
-npm run dev
+### Option 3 : Mobile App (Priorité)
+- Continuer le développement mobile
+- Lire `MOBILE-SESSIONS-LOGS/NEXT-STEP.md`
+- Semaine 3 en cours (Product Browsing)
 
-# Open Prisma Studio to create test data
-npx prisma studio
-```
+### Option 4 : Améliorations Admin
+- Page de gestion de l'équipe (team management)
+- Connecter les données mock aux vraies APIs
+- Améliorer les rapports analytics
 
 ---
 
-## New Pages Created
+## Nouvelles Pages Session 11
 
 | Page | URL |
 |------|-----|
-| Liste commandes sur-mesure | `/admin/custom-orders` |
-| Nouvelle commande | `/admin/custom-orders/new` |
-| Detail commande | `/admin/custom-orders/[id]` |
-| Production Kanban | `/admin/production` |
+| Liste dépenses | `/admin/expenses` |
+| Nouvelle dépense | `/admin/expenses/new` |
+| Modifier dépense | `/admin/expenses/[id]/edit` |
+| Catégories dépenses | `/admin/expenses/categories` |
+| Rapports dépenses | `/admin/expenses/reports` |
 
-## New APIs Created
+## Nouvelles APIs Session 11
 
 | Endpoint | Methods |
 |----------|---------|
-| `/api/admin/custom-orders` | GET, POST |
-| `/api/admin/custom-orders/[id]` | GET, PUT, DELETE |
-| `/api/admin/custom-orders/[id]/items` | POST, PUT, DELETE |
-| `/api/admin/custom-orders/[id]/payments` | GET, POST, DELETE |
-| `/api/admin/custom-orders/[id]/timeline` | GET, POST |
-| `/api/admin/tailors` | GET, POST |
-| `/api/admin/production` | GET |
+| `/api/admin/expenses` | GET, POST |
+| `/api/admin/expenses/[id]` | GET, PUT, DELETE |
+| `/api/admin/expenses/categories` | GET, POST |
+| `/api/admin/expenses/categories/[id]` | PUT, DELETE |
+| `/api/admin/expenses/reports` | GET |
 
 ---
 
-## Notes
+## État actuel du projet
 
-- Format numero commande: SM-2025-001
-- Types de tenues predefinis + option "Autre" personnalisable
-- Date de retrait par defaut: +14 jours
-- Priorites: NORMAL, URGENT (+50%), VIP (+100%)
+| Module | Status |
+|--------|--------|
+| Web Admin Dashboard | ✅ 100% |
+| Web Customer Frontend | ✅ 95% |
+| APIs | ✅ 70+ endpoints |
+| Expenses Module | ✅ 100% |
+| Materials Module | ✅ 100% |
+| Custom Orders | ✅ 100% |
+| Mobile App | 🔄 Week 3/10 |
+
+---
+
+## Commandes utiles
+
+```bash
+# Développement web
+npm run dev
+
+# Vérifier TypeScript
+npx tsc --noEmit
+
+# Prisma
+npx prisma studio
+npx prisma db push
+```
