@@ -179,7 +179,7 @@ export function AdminHeader() {
     {
       label: 'Rendez-vous',
       icon: CalendarDays,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
       items: [
         { href: '/admin/appointments', label: 'Tableau de bord' },
         { href: '/admin/appointments/list', label: 'Tous les rendez-vous' },
@@ -208,7 +208,7 @@ export function AdminHeader() {
         },
         {
           label: 'Stock Atelier',
-          allowedRoles: ['ADMIN', 'MANAGER'], // Pas STAFF ni TAILOR
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/materials', label: 'Materiels' },
             { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
@@ -293,7 +293,7 @@ export function AdminHeader() {
         },
         {
           label: 'Produits',
-          allowedRoles: ['ADMIN', 'MANAGER'],
+          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/products', label: 'Tous les produits' },
             { href: '/admin/products/new', label: 'Ajouter un produit' },

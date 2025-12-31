@@ -405,7 +405,7 @@ export default function AdminDashboard() {
   const userRole = (adminProfile?.role as UserRole) || 'STAFF'
   const isAdminOrManager = userRole === 'ADMIN' || userRole === 'MANAGER'
   const isTailor = userRole === 'TAILOR'
-  const canSeeRevenue = hasPermission(userRole, 'invoices') || isAdminOrManager
+  const canSeeRevenue = isAdminOrManager // Only Admin/Manager can see global revenue stats
   const canSeeCustomers = hasPermission(userRole, 'customers') || isAdminOrManager
   const canSeeProducts = hasPermission(userRole, 'products') || isAdminOrManager
   const canSeeOrders = hasPermission(userRole, 'orders') || isAdminOrManager
@@ -1253,6 +1253,43 @@ export default function AdminDashboard() {
               Actions Rapides
             </h2>
             <div className="space-y-2">
+              {/* Quick Create Actions for STAFF */}
+              {canSeeCustomers && (
+              <a
+                href="/admin/customers/new"
+                className="block p-3 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-700/50 hover:border-green-500/50 rounded-lg transition-all text-green-700 dark:text-green-300"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">+ Nouveau client</span>
+                  <Users className="h-4 w-4" />
+                </div>
+              </a>
+              )}
+              <a
+                href="/admin/custom-orders/new"
+                className="block p-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border border-purple-200 dark:border-purple-700/50 hover:border-purple-500/50 rounded-lg transition-all text-purple-700 dark:text-purple-300"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">+ Nouvelle commande sur-mesure</span>
+                  <Scissors className="h-4 w-4" />
+                </div>
+              </a>
+              {canSeeMaterials && (
+              <a
+                href="/admin/materials/out"
+                className="block p-3 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 border border-amber-200 dark:border-amber-700/50 hover:border-amber-500/50 rounded-lg transition-all text-amber-700 dark:text-amber-300"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">+ Sortie de matériel</span>
+                  <ArrowRightLeft className="h-4 w-4" />
+                </div>
+              </a>
+              )}
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-dark-700 my-3"></div>
+
+              {/* Management Links */}
               {canSeeOrders && (
               <a
                 href="/admin/orders"
