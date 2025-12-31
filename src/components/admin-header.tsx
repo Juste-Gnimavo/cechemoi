@@ -41,7 +41,8 @@ import {
   Moon,
   CalendarDays,
   Scissors,
-  UsersRound
+  UsersRound,
+  Wallet
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useTheme } from '@/store/theme'
@@ -184,6 +185,15 @@ export function AdminHeader() {
             { href: '/admin/sales/week', label: 'Ventes de la semaine' },
             { href: '/admin/sales/month', label: 'Ventes du mois' },
             { href: '/admin/sales/year', label: "Ventes de l'année" },
+          ],
+        },
+        {
+          label: 'Dépenses',
+          items: [
+            { href: '/admin/expenses', label: 'Toutes les dépenses' },
+            { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
+            { href: '/admin/expenses/reports', label: 'Rapports dépenses' },
+            { href: '/admin/expenses/categories', label: 'Catégories' },
           ],
         },
       ],

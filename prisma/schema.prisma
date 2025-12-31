@@ -121,6 +121,10 @@ model User {
   materialUsages        MaterialMovement[]   @relation("TailorMaterialUsage")  // Materials used by this tailor
   materialMovements     MaterialMovement[]   @relation("StaffMaterialMovement") // Material movements recorded by this staff
 
+  // Expenses Management (Dépenses)
+  staffExpenses         Expense[]            @relation("StaffExpenses")         // Salary expenses for this staff member
+  expensesCreated       Expense[]            @relation("ExpenseCreatedBy")      // Expenses recorded by this staff
+
   @@unique([phone, role]) // A person can have same phone for different roles (e.g. CUSTOMER + ADMIN)
   @@unique([email, role]) // A person can have same email for different roles
   @@index([phone])
@@ -2297,5 +2301,76 @@ model Receipt {
   @@index([customOrderId])
   @@index([invoiceId])
   @@index([paymentDate])
+  @@index([createdAt])
+}
+
+// ========================================
+// EXPENSES MANAGEMENT (Gestion des Dépenses)
+// ========================================
+
+// Catégories de dépenses (flexible)
+model ExpenseCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  icon        String?   // Nom de l'icône lucide (ex: "Zap" pour électricité)
+  color       String?   // Couleur hex pour l'UI
+  isDefault   Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  expenses    Expense[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sortOrder])
+}
+
+// Modes de paiement pour les dépenses
+enum ExpensePaymentMethod {
+  CASH           // Espèces
+  BANK_TRANSFER  // Virement bancaire
+  ORANGE_MONEY   // Orange Money
+  MTN_MOMO       // MTN MoMo
+  WAVE           // Wave
+  CHECK          // Chèque
+  CARD           // Carte bancaire
+}
+
+// Dépenses
+model Expense {
+  id              String               @id @default(cuid())
+
+  // Catégorie
+  categoryId      String
+  category        ExpenseCategory      @relation(fields: [categoryId], references: [id])
+
+  // Détails
+  description     String
+  amount          Float
+  paymentMethod   ExpensePaymentMethod
+  paymentDate     DateTime             @default(now())
+  reference       String?              // N° facture/reçu externe
+
+  // Lien optionnel avec un membre du staff (pour salaires)
+  staffId         String?
+  staff           User?                @relation("StaffExpenses", fields: [staffId], references: [id], onDelete: SetNull)
+
+  // Pièces jointes (photo facture)
+  attachmentUrl   String?
+
+  // Notes
+  notes           String?              @db.Text
+
+  // Traçabilité
+  createdById     String?
+  createdBy       User?                @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdByName   String?
+
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([categoryId])
+  @@index([staffId])
+  @@index([paymentDate])
+  @@index([createdById])
   @@index([createdAt])
 }
