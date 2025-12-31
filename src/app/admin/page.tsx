@@ -410,7 +410,7 @@ export default function AdminDashboard() {
   const canSeeProducts = hasPermission(userRole, 'products') || isAdminOrManager
   const canSeeOrders = hasPermission(userRole, 'orders') || isAdminOrManager
   const canSeeMaterials = hasPermission(userRole, 'materials') || isAdminOrManager
-  const canSendNotifications = isAdminOrManager
+  const canSendNotifications = hasPermission(userRole, 'notifications') || isAdminOrManager
 
   // Calculate daily and monthly revenue from revenueByDay
   const today = new Date()

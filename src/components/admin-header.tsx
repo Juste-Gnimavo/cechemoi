@@ -320,11 +320,11 @@ export function AdminHeader() {
       ],
     },
 
-    // 7. COMMUNICATION - Campagnes + Notifications + Blog (ADMIN, MANAGER seulement)
+    // 7. COMMUNICATION - Campagnes + Notifications + Blog
     {
       label: 'Communication',
       icon: Send,
-      allowedRoles: ['ADMIN', 'MANAGER'],
+      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
       groups: [
         {
           label: 'Campagnes',

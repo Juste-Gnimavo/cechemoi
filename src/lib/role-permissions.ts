@@ -24,6 +24,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | '*'> = {
     'invoices', 'invoices.create', 'receipts', 'sales',
     'orders', 'orders.create',
     'products', 'categories', 'inventory',
+    'campaigns', 'notifications',
   ],
   TAILOR: [
     'dashboard',
