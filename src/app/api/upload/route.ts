@@ -23,7 +23,11 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const file = formData.get('file') as File
     const category = (formData.get('category') as string) || 'temp'
-    const useS3 = formData.get('useS3') === 'true' // Use S3 if specified
+
+    // Auto-detect S3: use S3 if configured, otherwise fall back to local storage
+    const s3Configured = !!(process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY)
+    const forceLocal = formData.get('forceLocal') === 'true'
+    const useS3 = s3Configured && !forceLocal
 
     if (!file) {
       return NextResponse.json(
