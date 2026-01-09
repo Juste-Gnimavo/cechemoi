@@ -2153,6 +2153,7 @@ model CustomOrder {
   items           CustomOrderItem[]
   payments        CustomOrderPayment[]
   timeline        CustomOrderTimeline[]
+  attachments     CustomOrderAttachment[]
 
   // Invoice relation (auto-generated)
   invoice         Invoice?
@@ -2254,6 +2255,32 @@ model CustomOrderTimeline {
 
   @@index([customOrderId])
   @@index([createdAt])
+}
+
+model CustomOrderAttachment {
+  id              String   @id @default(cuid())
+  customOrderId   String
+  customOrder     CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+
+  // File info
+  filename        String
+  originalName    String
+  fileUrl         String
+  fileType        String   // MIME type
+  fileSize        Int      // Size in bytes
+  category        String   @default("document") // document, image, audio, video, other
+
+  // Description
+  description     String?
+
+  // Who uploaded
+  uploadedById    String?
+  uploadedByName  String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([customOrderId])
+  @@index([category])
 }
 
 // ========================================

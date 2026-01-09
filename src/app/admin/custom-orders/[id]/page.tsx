@@ -28,6 +28,14 @@ import {
   Receipt,
   ExternalLink,
   Box,
+  Paperclip,
+  Upload,
+  File,
+  Image,
+  Video,
+  Music,
+  X,
+  Save,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -138,6 +146,19 @@ interface MaterialUsage {
   createdBy: { name: string } | null
 }
 
+interface Attachment {
+  id: string
+  filename: string
+  originalName: string
+  fileUrl: string
+  fileType: string
+  fileSize: number
+  category: string
+  description?: string
+  uploadedByName?: string
+  createdAt: string
+}
+
 export default function CustomOrderDetailPage() {
   const router = useRouter()
   const params = useParams()
@@ -149,6 +170,14 @@ export default function CustomOrderDetailPage() {
   const [tailors, setTailors] = useState<any[]>([])
   const [materialUsages, setMaterialUsages] = useState<MaterialUsage[]>([])
   const [materialTotalCost, setMaterialTotalCost] = useState(0)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [attachmentsExpanded, setAttachmentsExpanded] = useState(true)
+  const [uploadingFile, setUploadingFile] = useState(false)
+
+  // Notes editing
+  const [editingNotes, setEditingNotes] = useState(false)
+  const [notesValue, setNotesValue] = useState('')
+  const [savingNotes, setSavingNotes] = useState(false)
 
   // Modal states
   const [showPaymentModal, setShowPaymentModal] = useState(false)
@@ -178,6 +207,7 @@ export default function CustomOrderDetailPage() {
     fetchOrder()
     fetchTailors()
     fetchMaterialUsages()
+    fetchAttachments()
   }, [orderId])
 
   const fetchOrder = async () => {
@@ -223,6 +253,137 @@ export default function CustomOrderDetailPage() {
     } catch (error) {
       console.error('Error fetching material usages:', error)
     }
+  }
+
+  const fetchAttachments = async () => {
+    try {
+      const res = await fetch(`/api/admin/custom-orders/${orderId}/attachments`)
+      const data = await res.json()
+      if (data.success) {
+        setAttachments(data.attachments)
+      }
+    } catch (error) {
+      console.error('Error fetching attachments:', error)
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const file = files[0]
+    const maxSize = 500 * 1024 * 1024 // 500MB
+    if (file.size > maxSize) {
+      toast.error('Fichier trop volumineux. Maximum 500MB')
+      return
+    }
+
+    setUploadingFile(true)
+    try {
+      // First upload to storage
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('category', `custom-orders/${orderId}`)
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const uploadData = await uploadRes.json()
+
+      if (!uploadData.success) {
+        throw new Error(uploadData.error || 'Upload failed')
+      }
+
+      // Then save attachment record
+      const res = await fetch(`/api/admin/custom-orders/${orderId}/attachments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: uploadData.filename,
+          originalName: file.name,
+          fileUrl: uploadData.url,
+          fileType: file.type,
+          fileSize: file.size,
+        }),
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast.success('Fichier ajoute')
+        fetchAttachments()
+        fetchOrder() // Refresh timeline
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error: any) {
+      console.error('Error uploading file:', error)
+      toast.error(error.message || 'Erreur lors du telechargement')
+    } finally {
+      setUploadingFile(false)
+      // Reset input
+      e.target.value = ''
+    }
+  }
+
+  const deleteAttachment = async (attachmentId: string) => {
+    if (!confirm('Supprimer ce fichier ?')) return
+
+    try {
+      const res = await fetch(`/api/admin/custom-orders/${orderId}/attachments?attachmentId=${attachmentId}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast.success('Fichier supprime')
+        fetchAttachments()
+        fetchOrder() // Refresh timeline
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error: any) {
+      console.error('Error deleting attachment:', error)
+      toast.error(error.message || 'Erreur lors de la suppression')
+    }
+  }
+
+  const saveNotes = async () => {
+    setSavingNotes(true)
+    try {
+      const res = await fetch(`/api/admin/custom-orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: notesValue }),
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast.success('Notes enregistrees')
+        setEditingNotes(false)
+        fetchOrder()
+      } else {
+        throw new Error(data.error)
+      }
+    } catch (error: any) {
+      console.error('Error saving notes:', error)
+      toast.error(error.message || 'Erreur lors de la sauvegarde')
+    } finally {
+      setSavingNotes(false)
+    }
+  }
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return Image
+    if (fileType.startsWith('video/')) return Video
+    if (fileType.startsWith('audio/')) return Music
+    return File
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    return (bytes / 1024 / 1024).toFixed(1) + ' MB'
   }
 
   const updateOrderStatus = async (newStatus: string) => {
@@ -887,15 +1048,58 @@ export default function CustomOrderDetailPage() {
           </div>
 
           {/* Notes */}
-          {order.notes && (
-            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary-400" />
                 Notes
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{order.notes}</p>
+              {!editingNotes && (
+                <button
+                  onClick={() => {
+                    setNotesValue(order.notes || '')
+                    setEditingNotes(true)
+                  }}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded transition-colors"
+                  title="Modifier"
+                >
+                  <Edit2 className="h-4 w-4 text-gray-400" />
+                </button>
+              )}
             </div>
-          )}
+            {editingNotes ? (
+              <div className="space-y-3">
+                <textarea
+                  value={notesValue}
+                  onChange={(e) => setNotesValue(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Ajouter des notes..."
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setEditingNotes(false)}
+                    className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={saveNotes}
+                    disabled={savingNotes}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg disabled:opacity-50"
+                  >
+                    {savingNotes && <Loader2 className="h-3 w-3 animate-spin" />}
+                    <Save className="h-3 w-3" />
+                    Enregistrer
+                  </button>
+                </div>
+              </div>
+            ) : order.notes ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{order.notes}</p>
+            ) : (
+              <p className="text-sm text-gray-400 italic">Aucune note</p>
+            )}
+          </div>
 
           {/* Material Usages Section */}
           <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
@@ -981,6 +1185,120 @@ export default function CustomOrderDetailPage() {
                       <Plus className="h-3 w-3" />
                       Enregistrer une sortie
                     </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Attachments Section */}
+          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
+            <button
+              onClick={() => setAttachmentsExpanded(!attachmentsExpanded)}
+              className="w-full p-6 flex items-center justify-between text-left"
+            >
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Paperclip className="h-4 w-4 text-primary-400" />
+                Fichiers joints ({attachments.length})
+              </h3>
+              <div className="flex items-center gap-2">
+                <label
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors cursor-pointer"
+                  title="Ajouter un fichier"
+                >
+                  <input
+                    type="file"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    disabled={uploadingFile}
+                  />
+                  {uploadingFile ? (
+                    <Loader2 className="h-4 w-4 text-primary-500 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4 text-primary-500" />
+                  )}
+                </label>
+                {attachmentsExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+            </button>
+
+            {attachmentsExpanded && (
+              <div className="px-6 pb-6">
+                {attachments.length > 0 ? (
+                  <div className="space-y-2">
+                    {attachments.map((attachment) => {
+                      const FileIcon = getFileIcon(attachment.fileType)
+                      return (
+                        <div
+                          key={attachment.id}
+                          className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2 bg-gray-200 dark:bg-dark-700 rounded-lg">
+                              <FileIcon className="h-5 w-5 text-gray-500" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <a
+                                href={attachment.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary-500 truncate block"
+                              >
+                                {attachment.originalName}
+                              </a>
+                              <p className="text-xs text-gray-500">
+                                {formatFileSize(attachment.fileSize)}
+                                {attachment.uploadedByName && ` - par ${attachment.uploadedByName}`}
+                                {' - '}
+                                {new Date(attachment.createdAt).toLocaleDateString('fr-FR')}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={attachment.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-colors"
+                              title="Ouvrir"
+                            >
+                              <ExternalLink className="h-4 w-4 text-gray-400" />
+                            </a>
+                            <button
+                              onClick={() => deleteAttachment(attachment.id)}
+                              className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <Paperclip className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Aucun fichier joint
+                    </p>
+                    <label className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-400 cursor-pointer">
+                      <input
+                        type="file"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                        disabled={uploadingFile}
+                      />
+                      <Upload className="h-3 w-3" />
+                      Ajouter un fichier (max 500MB)
+                    </label>
                   </div>
                 )}
               </div>

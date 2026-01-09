@@ -162,6 +162,7 @@ export function AdminHeader() {
           items: [
             { href: '/admin/customers', label: 'Voir/Chercher des clients' },
             { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
+            { href: '/admin/customers/sources', label: 'Sources d\'acquisition', allowedRoles: ['ADMIN'] },
           ],
         },
         {
@@ -203,6 +204,7 @@ export function AdminHeader() {
           items: [
             { href: '/admin/custom-orders', label: 'Toutes les commandes' },
             { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
+            { href: '/admin/custom-orders/audit', label: 'Audit & Statistiques', allowedRoles: ['ADMIN'] },
             { href: '/admin/production', label: 'Suivi Production' },
           ],
         },
@@ -342,7 +344,7 @@ export function AdminHeader() {
           items: [
             { href: '/admin/notifications', label: 'Tableau de bord' },
             { href: '/admin/notifications/logs', label: 'Logs' },
-            { href: '/admin/notifications/templates', label: 'Templates' },
+            { href: '/admin/notifications/templates', label: 'Modèles de message' },
             { href: '/admin/notifications/follow-up', label: 'Messages de relance' },
             { href: '/admin/notifications/settings', label: 'Paramètres' },
           ],
