@@ -95,8 +95,12 @@ export function UserProfileCard({
         throw new Error(uploadData.error || 'Upload failed')
       }
 
+      // Determine which API to use based on user role
+      const isAdminRole = user.role && ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user.role)
+      const profileApiUrl = isAdminRole ? '/api/admin/profile' : '/api/account/profile'
+
       // Update user profile
-      const updateRes = await fetch('/api/account/profile', {
+      const updateRes = await fetch(profileApiUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: uploadData.url }),
@@ -104,7 +108,8 @@ export function UserProfileCard({
 
       const updateData = await updateRes.json()
 
-      if (updateData.success) {
+      // Handle both response formats: { success, user } or { user }
+      if (updateData.success || updateData.user) {
         setImageUrl(uploadData.url)
         onImageUpdate?.(uploadData.url)
         toast.success('Photo de profil mise à jour')
