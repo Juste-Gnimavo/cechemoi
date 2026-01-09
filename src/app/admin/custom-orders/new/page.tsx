@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -76,6 +76,7 @@ interface OrderItem {
 
 export default function NewCustomOrderPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { welcome } = useConfetti()
 
   // Loading states
@@ -131,7 +132,30 @@ export default function NewCustomOrderPage() {
   // Load tailors on mount
   useEffect(() => {
     fetchTailors()
+    // Pre-load customer from URL parameter
+    const customerId = searchParams.get('customerId')
+    if (customerId) {
+      fetchCustomerById(customerId)
+    }
   }, [])
+
+  const fetchCustomerById = async (customerId: string) => {
+    try {
+      const res = await fetch(`/api/admin/customers/${customerId}`)
+      const data = await res.json()
+      if (data.success && data.customer) {
+        setSelectedCustomer({
+          id: data.customer.id,
+          name: data.customer.name,
+          phone: data.customer.phone,
+          whatsappNumber: data.customer.whatsappNumber,
+          email: data.customer.email,
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching customer:', error)
+    }
+  }
 
   const fetchTailors = async () => {
     try {

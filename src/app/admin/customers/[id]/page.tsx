@@ -471,7 +471,7 @@ export default function CustomerDetailPage() {
             <span>Modifier</span>
           </button>
           <Link
-            href={`/admin/orders/new?customerId=${customer.id}`}
+            href={`/admin/custom-orders/new?customerId=${customer.id}`}
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />

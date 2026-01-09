@@ -162,6 +162,7 @@ export function AdminHeader() {
           items: [
             { href: '/admin/customers', label: 'Voir/Chercher des clients' },
             { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
+            { href: '/admin/customers/import', label: 'Importer / Exporter' },
             { href: '/admin/customers/sources', label: 'Sources d\'acquisition', allowedRoles: ['ADMIN'] },
           ],
         },
