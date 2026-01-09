@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UserPlus, Edit, Trash2, Eye, EyeOff, Shield, Mail, Phone, X, Save } from 'lucide-react'
+import { UserPlus, Edit, Trash2, Eye, EyeOff, Shield, Mail, Phone, X, Save, ExternalLink } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 
 interface TeamMember {
   id: string
@@ -268,11 +269,9 @@ export default function TeamManagementPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Dernière Connexion
                   </th>
-                  {currentUserRole === 'ADMIN' && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  )}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-dark-700">
@@ -316,24 +315,35 @@ export default function TeamManagementPage() {
                         ? new Date(member.lastLogin).toLocaleDateString('fr-FR')
                         : 'Jamais'}
                     </td>
-                    {currentUserRole === 'ADMIN' && (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleOpenModal(member)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(member.id, member.name || 'cet utilisateur')}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/admin/team/${member.id}`}
+                          className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300"
+                          title="Voir le profil"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                        {currentUserRole === 'ADMIN' && (
+                          <>
+                            <button
+                              onClick={() => handleOpenModal(member)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Modifier"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(member.id, member.name || 'cet utilisateur')}
+                              className="text-red-600 hover:text-red-900"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

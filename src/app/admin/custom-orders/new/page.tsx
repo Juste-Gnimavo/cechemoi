@@ -13,7 +13,6 @@ import {
   Trash2,
   Calendar,
   Scissors,
-  AlertTriangle,
   CheckCircle,
   X,
   Ruler,
@@ -486,10 +485,10 @@ export default function NewCustomOrderPage() {
                 </p>
               </div>
             ) : (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Aucune mensuration enregistrée pour ce client
+              <div className="p-4 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg">
+                <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Ruler className="h-5 w-5" />
+                  Aucune mensuration enregistrée pour ce client (optionnel)
                 </p>
                 <Link
                   href={`/admin/customers/${selectedCustomer.id}`}
@@ -785,7 +784,7 @@ export default function NewCustomOrderPage() {
 
         {/* Notes */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes (optionnel)</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes (facultatif)</h2>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}

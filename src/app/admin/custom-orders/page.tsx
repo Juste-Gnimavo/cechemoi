@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Loader2,
   FileText,
+  BarChart3,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -237,13 +238,22 @@ export default function CustomOrdersPage() {
           </p>
         </div>
 
-        <Link
-          href="/admin/custom-orders/new"
-          className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          Nouvelle commande
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/custom-orders/audit"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-dark-700 rounded-lg transition-colors"
+          >
+            <BarChart3 className="h-5 w-5" />
+            Audit
+          </Link>
+          <Link
+            href="/admin/custom-orders/new"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            Nouvelle commande
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}
