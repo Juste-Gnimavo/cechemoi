@@ -191,9 +191,8 @@ export default function ImportCustomersPage() {
         </p>
         <p className="text-sm text-blue-600 dark:text-blue-500">
           Exemples:<br/>
-          <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">Jean Dupont    0708090102</code><br/>
-          <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">Marie;0758001234;marie@email.com</code><br/>
-          <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">Pierre, 0505050505</code>
+          <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">Marie;+2250758001234;marie@email.com</code><br/>
+          <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">Pierre, +2250505050505</code>
         </p>
       </div>
 
@@ -233,7 +232,7 @@ export default function ImportCustomersPage() {
           onChange={(e) => setRawText(e.target.value)}
           rows={8}
           className="w-full px-4 py-3 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder="Jean Dupont    0708090102&#10;Marie Konan    0758001234    marie@email.com&#10;Pierre    0505050505"
+          placeholder="Juste,+2250709757296"
         />
         <div className="mt-3 flex gap-3">
           <button

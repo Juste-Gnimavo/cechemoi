@@ -1,79 +1,81 @@
 # Prochaine Session - Web App
 
-**Dernière session** : 11 - Module Dépenses et Dashboard Amélioré
-**Date** : 31 Décembre 2024
+**Dernière session** : 12 - Role-Based Menu and STAFF Permissions
+**Date** : 31 Décembre 2025
 
 ---
 
 ## Modules Complétés
 
 - ✅ Gestion des Matériels (Stock Atelier)
-- ✅ Gestion des Dépenses (nouveau)
-- ✅ Dashboard Admin amélioré avec overview de tous les modules
+- ✅ Gestion des Dépenses
+- ✅ Dashboard Admin amélioré
 - ✅ Commandes Sur-Mesure
 - ✅ Système de Rendez-vous
 - ✅ Système de Facturation
+- ✅ **Role-Based Menu Filtering** (Session 12)
+- ✅ **STAFF Permissions** (Session 12)
+
+---
+
+## Résumé Session 12
+
+### Système de permissions par rôle
+- Menu admin filtré selon le rôle (ADMIN, MANAGER, STAFF, TAILOR)
+- Dashboard widgets conditionnels
+- STAFF a accès complet aux opérations (sauf revenus et équipe)
+- TAILOR a accès limité (RDV, Sur-Mesure, Production)
+
+### Fichiers créés/modifiés
+- `src/lib/role-permissions.ts` - Définitions des permissions
+- `src/components/admin-header.tsx` - Menu filtré par rôle
+- `src/app/admin/page.tsx` - Dashboard adapté au rôle
 
 ---
 
 ## Suggestions pour la prochaine session
 
-### Option 1 : Améliorations Dépenses
-- Upload de pièces jointes (photos de factures)
-- Export PDF des rapports de dépenses
-- Graphiques d'évolution mensuelle
-
-### Option 2 : Système de Notifications
+### Option 1 : Système de Notifications
 - Seed des 20 templates de notifications
 - Implémentation des triggers (commande, paiement, etc.)
 - UI admin pour gérer les templates
 - Référence : `SESSIONS-LOGS/08-NOTIFICATION-SYSTEM-AND-ADMIN-IMPROVEMENTS-PLAN.md`
 
-### Option 3 : Mobile App (Priorité)
+### Option 2 : Mobile App (Priorité)
 - Continuer le développement mobile
 - Lire `MOBILE-SESSIONS-LOGS/NEXT-STEP.md`
 - Semaine 3 en cours (Product Browsing)
 
-### Option 4 : Améliorations Admin
-- Page de gestion de l'équipe (team management)
-- Connecter les données mock aux vraies APIs
+### Option 3 : Améliorations Admin
+- Team performance metrics
+- Export PDF des rapports
 - Améliorer les rapports analytics
 
 ---
 
-## Nouvelles Pages Session 11
+## Accès par Rôle (Session 12)
 
-| Page | URL |
-|------|-----|
-| Liste dépenses | `/admin/expenses` |
-| Nouvelle dépense | `/admin/expenses/new` |
-| Modifier dépense | `/admin/expenses/[id]/edit` |
-| Catégories dépenses | `/admin/expenses/categories` |
-| Rapports dépenses | `/admin/expenses/reports` |
-
-## Nouvelles APIs Session 11
-
-| Endpoint | Methods |
-|----------|---------|
-| `/api/admin/expenses` | GET, POST |
-| `/api/admin/expenses/[id]` | GET, PUT, DELETE |
-| `/api/admin/expenses/categories` | GET, POST |
-| `/api/admin/expenses/categories/[id]` | PUT, DELETE |
-| `/api/admin/expenses/reports` | GET |
+| Module | ADMIN | MANAGER | STAFF | TAILOR |
+|--------|-------|---------|-------|--------|
+| Revenus | ✅ | ✅ | ❌ | ❌ |
+| Clients | ✅ | ✅ | ✅ | ❌ |
+| Rendez-vous | ✅ | ✅ | ✅ | ✅ |
+| Sur-Mesure | ✅ | ✅ | ✅ | ✅ |
+| Stock Atelier | ✅ | ✅ | ✅ | ❌ |
+| Caisse | ✅ | ✅ | ✅ | ❌ |
+| Boutique | ✅ | ✅ | ✅ | ❌ |
+| Communication | ✅ | ✅ | ✅ | ❌ |
+| Équipe | ✅ | ✅ | ❌ | ❌ |
+| Réglages | ✅ | ✅ | ❌ | ❌ |
 
 ---
 
-## État actuel du projet
+## Commits Session 12
 
-| Module | Status |
-|--------|--------|
-| Web Admin Dashboard | ✅ 100% |
-| Web Customer Frontend | ✅ 95% |
-| APIs | ✅ 70+ endpoints |
-| Expenses Module | ✅ 100% |
-| Materials Module | ✅ 100% |
-| Custom Orders | ✅ 100% |
-| Mobile App | 🔄 Week 3/10 |
+- `380ef1e` - feat: Add Communication menu access for STAFF
+- `d8737b1` - fix: Allow STAFF access to dashboard APIs and add stats cards
+- `067e35d` - feat: Enhance STAFF role with full operational permissions
+- `59f9721` - feat: Add role-based menu filtering and revenue stats
 
 ---
 
@@ -89,4 +91,7 @@ npx tsc --noEmit
 # Prisma
 npx prisma studio
 npx prisma db push
+
+# Git
+git log --oneline -10
 ```
