@@ -95,11 +95,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Generate unique filename
+    // Generate unique filename (reuse ext from validation, fallback to MIME type)
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 9)
-    const ext = path.extname(file.name) || `.${file.type.split('/')[1]}`
-    const filename = `${timestamp}-${randomString}${ext}`
+    const fileExt = ext || `.${file.type.split('/')[1]}`
+    const filename = `${timestamp}-${randomString}${fileExt}`
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer()
