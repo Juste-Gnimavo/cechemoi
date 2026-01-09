@@ -32,29 +32,65 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validate file type
+    // Validate file type - support design files
     const validTypes = [
+      // Images
       'image/jpeg',
       'image/png',
       'image/gif',
       'image/webp',
-      'application/pdf',
+      'image/svg+xml',
+      'image/tiff',
+      'image/bmp',
+      // Design files - Adobe
+      'image/vnd.adobe.photoshop',      // PSD
+      'application/x-photoshop',         // PSD alternative
+      'application/photoshop',           // PSD alternative
+      'application/psd',                 // PSD alternative
+      'application/illustrator',         // AI
+      'application/postscript',          // AI/EPS
+      'application/eps',                 // EPS
+      'application/x-eps',               // EPS alternative
+      'image/x-eps',                     // EPS alternative
+      'application/x-indesign',          // INDD
+      'application/pdf',                 // PDF
+      // Design files - Other
+      'application/x-sketch',            // Sketch
+      'application/sketch',              // Sketch alternative
+      'application/figma',               // Figma
+      'application/x-figma',             // Figma alternative
+      // Documents
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      // RAW image formats
+      'image/x-canon-cr2',               // Canon RAW
+      'image/x-nikon-nef',               // Nikon RAW
+      'image/x-sony-arw',                // Sony RAW
+      'image/x-adobe-dng',               // Adobe DNG
     ]
 
-    if (!validTypes.includes(file.type)) {
+    // Also check by file extension for design files (browsers may not detect MIME correctly)
+    const ext = path.extname(file.name).toLowerCase()
+    const validExtensions = [
+      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.tiff', '.tif', '.bmp',
+      '.psd', '.ai', '.eps', '.indd', '.pdf',
+      '.sketch', '.fig', '.xd',
+      '.cr2', '.nef', '.arw', '.dng', '.raw',
+      '.doc', '.docx'
+    ]
+
+    if (!validTypes.includes(file.type) && !validExtensions.includes(ext)) {
       return NextResponse.json(
-        { error: 'Type de fichier invalide. Utilisez JPG, PNG, GIF, WEBP ou PDF' },
+        { error: 'Type de fichier invalide. Formats acceptés: Images (JPG, PNG, GIF, WEBP, SVG, TIFF), Design (PSD, AI, EPS, PDF, INDD, Sketch, Figma, XD), RAW (CR2, NEF, ARW, DNG)' },
         { status: 400 }
       )
     }
 
-    // Validate file size (5MB for images, 50MB for documents)
-    const maxSize = file.type.startsWith('image/') ? 5 * 1024 * 1024 : 50 * 1024 * 1024
+    // Validate file size - 500MB max for design files
+    const maxSize = 500 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: `Fichier trop volumineux. Maximum ${file.type.startsWith('image/') ? '5' : '50'}MB` },
+        { error: 'Fichier trop volumineux. Maximum 500MB' },
         { status: 400 }
       )
     }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { signIn } from 'next-auth/react'
+import { useState, useEffect, Suspense } from 'react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -15,6 +15,7 @@ function AdminLoginContent() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/admin'
   const { theme, toggleTheme } = useTheme()
+  const { data: session, status } = useSession()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,6 +46,39 @@ function AdminLoginContent() {
   })
 
   const closeModal = () => setModal(prev => ({ ...prev, isOpen: false }))
+
+  // Redirect to admin dashboard if already authenticated
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      const userRole = (session.user as any).role
+      // Only redirect if user is admin/manager/staff
+      if (['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(userRole)) {
+        router.replace(callbackUrl)
+      }
+    }
+  }, [status, session, router, callbackUrl])
+
+  // Show loading while checking session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+        <Loader2 className="h-8 w-8 text-primary-500 animate-spin" />
+      </div>
+    )
+  }
+
+  // If already authenticated, show redirecting state
+  if (status === 'authenticated' && session?.user) {
+    const userRole = (session.user as any).role
+    if (['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(userRole)) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
+          <Loader2 className="h-8 w-8 text-primary-500 animate-spin mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Redirection vers le tableau de bord...</p>
+        </div>
+      )
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

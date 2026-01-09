@@ -70,15 +70,10 @@ export function UserProfileCard({
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    // Validate file - allow common image formats for profile photos
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/tiff']
     if (!validTypes.includes(file.type)) {
-      toast.error('Format non supporté. Utilisez JPG, PNG, GIF ou WEBP')
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Fichier trop volumineux. Maximum 5MB')
+      toast.error('Format non supporté. Utilisez JPG, PNG, GIF, WEBP, SVG ou TIFF')
       return
     }
 
