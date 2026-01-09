@@ -144,7 +144,7 @@ export default function NewShippingZonePage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Pays couverts *
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-3">
                 {COMMON_COUNTRIES.map((country) => (
                   <button
                     key={country}

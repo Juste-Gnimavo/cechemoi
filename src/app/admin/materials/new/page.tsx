@@ -182,7 +182,7 @@ export default function NewMaterialPage() {
           </div>
 
           {/* Stock Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
                 Unite <span className="text-red-500">*</span>

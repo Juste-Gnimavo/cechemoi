@@ -670,7 +670,7 @@ export default function NewCustomOrderPage() {
             Dates & Priorité
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {/* Pickup Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">

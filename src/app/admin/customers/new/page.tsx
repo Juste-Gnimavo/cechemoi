@@ -376,7 +376,7 @@ export default function NewCustomerPage() {
             Localisation
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 Ville
@@ -547,7 +547,7 @@ export default function NewCustomerPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                     Rue
