@@ -102,7 +102,7 @@ function formatDate(date: string | Date): string {
 function formatValue(value: number | string | null | undefined, unit: string): string {
   if (value === null || value === undefined || value === '') return '-'
   if (typeof value === 'string') {
-    return LENGTH_LABELS[value] || value
+    return value
   }
   return `${value} ${unit}`
 }
