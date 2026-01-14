@@ -177,11 +177,11 @@ export function AdminHeader() {
       ],
     },
 
-    // 3. RENDEZ-VOUS - Standalone menu (tous sauf CUSTOMER)
+    // 3. RENDEZ-VOUS - Standalone menu (ADMIN et MANAGER uniquement)
     {
       label: 'Rendez-vous',
       icon: CalendarDays,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+      allowedRoles: ['ADMIN', 'MANAGER'],
       items: [
         { href: '/admin/appointments', label: 'Tableau de bord' },
         { href: '/admin/appointments/list', label: 'Tous les rendez-vous' },

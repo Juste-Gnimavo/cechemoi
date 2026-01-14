@@ -4,55 +4,57 @@ import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, Ruler } from 'lucide-react'
 
 // Sub-options for length fields with their own values
+// Using string type to allow flexible input like "50 - 45"
 interface SleeveLengthValues {
-  manchesCourtes?: number | null
-  avantCoudes?: number | null
-  niveau34?: number | null
-  manchesLongues?: number | null
+  manchesCourtes?: string | null
+  avantCoudes?: string | null
+  niveau34?: string | null
+  manchesLongues?: string | null
 }
 
 interface DressLengthValues {
-  avantGenoux?: number | null
-  niveauGenoux?: number | null
-  apresGenoux?: number | null
-  miMollets?: number | null
-  chevilles?: number | null
-  tresLongue?: number | null
+  avantGenoux?: string | null
+  niveauGenoux?: string | null
+  apresGenoux?: string | null
+  miMollets?: string | null
+  chevilles?: string | null
+  tresLongue?: string | null
 }
 
 interface SkirtLengthValues {
-  avantGenoux?: number | null
-  niveauGenoux?: number | null
-  apresGenoux?: number | null
-  miMollets?: number | null
-  chevilles?: number | null
-  tresLongue?: number | null
+  avantGenoux?: string | null
+  niveauGenoux?: string | null
+  apresGenoux?: string | null
+  miMollets?: string | null
+  chevilles?: string | null
+  tresLongue?: string | null
 }
 
 interface MeasurementsFormData {
   measurementDate?: string
   unit?: 'cm' | 'inches'
-  dos?: number | null
-  carrureDevant?: number | null
-  carrureDerriere?: number | null
-  epaule?: number | null
-  epauleManche?: number | null
-  poitrine?: number | null
-  tourDeTaille?: number | null
-  longueurDetaille?: number | null
-  bassin?: number | null
+  // All measurements are strings to allow flexible input like "50 - 45"
+  dos?: string | null
+  carrureDevant?: string | null
+  carrureDerriere?: string | null
+  epaule?: string | null
+  epauleManche?: string | null
+  poitrine?: string | null
+  tourDeTaille?: string | null
+  longueurDetaille?: string | null
+  bassin?: string | null
   longueurManches?: string | null // JSON string for sub-values
-  tourDeManche?: number | null
-  poignets?: number | null
-  pinces?: number | null
-  longueurTotale?: number | null
+  tourDeManche?: string | null
+  poignets?: string | null
+  pinces?: string | null
+  longueurTotale?: string | null
   longueurRobes?: string | null // JSON string for sub-values
-  longueurTunique?: number | null
-  ceinture?: number | null
-  longueurPantalon?: number | null
-  frappe?: number | null
-  cuisse?: number | null
-  genoux?: number | null
+  longueurTunique?: string | null
+  ceinture?: string | null
+  longueurPantalon?: string | null
+  frappe?: string | null
+  cuisse?: string | null
+  genoux?: string | null
   longueurJupe?: string | null // JSON string for sub-values
   autresMesures?: string | null
 }
@@ -121,7 +123,7 @@ export function MeasurementsForm({
     onChange(newData)
   }
 
-  const renderNumberInput = (
+  const renderTextInput = (
     field: keyof MeasurementsFormData,
     label: string,
     num: number
@@ -132,11 +134,10 @@ export function MeasurementsForm({
         {label}
       </label>
       <input
-        type="number"
-        step="0.1"
+        type="text"
         value={formData[field] ?? ''}
         onChange={(e) =>
-          updateField(field, e.target.value ? parseFloat(e.target.value) : null)
+          updateField(field, e.target.value || null)
         }
         disabled={disabled}
         className="w-24 px-2 py-1 text-sm border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -158,12 +159,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-28">Manches courtes:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={sleeveValues.manchesCourtes ?? ''}
                 onChange={(e) => setSleeveValues({
                   ...sleeveValues,
-                  manchesCourtes: e.target.value ? parseFloat(e.target.value) : null
+                  manchesCourtes: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -173,12 +173,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-28">Niveau 3/4:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={sleeveValues.niveau34 ?? ''}
                 onChange={(e) => setSleeveValues({
                   ...sleeveValues,
-                  niveau34: e.target.value ? parseFloat(e.target.value) : null
+                  niveau34: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -188,12 +187,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-28">Avant les coudes:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={sleeveValues.avantCoudes ?? ''}
                 onChange={(e) => setSleeveValues({
                   ...sleeveValues,
-                  avantCoudes: e.target.value ? parseFloat(e.target.value) : null
+                  avantCoudes: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -203,12 +201,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-28">Manches longues:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={sleeveValues.manchesLongues ?? ''}
                 onChange={(e) => setSleeveValues({
                   ...sleeveValues,
-                  manchesLongues: e.target.value ? parseFloat(e.target.value) : null
+                  manchesLongues: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -234,12 +231,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Avant les genoux:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.avantGenoux ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  avantGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  avantGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -249,12 +245,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Mi-mollets:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.miMollets ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  miMollets: e.target.value ? parseFloat(e.target.value) : null
+                  miMollets: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -264,12 +259,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Au niveau des genoux:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.niveauGenoux ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  niveauGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  niveauGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -279,12 +273,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Niveau des chevilles:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.chevilles ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  chevilles: e.target.value ? parseFloat(e.target.value) : null
+                  chevilles: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -294,12 +287,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Après genoux (crayon):</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.apresGenoux ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  apresGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  apresGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -309,12 +301,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Très longue:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={dressValues.tresLongue ?? ''}
                 onChange={(e) => setDressValues({
                   ...dressValues,
-                  tresLongue: e.target.value ? parseFloat(e.target.value) : null
+                  tresLongue: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -340,12 +331,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Avant les genoux:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.avantGenoux ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  avantGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  avantGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -355,12 +345,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Mi-mollets:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.miMollets ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  miMollets: e.target.value ? parseFloat(e.target.value) : null
+                  miMollets: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -370,12 +359,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Au niveau des genoux:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.niveauGenoux ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  niveauGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  niveauGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -385,12 +373,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Niveau des chevilles:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.chevilles ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  chevilles: e.target.value ? parseFloat(e.target.value) : null
+                  chevilles: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -400,12 +387,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Après genoux (crayon):</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.apresGenoux ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  apresGenoux: e.target.value ? parseFloat(e.target.value) : null
+                  apresGenoux: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -415,12 +401,11 @@ export function MeasurementsForm({
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 dark:text-gray-400 w-36">Très longue:</span>
               <input
-                type="number"
-                step="0.1"
+                type="text"
                 value={skirtValues.tresLongue ?? ''}
                 onChange={(e) => setSkirtValues({
                   ...skirtValues,
-                  tresLongue: e.target.value ? parseFloat(e.target.value) : null
+                  tresLongue: e.target.value || null
                 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 text-xs border rounded focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white disabled:opacity-50"
@@ -498,33 +483,33 @@ export function MeasurementsForm({
 
             {/* Upper body (1-9) */}
             <div className="px-2">
-              {renderNumberInput('dos', 'DOS', 1)}
-              {renderNumberInput('carrureDevant', 'CARRURE DEVANT', 2)}
-              {renderNumberInput('carrureDerriere', 'CARRURE DERRIERE', 3)}
-              {renderNumberInput('epaule', 'EPAULE', 4)}
-              {renderNumberInput('epauleManche', 'EPAULE MANCHE', 5)}
-              {renderNumberInput('poitrine', 'POITRINE', 6)}
-              {renderNumberInput('tourDeTaille', 'TOUR DE TAILLE', 7)}
-              {renderNumberInput('longueurDetaille', 'LONGUEUR DETAILLE', 8)}
-              {renderNumberInput('bassin', 'BASSIN', 9)}
+              {renderTextInput('dos', 'DOS', 1)}
+              {renderTextInput('carrureDevant', 'CARRURE DEVANT', 2)}
+              {renderTextInput('carrureDerriere', 'CARRURE DERRIERE', 3)}
+              {renderTextInput('epaule', 'EPAULE', 4)}
+              {renderTextInput('epauleManche', 'EPAULE MANCHE', 5)}
+              {renderTextInput('poitrine', 'POITRINE', 6)}
+              {renderTextInput('tourDeTaille', 'TOUR DE TAILLE', 7)}
+              {renderTextInput('longueurDetaille', 'LONGUEUR DETAILLE', 8)}
+              {renderTextInput('bassin', 'BASSIN', 9)}
 
               {/* Arms with sub-options */}
               {renderSleeveLengthField()}
-              {renderNumberInput('tourDeManche', 'TOUR DE MANCHE', 11)}
-              {renderNumberInput('poignets', 'POIGNETS', 12)}
+              {renderTextInput('tourDeManche', 'TOUR DE MANCHE', 11)}
+              {renderTextInput('poignets', 'POIGNETS', 12)}
 
               {/* Torso */}
-              {renderNumberInput('pinces', 'PINCES', 13)}
-              {renderNumberInput('longueurTotale', 'LONGUEUR TOTALE', 14)}
+              {renderTextInput('pinces', 'PINCES', 13)}
+              {renderTextInput('longueurTotale', 'LONGUEUR TOTALE', 14)}
               {renderDressLengthField()}
-              {renderNumberInput('longueurTunique', 'LONGUEUR TUNIQUE', 16)}
-              {renderNumberInput('ceinture', 'CEINTURE', 17)}
+              {renderTextInput('longueurTunique', 'LONGUEUR TUNIQUE', 16)}
+              {renderTextInput('ceinture', 'CEINTURE', 17)}
 
               {/* Lower body */}
-              {renderNumberInput('longueurPantalon', 'LONGUEUR PANTALON', 18)}
-              {renderNumberInput('frappe', 'FRAPPE', 19)}
-              {renderNumberInput('cuisse', 'CUISSE', 20)}
-              {renderNumberInput('genoux', 'GENOUX', 21)}
+              {renderTextInput('longueurPantalon', 'LONGUEUR PANTALON', 18)}
+              {renderTextInput('frappe', 'FRAPPE', 19)}
+              {renderTextInput('cuisse', 'CUISSE', 20)}
+              {renderTextInput('genoux', 'GENOUX', 21)}
               {renderSkirtLengthField()}
             </div>
           </div>

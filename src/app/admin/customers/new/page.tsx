@@ -38,9 +38,6 @@ export default function NewCustomerPage() {
   const [country, setCountry] = useState('Côte d\'Ivoire')
   const [countryCode, setCountryCode] = useState('CI')
 
-  // Loyalty program
-  const [loyaltyTier, setLoyaltyTier] = useState('bronze')
-  const [initialPoints, setInitialPoints] = useState(0)
 
   // Notes
   const [notes, setNotes] = useState('')
@@ -144,8 +141,6 @@ export default function NewCustomerPage() {
           country: country || null,
           countryCode: countryCode || null,
           role: 'CUSTOMER',
-          loyaltyTier,
-          initialPoints,
           notes: notes || null,
           inscriptionDate: inscriptionDate || null,
           address: addressData,
@@ -197,8 +192,6 @@ export default function NewCustomerPage() {
     setCity('')
     setCountry('Côte d\'Ivoire')
     setCountryCode('CI')
-    setLoyaltyTier('bronze')
-    setInitialPoints(0)
     setNotes('')
     setInscriptionDate('')
     setAddAddress(false)
@@ -443,51 +436,6 @@ export default function NewCustomerPage() {
           </p>
         </div>
 
-        {/* Loyalty Program */}
-        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <User className="h-5 w-5 mr-2 text-primary-400" />
-            Programme de Fidélité
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Niveau de fidélité
-              </label>
-              <select
-                value={loyaltyTier}
-                onChange={(e) => setLoyaltyTier(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="bronze">🥉 Bronze</option>
-                <option value="silver">🥈 Argent</option>
-                <option value="gold">🥇 Or</option>
-                <option value="platinum">💎 Platine</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Niveau initial du client dans le programme
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Points initiaux
-              </label>
-              <input
-                type="number"
-                value={initialPoints}
-                onChange={(e) => setInitialPoints(parseInt(e.target.value) || 0)}
-                min="0"
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="0"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Points de départ (généralement 0)
-              </p>
-            </div>
-          </div>
-        </div>
 
         {/* Address Section */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
@@ -791,7 +739,6 @@ export default function NewCustomerPage() {
 
               <p className="text-gray-500 text-sm mb-6">
                 {phone && `Téléphone: ${phone}`}
-                {loyaltyTier && ` • Niveau: ${loyaltyTier.charAt(0).toUpperCase() + loyaltyTier.slice(1)}`}
               </p>
 
               <div className="flex gap-3">

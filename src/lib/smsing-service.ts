@@ -56,8 +56,7 @@ export class SMSingService {
     try {
       const { to, message } = params
       const formattedPhone = this.formatPhoneNumber(to)
-      const sanitizedMessage = this.sanitizeText(message)
-
+      // SMS supports Unicode - preserve French accents and emojis
       const queryParams = new URLSearchParams({
         sendsms: '',
         apikey: this.config.smsWhatsappApiKey,
@@ -65,7 +64,7 @@ export class SMSingService {
         type: 'sms',
         from: this.config.from,
         to: formattedPhone,
-        text: sanitizedMessage,
+        text: message,
       })
 
       const url = `${this.config.baseUrl}?${queryParams.toString()}`
@@ -96,34 +95,6 @@ export class SMSingService {
         error: error.response?.data?.message || error.message || 'Failed to send SMS',
       }
     }
-  }
-
-  /**
-   * Sanitize text for SMS/WhatsApp API to avoid encoding issues
-   * Removes or replaces problematic Unicode characters
-   */
-  private sanitizeText(text: string): string {
-    return text
-      // Replace French accents
-      .replace(/[àâä]/g, 'a')
-      .replace(/[éèêë]/g, 'e')
-      .replace(/[îï]/g, 'i')
-      .replace(/[ôö]/g, 'o')
-      .replace(/[ùûü]/g, 'u')
-      .replace(/[ç]/g, 'c')
-      .replace(/[ÀÂÄÃ]/g, 'A')
-      .replace(/[ÉÈÊË]/g, 'E')
-      .replace(/[ÎÏ]/g, 'I')
-      .replace(/[ÔÖÕ]/g, 'O')
-      .replace(/[ÙÛÜ]/g, 'U')
-      .replace(/[Ç]/g, 'C')
-      // Replace special quotes and dashes
-      .replace(/['']/g, "'")
-      .replace(/[""]/g, '"')
-      .replace(/[–—]/g, '-')
-      .replace(/[…]/g, '...')
-      // Remove any remaining non-ASCII
-      .replace(/[^\x00-\x7F]/g, '')
   }
 
   /**

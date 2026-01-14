@@ -123,19 +123,6 @@ export default function CustomerDetailPage() {
   })
   const [sendingNotification, setSendingNotification] = useState(false)
 
-  // Edit modal state
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [editForm, setEditForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    whatsappNumber: '',
-    city: '',
-    country: '',
-    countryCode: '',
-    inscriptionDate: '',
-  })
 
   // Measurements state
   const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null)
@@ -150,21 +137,6 @@ export default function CustomerDetailPage() {
     fetchMeasurements()
   }, [params.id])
 
-  // Initialize edit form when customer loads
-  useEffect(() => {
-    if (customer) {
-      setEditForm({
-        name: customer.name || '',
-        email: customer.email || '',
-        phone: customer.phone || '',
-        whatsappNumber: customer.whatsappNumber || '',
-        city: customer.city || '',
-        country: customer.country || '',
-        countryCode: customer.countryCode || '',
-        inscriptionDate: customer.createdAt ? new Date(customer.createdAt).toISOString().slice(0, 16) : '',
-      })
-    }
-  }, [customer])
 
   // Set recipient when customer loads
   useEffect(() => {
@@ -208,46 +180,6 @@ export default function CustomerDetailPage() {
       toast.error('Erreur lors de l\'envoi')
     } finally {
       setSendingNotification(false)
-    }
-  }
-
-  const saveCustomer = async () => {
-    if (!editForm.name || !editForm.phone) {
-      toast.error('Nom et téléphone sont requis')
-      return
-    }
-
-    try {
-      setSaving(true)
-      const res = await fetch(`/api/admin/customers/${params.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editForm.name,
-          email: editForm.email || null,
-          phone: editForm.phone,
-          whatsappNumber: editForm.whatsappNumber || null,
-          city: editForm.city || null,
-          country: editForm.country || null,
-          countryCode: editForm.countryCode || null,
-          inscriptionDate: editForm.inscriptionDate || null,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (data.success) {
-        toast.success('Client mis à jour avec succès')
-        setShowEditModal(false)
-        fetchCustomer() // Refresh data
-      } else {
-        toast.error(data.error || 'Erreur lors de la mise à jour')
-      }
-    } catch (error) {
-      console.error('Error updating customer:', error)
-      toast.error('Erreur lors de la mise à jour')
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -463,13 +395,13 @@ export default function CustomerDetailPage() {
               <span>Fiche PDF</span>
             </button>
           )}
-          <button
-            onClick={() => setShowEditModal(true)}
+          <Link
+            href={`/admin/customers/${params.id}/edit`}
             className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
           >
             <Pencil className="h-4 w-4" />
             <span>Modifier</span>
-          </button>
+          </Link>
           <Link
             href={`/admin/custom-orders/new?customerId=${customer.id}`}
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
@@ -945,160 +877,6 @@ export default function CustomerDetailPage() {
           )}
         </div>
       </div>
-
-      {/* Edit Customer Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowEditModal(false)} />
-          <div className="relative bg-white dark:bg-dark-900 rounded-2xl border border-gray-200 dark:border-dark-700 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Pencil className="h-5 w-5 text-orange-400" />
-                Modifier le client
-              </h2>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                    Nom complet <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={editForm.email}
-                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                    Téléphone <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">WhatsApp</label>
-                  <input
-                    type="tel"
-                    value={editForm.whatsappNumber}
-                    onChange={(e) => setEditForm({ ...editForm, whatsappNumber: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Ville</label>
-                  <input
-                    type="text"
-                    value={editForm.city}
-                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Pays</label>
-                  <select
-                    value={editForm.country}
-                    onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="">Sélectionner...</option>
-                    <option value="Côte d'Ivoire">Côte d&apos;Ivoire</option>
-                    <option value="Sénégal">Sénégal</option>
-                    <option value="Mali">Mali</option>
-                    <option value="Burkina Faso">Burkina Faso</option>
-                    <option value="Bénin">Bénin</option>
-                    <option value="Togo">Togo</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="France">France</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">Code Pays</label>
-                  <input
-                    type="text"
-                    value={editForm.countryCode}
-                    onChange={(e) => setEditForm({ ...editForm, countryCode: e.target.value.toUpperCase() })}
-                    maxLength={2}
-                    placeholder="CI"
-                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
-              </div>
-
-              {/* Custom Inscription Date */}
-              <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <h3 className="font-semibold text-orange-400">Date d&apos;inscription</h3>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  Modifier la date d&apos;inscription du client si nécessaire.
-                </p>
-                <input
-                  type="datetime-local"
-                  value={editForm.inscriptionDate}
-                  onChange={(e) => setEditForm({ ...editForm, inscriptionDate: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg focus:outline-none focus:border-orange-500 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-white rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={saveCustomer}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50"
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                <span>{saving ? 'Enregistrement...' : 'Enregistrer'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Add Measurement Modal */}
       {showMeasurementModal && (
