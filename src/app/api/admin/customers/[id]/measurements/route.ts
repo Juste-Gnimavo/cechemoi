@@ -196,3 +196,116 @@ export async function POST(
     )
   }
 }
+
+// PUT /api/admin/customers/[id]/measurements - Update or create single measurement (no versioning)
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    // Verify customer exists
+    const customer = await prisma.user.findUnique({
+      where: { id: params.id },
+    })
+
+    if (!customer) {
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
+    }
+
+    const body = await req.json()
+    const validatedData = measurementSchema.parse(body)
+
+    // Check if customer already has a measurement
+    const existingMeasurement = await prisma.customerMeasurement.findFirst({
+      where: { customerId: params.id },
+      orderBy: { measurementDate: 'desc' },
+    })
+
+    const measurementData = {
+      measurementDate: validatedData.measurementDate
+        ? new Date(validatedData.measurementDate)
+        : new Date(),
+      unit: validatedData.unit,
+
+      // Staff tracking
+      takenByStaffId: (session.user as any).id,
+      takenByStaffName: (session.user as any).name || 'Admin',
+
+      // Upper body
+      dos: validatedData.dos,
+      carrureDevant: validatedData.carrureDevant,
+      carrureDerriere: validatedData.carrureDerriere,
+      epaule: validatedData.epaule,
+      epauleManche: validatedData.epauleManche,
+      poitrine: validatedData.poitrine,
+      tourDeTaille: validatedData.tourDeTaille,
+      longueurDetaille: validatedData.longueurDetaille,
+      bassin: validatedData.bassin,
+
+      // Arms
+      longueurManches: validatedData.longueurManches,
+      tourDeManche: validatedData.tourDeManche,
+      poignets: validatedData.poignets,
+
+      // Torso
+      pinces: validatedData.pinces,
+      longueurTotale: validatedData.longueurTotale,
+      longueurRobes: validatedData.longueurRobes,
+      longueurTunique: validatedData.longueurTunique,
+      ceinture: validatedData.ceinture,
+
+      // Lower body
+      longueurPantalon: validatedData.longueurPantalon,
+      frappe: validatedData.frappe,
+      cuisse: validatedData.cuisse,
+      genoux: validatedData.genoux,
+      longueurJupe: validatedData.longueurJupe,
+
+      // Notes
+      autresMesures: validatedData.autresMesures,
+    }
+
+    let measurement
+
+    if (existingMeasurement) {
+      // Update existing measurement
+      measurement = await prisma.customerMeasurement.update({
+        where: { id: existingMeasurement.id },
+        data: measurementData,
+      })
+    } else {
+      // Create new measurement
+      measurement = await prisma.customerMeasurement.create({
+        data: {
+          customerId: params.id,
+          ...measurementData,
+        },
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      measurement,
+      message: 'Mensurations enregistrées avec succès',
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Données invalides', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    console.error('Error updating measurement:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors de l\'enregistrement des mensurations' },
+      { status: 500 }
+    )
+  }
+}

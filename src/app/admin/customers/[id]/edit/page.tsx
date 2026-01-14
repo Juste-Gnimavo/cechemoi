@@ -214,10 +214,10 @@ export default function EditCustomerPage() {
       const data = await res.json()
 
       if (data.success) {
-        // Save measurements if changed
+        // Save measurements if changed (PUT to update existing or create new)
         if (measurementsData && Object.keys(measurementsData).length > 0) {
           await fetch(`/api/admin/customers/${params.id}/measurements`, {
-            method: 'POST',
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(measurementsData),
           })

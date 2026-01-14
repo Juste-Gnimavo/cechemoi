@@ -212,6 +212,8 @@ export async function PUT(
       country,
       countryCode,
       inscriptionDate,
+      dateOfBirth,
+      howDidYouHearAboutUs,
     } = body
 
     // Check if customer exists
@@ -269,6 +271,8 @@ export async function PUT(
         ...(country !== undefined && { country: country || null }),
         ...(countryCode !== undefined && { countryCode: countryCode || null }),
         ...(inscriptionDate !== undefined && { createdAt: inscriptionDate ? new Date(inscriptionDate) : existingCustomer.createdAt }),
+        ...(dateOfBirth !== undefined && { dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null }),
+        ...(howDidYouHearAboutUs !== undefined && { howDidYouHearAboutUs: howDidYouHearAboutUs || null }),
       },
     })
 

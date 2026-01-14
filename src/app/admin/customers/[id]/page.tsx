@@ -125,7 +125,6 @@ export default function CustomerDetailPage() {
 
   // Measurements state
   const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null)
-  const [measurementHistory, setMeasurementHistory] = useState<Measurement[]>([])
   const [downloadingPdf, setDownloadingPdf] = useState(false)
 
   useEffect(() => {
@@ -206,7 +205,6 @@ export default function CustomerDetailPage() {
 
       if (data.success) {
         setCurrentMeasurement(data.currentMeasurement)
-        setMeasurementHistory(data.measurementHistory || [])
       }
     } catch (error) {
       console.error('Error fetching measurements:', error)
@@ -521,19 +519,12 @@ export default function CustomerDetailPage() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Ruler className="h-5 w-5 text-primary-500" />
                 Mensurations
-                {measurementHistory.length > 0 && (
-                  <span className="text-xs bg-primary-500/20 text-primary-500 px-2 py-0.5 rounded-full">
-                    {measurementHistory.length} enregistrement{measurementHistory.length > 1 ? 's' : ''}
-                  </span>
-                )}
               </h2>
             </div>
             <div className="p-6">
               {currentMeasurement ? (
                 <MeasurementsDisplay
                   measurement={currentMeasurement}
-                  measurementHistory={measurementHistory}
-                  showHistory={true}
                 />
               ) : (
                 <div className="text-center py-8">
