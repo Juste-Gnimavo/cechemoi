@@ -215,8 +215,6 @@ export default function EditCustomerPage() {
 
       if (data.success) {
         // Save measurements if changed (PUT to update existing or create new)
-        console.log('measurementsData before save:', measurementsData)
-        console.log('measurementsData keys:', measurementsData ? Object.keys(measurementsData) : 'null')
         if (measurementsData && Object.keys(measurementsData).length > 0) {
           const measurementsRes = await fetch(`/api/admin/customers/${params.id}/measurements`, {
             method: 'PUT',
@@ -478,7 +476,7 @@ export default function EditCustomerPage() {
             collapsed={true}
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Les mensurations seront enregistrees comme nouvelle version.
+            Les modifications seront enregistrees directement.
           </p>
         </div>
 

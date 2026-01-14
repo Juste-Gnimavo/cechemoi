@@ -3,61 +3,11 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Ruler, Download, Calendar, User } from 'lucide-react'
 
-// Sub-value labels for complex fields
-const SLEEVE_LABELS: Record<string, string> = {
-  manchesCourtes: 'Courtes',
-  avantCoudes: 'Avant coudes',
-  niveau34: '3/4',
-  manchesLongues: 'Longues',
-}
-
-const DRESS_LABELS: Record<string, string> = {
-  avantGenoux: 'Avant genoux',
-  niveauGenoux: 'Au niveau genoux',
-  apresGenoux: 'Après genoux',
-  miMollets: 'Mi-mollets',
-  chevilles: 'Chevilles',
-  tresLongue: 'Très longue',
-}
-
-const SKIRT_LABELS: Record<string, string> = {
-  avantGenoux: 'Avant genoux',
-  niveauGenoux: 'Au niveau genoux',
-  apresGenoux: 'Après genoux',
-  miMollets: 'Mi-mollets',
-  chevilles: 'Chevilles',
-  tresLongue: 'Très longue',
-}
-
-// Parse JSON field safely
-function parseJsonField(value: string | null | undefined): Record<string, string> | null {
-  if (!value) return null
-  try {
-    return JSON.parse(value)
-  } catch {
-    return null
-  }
-}
-
-// Format complex field (JSON with sub-values)
-function formatComplexValue(value: string | null | undefined, labels: Record<string, string>): string {
-  const parsed = parseJsonField(value)
-  if (!parsed) return '-'
-
-  const parts = Object.entries(parsed)
-    .filter(([_, v]) => v !== null && v !== undefined && v !== '')
-    .map(([key, val]) => `${labels[key] || key}: ${val}`)
-
-  return parts.length > 0 ? parts.join(', ') : '-'
-}
-
 interface Measurement {
   id: string
   measurementDate: string | Date
   unit: string
   takenByStaffName?: string | null
-
-  // All measurements are strings to allow flexible input like "87-2" or "50 - 45"
   dos?: string | null
   carrureDevant?: string | null
   carrureDerriere?: string | null
@@ -99,12 +49,9 @@ function formatDate(date: string | Date): string {
   })
 }
 
-function formatValue(value: number | string | null | undefined, unit: string): string {
+function formatValue(value: string | null | undefined): string {
   if (value === null || value === undefined || value === '') return '-'
-  if (typeof value === 'string') {
-    return value
-  }
-  return `${value} ${unit}`
+  return value
 }
 
 export function MeasurementsDisplay({
@@ -137,19 +84,19 @@ export function MeasurementsDisplay({
     { num: 7, label: 'TOUR DE TAILLE', value: measurement.tourDeTaille },
     { num: 8, label: 'LONGUEUR DETAILLE', value: measurement.longueurDetaille },
     { num: 9, label: 'BASSIN', value: measurement.bassin },
-    { num: 10, label: 'LONGUEUR DES MANCHES', value: measurement.longueurManches, isComplex: true, labels: SLEEVE_LABELS },
+    { num: 10, label: 'LONGUEUR DES MANCHES', value: measurement.longueurManches },
     { num: 11, label: 'TOUR DE MANCHE', value: measurement.tourDeManche },
     { num: 12, label: 'POIGNETS', value: measurement.poignets },
     { num: 13, label: 'PINCES', value: measurement.pinces },
     { num: 14, label: 'LONGUEUR TOTALE', value: measurement.longueurTotale },
-    { num: 15, label: 'LONGUEUR DES ROBES', value: measurement.longueurRobes, isComplex: true, labels: DRESS_LABELS },
+    { num: 15, label: 'LONGUEUR DES ROBES', value: measurement.longueurRobes },
     { num: 16, label: 'LONGUEUR TUNIQUE', value: measurement.longueurTunique },
     { num: 17, label: 'CEINTURE', value: measurement.ceinture },
     { num: 18, label: 'LONGUEUR PANTALON', value: measurement.longueurPantalon },
     { num: 19, label: 'FRAPPE', value: measurement.frappe },
     { num: 20, label: 'CUISSE', value: measurement.cuisse },
     { num: 21, label: 'GENOUX', value: measurement.genoux },
-    { num: 22, label: 'LONGUEUR JUPE', value: measurement.longueurJupe, isComplex: true, labels: SKIRT_LABELS },
+    { num: 22, label: 'LONGUEUR JUPE', value: measurement.longueurJupe },
   ]
 
   return (
@@ -212,10 +159,8 @@ export function MeasurementsDisplay({
               <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
                 {field.label}
               </span>
-              <span className={`text-sm font-medium text-gray-900 dark:text-white text-right ${field.isComplex ? 'flex-1' : 'w-32'}`}>
-                {field.isComplex && field.labels
-                  ? formatComplexValue(field.value, field.labels)
-                  : formatValue(field.value, measurement.unit || 'cm')}
+              <span className="w-32 text-sm font-medium text-gray-900 dark:text-white text-right">
+                {formatValue(field.value)}
               </span>
             </div>
           ))}
