@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -146,13 +146,13 @@ export async function POST(req: NextRequest) {
 
     // Validation
     if (!categoryId) {
-      return NextResponse.json({ error: 'La categorie est requise' }, { status: 400 })
+      return NextResponse.json({ error: 'La catégorie est requise' }, { status: 400 })
     }
     if (!description) {
       return NextResponse.json({ error: 'La description est requise' }, { status: 400 })
     }
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: 'Le montant doit etre positif' }, { status: 400 })
+      return NextResponse.json({ error: 'Le montant doit être positif' }, { status: 400 })
     }
     if (!paymentMethod) {
       return NextResponse.json({ error: 'Le mode de paiement est requis' }, { status: 400 })
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     // Check if staff exists if provided
@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
         where: { id: staffId },
       })
       if (!staff) {
-        return NextResponse.json({ error: 'Membre du personnel non trouve' }, { status: 404 })
+        return NextResponse.json({ error: 'Membre du personnel non trouvé' }, { status: 404 })
       }
     }
 
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       expense,
-      message: 'Depense enregistree avec succes',
+      message: 'Dépense enregistrée avec succès',
     })
   } catch (error) {
     console.error('Error creating expense:', error)

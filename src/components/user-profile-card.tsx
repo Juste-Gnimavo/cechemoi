@@ -137,6 +137,33 @@ export function UserProfileCard({
     })
   }
 
+  const formatBirthDate = (dateString: string | null | undefined) => {
+    if (!dateString) return null
+    // Handle both ISO format (from DB) and French format (DD-MM-YYYY)
+    let date: Date
+    if (dateString.includes('T')) {
+      // ISO format: 2012-01-02T00:00:00.000Z
+      date = new Date(dateString)
+    } else if (dateString.match(/^\d{2}-\d{2}-\d{4}$/)) {
+      // French format: DD-MM-YYYY
+      const [day, month, year] = dateString.split('-')
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    } else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      // ISO date only: YYYY-MM-DD
+      date = new Date(dateString)
+    } else {
+      return dateString // Return as-is if format unknown
+    }
+
+    if (isNaN(date.getTime())) return dateString
+
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).toUpperCase()
+  }
+
   const getBrowserName = (userAgent: string | null | undefined) => {
     if (!userAgent) return 'Inconnu'
     if (userAgent.includes('Chrome')) return 'Chrome'
@@ -299,8 +326,8 @@ export function UserProfileCard({
                     <Gift className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                   </div>
                   <div>
-                    <p className="text-gray-900 dark:text-white text-sm">
-                      {user.dateOfBirth}
+                    <p className="text-gray-900 dark:text-white text-sm font-medium">
+                      {formatBirthDate(user.dateOfBirth)}
                     </p>
                     <p className="text-xs text-gray-500">Date d&apos;anniversaire</p>
                   </div>

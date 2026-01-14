@@ -12,7 +12,7 @@ export async function POST(
   try {
     const userId = await getUserId(req)
     if (!userId) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -27,7 +27,7 @@ export async function POST(
 
     if (!appointment) {
       return NextResponse.json(
-        { error: 'Rendez-vous non trouve' },
+        { error: 'Rendez-vous non trouvé' },
         { status: 404 }
       )
     }
@@ -35,7 +35,7 @@ export async function POST(
     // Only allow cancellation of PENDING or CONFIRMED appointments
     if (!['PENDING', 'CONFIRMED'].includes(appointment.status)) {
       return NextResponse.json(
-        { error: 'Ce rendez-vous ne peut plus etre annule' },
+        { error: 'Ce rendez-vous ne peut plus être annulé' },
         { status: 400 }
       )
     }
@@ -64,10 +64,10 @@ export async function POST(
     const adminPhone = process.env.ADMIN_PHONE || '2250759545410'
 
     const adminSmsMessage = `ANNULATION RDV
-${appointment.customerName} a annule
+${appointment.customerName} a annulé
 Ref: ${appointment.reference}
 Service: ${appointment.type.name}
-Date: ${formattedDate} a ${appointment.time}
+Date: ${formattedDate} à ${appointment.time}
 ${reason ? `Raison: ${reason}` : ''}`
 
     const adminWhatsAppMessage = `❌ ANNULATION DE RENDEZ-VOUS

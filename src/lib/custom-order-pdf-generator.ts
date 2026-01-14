@@ -77,8 +77,8 @@ const ITEM_STATUS_LABELS: Record<string, string> = {
   FITTING: 'Essayage',
   ALTERATIONS: 'Retouches',
   FINISHING: 'Finitions',
-  COMPLETED: 'Termine',
-  DELIVERED: 'Livre',
+  COMPLETED: 'Terminé',
+  DELIVERED: 'Livré',
 }
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -632,13 +632,13 @@ export async function generateCustomOrderPDF(order: CustomOrder): Promise<Uint8A
   const finValueX = financeBoxX + financeBoxWidth - 10
 
   // Cost of items
-  page.drawText('Cout tenues:', { x: finLabelX, y: finY, size: 9, font: helvetica, color: textGray })
+  page.drawText('Coût tenues:', { x: finLabelX, y: finY, size: 9, font: helvetica, color: textGray })
   const itemsCostText = formatCurrency(order.totalCost)
   page.drawText(itemsCostText, { x: finValueX - helvetica.widthOfTextAtSize(itemsCostText, 9), y: finY, size: 9, font: helvetica, color: textBlack })
 
   finY -= 14
   // Material cost
-  page.drawText('Cout materiel:', { x: finLabelX, y: finY, size: 9, font: helvetica, color: textGray })
+  page.drawText('Coût matériel:', { x: finLabelX, y: finY, size: 9, font: helvetica, color: textGray })
   const materialCostText = formatCurrency(order.materialCost)
   page.drawText(materialCostText, { x: finValueX - helvetica.widthOfTextAtSize(materialCostText, 9), y: finY, size: 9, font: helvetica, color: textBlack })
 

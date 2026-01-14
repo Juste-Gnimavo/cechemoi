@@ -681,9 +681,9 @@ export default function SettingsPage() {
                   value={settings.categorySlugPrefix || ''}
                   onChange={(e) => setSettings({ ...settings, categorySlugPrefix: e.target.value })}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
-                  placeholder="categorie"
+                  placeholder="catégorie"
                 />
-                <p className="text-xs text-gray-500 mt-1">Ex: /categorie/nom-categorie</p>
+                <p className="text-xs text-gray-500 mt-1">Ex: /catégorie/nom-catégorie</p>
               </div>
             </div>
           </div>

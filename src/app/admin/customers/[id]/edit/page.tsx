@@ -140,7 +140,7 @@ export default function EditCustomerPage() {
           setLoyaltyPoints(customer.loyaltyAccount.points || 0)
         }
       } else {
-        toast.error('Client non trouve')
+        toast.error('Client non trouvé')
         router.push('/admin/customers')
       }
     } catch (error) {
@@ -169,13 +169,13 @@ export default function EditCustomerPage() {
     e.preventDefault()
 
     if (!firstName || !phone) {
-      toast.error('Prenom et telephone sont requis')
+      toast.error('Prénom et téléphone sont requis')
       return
     }
 
     // Validate phone format
     if (!phone.startsWith('+')) {
-      toast.error('Le numero de telephone doit etre au format international (ex: +225...)')
+      toast.error('Le numéro de téléphone doit être au format international (ex: +225...)')
       return
     }
 
@@ -223,14 +223,14 @@ export default function EditCustomerPage() {
           })
         }
 
-        toast.success('Client mis a jour avec succes')
+        toast.success('Client mis à jour avec succès')
         router.push(`/admin/customers/${params.id}`)
       } else {
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error updating customer:', error)
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setSaving(false)
     }
@@ -271,7 +271,7 @@ export default function EditCustomerPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Prenom <span className="text-red-500">*</span>
+                Prénom <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -311,7 +311,7 @@ export default function EditCustomerPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Telephone <span className="text-red-500">*</span>
+                Téléphone <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -338,7 +338,7 @@ export default function EditCustomerPage() {
                 placeholder="+225..."
               />
               <p className="text-xs text-gray-500 mt-1">
-                Si vide, utilise le numero de telephone principal
+                Si vide, utilise le numéro de téléphone principal
               </p>
             </div>
 
@@ -369,14 +369,14 @@ export default function EditCustomerPage() {
                 onChange={(e) => setHowDidYouHearAboutUs(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="">Selectionner...</option>
+                <option value="">Sélectionner...</option>
                 <option value="Instagram">Instagram</option>
                 <option value="Facebook">Facebook</option>
                 <option value="TikTok">TikTok</option>
                 <option value="Google">Google</option>
-                <option value="Bouche a oreille">Bouche a oreille (ami/famille)</option>
-                <option value="Publicite">Publicite</option>
-                <option value="Evenement">Evenement / Salon</option>
+                <option value="Bouche a oreille">Bouche à oreille (ami/famille)</option>
+                <option value="Publicite">Publicité</option>
+                <option value="Evenement">Évènement / Salon</option>
                 <option value="Autre">Autre</option>
               </select>
             </div>
@@ -428,12 +428,12 @@ export default function EditCustomerPage() {
                 onChange={(e) => setCountry(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="">Selectionner...</option>
-                <option value="Cote d'Ivoire">Cote d'Ivoire</option>
-                <option value="Senegal">Senegal</option>
+                <option value="">Sélectionner...</option>
+                <option value="Cote d'Ivoire">Côte d'Ivoire</option>
+                <option value="Senegal">Sénégal</option>
                 <option value="Mali">Mali</option>
                 <option value="Burkina Faso">Burkina Faso</option>
-                <option value="Benin">Benin</option>
+                <option value="Benin">Bénin</option>
                 <option value="Togo">Togo</option>
                 <option value="Ghana">Ghana</option>
                 <option value="Nigeria">Nigeria</option>

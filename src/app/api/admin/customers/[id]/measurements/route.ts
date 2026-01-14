@@ -56,7 +56,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Verify customer exists
@@ -76,7 +76,7 @@ export async function GET(
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     // Get all measurements (ordered by date, most recent first)
@@ -98,7 +98,7 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching measurements:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la recuperation des mensurations' },
+      { error: 'Erreur lors de la récupération des mensurations' },
       { status: 500 }
     )
   }
@@ -113,7 +113,7 @@ export async function POST(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Verify customer exists
@@ -122,7 +122,7 @@ export async function POST(
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     const body = await req.json()
@@ -179,12 +179,12 @@ export async function POST(
     return NextResponse.json({
       success: true,
       measurement,
-      message: 'Mensurations enregistrees avec succes',
+      message: 'Mensurations enregistrées avec succès',
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Donnees invalides', details: error.errors },
+        { error: 'Données invalides', details: error.errors },
         { status: 400 }
       )
     }

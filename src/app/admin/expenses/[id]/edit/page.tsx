@@ -84,7 +84,7 @@ export default function EditExpensePage() {
       const staffData = await staffRes.json()
 
       if (!expenseData.success) {
-        toast.error('Depense non trouvee')
+        toast.error('Dépense non trouvée')
         router.push('/admin/expenses')
         return
       }
@@ -121,7 +121,7 @@ export default function EditExpensePage() {
     e.preventDefault()
 
     if (!categoryId) {
-      toast.error('La categorie est requise')
+      toast.error('La catégorie est requise')
       return
     }
     if (!description) {
@@ -129,7 +129,7 @@ export default function EditExpensePage() {
       return
     }
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error('Le montant doit etre positif')
+      toast.error('Le montant doit être positif')
       return
     }
 
@@ -152,13 +152,13 @@ export default function EditExpensePage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Depense mise a jour avec succes')
+        toast.success('Dépense mise à jour avec succès')
         router.push('/admin/expenses')
       } else {
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setSaving(false)
     }
@@ -184,10 +184,10 @@ export default function EditExpensePage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Modifier la Depense
+            Modifier la Dépense
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Modifier les details de la depense
+            Modifier les détails de la dépense
           </p>
         </div>
       </div>
@@ -198,7 +198,7 @@ export default function EditExpensePage() {
           {/* Category */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              Categorie <span className="text-red-500">*</span>
+              Catégorie <span className="text-red-500">*</span>
             </label>
             <select
               value={categoryId}
@@ -206,7 +206,7 @@ export default function EditExpensePage() {
               required
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Selectionner une categorie</option>
+              <option value="">Sélectionner une catégorie</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -227,7 +227,7 @@ export default function EditExpensePage() {
               onChange={(e) => setDescription(e.target.value)}
               required
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Ex: Facture electricite decembre 2024"
+              placeholder="Ex: Facture électricité décembre 2024"
             />
           </div>
 
@@ -286,7 +286,7 @@ export default function EditExpensePage() {
           {/* Reference */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              Reference / N° Facture (optionnel)
+              Référence / N° Facture (optionnel)
             </label>
             <input
               type="text"
@@ -309,7 +309,7 @@ export default function EditExpensePage() {
                 onChange={(e) => setStaffId(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="">Selectionner un membre (optionnel)</option>
+                <option value="">Sélectionner un membre (optionnel)</option>
                 {staffMembers.map((staff) => (
                   <option key={staff.id} value={staff.id}>
                     {staff.name} ({staff.role})

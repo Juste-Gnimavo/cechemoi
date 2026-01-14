@@ -18,7 +18,7 @@ import {
 import Link from 'next/link'
 
 const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
-const MONTHS = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
 
 interface TimeSlot {
   time: string
@@ -100,9 +100,9 @@ export default function AppointmentsPage() {
   const getStatusInfo = (status: string) => {
     const statuses: Record<string, { color: string; label: string }> = {
       PENDING: { color: 'bg-yellow-500/20 text-yellow-500', label: 'En attente' },
-      CONFIRMED: { color: 'bg-blue-500/20 text-blue-500', label: 'Confirme' },
-      COMPLETED: { color: 'bg-green-500/20 text-green-500', label: 'Termine' },
-      CANCELLED: { color: 'bg-red-500/20 text-red-500', label: 'Annule' },
+      CONFIRMED: { color: 'bg-blue-500/20 text-blue-500', label: 'Confirmé' },
+      COMPLETED: { color: 'bg-green-500/20 text-green-500', label: 'Terminé' },
+      CANCELLED: { color: 'bg-red-500/20 text-red-500', label: 'Annulé' },
       NO_SHOW: { color: 'bg-gray-500/20 text-gray-500', label: 'Absent' },
     }
     return statuses[status] || { color: 'bg-gray-500/20 text-gray-500', label: status }
@@ -110,9 +110,9 @@ export default function AppointmentsPage() {
 
   const getPaymentInfo = (status: string) => {
     const statuses: Record<string, { color: string; label: string }> = {
-      UNPAID: { color: 'text-orange-500', label: 'Non paye' },
-      PAID: { color: 'text-green-500', label: 'Paye' },
-      REFUNDED: { color: 'text-gray-500', label: 'Rembourse' },
+      UNPAID: { color: 'text-orange-500', label: 'Non payé' },
+      PAID: { color: 'text-green-500', label: 'Payé' },
+      REFUNDED: { color: 'text-gray-500', label: 'Remboursé' },
     }
     return statuses[status] || { color: 'text-gray-500', label: status }
   }
@@ -243,15 +243,15 @@ export default function AppointmentsPage() {
               <p className="text-2xl font-bold text-yellow-500">{stats.pending}</p>
             </div>
             <div className="bg-white dark:bg-dark-900/50 rounded-lg p-4 border border-gray-200 dark:border-dark-700/50">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Confirmes</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Confirmés</p>
               <p className="text-2xl font-bold text-blue-500">{stats.confirmed}</p>
             </div>
             <div className="bg-white dark:bg-dark-900/50 rounded-lg p-4 border border-gray-200 dark:border-dark-700/50">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Termines</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Terminés</p>
               <p className="text-2xl font-bold text-green-500">{stats.completed}</p>
             </div>
             <div className="bg-white dark:bg-dark-900/50 rounded-lg p-4 border border-gray-200 dark:border-dark-700/50">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Annules</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Annulés</p>
               <p className="text-2xl font-bold text-red-500">{stats.cancelled}</p>
             </div>
           </div>
@@ -267,9 +267,9 @@ export default function AppointmentsPage() {
               >
                 <option value="all">Tous les rendez-vous</option>
                 <option value="PENDING">En attente</option>
-                <option value="CONFIRMED">Confirmes</option>
-                <option value="COMPLETED">Termines</option>
-                <option value="CANCELLED">Annules</option>
+                <option value="CONFIRMED">Confirmés</option>
+                <option value="COMPLETED">Terminés</option>
+                <option value="CANCELLED">Annulés</option>
               </select>
               <Link
                 href="/consultation"
@@ -288,7 +288,7 @@ export default function AppointmentsPage() {
           ) : appointments.length === 0 ? (
             <div className="bg-white dark:bg-dark-900/50 rounded-lg p-12 text-center border border-gray-200 dark:border-dark-700/50">
               <CalendarDays className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun rendez-vous trouve</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun rendez-vous trouvé</p>
               <Link
                 href="/consultation"
                 className="inline-block bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg"
@@ -329,7 +329,7 @@ export default function AppointmentsPage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">Duree</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">Durée</p>
                       <p className="text-gray-900 dark:text-white font-medium flex items-center gap-1">
                         <Clock className="w-4 h-4" />
                         {apt.duration} min
@@ -376,7 +376,7 @@ export default function AppointmentsPage() {
                 disabled={page === 1}
                 className="bg-white dark:bg-dark-900 text-gray-900 dark:text-white px-4 py-2 rounded-lg disabled:opacity-50 border border-gray-200 dark:border-dark-700"
               >
-                Precedent
+                Précédent
               </button>
               <span className="text-gray-900 dark:text-white px-4 py-2">
                 Page {page} sur {pagination.totalPages}
@@ -411,7 +411,7 @@ export default function AppointmentsPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  Cette action est irreversible. Vous devrez reprendre un nouveau rendez-vous.
+                  Cette action est irréversible. Vous devrez reprendre un nouveau rendez-vous.
                 </p>
               </div>
             </div>
@@ -521,8 +521,8 @@ export default function AppointmentsPage() {
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
                     {selectedDate
-                      ? `Creneaux le ${selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}`
-                      : 'Selectionnez une date'}
+                      ? `Créneaux le ${selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}`
+                      : 'Sélectionnez une date'}
                   </h4>
 
                   {selectedDate ? (
@@ -547,12 +547,12 @@ export default function AppointmentsPage() {
                       </div>
                     ) : (
                       <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                        Aucun creneau disponible ce jour
+                        Aucun créneau disponible ce jour
                       </p>
                     )
                   ) : (
                     <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                      Veuillez d'abord selectionner une date
+                      Veuillez d'abord sélectionner une date
                     </p>
                   )}
                 </div>

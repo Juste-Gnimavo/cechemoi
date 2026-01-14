@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const order = await prisma.customOrder.findUnique({
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Calculate financial summary
@@ -115,7 +115,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -137,7 +137,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     })
 
     if (!existingOrder) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Build update data
@@ -175,18 +175,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       const statusLabels: Record<string, string> = {
         PENDING: 'En attente',
         IN_PRODUCTION: 'En production',
-        FITTING: 'Essayage prevu',
+        FITTING: 'Essayage prévu',
         ALTERATIONS: 'Retouches en cours',
-        READY: 'Pret',
-        DELIVERED: 'Livre',
-        CANCELLED: 'Annule',
+        READY: 'Prêt',
+        DELIVERED: 'Livré',
+        CANCELLED: 'Annulé',
       }
 
       await prisma.customOrderTimeline.create({
         data: {
           customOrderId: params.id,
-          event: `Statut change: ${statusLabels[status] || status}`,
-          description: `Statut mis a jour par ${(session.user as any).name || 'Admin'}`,
+          event: `Statut changé: ${statusLabels[status] || status}`,
+          description: `Statut mis à jour par ${(session.user as any).name || 'Admin'}`,
           userId: (session.user as any).id,
           userName: (session.user as any).name,
         },
@@ -196,7 +196,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({
       success: true,
       order,
-      message: 'Commande mise a jour',
+      message: 'Commande mise à jour',
     })
   } catch (error) {
     console.error('Error updating custom order:', error)
@@ -211,7 +211,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Only ADMIN and MANAGER can delete
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check if order exists
@@ -221,13 +221,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Prevent deleting delivered orders
     if (order.status === 'DELIVERED') {
       return NextResponse.json(
-        { error: 'Impossible de supprimer une commande livree' },
+        { error: 'Impossible de supprimer une commande livrée' },
         { status: 400 }
       )
     }
@@ -239,7 +239,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({
       success: true,
-      message: `Commande ${order.orderNumber} supprimee`,
+      message: `Commande ${order.orderNumber} supprimée`,
     })
   } catch (error) {
     console.error('Error deleting custom order:', error)

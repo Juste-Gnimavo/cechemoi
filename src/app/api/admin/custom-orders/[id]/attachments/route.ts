@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -43,7 +43,7 @@ export async function POST(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -57,7 +57,7 @@ export async function POST(
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Determine category from MIME type if not provided
@@ -93,7 +93,7 @@ export async function POST(
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: id,
-        event: 'Fichier ajoute',
+        event: 'Fichier ajouté',
         description: `${originalName} (${(fileSize / 1024 / 1024).toFixed(2)} MB)`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
@@ -119,7 +119,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -139,7 +139,7 @@ export async function DELETE(
     })
 
     if (!attachment) {
-      return NextResponse.json({ error: 'Fichier non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Fichier non trouvé' }, { status: 404 })
     }
 
     await prisma.customOrderAttachment.delete({
@@ -150,7 +150,7 @@ export async function DELETE(
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: id,
-        event: 'Fichier supprime',
+        event: 'Fichier supprimé',
         description: attachment.originalName,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
@@ -159,7 +159,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Fichier supprime',
+      message: 'Fichier supprimé',
     })
   } catch (error) {
     console.error('Error deleting attachment:', error)

@@ -301,7 +301,7 @@ export async function POST(req: NextRequest) {
 
       if (existingEmail) {
         return NextResponse.json(
-          { error: 'Un client avec cet email existe deja' },
+          { error: 'Un client avec cet email existe déjà' },
           { status: 400 }
         )
       }

@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -48,7 +48,7 @@ export async function GET(
     })
 
     if (!expense) {
-      return NextResponse.json({ error: 'Depense non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Dépense non trouvée' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -70,7 +70,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -93,7 +93,7 @@ export async function PUT(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Depense non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Dépense non trouvée' }, { status: 404 })
     }
 
     // Check if category exists if provided
@@ -102,7 +102,7 @@ export async function PUT(
         where: { id: categoryId },
       })
       if (!category) {
-        return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+        return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
       }
     }
 
@@ -112,7 +112,7 @@ export async function PUT(
         where: { id: staffId },
       })
       if (!staff) {
-        return NextResponse.json({ error: 'Membre du personnel non trouve' }, { status: 404 })
+        return NextResponse.json({ error: 'Membre du personnel non trouvé' }, { status: 404 })
       }
     }
 
@@ -156,7 +156,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       expense,
-      message: 'Depense mise a jour',
+      message: 'Dépense mise à jour',
     })
   } catch (error) {
     console.error('Error updating expense:', error)
@@ -173,7 +173,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -184,7 +184,7 @@ export async function DELETE(
     })
 
     if (!expense) {
-      return NextResponse.json({ error: 'Depense non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Dépense non trouvée' }, { status: 404 })
     }
 
     await prisma.expense.delete({
@@ -193,7 +193,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Depense supprimee',
+      message: 'Dépense supprimée',
     })
   } catch (error) {
     console.error('Error deleting expense:', error)

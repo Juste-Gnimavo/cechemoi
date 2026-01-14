@@ -9,7 +9,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const services = await prisma.consultationType.findMany({
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest) {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -147,7 +147,7 @@ export async function DELETE(request: NextRequest) {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -164,7 +164,7 @@ export async function DELETE(request: NextRequest) {
 
     if (appointmentsCount > 0) {
       return NextResponse.json({
-        error: `Ce service a ${appointmentsCount} rendez-vous. Desactivez-le plutot que de le supprimer.`
+        error: `Ce service a ${appointmentsCount} rendez-vous. Désactivez-le plutôt que de le supprimer.`
       }, { status: 400 })
     }
 

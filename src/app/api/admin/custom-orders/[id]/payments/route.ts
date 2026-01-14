@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check order exists
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     const payments = await prisma.customOrderPayment.findMany({
@@ -74,14 +74,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
     const { amount, paymentType = 'INSTALLMENT', paymentMethod, notes, paidAt } = body
 
     if (!amount || amount <= 0) {
-      return NextResponse.json({ error: 'Montant requis et doit etre positif' }, { status: 400 })
+      return NextResponse.json({ error: 'Montant requis et doit être positif' }, { status: 400 })
     }
 
     // Check order exists
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Get current total paid
@@ -164,8 +164,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: params.id,
-        event: `Paiement recu: ${paymentTypeLabels[finalPaymentType] || finalPaymentType}`,
-        description: `${formatAmount(amount)} FCFA recu${paymentMethod ? ` via ${paymentMethod}` : ''}. ${balance <= 0 ? 'Commande entierement payee!' : `Reste: ${formatAmount(balance)} FCFA`}${receiptInfo ? ` - Recu ${receiptInfo.receiptNumber}` : ''}`,
+        event: `Paiement reçu: ${paymentTypeLabels[finalPaymentType] || finalPaymentType}`,
+        description: `${formatAmount(amount)} FCFA reçu${paymentMethod ? ` via ${paymentMethod}` : ''}. ${balance <= 0 ? 'Commande entièrement payée!' : `Reste: ${formatAmount(balance)} FCFA`}${receiptInfo ? ` - Reçu ${receiptInfo.receiptNumber}` : ''}`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
       },
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         isPaidInFull: balance <= 0,
       },
       receipt: receiptInfo,
-      message: balance <= 0 ? 'Paiement complet!' : `Paiement enregistre. Reste: ${formatAmount(balance)} FCFA`,
+      message: balance <= 0 ? 'Paiement complet!' : `Paiement enregistré. Reste: ${formatAmount(balance)} FCFA`,
     })
   } catch (error) {
     console.error('Error adding payment:', error)
@@ -199,7 +199,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Only ADMIN and MANAGER can delete payments
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -218,7 +218,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     })
 
     if (!payment) {
-      return NextResponse.json({ error: 'Paiement non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Paiement non trouvé' }, { status: 404 })
     }
 
     // Delete payment and synced data (receipt, invoice payment)
@@ -231,8 +231,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: params.id,
-        event: 'Paiement supprime',
-        description: `Paiement de ${formatAmount(payment.amount)} FCFA annule`,
+        event: 'Paiement supprimé',
+        description: `Paiement de ${formatAmount(payment.amount)} FCFA annulé`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
       },
@@ -240,7 +240,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({
       success: true,
-      message: 'Paiement supprime',
+      message: 'Paiement supprimé',
     })
   } catch (error) {
     console.error('Error deleting payment:', error)

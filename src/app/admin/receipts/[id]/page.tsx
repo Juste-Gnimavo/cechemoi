@@ -169,10 +169,10 @@ export default function ReceiptDetailPage() {
       <div className="text-center py-12">
         <Receipt className="w-12 h-12 mx-auto text-gray-400 mb-4" />
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Recu non trouve
+          Reçu non trouvé
         </h2>
         <Link href="/admin/receipts" className="text-purple-600 hover:underline">
-          Retour aux recus
+          Retour aux reçus
         </Link>
       </div>
     )
@@ -210,7 +210,7 @@ export default function ReceiptDetailPage() {
             ) : (
               <Download className="w-4 h-4" />
             )}
-            Telecharger PDF
+            Télécharger PDF
           </button>
           <button
             onClick={handleDelete}

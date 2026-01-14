@@ -339,7 +339,7 @@ export default function ProductsPage() {
                     </th>
                     <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">SKU</th>
                     <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">
-                      Categorie
+                      Catégorie
                     </th>
                     <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Prix</th>
                     <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Stock</th>

@@ -291,7 +291,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check if customer exists
@@ -304,13 +304,13 @@ export async function DELETE(
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     // Prevent deletion if customer has orders
     if (customer.orders.length > 0) {
       return NextResponse.json(
-        { error: 'Impossible de supprimer un client avec des commandes. Vous pouvez desactiver le compte.' },
+        { error: 'Impossible de supprimer un client avec des commandes. Vous pouvez désactiver le compte.' },
         { status: 400 }
       )
     }
@@ -332,7 +332,7 @@ export async function DELETE(
       where: { id: params.id },
     })
 
-    return NextResponse.json({ success: true, message: 'Client supprime avec succes' })
+    return NextResponse.json({ success: true, message: 'Client supprimé avec succès' })
   } catch (error) {
     console.error('Error deleting customer:', error)
     return NextResponse.json(

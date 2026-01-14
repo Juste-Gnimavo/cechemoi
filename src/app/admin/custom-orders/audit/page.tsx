@@ -144,9 +144,9 @@ export default function CustomOrdersAuditPage() {
       IN_PRODUCTION: 'En production',
       FITTING: 'Essayage',
       ALTERATIONS: 'Retouches',
-      READY: 'Pret',
-      DELIVERED: 'Livre',
-      CANCELLED: 'Annule',
+      READY: 'Prêt',
+      DELIVERED: 'Livré',
+      CANCELLED: 'Annulé',
     }
     return labels[status] || status
   }
@@ -168,7 +168,7 @@ export default function CustomOrdersAuditPage() {
               Audit des Commandes Sur-Mesure
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Suivez qui cree les commandes et quand
+              Suivez qui crée les commandes et quand
             </p>
           </div>
         </div>
@@ -358,7 +358,7 @@ export default function CustomOrdersAuditPage() {
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">N°</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cree par</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé par</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
@@ -436,7 +436,7 @@ export default function CustomOrdersAuditPage() {
                 )}
               </>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-8">Aucune commande pour cette periode</p>
+              <p className="text-gray-500 dark:text-gray-400 text-center py-8">Aucune commande pour cette période</p>
             )}
           </div>
         </>

@@ -12,15 +12,15 @@ interface Category {
 }
 
 const UNITS = [
-  { value: 'metre', label: 'Metre (m)' },
-  { value: 'cm', label: 'Centimetre (cm)' },
-  { value: 'piece', label: 'Piece' },
+  { value: 'metre', label: 'Mètre (m)' },
+  { value: 'cm', label: 'Centimètre (cm)' },
+  { value: 'piece', label: 'Pièce' },
   { value: 'bobine', label: 'Bobine' },
   { value: 'rouleau', label: 'Rouleau' },
   { value: 'kg', label: 'Kilogramme (kg)' },
   { value: 'g', label: 'Gramme (g)' },
   { value: 'paquet', label: 'Paquet' },
-  { value: 'boite', label: 'Boite' },
+  { value: 'boite', label: 'Boîte' },
 ]
 
 export default function EditMaterialPage({ params }: { params: Promise<{ id: string }> }) {
@@ -73,7 +73,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
         setColor(m.color || '')
         setDescription(m.description || '')
       } else {
-        toast.error('Materiel non trouve')
+        toast.error('Matériel non trouvé')
         router.push('/admin/materials')
       }
     } catch (error) {
@@ -112,13 +112,13 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Materiel mis a jour')
+        toast.success('Matériel mis à jour')
         router.push('/admin/materials')
       } else {
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setSaving(false)
     }
@@ -144,7 +144,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
             <ArrowLeft className="h-5 w-5 text-gray-500" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Modifier Materiel</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Modifier Matériel</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">{name}</p>
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
         <p className="text-xs text-blue-500 dark:text-blue-400 mt-2">
-          Pour modifier le stock, utilisez les fonctions d'entree/sortie
+          Pour modifier le stock, utilisez les fonctions d'entrée/sortie
         </p>
       </div>
 
@@ -180,7 +180,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                Nom du materiel <span className="text-red-500">*</span>
+                Nom du matériel <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -205,7 +205,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                Categorie <span className="text-red-500">*</span>
+                Catégorie <span className="text-red-500">*</span>
               </label>
               <select
                 value={categoryId}
@@ -226,7 +226,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                Unite <span className="text-red-500">*</span>
+                Unité <span className="text-red-500">*</span>
               </label>
               <select
                 value={unit}
@@ -269,7 +269,7 @@ export default function EditMaterialPage({ params }: { params: Promise<{ id: str
               min="0"
               step="0.01"
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Laisser vide pour desactiver l'alerte"
+              placeholder="Laisser vide pour désactiver l'alerte"
             />
           </div>
 

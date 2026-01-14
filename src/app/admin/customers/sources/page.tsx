@@ -215,7 +215,7 @@ export default function CustomerSourcesPage() {
 
               {stats.length === 0 && (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                  Aucune donnee pour cette periode
+                  Aucune donnée pour cette période
                 </p>
               )}
             </div>
@@ -346,7 +346,7 @@ export default function CustomerSourcesPage() {
 
             {stats.length === 0 && (
               <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                Aucune donnee pour cette periode
+                Aucune donnée pour cette période
               </p>
             )}
           </div>

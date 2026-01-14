@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
 
     if (!materialId || !type || !quantity) {
       return NextResponse.json(
-        { error: 'Materiel, type et quantite sont requis' },
+        { error: 'Matériel, type et quantité sont requis' },
         { status: 400 }
       )
     }
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (quantity <= 0) {
-      return NextResponse.json({ error: 'La quantite doit etre positive' }, { status: 400 })
+      return NextResponse.json({ error: 'La quantité doit être positive' }, { status: 400 })
     }
 
     // Get material and its current stock
@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!material) {
-      return NextResponse.json({ error: 'Materiel non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Matériel non trouvé' }, { status: 404 })
     }
 
     // Check if tailor exists if provided
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
         where: { id: tailorId, role: 'TAILOR' },
       })
       if (!tailor) {
-        return NextResponse.json({ error: 'Couturier non trouve' }, { status: 400 })
+        return NextResponse.json({ error: 'Couturier non trouvé' }, { status: 400 })
       }
     }
 
@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
         where: { id: customOrderId },
       })
       if (!order) {
-        return NextResponse.json({ error: 'Commande non trouvee' }, { status: 400 })
+        return NextResponse.json({ error: 'Commande non trouvée' }, { status: 400 })
       }
     }
 
@@ -261,7 +261,7 @@ export async function POST(req: NextRequest) {
     ])
 
     const typeLabels: Record<string, string> = {
-      IN: 'Entree',
+      IN: 'Entrée',
       OUT: 'Sortie',
       ADJUST: 'Ajustement',
       RETURN: 'Retour',
@@ -270,7 +270,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       movement,
-      message: `${typeLabels[type]} enregistree avec succes`,
+      message: `${typeLabels[type]} enregistrée avec succès`,
     })
   } catch (error) {
     console.error('Error creating material movement:', error)

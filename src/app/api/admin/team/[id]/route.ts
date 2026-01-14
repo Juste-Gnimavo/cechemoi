@@ -99,7 +99,7 @@ export async function PUT(
       })
 
       if (emailTaken) {
-        return NextResponse.json({ error: 'Cet email est deja utilise pour ce role' }, { status: 400 })
+        return NextResponse.json({ error: 'Cet email est déjà utilisé pour ce rôle' }, { status: 400 })
       }
     }
 

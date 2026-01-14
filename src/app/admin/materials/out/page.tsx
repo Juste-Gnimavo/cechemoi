@@ -86,13 +86,13 @@ function MaterialOutForm() {
     e.preventDefault()
 
     if (!materialId || !quantity) {
-      toast.error('Materiel et quantite sont requis')
+      toast.error('Matériel et quantité sont requis')
       return
     }
 
     const qty = parseFloat(quantity)
     if (qty <= 0) {
-      toast.error('La quantite doit etre positive')
+      toast.error('La quantité doit être positive')
       return
     }
 
@@ -118,7 +118,7 @@ function MaterialOutForm() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Sortie enregistree avec succes')
+        toast.success('Sortie enregistrée avec succès')
         router.push('/admin/materials')
       } else {
         toast.error(data.error || 'Erreur lors de l\'enregistrement')
@@ -155,10 +155,10 @@ function MaterialOutForm() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <ArrowUpCircle className="h-6 w-6 text-orange-500" />
-            Sortie de Materiel
+            Sortie de Matériel
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Enregistrer une sortie de materiel pour un couturier
+            Enregistrer une sortie de matériel pour un couturier
           </p>
         </div>
       </div>
@@ -170,7 +170,7 @@ function MaterialOutForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               <Package className="h-4 w-4 inline mr-1" />
-              Materiel <span className="text-red-500">*</span>
+              Matériel <span className="text-red-500">*</span>
             </label>
             <select
               value={materialId}
@@ -178,7 +178,7 @@ function MaterialOutForm() {
               required
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Selectionner un materiel</option>
+              <option value="">Sélectionner un matériel</option>
               {materials.map((mat) => (
                 <option key={mat.id} value={mat.id}>
                   {mat.name} ({mat.category.name}) - Stock: {mat.stock} {mat.unit}
@@ -217,7 +217,7 @@ function MaterialOutForm() {
           {/* Quantity */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              Quantite <span className="text-red-500">*</span>
+              Quantité <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -238,7 +238,7 @@ function MaterialOutForm() {
             </div>
             {selectedMaterial && quantity && parseFloat(quantity) > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Cout: {formatPrice(parseFloat(quantity) * selectedMaterial.unitPrice)}
+                Coût: {formatPrice(parseFloat(quantity) * selectedMaterial.unitPrice)}
               </p>
             )}
           </div>
@@ -257,14 +257,14 @@ function MaterialOutForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               <User className="h-4 w-4 inline mr-1" />
-              Couturier (qui a demande)
+              Couturier (qui a demandé)
             </label>
             <select
               value={tailorId}
               onChange={(e) => setTailorId(e.target.value)}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Selectionner un couturier (optionnel)</option>
+              <option value="">Sélectionner un couturier (optionnel)</option>
               {tailors.map((tailor) => (
                 <option key={tailor.id} value={tailor.id}>
                   {tailor.name} ({tailor.phone})
@@ -284,7 +284,7 @@ function MaterialOutForm() {
               onChange={(e) => setCustomOrderId(e.target.value)}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="">Selectionner une commande (optionnel)</option>
+              <option value="">Sélectionner une commande (optionnel)</option>
               {orders.map((order) => (
                 <option key={order.id} value={order.id}>
                   {order.orderNumber} - {order.customer.name}
@@ -303,7 +303,7 @@ function MaterialOutForm() {
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-              placeholder="Notes supplementaires..."
+              placeholder="Notes supplémentaires..."
             />
           </div>
         </div>

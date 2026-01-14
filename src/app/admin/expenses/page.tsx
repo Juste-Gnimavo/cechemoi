@@ -125,7 +125,7 @@ export default function ExpensesPage() {
   }
 
   const handleDelete = async (expense: Expense) => {
-    if (!confirm(`Voulez-vous vraiment supprimer cette depense "${expense.description}"?`)) {
+    if (!confirm(`Voulez-vous vraiment supprimer cette dépense "${expense.description}"?`)) {
       return
     }
 
@@ -137,7 +137,7 @@ export default function ExpensesPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Depense supprimee')
+        toast.success('Dépense supprimée')
         fetchExpenses()
       } else {
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -193,7 +193,7 @@ export default function ExpensesPage() {
             className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Nouvelle depense
+            Nouvelle dépense
           </Link>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function ExpensesPage() {
               <TrendingDown className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total depenses</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total dépenses</p>
               <p className="text-2xl font-bold text-red-500">{formatPrice(totals.totalAmount)}</p>
             </div>
           </div>
@@ -304,17 +304,17 @@ export default function ExpensesPage() {
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center">
           <TrendingDown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucune depense
+            Aucune dépense
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Commencez par ajouter une depense.
+            Commencez par ajouter une dépense.
           </p>
           <Link
             href="/admin/expenses/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Ajouter une depense
+            Ajouter une dépense
           </Link>
         </div>
       ) : (
@@ -326,7 +326,7 @@ export default function ExpensesPage() {
                   Date
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Categorie
+                  Catégorie
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Description

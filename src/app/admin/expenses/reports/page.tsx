@@ -275,7 +275,7 @@ export default function ExpenseReportsPage() {
                   <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Moyenne par depense</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Moyenne par dépense</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {data.summary.count > 0
                       ? formatCurrency(Math.round(data.summary.totalAmount / data.summary.count))
@@ -291,7 +291,7 @@ export default function ExpenseReportsPage() {
             <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
               <div className="p-4 border-b border-gray-200 dark:border-dark-700">
                 <h2 className="font-semibold text-gray-900 dark:text-white">
-                  Par Categorie
+                  Par Catégorie
                 </h2>
               </div>
               <div className="p-4">
@@ -332,7 +332,7 @@ export default function ExpenseReportsPage() {
                             />
                           </div>
                           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <span>{item.count} depense(s)</span>
+                            <span>{item.count} dépense(s)</span>
                             <span>{percentage}%</span>
                           </div>
                         </div>
@@ -379,7 +379,7 @@ export default function ExpenseReportsPage() {
                             />
                           </div>
                           <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <span>{item.count} depense(s)</span>
+                            <span>{item.count} dépense(s)</span>
                             <span>{percentage}%</span>
                           </div>
                         </div>
@@ -436,7 +436,7 @@ export default function ExpenseReportsPage() {
                           {item.creator?.name || 'Inconnu'}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {item.count} depense(s) enregistree(s)
+                          {item.count} dépense(s) enregistrée(s)
                         </p>
                       </div>
                       <span className="font-semibold text-gray-900 dark:text-white">

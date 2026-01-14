@@ -213,7 +213,7 @@ export function AdminHeader() {
           label: 'Stock Atelier',
           allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
-            { href: '/admin/materials', label: 'Materiels' },
+            { href: '/admin/materials', label: 'Matériels' },
             { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
             { href: '/admin/materials/in', label: 'Enregistrer entrée' },
             { href: '/admin/materials/movements', label: 'Historique' },

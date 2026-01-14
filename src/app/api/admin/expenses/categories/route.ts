@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 // Default expense categories to seed
 const DEFAULT_CATEGORIES = [
-  { name: 'Electricite (CIE)', icon: 'Zap', color: '#f59e0b', sortOrder: 1, isDefault: true },
+  { name: 'Électricité (CIE)', icon: 'Zap', color: '#f59e0b', sortOrder: 1, isDefault: true },
   { name: 'Eau (SODECI)', icon: 'Droplets', color: '#3b82f6', sortOrder: 2, isDefault: true },
   { name: 'Salaires', icon: 'Users', color: '#10b981', sortOrder: 3, isDefault: true },
   { name: 'Transport', icon: 'Car', color: '#8b5cf6', sortOrder: 4, isDefault: true },
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check if we need to seed default categories
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (existing) {
-      return NextResponse.json({ error: 'Une categorie avec ce nom existe deja' }, { status: 400 })
+      return NextResponse.json({ error: 'Une catégorie avec ce nom existe déjà' }, { status: 400 })
     }
 
     // Get max sortOrder
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       category,
-      message: 'Categorie creee avec succes',
+      message: 'Catégorie créée avec succès',
     })
   } catch (error) {
     console.error('Error creating expense category:', error)

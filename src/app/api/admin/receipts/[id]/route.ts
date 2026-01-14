@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const receipt = await prisma.receipt.findUnique({
@@ -57,7 +57,7 @@ export async function GET(
     })
 
     if (!receipt) {
-      return NextResponse.json({ error: 'Recu non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Reçu non trouvé' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -80,7 +80,7 @@ export async function DELETE(
 
     // Only ADMIN can delete receipts
     if (!session || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorise - Admin uniquement' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé - Admin uniquement' }, { status: 401 })
     }
 
     const receipt = await prisma.receipt.findUnique({
@@ -88,7 +88,7 @@ export async function DELETE(
     })
 
     if (!receipt) {
-      return NextResponse.json({ error: 'Recu non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Reçu non trouvé' }, { status: 404 })
     }
 
     // Delete the receipt
@@ -98,7 +98,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Recu supprime avec succes',
+      message: 'Reçu supprimé avec succès',
     })
   } catch (error) {
     console.error('Error deleting receipt:', error)

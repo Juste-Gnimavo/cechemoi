@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -49,7 +49,7 @@ export async function GET(
     })
 
     if (!material) {
-      return NextResponse.json({ error: 'Materiel non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Matériel non trouvé' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -75,7 +75,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -98,7 +98,7 @@ export async function PUT(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Materiel non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Matériel non trouvé' }, { status: 404 })
     }
 
     // Check SKU uniqueness if changing
@@ -107,7 +107,7 @@ export async function PUT(
         where: { sku },
       })
       if (skuExists) {
-        return NextResponse.json({ error: 'Ce SKU existe deja' }, { status: 400 })
+        return NextResponse.json({ error: 'Ce SKU existe déjà' }, { status: 400 })
       }
     }
 
@@ -117,7 +117,7 @@ export async function PUT(
         where: { id: categoryId },
       })
       if (!category) {
-        return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 400 })
+        return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 400 })
       }
     }
 
@@ -145,7 +145,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       material,
-      message: 'Materiel mis a jour',
+      message: 'Matériel mis à jour',
     })
   } catch (error) {
     console.error('Error updating material:', error)
@@ -162,7 +162,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -173,7 +173,7 @@ export async function DELETE(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Materiel non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Matériel non trouvé' }, { status: 404 })
     }
 
     // Soft delete - just mark as inactive
@@ -184,7 +184,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Materiel supprime',
+      message: 'Matériel supprimé',
     })
   } catch (error) {
     console.error('Error deleting material:', error)

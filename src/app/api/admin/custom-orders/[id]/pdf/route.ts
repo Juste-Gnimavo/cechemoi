@@ -15,7 +15,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Fetch order with all related data
@@ -72,7 +72,7 @@ export async function GET(
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Calculate totals

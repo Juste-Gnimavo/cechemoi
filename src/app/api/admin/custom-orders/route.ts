@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -232,7 +232,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     // Verify measurement if provided
@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
         where: { id: measurementId },
       })
       if (!measurement) {
-        return NextResponse.json({ error: 'Mensurations non trouvees' }, { status: 404 })
+        return NextResponse.json({ error: 'Mensurations non trouvées' }, { status: 404 })
       }
     }
 
@@ -292,8 +292,8 @@ export async function POST(req: NextRequest) {
         // Create initial timeline entry
         timeline: {
           create: {
-            event: 'Commande creee',
-            description: `Commande sur-mesure creee par ${(session.user as any).name || 'Admin'}`,
+            event: 'Commande créée',
+            description: `Commande sur-mesure créée par ${(session.user as any).name || 'Admin'}`,
             userId: (session.user as any).id,
             userName: (session.user as any).name,
           },
@@ -391,7 +391,7 @@ export async function POST(req: NextRequest) {
         success: true,
         order: updatedOrder,
         invoiceId,
-        message: 'Commande sur-mesure creee avec succes',
+        message: 'Commande sur-mesure créée avec succès',
       })
     } catch (invoiceError) {
       console.error('Error creating invoice:', invoiceError)
@@ -399,7 +399,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         order,
-        message: 'Commande creee (erreur facture)',
+        message: 'Commande créée (erreur facture)',
       })
     }
   } catch (error) {

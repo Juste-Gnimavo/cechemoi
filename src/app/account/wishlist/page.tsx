@@ -59,7 +59,7 @@ export default function FavorisPage() {
       }
     } catch (error) {
       console.error('Error fetching favoris:', error)
-      toast.error('Erreur lors du chargement de la favoris')
+      toast.error('Erreur lors du chargement des favoris')
     } finally {
       setLoading(false)
     }
@@ -74,7 +74,7 @@ export default function FavorisPage() {
 
       if (res.ok) {
         setItems(items.filter((item) => item.productId !== productId))
-        toast.success('Retiré de la favoris')
+        toast.success('Retiré des favoris')
       } else {
         const data = await res.json()
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -110,7 +110,7 @@ export default function FavorisPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ma Favoris</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Mes Favoris</h1>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
                 {items.length} {items.length === 1 ? 'article' : 'articles'}
               </p>
@@ -222,7 +222,7 @@ export default function FavorisPage() {
                         onClick={() => handleRemove(item.product.id)}
                         disabled={removingIds.includes(item.product.id)}
                         className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors disabled:opacity-50"
-                        title="Retirer de la favoris"
+                        title="Retirer des favoris"
                       >
                         {removingIds.includes(item.product.id) ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>

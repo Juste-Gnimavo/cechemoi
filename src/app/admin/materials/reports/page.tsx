@@ -238,7 +238,7 @@ export default function MaterialReportsPage() {
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Stock bas</p>
                   <p className="text-xl font-bold text-red-500">{data.summary.lowStockCount}</p>
-                  <p className="text-sm text-gray-500">/ {data.summary.totalMaterials} materiels</p>
+                  <p className="text-sm text-gray-500">/ {data.summary.totalMaterials} matériels</p>
                 </div>
               </div>
             </div>
@@ -269,7 +269,7 @@ export default function MaterialReportsPage() {
               <div className="p-4">
                 {data.byTailor.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune sortie sur cette periode
+                    Aucune sortie sur cette période
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -301,13 +301,13 @@ export default function MaterialReportsPage() {
               <div className="p-4 border-b border-gray-200 dark:border-dark-700">
                 <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <FolderOpen className="h-5 w-5 text-primary-500" />
-                  Sorties par Categorie
+                  Sorties par Catégorie
                 </h2>
               </div>
               <div className="p-4">
                 {data.byCategory.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune sortie sur cette periode
+                    Aucune sortie sur cette période
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -348,7 +348,7 @@ export default function MaterialReportsPage() {
               <div className="p-4">
                 {!data.byStaff || data.byStaff.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucun mouvement sur cette periode
+                    Aucun mouvement sur cette période
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -398,7 +398,7 @@ export default function MaterialReportsPage() {
               <div className="p-4">
                 {data.topMaterials.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune donnee sur cette periode
+                    Aucune donnee sur cette période
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -438,7 +438,7 @@ export default function MaterialReportsPage() {
               <div className="p-4">
                 {data.lowStockItems.length === 0 ? (
                   <p className="text-green-500 text-center py-4">
-                    Aucun materiel en stock bas
+                    Aucun matériel en stock bas
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -464,7 +464,7 @@ export default function MaterialReportsPage() {
                         href="/admin/materials?lowStock=true"
                         className="block text-center text-sm text-primary-500 hover:text-primary-400 py-2"
                       >
-                        Voir tous les {data.lowStockItems.length} materiels en stock bas
+                        Voir tous les {data.lowStockItems.length} matériels en stock bas
                       </Link>
                     )}
                   </div>

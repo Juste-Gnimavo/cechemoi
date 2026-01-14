@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     const userId = await getUserId(req)
     if (!userId) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)

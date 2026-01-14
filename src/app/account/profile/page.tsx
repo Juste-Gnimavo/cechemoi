@@ -130,7 +130,7 @@ export default function ProfilePage() {
       const response = await fetch(url)
 
       if (!response.ok) {
-        throw new Error('Erreur lors du telechargement')
+        throw new Error('Erreur lors du téléchargement')
       }
 
       const blob = await response.blob()
@@ -143,10 +143,10 @@ export default function ProfilePage() {
       window.URL.revokeObjectURL(downloadUrl)
       document.body.removeChild(a)
 
-      toast.success('PDF telecharge avec succes')
+      toast.success('PDF téléchargé avec succès')
     } catch (error) {
       console.error('Error downloading PDF:', error)
-      toast.error('Erreur lors du telechargement du PDF')
+      toast.error('Erreur lors du téléchargement du PDF')
     } finally {
       setDownloadingPdf(false)
     }
@@ -493,7 +493,7 @@ export default function ProfilePage() {
                       className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
                     >
                       <Download className="h-4 w-4" />
-                      {downloadingPdf ? 'Telechargement...' : 'Telecharger PDF'}
+                      {downloadingPdf ? 'Téléchargement...' : 'Télécharger PDF'}
                     </button>
                   )}
                 </div>
@@ -510,7 +510,7 @@ export default function ProfilePage() {
                   <div className="text-center py-8">
                     <Ruler className="h-12 w-12 mx-auto text-gray-400 mb-3" />
                     <p className="text-gray-500 dark:text-gray-400">
-                      Aucune mensuration enregistree
+                      Aucune mensuration enregistrée
                     </p>
                     <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
                       Rendez-vous en boutique pour prendre vos mensurations
@@ -521,19 +521,19 @@ export default function ProfilePage() {
 
               {/* Security Section */}
               <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 mt-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Securite</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Sécurité</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-dark-800 rounded-lg">
                     <div>
-                      <p className="text-gray-900 dark:text-white font-medium">Authentification par telephone</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Connexion securisee par code OTP</p>
+                      <p className="text-gray-900 dark:text-white font-medium">Authentification par téléphone</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Connexion sécurisée par code OTP</p>
                     </div>
                     <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full">
                       Active
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">
-                    Votre compte est protege par un code de verification envoye par SMS a chaque connexion.
+                    Votre compte est protégé par un code de vérification envoyé par SMS à chaque connexion.
                   </p>
                 </div>
               </div>

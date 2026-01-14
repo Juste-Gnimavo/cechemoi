@@ -12,7 +12,7 @@ export async function POST(
   try {
     const userId = await getUserId(req)
     if (!userId) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -34,7 +34,7 @@ export async function POST(
 
     if (!appointment) {
       return NextResponse.json(
-        { error: 'Rendez-vous non trouve' },
+        { error: 'Rendez-vous non trouvé' },
         { status: 404 }
       )
     }
@@ -42,7 +42,7 @@ export async function POST(
     // Only allow rescheduling of PENDING or CONFIRMED appointments
     if (!['PENDING', 'CONFIRMED'].includes(appointment.status)) {
       return NextResponse.json(
-        { error: 'Ce rendez-vous ne peut plus etre modifie' },
+        { error: 'Ce rendez-vous ne peut plus être modifié' },
         { status: 400 }
       )
     }
@@ -61,7 +61,7 @@ export async function POST(
 
     if (existingAppointment) {
       return NextResponse.json(
-        { error: 'Ce creneau n\'est plus disponible' },
+        { error: 'Ce créneau n\'est plus disponible' },
         { status: 400 }
       )
     }
@@ -100,11 +100,11 @@ export async function POST(
     const adminPhone = process.env.ADMIN_PHONE || '2250759545410'
 
     const adminSmsMessage = `REPORT RDV
-${appointment.customerName} a reporte
+${appointment.customerName} a reporté
 Ref: ${appointment.reference}
-Avant: ${oldDate} a ${oldTime}
-Apres: ${newFormattedDate} a ${time}
-A confirmer`
+Avant: ${oldDate} à ${oldTime}
+Après: ${newFormattedDate} à ${time}
+À confirmer`
 
     const adminWhatsAppMessage = `🔄 REPORT DE RENDEZ-VOUS
 

@@ -17,7 +17,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Get measurement ID from query params (optional - defaults to latest)
@@ -40,7 +40,7 @@ export async function GET(
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     // Fetch measurement (specific or latest)
@@ -62,7 +62,7 @@ export async function GET(
 
     if (!measurement) {
       return NextResponse.json(
-        { error: 'Aucune mensuration trouvee pour ce client' },
+        { error: 'Aucune mensuration trouvée pour ce client' },
         { status: 404 }
       )
     }

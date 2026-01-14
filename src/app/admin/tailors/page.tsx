@@ -366,7 +366,7 @@ export default function TailorsPage() {
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">Aucune sortie materiel</p>
+                  <p className="text-xs text-gray-400 italic">Aucune sortie matériel</p>
                 )}
               </div>
 

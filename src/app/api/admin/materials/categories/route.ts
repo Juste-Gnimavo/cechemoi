@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check if categories exist, if not seed default ones
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (existing) {
-      return NextResponse.json({ error: 'Cette categorie existe deja' }, { status: 400 })
+      return NextResponse.json({ error: 'Cette catégorie existe déjà' }, { status: 400 })
     }
 
     // Get max sortOrder if not provided
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       category,
-      message: 'Categorie creee avec succes',
+      message: 'Catégorie créée avec succès',
     })
   } catch (error) {
     console.error('Error creating material category:', error)

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const userId = (session.user as any).id
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
     }
 
     // Fetch measurement (specific or latest)
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
 
     if (!measurement) {
       return NextResponse.json(
-        { error: 'Aucune mensuration trouvee' },
+        { error: 'Aucune mensuration trouvée' },
         { status: 404 }
       )
     }
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('PDF generation error:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la generation du PDF' },
+      { error: 'Erreur lors de la génération du PDF' },
       { status: 500 }
     )
   }

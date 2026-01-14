@@ -12,7 +12,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -25,7 +25,7 @@ export async function GET(
     })
 
     if (!appointment) {
-      return NextResponse.json({ error: 'Rendez-vous non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Rendez-vous non trouvé' }, { status: 404 })
     }
 
     return NextResponse.json({ appointment })
@@ -44,7 +44,7 @@ export async function PATCH(
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params

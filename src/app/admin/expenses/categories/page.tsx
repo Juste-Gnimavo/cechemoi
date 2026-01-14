@@ -66,11 +66,11 @@ const COLORS = [
 ]
 
 const ICON_OPTIONS = [
-  { value: 'Zap', label: 'Electricite' },
+  { value: 'Zap', label: 'Électricité' },
   { value: 'Droplets', label: 'Eau' },
   { value: 'Users', label: 'Personnes' },
   { value: 'Car', label: 'Transport' },
-  { value: 'Phone', label: 'Telephone' },
+  { value: 'Phone', label: 'Téléphone' },
   { value: 'Tv', label: 'TV' },
   { value: 'Sparkles', label: 'Nettoyage' },
   { value: 'Home', label: 'Maison' },
@@ -170,7 +170,7 @@ export default function ExpenseCategoriesPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success(editingCategory ? 'Categorie modifiee' : 'Categorie creee')
+        toast.success(editingCategory ? 'Catégorie modifiée' : 'Catégorie créée')
         closeModal()
         fetchCategories()
       } else {
@@ -185,11 +185,11 @@ export default function ExpenseCategoriesPage() {
 
   const handleDelete = async (category: ExpenseCategory) => {
     if (category._count && category._count.expenses > 0) {
-      toast.error(`Impossible de supprimer: ${category._count.expenses} depense(s) liee(s)`)
+      toast.error(`Impossible de supprimer: ${category._count.expenses} dépense(s) liée(s)`)
       return
     }
 
-    if (!confirm(`Supprimer la categorie "${category.name}" ?`)) {
+    if (!confirm(`Supprimer la catégorie "${category.name}" ?`)) {
       return
     }
 
@@ -201,7 +201,7 @@ export default function ExpenseCategoriesPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Categorie supprimee')
+        toast.success('Catégorie supprimée')
         fetchCategories()
       } else {
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -237,10 +237,10 @@ export default function ExpenseCategoriesPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Categories de Depenses
+              Catégories de Dépenses
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Gerer les categories pour organiser vos depenses
+              Gérer les catégories pour organiser vos dépenses
             </p>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function ExpenseCategoriesPage() {
           className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Nouvelle categorie
+          Nouvelle catégorie
         </button>
       </div>
 
@@ -257,7 +257,7 @@ export default function ExpenseCategoriesPage() {
       <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg overflow-hidden">
         {categories.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            Aucune categorie. Cliquez sur "Nouvelle categorie" pour commencer.
+            Aucune catégorie. Cliquez sur "Nouvelle catégorie" pour commencer.
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-dark-700">
@@ -285,7 +285,7 @@ export default function ExpenseCategoriesPage() {
                         </h3>
                         {category.isDefault && (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-gray-400 rounded">
-                            Par defaut
+                            Par défaut
                           </span>
                         )}
                       </div>
@@ -295,7 +295,7 @@ export default function ExpenseCategoriesPage() {
                         </p>
                       )}
                       <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        {category._count?.expenses || 0} depense(s)
+                        {category._count?.expenses || 0} dépense(s)
                       </p>
                     </div>
                   </div>
@@ -327,7 +327,7 @@ export default function ExpenseCategoriesPage() {
           <div className="bg-white dark:bg-dark-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingCategory ? 'Modifier la categorie' : 'Nouvelle categorie'}
+                {editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
               </h2>
               <button
                 onClick={closeModal}
@@ -363,14 +363,14 @@ export default function ExpenseCategoriesPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Description de la categorie"
+                  placeholder="Description de la catégorie"
                 />
               </div>
 
               {/* Icon */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                  Icone
+                  Icône
                 </label>
                 <select
                   value={icon}
@@ -425,7 +425,7 @@ export default function ExpenseCategoriesPage() {
               {/* Preview */}
               <div className="pt-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                  Apercu
+                  Aperçu
                 </label>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-900 rounded-lg">
                   {(() => {
@@ -440,7 +440,7 @@ export default function ExpenseCategoriesPage() {
                     )
                   })()}
                   <span className="font-medium text-gray-900 dark:text-white">
-                    {name || 'Nom de la categorie'}
+                    {name || 'Nom de la catégorie'}
                   </span>
                 </div>
               </div>
@@ -460,7 +460,7 @@ export default function ExpenseCategoriesPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {editingCategory ? 'Enregistrer' : 'Creer'}
+                  {editingCategory ? 'Enregistrer' : 'Créer'}
                 </button>
               </div>
             </form>

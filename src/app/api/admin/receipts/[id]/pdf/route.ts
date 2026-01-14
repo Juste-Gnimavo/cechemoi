@@ -15,7 +15,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Fetch receipt with related data including items
@@ -55,7 +55,7 @@ export async function GET(
     })
 
     if (!receipt) {
-      return NextResponse.json({ error: 'Recu non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Reçu non trouvé' }, { status: 404 })
     }
 
     // Build items list from custom order or invoice
@@ -110,7 +110,7 @@ export async function GET(
   } catch (error) {
     console.error('PDF generation error:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la generation du PDF' },
+      { error: 'Erreur lors de la génération du PDF' },
       { status: 500 }
     )
   }

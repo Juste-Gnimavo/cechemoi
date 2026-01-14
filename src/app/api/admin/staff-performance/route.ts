@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     // Only ADMIN can view staff performance
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const searchParams = req.nextUrl.searchParams
@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching staff performance:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la recuperation des performances' },
+      { error: 'Erreur lors de la récupération des performances' },
       { status: 500 }
     )
   }

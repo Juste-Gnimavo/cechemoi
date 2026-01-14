@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (existingUser) {
-      return NextResponse.json({ error: 'Cet email est deja utilise pour ce role' }, { status: 400 })
+      return NextResponse.json({ error: 'Cet email est déjà utilisé pour ce rôle' }, { status: 400 })
     }
 
     // Check if phone+role already exists
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (existingPhone) {
-      return NextResponse.json({ error: 'Ce telephone est deja utilise pour ce role' }, { status: 400 })
+      return NextResponse.json({ error: 'Ce téléphone est déjà utilisé pour ce rôle' }, { status: 400 })
     }
 
     // Hash password

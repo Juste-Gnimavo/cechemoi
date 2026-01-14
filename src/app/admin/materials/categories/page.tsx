@@ -89,7 +89,7 @@ export default function MaterialCategoriesPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success(editingCategory ? 'Categorie mise a jour' : 'Categorie creee')
+        toast.success(editingCategory ? 'Catégorie mise à jour' : 'Catégorie créée')
         closeModal()
         fetchCategories()
       } else {
@@ -104,12 +104,12 @@ export default function MaterialCategoriesPage() {
 
   const handleDelete = async (category: Category) => {
     if (category.isDefault) {
-      toast.error('Impossible de supprimer une categorie par defaut')
+      toast.error('Impossible de supprimer une catégorie par défaut')
       return
     }
 
     if (category.materialsCount > 0) {
-      toast.error('Impossible de supprimer: cette categorie contient des materiels')
+      toast.error('Impossible de supprimer: cette catégorie contient des matériels')
       return
     }
 
@@ -125,7 +125,7 @@ export default function MaterialCategoriesPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Categorie supprimee')
+        toast.success('Catégorie supprimée')
         fetchCategories()
       } else {
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -158,10 +158,10 @@ export default function MaterialCategoriesPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Categories de Materiels
+              Catégories de Matériels
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Organisez vos materiels par categories
+              Organisez vos matériels par catégories
             </p>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function MaterialCategoriesPage() {
           className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Nouvelle categorie
+          Nouvelle catégorie
         </button>
       </div>
 
@@ -180,17 +180,17 @@ export default function MaterialCategoriesPage() {
           <div className="p-12 text-center">
             <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Aucune categorie
+              Aucune catégorie
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">
-              Commencez par creer des categories pour organiser vos materiels.
+              Commencez par créer des catégories pour organiser vos matériels.
             </p>
             <button
               onClick={() => openModal()}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Creer une categorie
+              Créer une catégorie
             </button>
           </div>
         ) : (
@@ -198,10 +198,10 @@ export default function MaterialCategoriesPage() {
             <thead className="bg-gray-50 dark:bg-dark-900">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Categorie
+                  Catégorie
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Materiels
+                  Matériels
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Type
@@ -241,11 +241,11 @@ export default function MaterialCategoriesPage() {
                   <td className="px-4 py-3 text-center">
                     {category.isDefault ? (
                       <span className="inline-flex px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
-                        Par defaut
+                        Par défaut
                       </span>
                     ) : (
                       <span className="inline-flex px-2 py-1 text-xs bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-400 rounded">
-                        Personnalisee
+                        Personnalisée
                       </span>
                     )}
                   </td>
@@ -265,7 +265,7 @@ export default function MaterialCategoriesPage() {
                           className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
                           title={
                             category.materialsCount > 0
-                              ? 'Contient des materiels'
+                              ? 'Contient des matériels'
                               : 'Supprimer'
                           }
                         >
@@ -292,7 +292,7 @@ export default function MaterialCategoriesPage() {
           <div className="relative bg-white dark:bg-dark-900 rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingCategory ? 'Modifier la categorie' : 'Nouvelle categorie'}
+                {editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
               </h3>
               <button
                 onClick={closeModal}
@@ -326,7 +326,7 @@ export default function MaterialCategoriesPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                  placeholder="Description de la categorie..."
+                  placeholder="Description de la catégorie..."
                 />
               </div>
 
@@ -344,7 +344,7 @@ export default function MaterialCategoriesPage() {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {editingCategory ? 'Mettre a jour' : 'Creer'}
+                  {editingCategory ? 'Mettre à jour' : 'Créer'}
                 </button>
               </div>
             </form>

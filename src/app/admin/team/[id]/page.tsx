@@ -172,9 +172,9 @@ export default function TeamMemberProfilePage() {
       IN_PRODUCTION: 'En production',
       FITTING: 'Essayage',
       ALTERATIONS: 'Retouches',
-      READY: 'Pret',
-      DELIVERED: 'Livre',
-      CANCELLED: 'Annule',
+      READY: 'Prêt',
+      DELIVERED: 'Livré',
+      CANCELLED: 'Annulé',
     }
     return labels[status] || status
   }
@@ -190,9 +190,9 @@ export default function TeamMemberProfilePage() {
   if (!member) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <p className="text-gray-500 dark:text-gray-400">Membre non trouve</p>
+        <p className="text-gray-500 dark:text-gray-400">Membre non trouvé</p>
         <Link href="/admin/team" className="text-primary-500 hover:text-primary-400 mt-2">
-          Retour a la liste
+          Retour à la liste
         </Link>
       </div>
     )
@@ -373,7 +373,7 @@ export default function TeamMemberProfilePage() {
                   <thead>
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Telephone</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
                     </tr>
@@ -424,7 +424,7 @@ export default function TeamMemberProfilePage() {
               <div className="flex items-center gap-3">
                 <Phone className="h-4 w-4 text-gray-400" />
                 <div>
-                  <p className="text-xs text-gray-500">Telephone</p>
+                  <p className="text-xs text-gray-500">Téléphone</p>
                   <p className="text-sm text-gray-900 dark:text-white">{member.phone}</p>
                 </div>
               </div>
@@ -447,7 +447,7 @@ export default function TeamMemberProfilePage() {
               <div className="flex items-center gap-3">
                 <Clock className="h-4 w-4 text-gray-400" />
                 <div>
-                  <p className="text-xs text-gray-500">Derniere connexion</p>
+                  <p className="text-xs text-gray-500">Dernière connexion</p>
                   <p className="text-sm text-gray-900 dark:text-white">
                     {member.lastLoginAt
                       ? new Date(member.lastLoginAt).toLocaleDateString('fr-FR', {

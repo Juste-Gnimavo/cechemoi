@@ -102,7 +102,7 @@ export default function MaterialsPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Materiel supprime')
+        toast.success('Matériel supprimé')
         fetchMaterials()
       } else {
         toast.error(data.error || 'Erreur lors de la suppression')
@@ -123,9 +123,9 @@ export default function MaterialsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Stock Materiels</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Stock Matériels</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Gestion du stock des materiels de l'atelier
+            Gestion du stock des matériels de l'atelier
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export default function MaterialsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
           >
             <ArrowDownCircle className="h-4 w-4" />
-            Entree
+            Entrée
           </Link>
           <Link
             href="/admin/materials/out"
@@ -162,7 +162,7 @@ export default function MaterialsPage() {
                 <Package className="h-5 w-5 text-primary-500" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total materiels</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total matériels</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function MaterialsPage() {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
-          <option value="">Toutes les categories</option>
+          <option value="">Toutes les catégories</option>
           {categories.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.name}
@@ -260,19 +260,19 @@ export default function MaterialsPage() {
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center">
           <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucun materiel trouve
+            Aucun matériel trouvé
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             {search || categoryFilter || lowStockFilter
-              ? 'Aucun materiel ne correspond a vos criteres de recherche.'
-              : 'Commencez par ajouter vos materiels pour gerer votre stock.'}
+              ? 'Aucun matériel ne correspond à vos critères de recherche.'
+              : 'Commencez par ajouter vos matériels pour gérer votre stock.'}
           </p>
           <Link
             href="/admin/materials/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
           >
             <Plus className="h-4 w-4" />
-            Ajouter un materiel
+            Ajouter un matériel
           </Link>
         </div>
       ) : (
@@ -282,10 +282,10 @@ export default function MaterialsPage() {
               <thead className="bg-gray-50 dark:bg-dark-900">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Materiel
+                    Matériel
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Categorie
+                    Catégorie
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Stock
@@ -371,7 +371,7 @@ export default function MaterialsPage() {
                         <Link
                           href={`/admin/materials/in?materialId=${material.id}`}
                           className="p-2 hover:bg-green-500/10 rounded-lg transition-colors group"
-                          title="Entree"
+                          title="Entrée"
                         >
                           <ArrowDownCircle className="h-4 w-4 text-gray-400 group-hover:text-green-500" />
                         </Link>
@@ -418,7 +418,7 @@ export default function MaterialsPage() {
           className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
         >
           <Filter className="h-4 w-4" />
-          Gerer les categories
+          Gérer les catégories
         </Link>
         <Link
           href="/admin/materials/reports"

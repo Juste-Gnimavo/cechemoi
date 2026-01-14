@@ -206,7 +206,7 @@ export default function ReceiptsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher par numero, client, telephone..."
+                placeholder="Rechercher par numéro, client, téléphone..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -254,7 +254,7 @@ export default function ReceiptsPage() {
           </div>
         ) : receipts.length === 0 ? (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            Aucun recu trouve
+            Aucun reçu trouvé
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -277,7 +277,7 @@ export default function ReceiptsPage() {
                     Mode
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Reference
+                    Référence
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Actions

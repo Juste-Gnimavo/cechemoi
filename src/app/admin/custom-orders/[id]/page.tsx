@@ -310,7 +310,7 @@ export default function CustomOrderDetailPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Fichier ajoute')
+        toast.success('Fichier ajouté')
         fetchAttachments()
         fetchOrder() // Refresh timeline
       } else {
@@ -336,7 +336,7 @@ export default function CustomOrderDetailPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Fichier supprime')
+        toast.success('Fichier supprimé')
         fetchAttachments()
         fetchOrder() // Refresh timeline
       } else {
@@ -1109,14 +1109,14 @@ export default function CustomOrderDetailPage() {
             >
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Box className="h-4 w-4 text-primary-400" />
-                Materiels utilises ({materialUsages.length})
+                Matériels utilisés ({materialUsages.length})
               </h3>
               <div className="flex items-center gap-2">
                 <Link
                   href={`/admin/materials/out?customOrderId=${orderId}`}
                   onClick={(e) => e.stopPropagation()}
                   className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors"
-                  title="Ajouter sortie materiel"
+                  title="Ajouter sortie matériel"
                 >
                   <Plus className="h-4 w-4 text-primary-500" />
                 </Link>
@@ -1133,7 +1133,7 @@ export default function CustomOrderDetailPage() {
                 {materialUsages.length > 0 ? (
                   <>
                     <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Cout total: </span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Coût total: </span>
                       <span className="font-semibold text-orange-600 dark:text-orange-400">
                         {materialTotalCost.toLocaleString()} FCFA
                       </span>
@@ -1176,7 +1176,7 @@ export default function CustomOrderDetailPage() {
                   <div className="text-center py-4">
                     <Box className="h-8 w-8 text-gray-300 mx-auto mb-2" />
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      Aucun materiel enregistre
+                      Aucun matériel enregistré
                     </p>
                     <Link
                       href={`/admin/materials/out?customOrderId=${orderId}`}

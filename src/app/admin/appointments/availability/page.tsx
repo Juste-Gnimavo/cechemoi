@@ -116,7 +116,7 @@ export default function AvailabilityPage() {
       }
     } catch (error) {
       console.error('Error toggling:', error)
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     }
   }
 

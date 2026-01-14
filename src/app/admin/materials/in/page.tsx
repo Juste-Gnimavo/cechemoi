@@ -64,13 +64,13 @@ function MaterialInForm() {
     e.preventDefault()
 
     if (!materialId || !quantity) {
-      toast.error('Materiel et quantite sont requis')
+      toast.error('Matériel et quantité sont requis')
       return
     }
 
     const qty = parseFloat(quantity)
     if (qty <= 0) {
-      toast.error('La quantite doit etre positive')
+      toast.error('La quantité doit être positive')
       return
     }
 
@@ -91,7 +91,7 @@ function MaterialInForm() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Entree enregistree avec succes')
+        toast.success('Entrée enregistrée avec succès')
         router.push('/admin/materials')
       } else {
         toast.error(data.error || 'Erreur lors de l\'enregistrement')
@@ -128,10 +128,10 @@ function MaterialInForm() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <ArrowDownCircle className="h-6 w-6 text-green-500" />
-            Entree de Materiel
+            Entrée de Matériel
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Enregistrer une reception de materiel (achat, livraison)
+            Enregistrer une réception de matériel (achat, livraison)
           </p>
         </div>
       </div>
@@ -143,7 +143,7 @@ function MaterialInForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
               <Package className="h-4 w-4 inline mr-1" />
-              Materiel <span className="text-red-500">*</span>
+              Matériel <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
               <select
@@ -152,7 +152,7 @@ function MaterialInForm() {
                 required
                 className="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
-                <option value="">Selectionner un materiel</option>
+                <option value="">Sélectionner un matériel</option>
                 {materials.map((mat) => (
                   <option key={mat.id} value={mat.id}>
                     {mat.name} ({mat.category.name})
@@ -162,7 +162,7 @@ function MaterialInForm() {
               <Link
                 href="/admin/materials/new"
                 className="flex items-center gap-1 px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-                title="Ajouter un nouveau materiel"
+                title="Ajouter un nouveau matériel"
               >
                 <Plus className="h-4 w-4" />
               </Link>
@@ -194,7 +194,7 @@ function MaterialInForm() {
           {/* Quantity */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              Quantite recue <span className="text-red-500">*</span>
+              Quantité reçue <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -232,11 +232,11 @@ function MaterialInForm() {
               min="0"
               step="0.01"
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Prix par unite"
+              placeholder="Prix par unité"
             />
             {quantity && unitPrice && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Cout total: {formatPrice(parseFloat(quantity) * parseFloat(unitPrice))}
+                Coût total: {formatPrice(parseFloat(quantity) * parseFloat(unitPrice))}
               </p>
             )}
           </div>
@@ -244,7 +244,7 @@ function MaterialInForm() {
           {/* Reference */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              N° Reference / Bon de commande (optionnel)
+              N° Référence / Bon de commande (optionnel)
             </label>
             <input
               type="text"
@@ -265,7 +265,7 @@ function MaterialInForm() {
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-              placeholder="Fournisseur, details de la livraison..."
+              placeholder="Fournisseur, détails de la livraison..."
             />
           </div>
         </div>
@@ -288,7 +288,7 @@ function MaterialInForm() {
             ) : (
               <ArrowDownCircle className="h-4 w-4" />
             )}
-            Enregistrer l'entree
+            Enregistrer l'entrée
           </button>
         </div>
       </form>

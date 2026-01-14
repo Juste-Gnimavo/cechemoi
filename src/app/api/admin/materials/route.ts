@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     if (!name || !categoryId || !unit) {
       return NextResponse.json(
-        { error: 'Nom, categorie et unite sont requis' },
+        { error: 'Nom, catégorie et unité sont requis' },
         { status: 400 }
       )
     }
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 400 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 400 })
     }
 
     // Check SKU uniqueness if provided
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
         where: { sku },
       })
       if (existingSku) {
-        return NextResponse.json({ error: 'Ce SKU existe deja' }, { status: 400 })
+        return NextResponse.json({ error: 'Ce SKU existe déjà' }, { status: 400 })
       }
     }
 
@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       material,
-      message: 'Materiel cree avec succes',
+      message: 'Matériel créé avec succès',
     })
   } catch (error) {
     console.error('Error creating material:', error)

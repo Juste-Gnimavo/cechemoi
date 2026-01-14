@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const userId = (session.user as any).id
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error fetching customer measurements:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la recuperation des mensurations' },
+      { error: 'Erreur lors de la récupération des mensurations' },
       { status: 500 }
     )
   }

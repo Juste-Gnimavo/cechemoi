@@ -11,14 +11,14 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
     const { customers } = body // Array of { firstName, lastName, phone, email? }
 
     if (!customers || !Array.isArray(customers) || customers.length === 0) {
-      return NextResponse.json({ error: 'Aucun client a importer' }, { status: 400 })
+      return NextResponse.json({ error: 'Aucun client à importer' }, { status: 400 })
     }
 
     const results = {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       try {
         // Validate required fields
         if (!customer.firstName || !customer.phone) {
-          results.errors.push(`Ligne ignoree: prenom et telephone requis`)
+          results.errors.push(`Ligne ignorée: prénom et téléphone requis`)
           results.skipped++
           continue
         }
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         })
 
         if (existingCustomer) {
-          results.errors.push(`${customer.firstName} ${customer.lastName || ''}: telephone ${phone} existe deja`)
+          results.errors.push(`${customer.firstName} ${customer.lastName || ''}: téléphone ${phone} existe déjà`)
           results.skipped++
           continue
         }

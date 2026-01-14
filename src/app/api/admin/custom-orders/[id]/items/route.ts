@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     })
 
     if (!order) {
-      return NextResponse.json({ error: 'Commande non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Commande non trouvée' }, { status: 404 })
     }
 
     // Create item
@@ -64,8 +64,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: params.id,
-        event: 'Article ajoute',
-        description: `${garmentType}${customType ? ` (${customType})` : ''} ajoute a la commande`,
+        event: 'Article ajouté',
+        description: `${garmentType}${customType ? ` (${customType})` : ''} ajouté à la commande`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
       },
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({
       success: true,
       item,
-      message: 'Article ajoute',
+      message: 'Article ajouté',
     })
   } catch (error) {
     console.error('Error adding item:', error)
@@ -90,7 +90,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Allow TAILOR to update status only
     const userRole = (session?.user as any)?.role
     if (!session || !['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(userRole)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
@@ -116,13 +116,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     })
 
     if (!existingItem) {
-      return NextResponse.json({ error: 'Article non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Article non trouvé' }, { status: 404 })
     }
 
     // If TAILOR, can only update their own items and only status/hours
     if (userRole === 'TAILOR') {
       if (existingItem.tailorId !== (session.user as any).id) {
-        return NextResponse.json({ error: 'Vous ne pouvez modifier que vos articles assignes' }, { status: 403 })
+        return NextResponse.json({ error: 'Vous ne pouvez modifier que vos articles assignés' }, { status: 403 })
       }
       // Tailors can only update: status, startedAt, completedAt, actualHours, notes
     }
@@ -195,15 +195,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         FITTING: 'Essayage',
         ALTERATIONS: 'Retouches',
         FINISHING: 'Finitions',
-        COMPLETED: 'Termine',
-        DELIVERED: 'Livre',
+        COMPLETED: 'Terminé',
+        DELIVERED: 'Livré',
       }
 
       await prisma.customOrderTimeline.create({
         data: {
           customOrderId: params.id,
           event: `${item.garmentType}: ${statusLabels[status] || status}`,
-          description: `Mis a jour par ${(session.user as any).name || 'Utilisateur'}`,
+          description: `Mis à jour par ${(session.user as any).name || 'Utilisateur'}`,
           userId: (session.user as any).id,
           userName: (session.user as any).name,
         },
@@ -213,7 +213,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({
       success: true,
       item,
-      message: 'Article mis a jour',
+      message: 'Article mis à jour',
     })
   } catch (error) {
     console.error('Error updating item:', error)
@@ -227,7 +227,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { searchParams } = new URL(req.url)
@@ -252,7 +252,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     })
 
     if (!item) {
-      return NextResponse.json({ error: 'Article non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Article non trouvé' }, { status: 404 })
     }
 
     // Delete item
@@ -275,8 +275,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await prisma.customOrderTimeline.create({
       data: {
         customOrderId: params.id,
-        event: 'Article supprime',
-        description: `${item.garmentType} retire de la commande`,
+        event: 'Article supprimé',
+        description: `${item.garmentType} retiré de la commande`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
       },
@@ -284,7 +284,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({
       success: true,
-      message: 'Article supprime',
+      message: 'Article supprimé',
     })
   } catch (error) {
     console.error('Error deleting item:', error)

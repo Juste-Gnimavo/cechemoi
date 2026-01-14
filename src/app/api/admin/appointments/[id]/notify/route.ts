@@ -12,7 +12,7 @@ export async function POST(
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
     if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -26,7 +26,7 @@ export async function POST(
     })
 
     if (!appointment) {
-      return NextResponse.json({ error: 'Rendez-vous non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Rendez-vous non trouvé' }, { status: 404 })
     }
 
     // Format date
@@ -44,7 +44,7 @@ export async function POST(
     switch (type) {
       case 'confirmation':
         smsMessage = `Bonjour ${appointment.customerName},
-Votre RDV du ${formattedDate} a ${appointment.time} est confirme!
+Votre RDV du ${formattedDate} à ${appointment.time} est confirmé!
 Service: ${appointment.type.name}
 Ref: ${appointment.reference}
 A bientot chez CECHEMOI!`
@@ -84,7 +84,7 @@ N'oubliez pas votre rendez-vous chez CÈCHÉMOI !
 
       case 'cancellation':
         smsMessage = `Bonjour ${appointment.customerName},
-Nous regrettons de vous informer que votre RDV du ${formattedDate} a ${appointment.time} a ete annule.
+Nous regrettons de vous informer que votre RDV du ${formattedDate} à ${appointment.time} a été annulé.
 Ref: ${appointment.reference}
 Contactez-nous pour reprogrammer.
 CECHEMOI`

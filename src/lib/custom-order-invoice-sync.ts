@@ -62,7 +62,7 @@ export async function createInvoiceFromCustomOrder(
   })
 
   if (!customOrder) {
-    throw new Error('Commande sur-mesure non trouvee')
+    throw new Error('Commande sur-mesure non trouvée')
   }
 
   // Check if invoice already exists
@@ -127,7 +127,7 @@ export async function createInvoiceFromCustomOrder(
           ...(customOrder.materialCost > 0
             ? [
                 {
-                  description: 'Cout materiel (tissu, accessoires)',
+                  description: 'Coût matériel (tissu, accessoires)',
                   quantity: 1,
                   unitPrice: customOrder.materialCost,
                   total: customOrder.materialCost,
@@ -187,7 +187,7 @@ export async function syncPaymentToInvoice(
   })
 
   if (!payment) {
-    throw new Error('Paiement non trouve')
+    throw new Error('Paiement non trouvé')
   }
 
   // Get or create invoice

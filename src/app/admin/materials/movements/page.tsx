@@ -48,7 +48,7 @@ interface Movement {
 
 const TYPE_CONFIG = {
   IN: {
-    label: 'Entree',
+    label: 'Entrée',
     icon: ArrowDownCircle,
     color: 'text-green-500',
     bg: 'bg-green-100 dark:bg-green-900/30',
@@ -184,7 +184,7 @@ function MovementsContent() {
               Historique des Mouvements
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Toutes les entrees et sorties de materiels
+              Toutes les entrées et sorties de matériels
             </p>
           </div>
         </div>
@@ -236,7 +236,7 @@ function MovementsContent() {
             onChange={(e) => setMaterialId(e.target.value)}
             className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
           >
-            <option value="">Tous les materiels</option>
+            <option value="">Tous les matériels</option>
             {materials.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -287,10 +287,10 @@ function MovementsContent() {
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center">
           <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Aucun mouvement trouve
+            Aucun mouvement trouvé
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            Aucun mouvement ne correspond a vos criteres de recherche.
+            Aucun mouvement ne correspond à vos critères de recherche.
           </p>
         </div>
       ) : (

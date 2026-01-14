@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -33,7 +33,7 @@ export async function GET(
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -58,7 +58,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -71,7 +71,7 @@ export async function PUT(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     // Check if new name already exists (if changing name)
@@ -80,7 +80,7 @@ export async function PUT(
         where: { name },
       })
       if (nameExists) {
-        return NextResponse.json({ error: 'Ce nom de categorie existe deja' }, { status: 400 })
+        return NextResponse.json({ error: 'Ce nom de catégorie existe déjà' }, { status: 400 })
       }
     }
 
@@ -96,7 +96,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       category,
-      message: 'Categorie mise a jour',
+      message: 'Catégorie mise à jour',
     })
   } catch (error) {
     console.error('Error updating material category:', error)
@@ -113,7 +113,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -129,13 +129,13 @@ export async function DELETE(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     // Check if category has materials
     if (existing._count.materials > 0) {
       return NextResponse.json(
-        { error: 'Impossible de supprimer: cette categorie contient des materiels' },
+        { error: 'Impossible de supprimer: cette catégorie contient des matériels' },
         { status: 400 }
       )
     }
@@ -143,7 +143,7 @@ export async function DELETE(
     // Don't allow deleting default categories
     if (existing.isDefault) {
       return NextResponse.json(
-        { error: 'Impossible de supprimer une categorie par defaut' },
+        { error: 'Impossible de supprimer une catégorie par défaut' },
         { status: 400 }
       )
     }
@@ -154,7 +154,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Categorie supprimee',
+      message: 'Catégorie supprimée',
     })
   } catch (error) {
     console.error('Error deleting material category:', error)

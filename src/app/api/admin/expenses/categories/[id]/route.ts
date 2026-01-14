@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -29,7 +29,7 @@ export async function GET(
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -55,7 +55,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -68,7 +68,7 @@ export async function PUT(
     })
 
     if (!existing) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     // Check if new name is already taken by another category
@@ -77,7 +77,7 @@ export async function PUT(
         where: { name },
       })
       if (nameExists) {
-        return NextResponse.json({ error: 'Une categorie avec ce nom existe deja' }, { status: 400 })
+        return NextResponse.json({ error: 'Une catégorie avec ce nom existe déjà' }, { status: 400 })
       }
     }
 
@@ -95,7 +95,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       category,
-      message: 'Categorie mise a jour',
+      message: 'Catégorie mise à jour',
     })
   } catch (error) {
     console.error('Error updating expense category:', error)
@@ -112,7 +112,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const { id } = await params
@@ -128,13 +128,13 @@ export async function DELETE(
     })
 
     if (!category) {
-      return NextResponse.json({ error: 'Categorie non trouvee' }, { status: 404 })
+      return NextResponse.json({ error: 'Catégorie non trouvée' }, { status: 404 })
     }
 
     // Check if there are expenses linked to this category
     if (category._count.expenses > 0) {
       return NextResponse.json(
-        { error: `Impossible de supprimer: cette categorie contient ${category._count.expenses} depense(s)` },
+        { error: `Impossible de supprimer: cette catégorie contient ${category._count.expenses} dépense(s)` },
         { status: 400 }
       )
     }
@@ -145,7 +145,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Categorie supprimee',
+      message: 'Catégorie supprimée',
     })
   } catch (error) {
     console.error('Error deleting expense category:', error)

@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const tailor = await prisma.user.findFirst({
@@ -32,7 +32,7 @@ export async function GET(
     })
 
     if (!tailor) {
-      return NextResponse.json({ error: 'Couturier non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Couturier non trouvé' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true, tailor })
@@ -51,14 +51,14 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     const body = await req.json()
     const { name, phone, email } = body
 
     if (!name || !phone) {
-      return NextResponse.json({ error: 'Nom et telephone requis' }, { status: 400 })
+      return NextResponse.json({ error: 'Nom et téléphone requis' }, { status: 400 })
     }
 
     // Check if tailor exists
@@ -70,7 +70,7 @@ export async function PUT(
     })
 
     if (!existingTailor) {
-      return NextResponse.json({ error: 'Couturier non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Couturier non trouvé' }, { status: 404 })
     }
 
     // Check if phone is taken by another tailor
@@ -84,7 +84,7 @@ export async function PUT(
       })
 
       if (phoneTaken) {
-        return NextResponse.json({ error: 'Ce numero est deja utilise par un autre couturier' }, { status: 400 })
+        return NextResponse.json({ error: 'Ce numéro est déjà utilisé par un autre couturier' }, { status: 400 })
       }
     }
 
@@ -99,7 +99,7 @@ export async function PUT(
       })
 
       if (emailTaken) {
-        return NextResponse.json({ error: 'Cet email est deja utilise par un autre couturier' }, { status: 400 })
+        return NextResponse.json({ error: 'Cet email est déjà utilisé par un autre couturier' }, { status: 400 })
       }
     }
 
@@ -123,7 +123,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       tailor,
-      message: 'Couturier mis a jour',
+      message: 'Couturier mis à jour',
     })
   } catch (error) {
     console.error('Error updating tailor:', error)
@@ -140,7 +140,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
     // Check if tailor exists
@@ -159,7 +159,7 @@ export async function DELETE(
     })
 
     if (!tailor) {
-      return NextResponse.json({ error: 'Couturier non trouve' }, { status: 404 })
+      return NextResponse.json({ error: 'Couturier non trouvé' }, { status: 404 })
     }
 
     // Check if tailor has active assignments
@@ -177,7 +177,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Couturier supprime',
+      message: 'Couturier supprimé',
     })
   } catch (error) {
     console.error('Error deleting tailor:', error)

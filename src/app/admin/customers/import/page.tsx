@@ -187,7 +187,7 @@ export default function ImportCustomersPage() {
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
         <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Format attendu</h3>
         <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
-          Collez vos donnees avec une ligne par client. Les champs requis sont: <strong>Prenom</strong> et <strong>Telephone</strong>.
+          Collez vos données avec une ligne par client. Les champs requis sont: <strong>Prénom</strong> et <strong>Téléphone</strong>.
         </p>
         <p className="text-sm text-blue-600 dark:text-blue-500">
           Exemples:<br/>
@@ -281,9 +281,9 @@ export default function ImportCustomersPage() {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
               <thead>
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prenom</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prénom</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Telephone</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                   <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
                 </tr>
@@ -323,7 +323,7 @@ export default function ImportCustomersPage() {
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 <span className="text-2xl font-bold text-green-600">{result.created}</span>
               </div>
-              <p className="text-sm text-green-600">Client(s) cree(s)</p>
+              <p className="text-sm text-green-600">Client(s) créé(s)</p>
             </div>
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
               <div className="flex items-center gap-2">
