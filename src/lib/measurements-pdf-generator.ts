@@ -9,34 +9,35 @@ interface CustomerMeasurement {
   unit: string
   takenByStaffName?: string | null
 
+  // All measurements are strings to allow flexible input like "87-2" or "50 - 45"
   // Upper body
-  dos?: number | null
-  carrureDevant?: number | null
-  carrureDerriere?: number | null
-  epaule?: number | null
-  epauleManche?: number | null
-  poitrine?: number | null
-  tourDeTaille?: number | null
-  longueurDetaille?: number | null
-  bassin?: number | null
+  dos?: string | null
+  carrureDevant?: string | null
+  carrureDerriere?: string | null
+  epaule?: string | null
+  epauleManche?: string | null
+  poitrine?: string | null
+  tourDeTaille?: string | null
+  longueurDetaille?: string | null
+  bassin?: string | null
 
   // Arms
   longueurManches?: string | null
-  tourDeManche?: number | null
-  poignets?: number | null
+  tourDeManche?: string | null
+  poignets?: string | null
 
   // Torso
-  pinces?: number | null
-  longueurTotale?: number | null
+  pinces?: string | null
+  longueurTotale?: string | null
   longueurRobes?: string | null
-  longueurTunique?: number | null
-  ceinture?: number | null
+  longueurTunique?: string | null
+  ceinture?: string | null
 
   // Lower body
-  longueurPantalon?: number | null
-  frappe?: number | null
-  cuisse?: number | null
-  genoux?: number | null
+  longueurPantalon?: string | null
+  frappe?: string | null
+  cuisse?: string | null
+  genoux?: string | null
   longueurJupe?: string | null
 
   // Notes

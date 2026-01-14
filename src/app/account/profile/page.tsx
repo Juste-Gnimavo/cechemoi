@@ -31,27 +31,28 @@ interface Measurement {
   measurementDate: string
   unit: string
   takenByStaffName?: string | null
-  dos?: number | null
-  carrureDevant?: number | null
-  carrureDerriere?: number | null
-  epaule?: number | null
-  epauleManche?: number | null
-  poitrine?: number | null
-  tourDeTaille?: number | null
-  longueurDetaille?: number | null
-  bassin?: number | null
+  // All measurements are strings to allow flexible input like "87-2" or "50 - 45"
+  dos?: string | null
+  carrureDevant?: string | null
+  carrureDerriere?: string | null
+  epaule?: string | null
+  epauleManche?: string | null
+  poitrine?: string | null
+  tourDeTaille?: string | null
+  longueurDetaille?: string | null
+  bassin?: string | null
   longueurManches?: string | null
-  tourDeManche?: number | null
-  poignets?: number | null
-  pinces?: number | null
-  longueurTotale?: number | null
+  tourDeManche?: string | null
+  poignets?: string | null
+  pinces?: string | null
+  longueurTotale?: string | null
   longueurRobes?: string | null
-  longueurTunique?: number | null
-  ceinture?: number | null
-  longueurPantalon?: number | null
-  frappe?: number | null
-  cuisse?: number | null
-  genoux?: number | null
+  longueurTunique?: string | null
+  ceinture?: string | null
+  longueurPantalon?: string | null
+  frappe?: string | null
+  cuisse?: string | null
+  genoux?: string | null
   longueurJupe?: string | null
   autresMesures?: string | null
 }
