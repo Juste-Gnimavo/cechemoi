@@ -17,16 +17,12 @@ import {
   Loader2,
   MapPin,
   Pencil,
-  X,
-  Save,
   Ruler,
   Download,
   User,
-  History,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { UserProfileCard } from '@/components/user-profile-card'
-import { MeasurementsForm } from '@/components/admin/measurements-form'
 import { MeasurementsDisplay } from '@/components/measurements-display'
 
 interface CustomerDetail {
@@ -128,9 +124,6 @@ export default function CustomerDetailPage() {
   // Measurements state
   const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null)
   const [measurementHistory, setMeasurementHistory] = useState<Measurement[]>([])
-  const [showMeasurementModal, setShowMeasurementModal] = useState(false)
-  const [measurementFormData, setMeasurementFormData] = useState<any>({})
-  const [savingMeasurement, setSavingMeasurement] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
 
   useEffect(() => {
@@ -218,32 +211,6 @@ export default function CustomerDetailPage() {
     }
   }
 
-  const saveMeasurement = async () => {
-    try {
-      setSavingMeasurement(true)
-      const response = await fetch(`/api/admin/customers/${params.id}/measurements`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(measurementFormData),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success('Mensurations enregistrées avec succès')
-        setShowMeasurementModal(false)
-        setMeasurementFormData({})
-        fetchMeasurements()
-      } else {
-        toast.error(data.error || 'Erreur lors de l\'enregistrement')
-      }
-    } catch (error) {
-      console.error('Error saving measurement:', error)
-      toast.error('Erreur lors de l\'enregistrement')
-    } finally {
-      setSavingMeasurement(false)
-    }
-  }
 
   const downloadMeasurementPdf = async (measurementId?: string) => {
     try {
@@ -442,6 +409,7 @@ export default function CustomerDetailPage() {
           emailVerified: customer.emailVerified,
           createdAt: customer.createdAt,
           updatedAt: customer.updatedAt,
+          dateOfBirth: customer.dateOfBirth,
         }}
         variant="full"
         editable={false}
@@ -557,13 +525,6 @@ export default function CustomerDetailPage() {
                   </span>
                 )}
               </h2>
-              <button
-                onClick={() => setShowMeasurementModal(true)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                Ajouter
-              </button>
             </div>
             <div className="p-6">
               {currentMeasurement ? (
@@ -578,12 +539,13 @@ export default function CustomerDetailPage() {
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
                     Aucune mensuration enregistrée pour ce client
                   </p>
-                  <button
-                    onClick={() => setShowMeasurementModal(true)}
-                    className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+                  <Link
+                    href={`/admin/customers/${params.id}/edit`}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
                   >
-                    Ajouter des mensurations
-                  </button>
+                    <Pencil className="h-4 w-4" />
+                    Modifier le profil
+                  </Link>
                 </div>
               )}
             </div>
@@ -879,57 +841,6 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
-      {/* Add Measurement Modal */}
-      {showMeasurementModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowMeasurementModal(false)} />
-          <div className="relative bg-white dark:bg-dark-900 rounded-2xl border border-gray-200 dark:border-dark-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Ruler className="h-5 w-5 text-primary-500" />
-                Ajouter des mensurations
-              </h2>
-              <button
-                onClick={() => setShowMeasurementModal(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
-              >
-                <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6">
-              <MeasurementsForm
-                onChange={(data) => setMeasurementFormData(data)}
-                collapsed={false}
-              />
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
-              <button
-                onClick={() => setShowMeasurementModal(false)}
-                className="px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-white rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={saveMeasurement}
-                disabled={savingMeasurement}
-                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-50"
-              >
-                {savingMeasurement ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                <span>{savingMeasurement ? 'Enregistrement...' : 'Enregistrer'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

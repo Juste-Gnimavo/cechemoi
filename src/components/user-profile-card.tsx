@@ -20,6 +20,7 @@ import {
   Calendar,
   Wifi,
   Fingerprint,
+  Gift,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -44,6 +45,7 @@ interface UserProfileCardProps {
     emailVerified?: string | null // Date string if verified
     createdAt?: string
     updatedAt?: string
+    dateOfBirth?: string | null // Birthday
   }
   variant?: 'horizontal' | 'vertical' | 'full'
   onImageUpdate?: (newImageUrl: string) => void
@@ -287,6 +289,20 @@ export function UserProfileCard({
                       {getCountryFlag(user.countryCode)} {user.city}{user.city && user.country && ', '}{user.country}
                     </p>
                     <p className="text-xs text-gray-500">Localisation</p>
+                  </div>
+                </div>
+              )}
+
+              {user.dateOfBirth && (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-pink-500/10">
+                    <Gift className="h-4 w-4 text-pink-500 dark:text-pink-400" />
+                  </div>
+                  <div>
+                    <p className="text-gray-900 dark:text-white text-sm">
+                      {user.dateOfBirth}
+                    </p>
+                    <p className="text-xs text-gray-500">Date d&apos;anniversaire</p>
                   </div>
                 </div>
               )}
