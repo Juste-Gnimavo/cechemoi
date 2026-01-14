@@ -8,39 +8,40 @@ import { z } from 'zod'
 export const dynamic = 'force-dynamic'
 
 // Measurement validation schema
+// All measurements are strings to allow flexible input like "87-2" or "50 - 45"
 const measurementSchema = z.object({
   measurementDate: z.string().optional(),
   unit: z.enum(['cm', 'inches']).default('cm'),
 
   // Upper body (1-9)
-  dos: z.number().nullable().optional(),
-  carrureDevant: z.number().nullable().optional(),
-  carrureDerriere: z.number().nullable().optional(),
-  epaule: z.number().nullable().optional(),
-  epauleManche: z.number().nullable().optional(),
-  poitrine: z.number().nullable().optional(),
-  tourDeTaille: z.number().nullable().optional(),
-  longueurDetaille: z.number().nullable().optional(),
-  bassin: z.number().nullable().optional(),
+  dos: z.string().nullable().optional(),
+  carrureDevant: z.string().nullable().optional(),
+  carrureDerriere: z.string().nullable().optional(),
+  epaule: z.string().nullable().optional(),
+  epauleManche: z.string().nullable().optional(),
+  poitrine: z.string().nullable().optional(),
+  tourDeTaille: z.string().nullable().optional(),
+  longueurDetaille: z.string().nullable().optional(),
+  bassin: z.string().nullable().optional(),
 
   // Arms (10-12)
-  longueurManches: z.string().nullable().optional(), // Can be option or custom value
-  tourDeManche: z.number().nullable().optional(),
-  poignets: z.number().nullable().optional(),
+  longueurManches: z.string().nullable().optional(),
+  tourDeManche: z.string().nullable().optional(),
+  poignets: z.string().nullable().optional(),
 
   // Torso (13-17)
-  pinces: z.number().nullable().optional(),
-  longueurTotale: z.number().nullable().optional(),
-  longueurRobes: z.string().nullable().optional(), // Can be option or custom value
-  longueurTunique: z.number().nullable().optional(),
-  ceinture: z.number().nullable().optional(),
+  pinces: z.string().nullable().optional(),
+  longueurTotale: z.string().nullable().optional(),
+  longueurRobes: z.string().nullable().optional(),
+  longueurTunique: z.string().nullable().optional(),
+  ceinture: z.string().nullable().optional(),
 
   // Lower body (18-22)
-  longueurPantalon: z.number().nullable().optional(),
-  frappe: z.number().nullable().optional(),
-  cuisse: z.number().nullable().optional(),
-  genoux: z.number().nullable().optional(),
-  longueurJupe: z.string().nullable().optional(), // Can be option or custom value
+  longueurPantalon: z.string().nullable().optional(),
+  frappe: z.string().nullable().optional(),
+  cuisse: z.string().nullable().optional(),
+  genoux: z.string().nullable().optional(),
+  longueurJupe: z.string().nullable().optional(),
 
   // Notes
   autresMesures: z.string().nullable().optional(),

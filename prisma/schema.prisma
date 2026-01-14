@@ -1944,34 +1944,35 @@ model CustomerMeasurement {
   unit              String   @default("cm") // cm or inches
 
   // === 22 BODY MEASUREMENTS ===
+  // All measurements are String to allow flexible input like "87-2" or "50 - 45"
   // Upper body (1-9)
-  dos               Float?   // 1. DOS (back)
-  carrureDevant     Float?   // 2. CARRURE DEVANT (front width)
-  carrureDerriere   Float?   // 3. CARRURE DERRIERE (back width)
-  epaule            Float?   // 4. EPAULE (shoulder)
-  epauleManche      Float?   // 5. EPAULE MANCHE (shoulder to sleeve)
-  poitrine          Float?   // 6. POITRINE (chest/bust)
-  tourDeTaille      Float?   // 7. TOUR DE TAILLE (waist)
-  longueurDetaille  Float?   // 8. LONGUEUR DETAILLE
-  bassin            Float?   // 9. BASSIN (hip)
+  dos               String?  // 1. DOS (back)
+  carrureDevant     String?  // 2. CARRURE DEVANT (front width)
+  carrureDerriere   String?  // 3. CARRURE DERRIERE (back width)
+  epaule            String?  // 4. EPAULE (shoulder)
+  epauleManche      String?  // 5. EPAULE MANCHE (shoulder to sleeve)
+  poitrine          String?  // 6. POITRINE (chest/bust)
+  tourDeTaille      String?  // 7. TOUR DE TAILLE (waist)
+  longueurDetaille  String?  // 8. LONGUEUR DETAILLE
+  bassin            String?  // 9. BASSIN (hip)
 
   // Arms (10-12)
   longueurManches   String?  // 10. LONGUEUR DES MANCHES (option OR custom cm value)
-  tourDeManche      Float?   // 11. TOUR DE MANCHE (sleeve circumference)
-  poignets          Float?   // 12. POIGNETS (wrists)
+  tourDeManche      String?  // 11. TOUR DE MANCHE (sleeve circumference)
+  poignets          String?  // 12. POIGNETS (wrists)
 
   // Torso (13-17)
-  pinces            Float?   // 13. PINCES (darts)
-  longueurTotale    Float?   // 14. LONGUEUR TOTALE (total length)
+  pinces            String?  // 13. PINCES (darts)
+  longueurTotale    String?  // 14. LONGUEUR TOTALE (total length)
   longueurRobes     String?  // 15. LONGUEUR DES ROBES (option OR custom cm value)
-  longueurTunique   Float?   // 16. LONGUEUR TUNIQUE (tunic length)
-  ceinture          Float?   // 17. CEINTURE (belt/waist)
+  longueurTunique   String?  // 16. LONGUEUR TUNIQUE (tunic length)
+  ceinture          String?  // 17. CEINTURE (belt/waist)
 
   // Lower body (18-22)
-  longueurPantalon  Float?   // 18. LONGUEUR PANTALON (pants length)
-  frappe            Float?   // 19. FRAPPE
-  cuisse            Float?   // 20. CUISSE (thigh)
-  genoux            Float?   // 21. GENOUX (knees)
+  longueurPantalon  String?  // 18. LONGUEUR PANTALON (pants length)
+  frappe            String?  // 19. FRAPPE
+  cuisse            String?  // 20. CUISSE (thigh)
+  genoux            String?  // 21. GENOUX (knees)
   longueurJupe      String?  // 22. LONGUEUR JUPE (option OR custom cm value)
 
   // Notes

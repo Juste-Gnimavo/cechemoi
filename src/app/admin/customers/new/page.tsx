@@ -10,6 +10,14 @@ import { ImageUpload } from '@/components/image-upload'
 import { useConfetti } from '@/hooks/useConfetti'
 import { MeasurementsForm } from '@/components/admin/measurements-form'
 
+// Helper function for date format conversion (French format DD-MM-YYYY -> ISO YYYY-MM-DD)
+const formatDateToISO = (frenchDate: string | null | undefined): string | null => {
+  if (!frenchDate) return null
+  const parts = frenchDate.split('-')
+  if (parts.length !== 3) return frenchDate // Return as-is if not valid format
+  return `${parts[2]}-${parts[1]}-${parts[0]}` // DD-MM-YYYY -> YYYY-MM-DD
+}
+
 export default function NewCustomerPage() {
   const router = useRouter()
   const { welcome } = useConfetti()
@@ -140,7 +148,7 @@ export default function NewCustomerPage() {
           phone,
           whatsappNumber: whatsappNumber || phone,
           image: image || null,
-          dateOfBirth: dateOfBirth || null,
+          dateOfBirth: formatDateToISO(dateOfBirth),
           howDidYouHearAboutUs: howDidYouHearAboutUs || null,
           city: city || null,
           country: country || null,
@@ -326,11 +334,15 @@ export default function NewCustomerPage() {
                 Date d'anniversaire
               </label>
               <input
-                type="date"
+                type="text"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
+                placeholder="JJ-MM-AAAA (ex: 30-06-1983)"
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Format: JJ-MM-AAAA (ex: 30-06-1983)
+              </p>
             </div>
 
             <div>

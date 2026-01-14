@@ -56,6 +56,22 @@ interface Measurement {
   autresMesures?: string | null
 }
 
+// Helper functions for date format conversion (French format DD-MM-YYYY <-> ISO YYYY-MM-DD)
+const formatDateToFrench = (isoDate: string | null | undefined): string => {
+  if (!isoDate) return ''
+  const date = isoDate.split('T')[0] // Handle ISO datetime
+  const parts = date.split('-')
+  if (parts.length !== 3) return isoDate
+  return `${parts[2]}-${parts[1]}-${parts[0]}` // YYYY-MM-DD -> DD-MM-YYYY
+}
+
+const formatDateToISO = (frenchDate: string | null | undefined): string | null => {
+  if (!frenchDate) return null
+  const parts = frenchDate.split('-')
+  if (parts.length !== 3) return frenchDate // Return as-is if not valid format
+  return `${parts[2]}-${parts[1]}-${parts[0]}` // DD-MM-YYYY -> YYYY-MM-DD
+}
+
 export default function EditCustomerPage() {
   const router = useRouter()
   const params = useParams()
@@ -111,7 +127,7 @@ export default function EditCustomerPage() {
         setPhone(customer.phone || '')
         setWhatsappNumber(customer.whatsappNumber || '')
         setImage(customer.image || '')
-        setDateOfBirth(customer.dateOfBirth ? customer.dateOfBirth.split('T')[0] : '')
+        setDateOfBirth(formatDateToFrench(customer.dateOfBirth))
         setHowDidYouHearAboutUs(customer.howDidYouHearAboutUs || '')
         setCity(customer.city || '')
         setCountry(customer.country || '')
@@ -184,7 +200,7 @@ export default function EditCustomerPage() {
           phone,
           whatsappNumber: whatsappNumber || phone,
           image: image || null,
-          dateOfBirth: dateOfBirth || null,
+          dateOfBirth: formatDateToISO(dateOfBirth),
           howDidYouHearAboutUs: howDidYouHearAboutUs || null,
           city: city || null,
           country: country || null,
@@ -332,11 +348,15 @@ export default function EditCustomerPage() {
                 Date d'anniversaire
               </label>
               <input
-                type="date"
+                type="text"
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
+                placeholder="JJ-MM-AAAA (ex: 30-06-1983)"
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Format: JJ-MM-AAAA (ex: 30-06-1983)
+              </p>
             </div>
 
             <div>
