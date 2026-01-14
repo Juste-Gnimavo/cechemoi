@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, ChevronUp, Ruler } from 'lucide-react'
 
 // Sub-options for length fields with their own values
@@ -101,9 +101,17 @@ export function MeasurementsForm({
     parseJsonField(initialData?.longueurJupe, {})
   )
 
+  // Use ref to always have latest onChange without causing re-renders
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  // Track if we're syncing from initialData to avoid duplicate onChange calls
+  const isSyncingRef = useRef(false)
+
   // Sync form data when initialData changes (e.g., after API fetch)
   useEffect(() => {
     if (initialData) {
+      isSyncingRef.current = true
       const newData = {
         measurementDate: initialData.measurementDate || new Date().toISOString().split('T')[0],
         unit: initialData.unit || 'cm',
@@ -135,12 +143,17 @@ export function MeasurementsForm({
       setSleeveValues(parseJsonField(initialData.longueurManches, {}))
       setDressValues(parseJsonField(initialData.longueurRobes, {}))
       setSkirtValues(parseJsonField(initialData.longueurJupe, {}))
-      onChange(newData)
+      onChangeRef.current(newData)
+      // Reset flag after a tick to allow future sub-value changes
+      setTimeout(() => { isSyncingRef.current = false }, 0)
     }
   }, [initialData])
 
-  // Update form data and notify parent when sub-values change
+  // Update form data and notify parent when sub-values change (user input)
   useEffect(() => {
+    // Skip if we're syncing from initialData
+    if (isSyncingRef.current) return
+
     const hasSleeveValues = Object.values(sleeveValues).some(v => v !== null && v !== undefined && v !== '')
     const hasDressValues = Object.values(dressValues).some(v => v !== null && v !== undefined && v !== '')
     const hasSkirtValues = Object.values(skirtValues).some(v => v !== null && v !== undefined && v !== '')
@@ -152,16 +165,15 @@ export function MeasurementsForm({
         longueurRobes: hasDressValues ? JSON.stringify(dressValues) : null,
         longueurJupe: hasSkirtValues ? JSON.stringify(skirtValues) : null,
       }
-      // Notify parent of the change
-      onChange(newData)
+      onChangeRef.current(newData)
       return newData
     })
-  }, [sleeveValues, dressValues, skirtValues, onChange])
+  }, [sleeveValues, dressValues, skirtValues])
 
   const updateField = (field: keyof MeasurementsFormData, value: any) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
-    onChange(newData)
+    onChangeRef.current(newData)
   }
 
   const renderTextInput = (
