@@ -139,21 +139,24 @@ export function MeasurementsForm({
     }
   }, [initialData])
 
-  // Update parent when sub-values change
+  // Update form data and notify parent when sub-values change
   useEffect(() => {
-    const hasSleeveValues = Object.values(sleeveValues).some(v => v !== null && v !== undefined)
-    const hasDressValues = Object.values(dressValues).some(v => v !== null && v !== undefined)
-    const hasSkirtValues = Object.values(skirtValues).some(v => v !== null && v !== undefined)
+    const hasSleeveValues = Object.values(sleeveValues).some(v => v !== null && v !== undefined && v !== '')
+    const hasDressValues = Object.values(dressValues).some(v => v !== null && v !== undefined && v !== '')
+    const hasSkirtValues = Object.values(skirtValues).some(v => v !== null && v !== undefined && v !== '')
 
-    const newData = {
-      ...formData,
-      longueurManches: hasSleeveValues ? JSON.stringify(sleeveValues) : null,
-      longueurRobes: hasDressValues ? JSON.stringify(dressValues) : null,
-      longueurJupe: hasSkirtValues ? JSON.stringify(skirtValues) : null,
-    }
-    setFormData(newData)
-    onChange(newData)
-  }, [sleeveValues, dressValues, skirtValues])
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        longueurManches: hasSleeveValues ? JSON.stringify(sleeveValues) : null,
+        longueurRobes: hasDressValues ? JSON.stringify(dressValues) : null,
+        longueurJupe: hasSkirtValues ? JSON.stringify(skirtValues) : null,
+      }
+      // Notify parent of the change
+      onChange(newData)
+      return newData
+    })
+  }, [sleeveValues, dressValues, skirtValues, onChange])
 
   const updateField = (field: keyof MeasurementsFormData, value: any) => {
     const newData = { ...formData, [field]: value }
