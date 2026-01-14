@@ -8,6 +8,7 @@ interface Measurement {
   measurementDate: string | Date
   unit: string
   takenByStaffName?: string | null
+  // Upper body (1-9)
   dos?: string | null
   carrureDevant?: string | null
   carrureDerriere?: string | null
@@ -17,19 +18,40 @@ interface Measurement {
   tourDeTaille?: string | null
   longueurDetaille?: string | null
   bassin?: string | null
-  longueurManches?: string | null
+  // 10. LONGUEUR DES MANCHES - 4 sub-fields
+  longueurManchesCourtes?: string | null
+  longueurManchesAvantCoudes?: string | null
+  longueurManchesNiveau34?: string | null
+  longueurManchesLongues?: string | null
+  // Arms continued (11-12)
   tourDeManche?: string | null
   poignets?: string | null
+  // Torso (13-14)
   pinces?: string | null
   longueurTotale?: string | null
-  longueurRobes?: string | null
+  // 15. LONGUEUR DES ROBES - 6 sub-fields
+  longueurRobesAvantGenoux?: string | null
+  longueurRobesNiveauGenoux?: string | null
+  longueurRobesApresGenoux?: string | null
+  longueurRobesMiMollets?: string | null
+  longueurRobesChevilles?: string | null
+  longueurRobesTresLongue?: string | null
+  // Torso continued (16-17)
   longueurTunique?: string | null
   ceinture?: string | null
+  // Lower body (18-21)
   longueurPantalon?: string | null
   frappe?: string | null
   cuisse?: string | null
   genoux?: string | null
-  longueurJupe?: string | null
+  // 22. LONGUEUR JUPE - 6 sub-fields
+  longueurJupeAvantGenoux?: string | null
+  longueurJupeNiveauGenoux?: string | null
+  longueurJupeApresGenoux?: string | null
+  longueurJupeMiMollets?: string | null
+  longueurJupeChevilles?: string | null
+  longueurJupeTresLongue?: string | null
+  // Notes
   autresMesures?: string | null
 }
 
@@ -68,13 +90,14 @@ export function MeasurementsDisplay({
       <div className="p-6 text-center border rounded-lg dark:border-gray-700">
         <Ruler className="w-12 h-12 mx-auto text-gray-400 mb-3" />
         <p className="text-gray-500 dark:text-gray-400">
-          Aucune mensuration enregistrée
+          Aucune mensuration enregistree
         </p>
       </div>
     )
   }
 
-  const measurementFields = [
+  // Simple fields (single value)
+  const simpleFields = [
     { num: 1, label: 'DOS', value: measurement.dos },
     { num: 2, label: 'CARRURE DEVANT', value: measurement.carrureDevant },
     { num: 3, label: 'CARRURE DERRIERE', value: measurement.carrureDerriere },
@@ -84,20 +107,98 @@ export function MeasurementsDisplay({
     { num: 7, label: 'TOUR DE TAILLE', value: measurement.tourDeTaille },
     { num: 8, label: 'LONGUEUR DETAILLE', value: measurement.longueurDetaille },
     { num: 9, label: 'BASSIN', value: measurement.bassin },
-    { num: 10, label: 'LONGUEUR DES MANCHES', value: measurement.longueurManches },
+  ]
+
+  const sleeveFields = [
+    { label: 'Manches courtes', value: measurement.longueurManchesCourtes },
+    { label: 'Niveau 3/4', value: measurement.longueurManchesNiveau34 },
+    { label: 'Avant les coudes', value: measurement.longueurManchesAvantCoudes },
+    { label: 'Manches longues', value: measurement.longueurManchesLongues },
+  ]
+
+  const simpleFields2 = [
     { num: 11, label: 'TOUR DE MANCHE', value: measurement.tourDeManche },
     { num: 12, label: 'POIGNETS', value: measurement.poignets },
     { num: 13, label: 'PINCES', value: measurement.pinces },
     { num: 14, label: 'LONGUEUR TOTALE', value: measurement.longueurTotale },
-    { num: 15, label: 'LONGUEUR DES ROBES', value: measurement.longueurRobes },
+  ]
+
+  const dressFields = [
+    { label: 'Avant les genoux', value: measurement.longueurRobesAvantGenoux },
+    { label: 'Mi-mollets', value: measurement.longueurRobesMiMollets },
+    { label: 'Au niveau des genoux', value: measurement.longueurRobesNiveauGenoux },
+    { label: 'Niveau des chevilles', value: measurement.longueurRobesChevilles },
+    { label: 'Apres les genoux (crayon)', value: measurement.longueurRobesApresGenoux },
+    { label: 'Tres longue', value: measurement.longueurRobesTresLongue },
+  ]
+
+  const simpleFields3 = [
     { num: 16, label: 'LONGUEUR TUNIQUE', value: measurement.longueurTunique },
     { num: 17, label: 'CEINTURE', value: measurement.ceinture },
     { num: 18, label: 'LONGUEUR PANTALON', value: measurement.longueurPantalon },
     { num: 19, label: 'FRAPPE', value: measurement.frappe },
     { num: 20, label: 'CUISSE', value: measurement.cuisse },
     { num: 21, label: 'GENOUX', value: measurement.genoux },
-    { num: 22, label: 'LONGUEUR JUPE', value: measurement.longueurJupe },
   ]
+
+  const skirtFields = [
+    { label: 'Avant les genoux', value: measurement.longueurJupeAvantGenoux },
+    { label: 'Mi-mollets', value: measurement.longueurJupeMiMollets },
+    { label: 'Au niveau des genoux', value: measurement.longueurJupeNiveauGenoux },
+    { label: 'Niveau des chevilles', value: measurement.longueurJupeChevilles },
+    { label: 'Apres les genoux (crayon)', value: measurement.longueurJupeApresGenoux },
+    { label: 'Tres longue', value: measurement.longueurJupeTresLongue },
+  ]
+
+  const renderSimpleRow = (num: number, label: string, value: string | null | undefined) => (
+    <div
+      key={num}
+      className={`flex items-center gap-2 px-3 py-2 ${
+        num % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : ''
+      }`}
+    >
+      <span className="w-8 text-sm text-gray-500 dark:text-gray-400">{num}</span>
+      <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{label}</span>
+      <span className="w-32 text-sm font-medium text-gray-900 dark:text-white text-right">
+        {formatValue(value)}
+      </span>
+    </div>
+  )
+
+  const renderGroupRow = (
+    num: number,
+    label: string,
+    subFields: { label: string; value: string | null | undefined }[]
+  ) => {
+    const hasValues = subFields.some((f) => f.value)
+    return (
+      <div
+        key={num}
+        className={`px-3 py-2 ${num % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : ''}`}
+      >
+        <div className="flex items-start gap-2">
+          <span className="w-8 text-sm text-gray-500 dark:text-gray-400">{num}</span>
+          <div className="flex-1">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
+            {hasValues ? (
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 pl-2 text-xs">
+                {subFields.map((sf, idx) => (
+                  <div key={idx} className="flex items-center gap-1">
+                    <span className="text-gray-500 dark:text-gray-400">{sf.label}:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {formatValue(sf.value)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-sm text-gray-400 dark:text-gray-500 ml-4">-</span>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -116,7 +217,7 @@ export function MeasurementsDisplay({
             className="flex items-center gap-2 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="w-4 h-4" />
-            {isDownloading ? 'Téléchargement...' : 'Télécharger PDF'}
+            {isDownloading ? 'Telechargement...' : 'Telecharger PDF'}
           </button>
         )}
       </div>
@@ -146,24 +247,23 @@ export function MeasurementsDisplay({
 
         {/* Rows */}
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {measurementFields.map((field) => (
-            <div
-              key={field.num}
-              className={`flex items-center gap-2 px-3 py-2 ${
-                field.num % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800/50' : ''
-              }`}
-            >
-              <span className="w-8 text-sm text-gray-500 dark:text-gray-400">
-                {field.num}
-              </span>
-              <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
-                {field.label}
-              </span>
-              <span className="w-32 text-sm font-medium text-gray-900 dark:text-white text-right">
-                {formatValue(field.value)}
-              </span>
-            </div>
-          ))}
+          {/* Simple fields 1-9 */}
+          {simpleFields.map((field) => renderSimpleRow(field.num, field.label, field.value))}
+
+          {/* 10. LONGUEUR DES MANCHES */}
+          {renderGroupRow(10, 'LONGUEUR DES MANCHES', sleeveFields)}
+
+          {/* Simple fields 11-14 */}
+          {simpleFields2.map((field) => renderSimpleRow(field.num, field.label, field.value))}
+
+          {/* 15. LONGUEUR DES ROBES */}
+          {renderGroupRow(15, 'LONGUEUR DES ROBES', dressFields)}
+
+          {/* Simple fields 16-21 */}
+          {simpleFields3.map((field) => renderSimpleRow(field.num, field.label, field.value))}
+
+          {/* 22. LONGUEUR JUPE */}
+          {renderGroupRow(22, 'LONGUEUR JUPE', skirtFields)}
         </div>
       </div>
 
@@ -220,7 +320,7 @@ export function MeasurementsDisplay({
                       onClick={() => onDownloadPDF(m.id)}
                       disabled={isDownloading}
                       className="p-2 text-gray-400 hover:text-primary-600 disabled:opacity-50"
-                      title="Télécharger ce PDF"
+                      title="Telecharger ce PDF"
                     >
                       <Download className="w-4 h-4" />
                     </button>

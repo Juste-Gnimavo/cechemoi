@@ -1957,14 +1957,24 @@ model CustomerMeasurement {
   bassin            String?  // 9. BASSIN (hip)
 
   // Arms (10-12)
-  longueurManches   String?  // 10. LONGUEUR DES MANCHES (option OR custom cm value)
+  // 10. LONGUEUR DES MANCHES - 4 sub-fields
+  longueurManchesCourtes      String?  // 10a. Manches courtes
+  longueurManchesAvantCoudes  String?  // 10b. Avant les coudes
+  longueurManchesNiveau34     String?  // 10c. Niveau 3/4
+  longueurManchesLongues      String?  // 10d. Manches longues
   tourDeManche      String?  // 11. TOUR DE MANCHE (sleeve circumference)
   poignets          String?  // 12. POIGNETS (wrists)
 
   // Torso (13-17)
   pinces            String?  // 13. PINCES (darts)
   longueurTotale    String?  // 14. LONGUEUR TOTALE (total length)
-  longueurRobes     String?  // 15. LONGUEUR DES ROBES (option OR custom cm value)
+  // 15. LONGUEUR DES ROBES - 6 sub-fields
+  longueurRobesAvantGenoux    String?  // 15a. Avant les genoux
+  longueurRobesNiveauGenoux   String?  // 15b. Au niveau des genoux
+  longueurRobesApresGenoux    String?  // 15c. Apres les genoux (crayon)
+  longueurRobesMiMollets      String?  // 15d. Mi-mollets
+  longueurRobesChevilles      String?  // 15e. Niveau des chevilles
+  longueurRobesTresLongue     String?  // 15f. Tres longue
   longueurTunique   String?  // 16. LONGUEUR TUNIQUE (tunic length)
   ceinture          String?  // 17. CEINTURE (belt/waist)
 
@@ -1973,7 +1983,18 @@ model CustomerMeasurement {
   frappe            String?  // 19. FRAPPE
   cuisse            String?  // 20. CUISSE (thigh)
   genoux            String?  // 21. GENOUX (knees)
-  longueurJupe      String?  // 22. LONGUEUR JUPE (option OR custom cm value)
+  // 22. LONGUEUR JUPE - 6 sub-fields
+  longueurJupeAvantGenoux     String?  // 22a. Avant les genoux
+  longueurJupeNiveauGenoux    String?  // 22b. Au niveau des genoux
+  longueurJupeApresGenoux     String?  // 22c. Apres les genoux (crayon)
+  longueurJupeMiMollets       String?  // 22d. Mi-mollets
+  longueurJupeChevilles       String?  // 22e. Niveau des chevilles
+  longueurJupeTresLongue      String?  // 22f. Tres longue
+
+  // DEPRECATED: Old JSON fields - will be removed after data migration
+  longueurManches   String?  // @deprecated - use sub-fields above
+  longueurRobes     String?  // @deprecated - use sub-fields above
+  longueurJupe      String?  // @deprecated - use sub-fields above
 
   // Notes
   autresMesures     String?  @db.Text // AUTRES MESURES OU OBSERVATIONS

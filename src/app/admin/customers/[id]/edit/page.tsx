@@ -31,6 +31,7 @@ interface Measurement {
   id: string
   measurementDate: string
   unit: 'cm' | 'inches'
+  // Upper body (1-9)
   dos?: string | null
   carrureDevant?: string | null
   carrureDerriere?: string | null
@@ -40,19 +41,40 @@ interface Measurement {
   tourDeTaille?: string | null
   longueurDetaille?: string | null
   bassin?: string | null
-  longueurManches?: string | null
+  // 10. LONGUEUR DES MANCHES - 4 sub-fields
+  longueurManchesCourtes?: string | null
+  longueurManchesAvantCoudes?: string | null
+  longueurManchesNiveau34?: string | null
+  longueurManchesLongues?: string | null
+  // Arms continued (11-12)
   tourDeManche?: string | null
   poignets?: string | null
+  // Torso (13-14)
   pinces?: string | null
   longueurTotale?: string | null
-  longueurRobes?: string | null
+  // 15. LONGUEUR DES ROBES - 6 sub-fields
+  longueurRobesAvantGenoux?: string | null
+  longueurRobesNiveauGenoux?: string | null
+  longueurRobesApresGenoux?: string | null
+  longueurRobesMiMollets?: string | null
+  longueurRobesChevilles?: string | null
+  longueurRobesTresLongue?: string | null
+  // Torso continued (16-17)
   longueurTunique?: string | null
   ceinture?: string | null
+  // Lower body (18-21)
   longueurPantalon?: string | null
   frappe?: string | null
   cuisse?: string | null
   genoux?: string | null
-  longueurJupe?: string | null
+  // 22. LONGUEUR JUPE - 6 sub-fields
+  longueurJupeAvantGenoux?: string | null
+  longueurJupeNiveauGenoux?: string | null
+  longueurJupeApresGenoux?: string | null
+  longueurJupeMiMollets?: string | null
+  longueurJupeChevilles?: string | null
+  longueurJupeTresLongue?: string | null
+  // Notes
   autresMesures?: string | null
 }
 

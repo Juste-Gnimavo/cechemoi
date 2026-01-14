@@ -24,24 +24,45 @@ const measurementSchema = z.object({
   longueurDetaille: z.string().nullable().optional(),
   bassin: z.string().nullable().optional(),
 
-  // Arms (10-12)
-  longueurManches: z.string().nullable().optional(),
+  // 10. LONGUEUR DES MANCHES - 4 sub-fields
+  longueurManchesCourtes: z.string().nullable().optional(),
+  longueurManchesAvantCoudes: z.string().nullable().optional(),
+  longueurManchesNiveau34: z.string().nullable().optional(),
+  longueurManchesLongues: z.string().nullable().optional(),
+
+  // Arms continued (11-12)
   tourDeManche: z.string().nullable().optional(),
   poignets: z.string().nullable().optional(),
 
-  // Torso (13-17)
+  // Torso (13-14)
   pinces: z.string().nullable().optional(),
   longueurTotale: z.string().nullable().optional(),
-  longueurRobes: z.string().nullable().optional(),
+
+  // 15. LONGUEUR DES ROBES - 6 sub-fields
+  longueurRobesAvantGenoux: z.string().nullable().optional(),
+  longueurRobesNiveauGenoux: z.string().nullable().optional(),
+  longueurRobesApresGenoux: z.string().nullable().optional(),
+  longueurRobesMiMollets: z.string().nullable().optional(),
+  longueurRobesChevilles: z.string().nullable().optional(),
+  longueurRobesTresLongue: z.string().nullable().optional(),
+
+  // Torso continued (16-17)
   longueurTunique: z.string().nullable().optional(),
   ceinture: z.string().nullable().optional(),
 
-  // Lower body (18-22)
+  // Lower body (18-21)
   longueurPantalon: z.string().nullable().optional(),
   frappe: z.string().nullable().optional(),
   cuisse: z.string().nullable().optional(),
   genoux: z.string().nullable().optional(),
-  longueurJupe: z.string().nullable().optional(),
+
+  // 22. LONGUEUR JUPE - 6 sub-fields
+  longueurJupeAvantGenoux: z.string().nullable().optional(),
+  longueurJupeNiveauGenoux: z.string().nullable().optional(),
+  longueurJupeApresGenoux: z.string().nullable().optional(),
+  longueurJupeMiMollets: z.string().nullable().optional(),
+  longueurJupeChevilles: z.string().nullable().optional(),
+  longueurJupeTresLongue: z.string().nullable().optional(),
 
   // Notes
   autresMesures: z.string().nullable().optional(),
@@ -141,7 +162,7 @@ export async function POST(
         takenByStaffId: (session.user as any).id,
         takenByStaffName: (session.user as any).name || 'Admin',
 
-        // Upper body
+        // Upper body (1-9)
         dos: validatedData.dos,
         carrureDevant: validatedData.carrureDevant,
         carrureDerriere: validatedData.carrureDerriere,
@@ -152,24 +173,45 @@ export async function POST(
         longueurDetaille: validatedData.longueurDetaille,
         bassin: validatedData.bassin,
 
-        // Arms
-        longueurManches: validatedData.longueurManches,
+        // 10. LONGUEUR DES MANCHES - 4 sub-fields
+        longueurManchesCourtes: validatedData.longueurManchesCourtes,
+        longueurManchesAvantCoudes: validatedData.longueurManchesAvantCoudes,
+        longueurManchesNiveau34: validatedData.longueurManchesNiveau34,
+        longueurManchesLongues: validatedData.longueurManchesLongues,
+
+        // Arms continued (11-12)
         tourDeManche: validatedData.tourDeManche,
         poignets: validatedData.poignets,
 
-        // Torso
+        // Torso (13-14)
         pinces: validatedData.pinces,
         longueurTotale: validatedData.longueurTotale,
-        longueurRobes: validatedData.longueurRobes,
+
+        // 15. LONGUEUR DES ROBES - 6 sub-fields
+        longueurRobesAvantGenoux: validatedData.longueurRobesAvantGenoux,
+        longueurRobesNiveauGenoux: validatedData.longueurRobesNiveauGenoux,
+        longueurRobesApresGenoux: validatedData.longueurRobesApresGenoux,
+        longueurRobesMiMollets: validatedData.longueurRobesMiMollets,
+        longueurRobesChevilles: validatedData.longueurRobesChevilles,
+        longueurRobesTresLongue: validatedData.longueurRobesTresLongue,
+
+        // Torso continued (16-17)
         longueurTunique: validatedData.longueurTunique,
         ceinture: validatedData.ceinture,
 
-        // Lower body
+        // Lower body (18-21)
         longueurPantalon: validatedData.longueurPantalon,
         frappe: validatedData.frappe,
         cuisse: validatedData.cuisse,
         genoux: validatedData.genoux,
-        longueurJupe: validatedData.longueurJupe,
+
+        // 22. LONGUEUR JUPE - 6 sub-fields
+        longueurJupeAvantGenoux: validatedData.longueurJupeAvantGenoux,
+        longueurJupeNiveauGenoux: validatedData.longueurJupeNiveauGenoux,
+        longueurJupeApresGenoux: validatedData.longueurJupeApresGenoux,
+        longueurJupeMiMollets: validatedData.longueurJupeMiMollets,
+        longueurJupeChevilles: validatedData.longueurJupeChevilles,
+        longueurJupeTresLongue: validatedData.longueurJupeTresLongue,
 
         // Notes
         autresMesures: validatedData.autresMesures,
@@ -179,12 +221,12 @@ export async function POST(
     return NextResponse.json({
       success: true,
       measurement,
-      message: 'Mensurations enregistrées avec succès',
+      message: 'Mensurations enregistrees avec succes',
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Données invalides', details: error.errors },
+        { error: 'Donnees invalides', details: error.errors },
         { status: 400 }
       )
     }
@@ -206,7 +248,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
 
     if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
     }
 
     // Verify customer exists
@@ -215,7 +257,7 @@ export async function PUT(
     })
 
     if (!customer) {
-      return NextResponse.json({ error: 'Client non trouvé' }, { status: 404 })
+      return NextResponse.json({ error: 'Client non trouve' }, { status: 404 })
     }
 
     const body = await req.json()
@@ -237,7 +279,7 @@ export async function PUT(
       takenByStaffId: (session.user as any).id,
       takenByStaffName: (session.user as any).name || 'Admin',
 
-      // Upper body
+      // Upper body (1-9)
       dos: validatedData.dos,
       carrureDevant: validatedData.carrureDevant,
       carrureDerriere: validatedData.carrureDerriere,
@@ -248,24 +290,45 @@ export async function PUT(
       longueurDetaille: validatedData.longueurDetaille,
       bassin: validatedData.bassin,
 
-      // Arms
-      longueurManches: validatedData.longueurManches,
+      // 10. LONGUEUR DES MANCHES - 4 sub-fields
+      longueurManchesCourtes: validatedData.longueurManchesCourtes,
+      longueurManchesAvantCoudes: validatedData.longueurManchesAvantCoudes,
+      longueurManchesNiveau34: validatedData.longueurManchesNiveau34,
+      longueurManchesLongues: validatedData.longueurManchesLongues,
+
+      // Arms continued (11-12)
       tourDeManche: validatedData.tourDeManche,
       poignets: validatedData.poignets,
 
-      // Torso
+      // Torso (13-14)
       pinces: validatedData.pinces,
       longueurTotale: validatedData.longueurTotale,
-      longueurRobes: validatedData.longueurRobes,
+
+      // 15. LONGUEUR DES ROBES - 6 sub-fields
+      longueurRobesAvantGenoux: validatedData.longueurRobesAvantGenoux,
+      longueurRobesNiveauGenoux: validatedData.longueurRobesNiveauGenoux,
+      longueurRobesApresGenoux: validatedData.longueurRobesApresGenoux,
+      longueurRobesMiMollets: validatedData.longueurRobesMiMollets,
+      longueurRobesChevilles: validatedData.longueurRobesChevilles,
+      longueurRobesTresLongue: validatedData.longueurRobesTresLongue,
+
+      // Torso continued (16-17)
       longueurTunique: validatedData.longueurTunique,
       ceinture: validatedData.ceinture,
 
-      // Lower body
+      // Lower body (18-21)
       longueurPantalon: validatedData.longueurPantalon,
       frappe: validatedData.frappe,
       cuisse: validatedData.cuisse,
       genoux: validatedData.genoux,
-      longueurJupe: validatedData.longueurJupe,
+
+      // 22. LONGUEUR JUPE - 6 sub-fields
+      longueurJupeAvantGenoux: validatedData.longueurJupeAvantGenoux,
+      longueurJupeNiveauGenoux: validatedData.longueurJupeNiveauGenoux,
+      longueurJupeApresGenoux: validatedData.longueurJupeApresGenoux,
+      longueurJupeMiMollets: validatedData.longueurJupeMiMollets,
+      longueurJupeChevilles: validatedData.longueurJupeChevilles,
+      longueurJupeTresLongue: validatedData.longueurJupeTresLongue,
 
       // Notes
       autresMesures: validatedData.autresMesures,
