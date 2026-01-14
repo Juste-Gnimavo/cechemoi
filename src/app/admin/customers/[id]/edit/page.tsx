@@ -216,11 +216,17 @@ export default function EditCustomerPage() {
       if (data.success) {
         // Save measurements if changed (PUT to update existing or create new)
         if (measurementsData && Object.keys(measurementsData).length > 0) {
-          await fetch(`/api/admin/customers/${params.id}/measurements`, {
+          const measurementsRes = await fetch(`/api/admin/customers/${params.id}/measurements`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(measurementsData),
           })
+          const measurementsResult = await measurementsRes.json()
+          if (!measurementsResult.success) {
+            console.error('Error saving measurements:', measurementsResult.error)
+            toast.error(measurementsResult.error || 'Erreur lors de la sauvegarde des mensurations')
+            return
+          }
         }
 
         toast.success('Client mis à jour avec succès')

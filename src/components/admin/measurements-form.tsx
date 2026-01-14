@@ -101,6 +101,44 @@ export function MeasurementsForm({
     parseJsonField(initialData?.longueurJupe, {})
   )
 
+  // Sync form data when initialData changes (e.g., after API fetch)
+  useEffect(() => {
+    if (initialData) {
+      const newData = {
+        measurementDate: initialData.measurementDate || new Date().toISOString().split('T')[0],
+        unit: initialData.unit || 'cm',
+        dos: initialData.dos,
+        carrureDevant: initialData.carrureDevant,
+        carrureDerriere: initialData.carrureDerriere,
+        epaule: initialData.epaule,
+        epauleManche: initialData.epauleManche,
+        poitrine: initialData.poitrine,
+        tourDeTaille: initialData.tourDeTaille,
+        longueurDetaille: initialData.longueurDetaille,
+        bassin: initialData.bassin,
+        longueurManches: initialData.longueurManches,
+        tourDeManche: initialData.tourDeManche,
+        poignets: initialData.poignets,
+        pinces: initialData.pinces,
+        longueurTotale: initialData.longueurTotale,
+        longueurRobes: initialData.longueurRobes,
+        longueurTunique: initialData.longueurTunique,
+        ceinture: initialData.ceinture,
+        longueurPantalon: initialData.longueurPantalon,
+        frappe: initialData.frappe,
+        cuisse: initialData.cuisse,
+        genoux: initialData.genoux,
+        longueurJupe: initialData.longueurJupe,
+        autresMesures: initialData.autresMesures,
+      }
+      setFormData(newData)
+      setSleeveValues(parseJsonField(initialData.longueurManches, {}))
+      setDressValues(parseJsonField(initialData.longueurRobes, {}))
+      setSkirtValues(parseJsonField(initialData.longueurJupe, {}))
+      onChange(newData)
+    }
+  }, [initialData])
+
   // Update parent when sub-values change
   useEffect(() => {
     const hasSleeveValues = Object.values(sleeveValues).some(v => v !== null && v !== undefined)
