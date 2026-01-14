@@ -394,6 +394,7 @@ export async function POST(req: NextRequest) {
             unit: m.unit || 'cm',
             takenByStaffId: (session.user as any).id,
             takenByStaffName: (session.user as any).name || 'Admin',
+            // Upper body (1-9)
             dos: m.dos || null,
             carrureDevant: m.carrureDevant || null,
             carrureDerriere: m.carrureDerriere || null,
@@ -403,19 +404,40 @@ export async function POST(req: NextRequest) {
             tourDeTaille: m.tourDeTaille || null,
             longueurDetaille: m.longueurDetaille || null,
             bassin: m.bassin || null,
-            longueurManches: m.longueurManches || null,
+            // 10. LONGUEUR DES MANCHES - 4 sub-fields
+            longueurManchesCourtes: m.longueurManchesCourtes || null,
+            longueurManchesAvantCoudes: m.longueurManchesAvantCoudes || null,
+            longueurManchesNiveau34: m.longueurManchesNiveau34 || null,
+            longueurManchesLongues: m.longueurManchesLongues || null,
+            // Arms continued (11-12)
             tourDeManche: m.tourDeManche || null,
             poignets: m.poignets || null,
+            // Torso (13-14)
             pinces: m.pinces || null,
             longueurTotale: m.longueurTotale || null,
-            longueurRobes: m.longueurRobes || null,
+            // 15. LONGUEUR DES ROBES - 6 sub-fields
+            longueurRobesAvantGenoux: m.longueurRobesAvantGenoux || null,
+            longueurRobesNiveauGenoux: m.longueurRobesNiveauGenoux || null,
+            longueurRobesApresGenoux: m.longueurRobesApresGenoux || null,
+            longueurRobesMiMollets: m.longueurRobesMiMollets || null,
+            longueurRobesChevilles: m.longueurRobesChevilles || null,
+            longueurRobesTresLongue: m.longueurRobesTresLongue || null,
+            // Torso continued (16-17)
             longueurTunique: m.longueurTunique || null,
             ceinture: m.ceinture || null,
+            // Lower body (18-21)
             longueurPantalon: m.longueurPantalon || null,
             frappe: m.frappe || null,
             cuisse: m.cuisse || null,
             genoux: m.genoux || null,
-            longueurJupe: m.longueurJupe || null,
+            // 22. LONGUEUR JUPE - 6 sub-fields
+            longueurJupeAvantGenoux: m.longueurJupeAvantGenoux || null,
+            longueurJupeNiveauGenoux: m.longueurJupeNiveauGenoux || null,
+            longueurJupeApresGenoux: m.longueurJupeApresGenoux || null,
+            longueurJupeMiMollets: m.longueurJupeMiMollets || null,
+            longueurJupeChevilles: m.longueurJupeChevilles || null,
+            longueurJupeTresLongue: m.longueurJupeTresLongue || null,
+            // Notes
             autresMesures: m.autresMesures || null,
           },
         })
