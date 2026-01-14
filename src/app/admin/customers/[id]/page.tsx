@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -106,6 +106,8 @@ interface Measurement {
 export default function CustomerDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const updated = searchParams.get('updated') // Used to trigger refetch after edit
   const [customer, setCustomer] = useState<CustomerDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [noteContent, setNoteContent] = useState('')
@@ -129,7 +131,7 @@ export default function CustomerDetailPage() {
   useEffect(() => {
     fetchCustomer()
     fetchMeasurements()
-  }, [params.id])
+  }, [params.id, updated]) // 'updated' triggers refetch when returning from edit page
 
 
   // Set recipient when customer loads

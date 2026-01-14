@@ -224,7 +224,8 @@ export default function EditCustomerPage() {
         }
 
         toast.success('Client mis à jour avec succès')
-        router.push(`/admin/customers/${params.id}`)
+        router.refresh() // Force revalidation of cached data
+        router.push(`/admin/customers/${params.id}?updated=${Date.now()}`)
       } else {
         toast.error(data.error || 'Erreur lors de la mise à jour')
       }
