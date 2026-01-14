@@ -1,7 +1,7 @@
 # Prochaine Session - Web App
 
-**Dernière session** : 12 - Role-Based Menu and STAFF Permissions
-**Date** : 31 Décembre 2025
+**Dernière session** : 13 - Measurements Sub-measures and Date Filters
+**Date** : 14 Janvier 2026
 
 ---
 
@@ -13,23 +13,34 @@
 - ✅ Commandes Sur-Mesure
 - ✅ Système de Rendez-vous
 - ✅ Système de Facturation
-- ✅ **Role-Based Menu Filtering** (Session 12)
-- ✅ **STAFF Permissions** (Session 12)
+- ✅ Role-Based Menu Filtering (Session 12)
+- ✅ STAFF Permissions (Session 12)
+- ✅ **Mensurations avec sous-mesures** (Session 13)
+- ✅ **Filtres de date clients** (Session 13)
 
 ---
 
-## Résumé Session 12
+## Résumé Session 13
 
-### Système de permissions par rôle
-- Menu admin filtré selon le rôle (ADMIN, MANAGER, STAFF, TAILOR)
-- Dashboard widgets conditionnels
-- STAFF a accès complet aux opérations (sauf revenus et équipe)
-- TAILOR a accès limité (RDV, Sur-Mesure, Production)
+### Mensurations - 16 nouveaux champs
+Remplacement du stockage JSON par 16 colonnes individuelles :
+- **LONGUEUR DES MANCHES** (4 champs) : courtes, avant coudes, 3/4, longues
+- **LONGUEUR DES ROBES** (6 champs) : avant/niveau/après genoux, mi-mollets, chevilles, très longue
+- **LONGUEUR JUPE** (6 champs) : avant/niveau/après genoux, mi-mollets, chevilles, très longue
 
-### Fichiers créés/modifiés
-- `src/lib/role-permissions.ts` - Définitions des permissions
-- `src/components/admin-header.tsx` - Menu filtré par rôle
-- `src/app/admin/page.tsx` - Dashboard adapté au rôle
+### Filtres de date clients
+Interface de recherche par date sur `/admin/customers` :
+- Périodes prédéfinies : Aujourd'hui, Cette semaine, Ce mois, Cette année
+- Plage personnalisée : du/au
+- Sélecteurs mois/année
+- Indicateur de filtre actif
+
+### Fichiers modifiés
+- `prisma/schema.prisma` - 16 nouveaux champs
+- `src/components/admin/measurements-form.tsx` - Formulaire avec sous-groupes
+- `src/components/measurements-display.tsx` - Affichage formaté
+- `src/app/admin/customers/page.tsx` - Filtres de date
+- `src/app/api/admin/customers/route.ts` - API avec filtres date
 
 ---
 
@@ -47,35 +58,23 @@
 - Semaine 3 en cours (Product Browsing)
 
 ### Option 3 : Améliorations Admin
+- Filtres de date sur autres pages (commandes, factures, etc.)
 - Team performance metrics
 - Export PDF des rapports
 - Améliorer les rapports analytics
 
----
-
-## Accès par Rôle (Session 12)
-
-| Module | ADMIN | MANAGER | STAFF | TAILOR |
-|--------|-------|---------|-------|--------|
-| Revenus | ✅ | ✅ | ❌ | ❌ |
-| Clients | ✅ | ✅ | ✅ | ❌ |
-| Rendez-vous | ✅ | ✅ | ✅ | ✅ |
-| Sur-Mesure | ✅ | ✅ | ✅ | ✅ |
-| Stock Atelier | ✅ | ✅ | ✅ | ❌ |
-| Caisse | ✅ | ✅ | ✅ | ❌ |
-| Boutique | ✅ | ✅ | ✅ | ❌ |
-| Communication | ✅ | ✅ | ✅ | ❌ |
-| Équipe | ✅ | ✅ | ❌ | ❌ |
-| Réglages | ✅ | ✅ | ❌ | ❌ |
+### Option 4 : Génération PDF Mensurations
+- Mettre à jour le PDF des mensurations avec les 16 sous-champs
+- Format identique au formulaire officiel CECHEMOI
 
 ---
 
-## Commits Session 12
+## Commits Session 13
 
-- `380ef1e` - feat: Add Communication menu access for STAFF
-- `d8737b1` - fix: Allow STAFF access to dashboard APIs and add stats cards
-- `067e35d` - feat: Enhance STAFF role with full operational permissions
-- `59f9721` - feat: Add role-based menu filtering and revenue stats
+- `70fd062` - fix: Add French accents to date filter labels
+- `6607e6c` - feat: Add date filters for customer search
+- `00b7a67` - fix: Add 16 sub-measurement fields to customer creation API
+- `e53793b` - feat: Add 16 sub-measurement fields for sleeves, dresses, and skirts
 
 ---
 
