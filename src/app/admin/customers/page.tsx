@@ -246,7 +246,7 @@ export default function CustomersPage() {
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Rechercher par nom, telephone, email..."
+                placeholder="Rechercher par nom, téléphone, email..."
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -286,13 +286,13 @@ export default function CustomersPage() {
             <div className="border-t border-gray-200 dark:border-dark-700 pt-4 space-y-4">
               {/* Periodes predefines */}
               <div className="flex flex-wrap gap-2">
-                <span className="text-sm text-gray-500 dark:text-gray-400 py-1 mr-2">Periode:</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 py-1 mr-2">Période:</span>
                 {[
                   { value: '', label: 'Tous' },
                   { value: 'today', label: "Aujourd'hui" },
                   { value: 'week', label: 'Cette semaine' },
                   { value: 'month', label: 'Ce mois' },
-                  { value: 'year', label: 'Cette annee' },
+                  { value: 'year', label: 'Cette année' },
                 ].map((p) => (
                   <button
                     key={p.value}
@@ -319,7 +319,7 @@ export default function CustomersPage() {
 
               {/* Plage de dates personnalisee */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Plage personnalisee:</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Plage personnalisée:</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="date"
@@ -355,7 +355,7 @@ export default function CustomersPage() {
 
               {/* Mois et annee specifiques */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Mois/Annee:</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">Mois/Année:</span>
                 <select
                   value={filters.month}
                   onChange={(e) =>
@@ -371,17 +371,17 @@ export default function CustomersPage() {
                 >
                   <option value="">Tous les mois</option>
                   <option value="1">Janvier</option>
-                  <option value="2">Fevrier</option>
+                  <option value="2">Février</option>
                   <option value="3">Mars</option>
                   <option value="4">Avril</option>
                   <option value="5">Mai</option>
                   <option value="6">Juin</option>
                   <option value="7">Juillet</option>
-                  <option value="8">Aout</option>
+                  <option value="8">Août</option>
                   <option value="9">Septembre</option>
                   <option value="10">Octobre</option>
                   <option value="11">Novembre</option>
-                  <option value="12">Decembre</option>
+                  <option value="12">Décembre</option>
                 </select>
                 <select
                   value={filters.year}
@@ -396,7 +396,7 @@ export default function CustomersPage() {
                   }
                   className="bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-dark-700 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
                 >
-                  <option value="">Toutes les annees</option>
+                  <option value="">Toutes les années</option>
                   {[2026, 2025, 2024, 2023, 2022].map((y) => (
                     <option key={y} value={y.toString()}>
                       {y}
@@ -422,7 +422,7 @@ export default function CustomersPage() {
                     className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                   >
                     <X className="h-4 w-4" />
-                    Reinitialiser les filtres de date
+                    Réinitialiser les filtres de date
                   </button>
                 </div>
               )}
@@ -438,12 +438,12 @@ export default function CustomersPage() {
                 {filters.period === 'today' && "Aujourd'hui"}
                 {filters.period === 'week' && 'Cette semaine'}
                 {filters.period === 'month' && 'Ce mois'}
-                {filters.period === 'year' && 'Cette annee'}
+                {filters.period === 'year' && 'Cette année'}
                 {filters.dateFrom && filters.dateTo && `Du ${filters.dateFrom} au ${filters.dateTo}`}
                 {filters.dateFrom && !filters.dateTo && `Depuis le ${filters.dateFrom}`}
                 {!filters.dateFrom && filters.dateTo && `Jusqu'au ${filters.dateTo}`}
-                {filters.month && filters.year && `${['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'][parseInt(filters.month) - 1]} ${filters.year}`}
-                {filters.year && !filters.month && `Annee ${filters.year}`}
+                {filters.month && filters.year && `${['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'][parseInt(filters.month) - 1]} ${filters.year}`}
+                {filters.year && !filters.month && `Année ${filters.year}`}
               </span>
               <button
                 onClick={() =>
