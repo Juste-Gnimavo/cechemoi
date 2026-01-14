@@ -115,11 +115,12 @@ export default function NewInvoicePage() {
 
   // Available payment methods
   const paymentMethods: PaymentMethodOption[] = [
-    { id: '1', name: 'Paiement à la livraison', code: 'CASH_ON_DELIVERY', enabled: true },
-    { id: '2', name: 'Orange Money', code: 'ORANGE_MONEY', enabled: true },
-    { id: '3', name: 'MTN Mobile Money', code: 'MTN_MOBILE_MONEY', enabled: true },
-    { id: '4', name: 'Wave', code: 'WAVE', enabled: true },
-    { id: '5', name: 'PaiementPro (CB, PayPal)', code: 'PAIEMENTPRO', enabled: true },
+    { id: '1', name: 'Paiement espèce à la caisse', code: 'CASH_AT_STORE', enabled: true },
+    { id: '2', name: 'Paiement à la livraison', code: 'CASH_ON_DELIVERY', enabled: true },
+    { id: '3', name: 'Orange Money', code: 'ORANGE_MONEY', enabled: true },
+    { id: '4', name: 'MTN Mobile Money', code: 'MTN_MOBILE_MONEY', enabled: true },
+    { id: '5', name: 'Wave', code: 'WAVE', enabled: true },
+    { id: '6', name: 'PaiementPro (CB, PayPal)', code: 'PAIEMENTPRO', enabled: true },
   ]
 
   // Items
@@ -202,7 +203,8 @@ export default function NewInvoicePage() {
 
   // Calculate shipping cost based on selected method
   const selectedShipping = shippingMethods.find(m => m.id === selectedShippingMethodId)
-  const calculatedShippingCost = selectedShipping?.costType === 'free' ? 0 : (selectedShipping?.cost || shippingCost)
+  // Always use manual shippingCost - free methods set it to 0
+  const calculatedShippingCost = selectedShipping?.costType === 'free' ? 0 : shippingCost
 
   const addItem = () => {
     setItems([...items, { description: '', quantity: 1, unitPrice: 0, total: 0 }])
@@ -855,8 +857,9 @@ export default function NewInvoicePage() {
                         checked={selectedShippingMethodId === method.id}
                         onChange={(e) => {
                           setSelectedShippingMethodId(e.target.value)
-                          if (method.costType !== 'variable') {
-                            setShippingCost(method.cost || 0)
+                          // Reset shipping cost to 0 for manual entry
+                          if (method.costType === 'free') {
+                            setShippingCost(0)
                           }
                         }}
                         className="mt-1 text-purple-500"
@@ -864,10 +867,8 @@ export default function NewInvoicePage() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-gray-900 dark:text-white">{method.name}</span>
-                          <span className={method.costType === 'free' ? 'text-green-500' : 'text-gray-900 dark:text-white'}>
-                            {method.costType === 'free' ? 'Gratuit' :
-                             method.costType === 'variable' ? 'Variable' :
-                             formatCurrency(method.cost || 0)}
+                          <span className={method.costType === 'free' ? 'text-green-500' : 'text-gray-500 dark:text-gray-400 text-sm'}>
+                            {method.costType === 'free' ? 'Gratuit' : 'Montant à définir'}
                           </span>
                         </div>
                         {method.description && (
@@ -906,7 +907,8 @@ export default function NewInvoicePage() {
                       className="text-purple-500"
                     />
                     <div className="flex items-center gap-2">
-                      {method.code === 'CASH_ON_DELIVERY' && <Banknote className="w-5 h-5 text-green-500" />}
+                      {method.code === 'CASH_AT_STORE' && <Banknote className="w-5 h-5 text-emerald-500" />}
+                      {method.code === 'CASH_ON_DELIVERY' && <Truck className="w-5 h-5 text-green-500" />}
                       {method.code === 'ORANGE_MONEY' && (
                         <Image src="/logo/orange.svg" alt="Orange Money" width={20} height={20} className="object-contain" />
                       )}
@@ -954,16 +956,14 @@ export default function NewInvoicePage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-gray-500 dark:text-gray-400">Frais de livraison</label>
-              {selectedShipping ? (
-                <div className="text-right">
-                  <span className={selectedShipping.costType === 'free' ? 'text-green-500' : 'text-gray-900 dark:text-white'}>
-                    {selectedShipping.costType === 'free' ? 'Gratuit' :
-                     selectedShipping.costType === 'variable' ? 'À définir' :
-                     formatCurrency(calculatedShippingCost)}
-                  </span>
-                  <span className="text-gray-500 text-xs block">({selectedShipping.name})</span>
-                </div>
+              <label className="text-gray-500 dark:text-gray-400">
+                Frais de livraison
+                {selectedShipping && (
+                  <span className="text-xs block">({selectedShipping.name})</span>
+                )}
+              </label>
+              {selectedShipping?.costType === 'free' ? (
+                <span className="text-green-500">Gratuit</span>
               ) : (
                 <input
                   type="number"
@@ -971,6 +971,7 @@ export default function NewInvoicePage() {
                   onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
                   min="0"
                   step="0.01"
+                  placeholder="0"
                   className="w-32 px-3 py-1 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded text-gray-900 dark:text-white text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               )}

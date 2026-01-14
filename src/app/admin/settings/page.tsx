@@ -74,6 +74,11 @@ interface Settings {
   instagramUrl: string | null
   twitterUrl: string | null
   whatsappNumber: string | null
+  youtubeUrl: string | null
+  tiktokUrl: string | null
+  linkedinUrl: string | null
+  pinterestUrl: string | null
+  snapchatUrl: string | null
   // Maintenance
   maintenanceMode: boolean
   maintenanceMessage: string | null
@@ -471,6 +476,61 @@ export default function SettingsPage() {
                   onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
                   placeholder="+225..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">YouTube</label>
+                <input
+                  type="url"
+                  value={settings.youtubeUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, youtubeUrl: e.target.value })}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
+                  placeholder="https://youtube.com/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">TikTok</label>
+                <input
+                  type="url"
+                  value={settings.tiktokUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, tiktokUrl: e.target.value })}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
+                  placeholder="https://tiktok.com/@..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">LinkedIn</label>
+                <input
+                  type="url"
+                  value={settings.linkedinUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, linkedinUrl: e.target.value })}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
+                  placeholder="https://linkedin.com/company/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Pinterest</label>
+                <input
+                  type="url"
+                  value={settings.pinterestUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, pinterestUrl: e.target.value })}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
+                  placeholder="https://pinterest.com/..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Snapchat</label>
+                <input
+                  type="url"
+                  value={settings.snapchatUrl || ''}
+                  onChange={(e) => setSettings({ ...settings, snapchatUrl: e.target.value })}
+                  className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-2 rounded-lg border border-gray-200 dark:border-transparent"
+                  placeholder="https://snapchat.com/add/..."
                 />
               </div>
             </div>

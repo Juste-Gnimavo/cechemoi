@@ -14,7 +14,7 @@ interface ThemeState {
 export const useTheme = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: 'dark',
+      theme: 'light',
       setTheme: (theme: Theme) => {
         set({ theme })
         // Update document class

@@ -46,7 +46,7 @@ export function CustomerHeader() {
     { href: '/account/invoices', label: 'Mes Factures', icon: FileText },
     { href: '/account/profile', label: 'Mon Profil', icon: User },
     { href: '/account/addresses', label: 'Adresses', icon: MapPin },
-    { href: '/account/wishlist', label: 'Ma Wishlist', icon: Heart },
+    { href: '/account/wishlist', label: 'Mes Favoris', icon: Heart },
     { href: '/account/payments', label: 'Paiements', icon: CreditCard },
     { href: '/account/loyalty', label: 'Points Fidélité', icon: Gift },
     { href: '/account/notifications', label: 'Notifications', icon: Bell },

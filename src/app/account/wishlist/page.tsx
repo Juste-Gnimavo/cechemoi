@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { toast } from 'react-hot-toast'
 import { ProductImage } from '@/components/ui/product-image'
 
-interface WishlistItem {
+interface FavorisItem {
   id: string
   productId: string
   createdAt: string
@@ -31,35 +31,35 @@ interface WishlistItem {
   }
 }
 
-export default function WishlistPage() {
+export default function FavorisPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [items, setItems] = useState<WishlistItem[]>([])
+  const [items, setItems] = useState<FavorisItem[]>([])
   const [loading, setLoading] = useState(true)
   const [removingIds, setRemovingIds] = useState<string[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/auth/login-phone?callbackUrl=/account/wishlist')
+      router.push('/auth/login-phone?callbackUrl=/account/favoris')
       return
     }
 
     if (!session) return
 
-    fetchWishlist()
+    fetchFavoris()
   }, [session, router, status])
 
-  const fetchWishlist = async () => {
+  const fetchFavoris = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/wishlist')
+      const res = await fetch('/api/favoris')
       if (res.ok) {
         const data = await res.json()
         setItems(data.items)
       }
     } catch (error) {
-      console.error('Error fetching wishlist:', error)
-      toast.error('Erreur lors du chargement de la wishlist')
+      console.error('Error fetching favoris:', error)
+      toast.error('Erreur lors du chargement de la favoris')
     } finally {
       setLoading(false)
     }
@@ -68,19 +68,19 @@ export default function WishlistPage() {
   const handleRemove = async (productId: string) => {
     setRemovingIds([...removingIds, productId])
     try {
-      const res = await fetch(`/api/wishlist/${productId}`, {
+      const res = await fetch(`/api/favoris/${productId}`, {
         method: 'DELETE',
       })
 
       if (res.ok) {
         setItems(items.filter((item) => item.productId !== productId))
-        toast.success('Retiré de la wishlist')
+        toast.success('Retiré de la favoris')
       } else {
         const data = await res.json()
         toast.error(data.error || 'Erreur lors de la suppression')
       }
     } catch (error) {
-      console.error('Error removing from wishlist:', error)
+      console.error('Error removing from favoris:', error)
       toast.error('Erreur serveur')
     } finally {
       setRemovingIds(removingIds.filter((id) => id !== productId))
@@ -110,7 +110,7 @@ export default function WishlistPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ma Wishlist</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ma Favoris</h1>
               <p className="text-gray-500 dark:text-gray-400 mt-2">
                 {items.length} {items.length === 1 ? 'article' : 'articles'}
               </p>
@@ -126,15 +126,15 @@ export default function WishlistPage() {
           {items.length === 0 ? (
             <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg p-12 text-center border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20">
               <Heart className="h-16 w-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400 mb-4">Votre wishlist est vide</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">Votre liste de favoris est vide</p>
               <p className="text-gray-400 dark:text-gray-500 text-sm mb-6">
-                Ajoutez vos vins préférés pour les retrouver facilement
+                Ajoutez vos articles préférés pour les retrouver facilement
               </p>
               <Link
                 href="/"
                 className="inline-block bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20 hover:shadow-xl hover:shadow-primary-500/30 px-6 py-2 rounded-lg"
               >
-                Découvrir nos vins
+                Découvrir nos créations
               </Link>
             </div>
           ) : (
@@ -222,7 +222,7 @@ export default function WishlistPage() {
                         onClick={() => handleRemove(item.product.id)}
                         disabled={removingIds.includes(item.product.id)}
                         className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors disabled:opacity-50"
-                        title="Retirer de la wishlist"
+                        title="Retirer de la favoris"
                       >
                         {removingIds.includes(item.product.id) ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>

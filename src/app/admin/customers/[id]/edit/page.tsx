@@ -30,7 +30,7 @@ interface CustomerData {
 interface Measurement {
   id: string
   measurementDate: string
-  unit: string
+  unit: 'cm' | 'inches'
   dos?: string | null
   carrureDevant?: string | null
   carrureDerriere?: string | null

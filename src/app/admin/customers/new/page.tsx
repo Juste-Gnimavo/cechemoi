@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Mail, Send, User, MapPin, Globe, Image as ImageIcon, ExternalLink, UserPlus, Gift, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Mail, Send, User, MapPin, Globe, Image as ImageIcon, ExternalLink, UserPlus, Gift, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { GeolocationCapture } from '@/components/geolocation-capture'
 import { ImageUpload } from '@/components/image-upload'
@@ -62,6 +62,11 @@ export default function NewCustomerPage() {
   // Notifications
   const [sendWelcomeSMS, setSendWelcomeSMS] = useState(true)
   const [sendWelcomeWhatsApp, setSendWelcomeWhatsApp] = useState(true)
+
+  // Collapsed sections (collapsed by default on mobile)
+  const [locationCollapsed, setLocationCollapsed] = useState(true)
+  const [notesCollapsed, setNotesCollapsed] = useState(true)
+  const [welcomeCollapsed, setWelcomeCollapsed] = useState(true)
 
   const handleLocationCaptured = (geoData: { latitude: number; longitude: number; accuracy: number }) => {
     setLatitude(geoData.latitude)
@@ -225,6 +230,14 @@ export default function NewCustomerPage() {
         </Link>
       </div>
 
+      {/* Required Fields Note */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg p-4">
+        <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+          <span className="text-red-500 font-bold">*</span>
+          <span>Seuls les champs avec astérisques sont obligatoires. Les autres sections sont facultatives.</span>
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
@@ -362,70 +375,7 @@ export default function NewCustomerPage() {
           </div>
         </div>
 
-        {/* Location Information */}
-        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <MapPin className="h-5 w-5 mr-2 text-primary-400" />
-            Localisation
-          </h2>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Ville
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Abidjan"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Pays
-              </label>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
-                <option value="Sénégal">Sénégal</option>
-                <option value="Mali">Mali</option>
-                <option value="Burkina Faso">Burkina Faso</option>
-                <option value="Bénin">Bénin</option>
-                <option value="Togo">Togo</option>
-                <option value="Ghana">Ghana</option>
-                <option value="Nigeria">Nigeria</option>
-                <option value="France">France</option>
-                <option value="Autre">Autre</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Code Pays
-              </label>
-              <input
-                type="text"
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value.toUpperCase())}
-                maxLength={2}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="CI"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Code ISO à 2 lettres
-              </p>
-            </div>
-          </div>
-        </div>
-
-
-        {/* Measurements Section */}
+        {/* Measurements Section - Facultatif */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
           <MeasurementsForm
             onChange={(data) => setMeasurementsData(data)}
@@ -436,13 +386,96 @@ export default function NewCustomerPage() {
           </p>
         </div>
 
+        {/* Location Information - Collapsible - Facultatif */}
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setLocationCollapsed(!locationCollapsed)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+          >
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <MapPin className="h-5 w-5 mr-2 text-primary-400" />
+              Localisation
+              <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 dark:bg-dark-700 px-2 py-0.5 rounded">Facultatif</span>
+              {(city || country !== 'Côte d\'Ivoire') && (
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({city || country})
+                </span>
+              )}
+            </h2>
+            {locationCollapsed ? (
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            ) : (
+              <ChevronUp className="h-5 w-5 text-gray-400" />
+            )}
+          </button>
 
-        {/* Address Section */}
+          {!locationCollapsed && (
+            <div className="p-6 pt-2 space-y-4 border-t border-gray-200 dark:border-dark-700">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Ville
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Abidjan"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Pays
+                  </label>
+                  <select
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                    <option value="Sénégal">Sénégal</option>
+                    <option value="Mali">Mali</option>
+                    <option value="Burkina Faso">Burkina Faso</option>
+                    <option value="Bénin">Bénin</option>
+                    <option value="Togo">Togo</option>
+                    <option value="Ghana">Ghana</option>
+                    <option value="Nigeria">Nigeria</option>
+                    <option value="France">France</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Code Pays
+                  </label>
+                  <input
+                    type="text"
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value.toUpperCase())}
+                    maxLength={2}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="CI"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Code ISO à 2 lettres
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Address Section - Facultatif */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
               <MapPin className="h-5 w-5 mr-2 text-primary-400" />
-              Adresse de Livraison (optionnel)
+              Adresse de Livraison
+              <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 dark:bg-dark-700 px-2 py-0.5 rounded">Facultatif</span>
             </h2>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
@@ -619,83 +652,130 @@ export default function NewCustomerPage() {
           )}
         </div>
 
-        {/* Notes */}
-        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes (optionnel)</h2>
-          <div>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="Notes internes sur le client..."
-            />
-          </div>
+        {/* Notes - Collapsible */}
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setNotesCollapsed(!notesCollapsed)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+          >
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-gray-400" />
+              Notes
+              <span className="ml-2 text-xs font-normal text-gray-400 bg-gray-100 dark:bg-dark-700 px-2 py-0.5 rounded">Facultatif</span>
+              {notes && (
+                <span className="ml-2 text-sm font-normal text-green-500">
+                  (renseigné)
+                </span>
+              )}
+            </h2>
+            {notesCollapsed ? (
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            ) : (
+              <ChevronUp className="h-5 w-5 text-gray-400" />
+            )}
+          </button>
 
-          {/* Custom Inscription Date */}
-          <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <h3 className="font-semibold text-orange-400">Date d'inscription (Antidater)</h3>
+          {!notesCollapsed && (
+            <div className="p-6 pt-2 space-y-4 border-t border-gray-200 dark:border-dark-700">
+              <div>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Notes internes sur le client..."
+                />
+              </div>
+
+              {/* Custom Inscription Date */}
+              <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <h3 className="font-semibold text-orange-400">Date d'inscription (Antidater)</h3>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  Pour les clients ajoutés a posteriori, définissez la date réelle de leur inscription.
+                </p>
+                <input
+                  type="datetime-local"
+                  value={inscriptionDate}
+                  onChange={(e) => setInscriptionDate(e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg focus:outline-none focus:border-orange-500 text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Laissez vide pour utiliser la date/heure actuelle
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              Pour les clients ajoutés a posteriori, définissez la date réelle de leur inscription.
-            </p>
-            <input
-              type="datetime-local"
-              value={inscriptionDate}
-              onChange={(e) => setInscriptionDate(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg focus:outline-none focus:border-orange-500 text-gray-900 dark:text-white"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              Laissez vide pour utiliser la date/heure actuelle
-            </p>
-          </div>
+          )}
         </div>
 
-        {/* Welcome Notifications */}
-        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notifications de Bienvenue</h2>
+        {/* Welcome Notifications - Collapsible */}
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setWelcomeCollapsed(!welcomeCollapsed)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+          >
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center flex-wrap gap-2">
+              <Send className="h-5 w-5 text-blue-400" />
+              Notifications de Bienvenue
+              <span className="text-xs font-normal text-gray-400 bg-gray-100 dark:bg-dark-700 px-2 py-0.5 rounded">Facultatif</span>
+              {(sendWelcomeSMS || sendWelcomeWhatsApp) && (
+                <span className="text-xs font-normal text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
+                  {[sendWelcomeSMS && 'SMS', sendWelcomeWhatsApp && 'WhatsApp'].filter(Boolean).join(' + ')}
+                </span>
+              )}
+            </h2>
+            {welcomeCollapsed ? (
+              <ChevronDown className="h-5 w-5 text-gray-400" />
+            ) : (
+              <ChevronUp className="h-5 w-5 text-gray-400" />
+            )}
+          </button>
 
-          <div className="space-y-3">
-            <label className="flex items-center space-x-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={sendWelcomeSMS}
-                onChange={(e) => setSendWelcomeSMS(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
-              />
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <Send className="h-4 w-4 text-blue-400" />
-                  <span className="text-gray-900 dark:text-white font-medium">Envoyer SMS de bienvenue</span>
+          {!welcomeCollapsed && (
+            <div className="p-6 pt-2 space-y-3 border-t border-gray-200 dark:border-dark-700">
+              <label className="flex items-center space-x-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={sendWelcomeSMS}
+                  onChange={(e) => setSendWelcomeSMS(e.target.checked)}
+                  className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <Send className="h-4 w-4 text-blue-400" />
+                    <span className="text-gray-900 dark:text-white font-medium">Envoyer SMS de bienvenue</span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Le client recevra un SMS pour lui souhaiter la bienvenue
+                  </p>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Le client recevra un SMS pour lui souhaiter la bienvenue
-                </p>
-              </div>
-            </label>
+              </label>
 
-            <label className="flex items-center space-x-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={sendWelcomeWhatsApp}
-                onChange={(e) => setSendWelcomeWhatsApp(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
-              />
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <Mail className="h-4 w-4 text-green-400" />
-                  <span className="text-gray-900 dark:text-white font-medium">Envoyer WhatsApp de bienvenue</span>
+              <label className="flex items-center space-x-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={sendWelcomeWhatsApp}
+                  onChange={(e) => setSendWelcomeWhatsApp(e.target.checked)}
+                  className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-green-400" />
+                    <span className="text-gray-900 dark:text-white font-medium">Envoyer WhatsApp de bienvenue</span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Le client recevra un message WhatsApp de bienvenue
+                  </p>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Le client recevra un message WhatsApp de bienvenue
-                </p>
-              </div>
-            </label>
-          </div>
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Actions */}

@@ -455,7 +455,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Key Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
         {/* Revenue net of all paid invoices - Only for STAFF+ */}
         {canSeeRevenue && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
@@ -1096,7 +1096,7 @@ export default function AdminDashboard() {
             </div>
             <div className="p-6">
               {/* Stats Row */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
                 <div className="text-center p-3 bg-gray-100 dark:bg-dark-800 rounded-lg">
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{appointmentStats?.total || 0}</p>
                   <p className="text-xs text-gray-500">Total</p>
