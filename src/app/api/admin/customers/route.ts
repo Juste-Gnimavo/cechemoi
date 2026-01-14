@@ -27,6 +27,13 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'createdAt'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
 
+    // Date filters
+    const period = searchParams.get('period') || '' // today, week, month, year
+    const dateFrom = searchParams.get('dateFrom') || ''
+    const dateTo = searchParams.get('dateTo') || ''
+    const filterMonth = searchParams.get('month') || '' // 1-12
+    const filterYear = searchParams.get('year') || '' // 2024, 2025, etc.
+
     // Build where clause
     const where: any = {
       role: 'CUSTOMER', // Only show customers, not admins
@@ -41,8 +48,53 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    // Segment filtering
+    // Date filtering
     const now = new Date()
+
+    // Apply period filter
+    if (period === 'today') {
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      where.createdAt = { gte: startOfDay }
+    } else if (period === 'week') {
+      const dayOfWeek = now.getDay()
+      const startOfWeek = new Date(now)
+      startOfWeek.setDate(now.getDate() - dayOfWeek)
+      startOfWeek.setHours(0, 0, 0, 0)
+      where.createdAt = { gte: startOfWeek }
+    } else if (period === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      where.createdAt = { gte: startOfMonth }
+    } else if (period === 'year') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1)
+      where.createdAt = { gte: startOfYear }
+    } else if (dateFrom || dateTo) {
+      // Custom date range
+      where.createdAt = {}
+      if (dateFrom) {
+        where.createdAt.gte = new Date(dateFrom)
+      }
+      if (dateTo) {
+        const endDate = new Date(dateTo)
+        endDate.setHours(23, 59, 59, 999)
+        where.createdAt.lte = endDate
+      }
+    } else if (filterMonth && filterYear) {
+      // Specific month and year
+      const monthNum = parseInt(filterMonth)
+      const yearNum = parseInt(filterYear)
+      const startOfMonth = new Date(yearNum, monthNum - 1, 1)
+      const endOfMonth = new Date(yearNum, monthNum, 0, 23, 59, 59, 999)
+      where.createdAt = { gte: startOfMonth, lte: endOfMonth }
+    } else if (filterYear) {
+      // Specific year only
+      const yearNum = parseInt(filterYear)
+      const startOfYear = new Date(yearNum, 0, 1)
+      const endOfYear = new Date(yearNum, 11, 31, 23, 59, 59, 999)
+      where.createdAt = { gte: startOfYear, lte: endOfYear }
+    }
+
+    // Segment filtering
+    const nowForSegment = new Date()
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()))
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
