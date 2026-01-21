@@ -12,6 +12,17 @@ import {
   ShoppingCart,
   ChevronLeft,
   ChevronRight,
+  Search,
+  RefreshCw,
+  CreditCard,
+  Receipt,
+  FileText,
+  CheckCircle,
+  Clock,
+  Package,
+  CalendarDays,
+  Filter,
+  Download,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -19,6 +30,7 @@ interface DailyTransaction {
   date: string
   revenue: number
   orderCount: number
+  invoiceCount: number
   expensesCount: number
   expensesTotal: number
   netProfit: number
@@ -28,6 +40,7 @@ interface RevenueByDay {
   date: string
   revenue: number
   orders: number
+  invoices?: number
 }
 
 interface Expense {
@@ -36,11 +49,35 @@ interface Expense {
   paymentDate: string
 }
 
+interface Analytics {
+  revenue: {
+    total: number
+    fromOrders: number
+    fromStandaloneInvoices: number
+    fromCustomOrders: number
+    fromStandalonePayments: number
+    fromInvoicePayments: number
+    fromAppointments: number
+  }
+  orders: {
+    total: number
+    paid: number
+  }
+  standaloneInvoices: {
+    total: number
+    revenue: number
+  }
+  customOrders: {
+    receiptsCount: number
+    revenue: number
+  }
+}
+
 const PERIODS = [
   { value: 'today', label: "Aujourd'hui" },
   { value: 'yesterday', label: 'Hier' },
-  { value: 'week', label: '7 derniers jours' },
-  { value: 'month', label: '30 derniers jours' },
+  { value: 'week', label: '7 jours' },
+  { value: 'month', label: '30 jours' },
   { value: 'year', label: 'Cette année' },
   { value: 'custom', label: 'Personnalisé' },
 ]
@@ -48,7 +85,7 @@ const PERIODS = [
 const ITEMS_PER_PAGE_OPTIONS = [7, 15, 30, 60]
 
 function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA'
+  return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA'
 }
 
 function formatDate(dateString: string) {
@@ -57,6 +94,13 @@ function formatDate(dateString: string) {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+  })
+}
+
+function formatShortDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
   })
 }
 
@@ -99,11 +143,14 @@ function getDateRange(period: string): { startDate: string; endDate: string } {
 export default function TransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [transactions, setTransactions] = useState<DailyTransaction[]>([])
+  const [filteredTransactions, setFilteredTransactions] = useState<DailyTransaction[]>([])
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const [totals, setTotals] = useState({
     revenue: 0,
     expenses: 0,
     netProfit: 0,
     orderCount: 0,
+    invoiceCount: 0,
     expensesCount: 0,
   })
 
@@ -111,6 +158,8 @@ export default function TransactionsPage() {
   const [period, setPeriod] = useState('month')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showOnlyWithActivity, setShowOnlyWithActivity] = useState(false)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -119,6 +168,26 @@ export default function TransactionsPage() {
   useEffect(() => {
     fetchTransactions()
   }, [period, startDate, endDate])
+
+  useEffect(() => {
+    // Filter transactions based on search and activity filter
+    let filtered = [...transactions]
+
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase()
+      filtered = filtered.filter(tx => {
+        const dateStr = formatDate(tx.date).toLowerCase()
+        return dateStr.includes(search)
+      })
+    }
+
+    if (showOnlyWithActivity) {
+      filtered = filtered.filter(tx => tx.revenue > 0 || tx.expensesTotal > 0)
+    }
+
+    setFilteredTransactions(filtered)
+    setCurrentPage(1)
+  }, [transactions, searchTerm, showOnlyWithActivity])
 
   const fetchTransactions = async () => {
     setLoading(true)
@@ -145,6 +214,8 @@ export default function TransactionsPage() {
       if (!analyticsData.success) {
         throw new Error('Failed to fetch analytics')
       }
+
+      setAnalytics(analyticsData.analytics)
 
       const revenueByDay: RevenueByDay[] = analyticsData.analytics?.revenueByDay || []
       const expenses: Expense[] = expensesData.success ? expensesData.expenses : []
@@ -178,6 +249,7 @@ export default function TransactionsPage() {
             date,
             revenue,
             orderCount: revenueData?.orders || 0,
+            invoiceCount: revenueData?.invoices || 0,
             expensesCount: expenseData?.count || 0,
             expensesTotal,
             netProfit: revenue - expensesTotal,
@@ -192,14 +264,16 @@ export default function TransactionsPage() {
           expenses: acc.expenses + day.expensesTotal,
           netProfit: acc.netProfit + day.netProfit,
           orderCount: acc.orderCount + day.orderCount,
+          invoiceCount: acc.invoiceCount + day.invoiceCount,
           expensesCount: acc.expensesCount + day.expensesCount,
         }),
-        { revenue: 0, expenses: 0, netProfit: 0, orderCount: 0, expensesCount: 0 }
+        { revenue: 0, expenses: 0, netProfit: 0, orderCount: 0, invoiceCount: 0, expensesCount: 0 }
       )
 
       setTransactions(dailyTransactions)
+      setFilteredTransactions(dailyTransactions)
       setTotals(calculatedTotals)
-      setCurrentPage(1) // Reset to first page on new data
+      setCurrentPage(1)
     } catch (error) {
       console.error('Error fetching transactions:', error)
       toast.error('Erreur lors du chargement des transactions')
@@ -209,8 +283,8 @@ export default function TransactionsPage() {
   }
 
   // Pagination calculations
-  const totalPages = Math.ceil(transactions.length / itemsPerPage)
-  const paginatedTransactions = transactions.slice(
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+  const paginatedTransactions = filteredTransactions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
@@ -218,7 +292,7 @@ export default function TransactionsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link
             href="/admin"
@@ -227,129 +301,222 @@ export default function TransactionsPage() {
             <ArrowLeft className="h-5 w-5 text-gray-500" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Transactions Journalières
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <CreditCard className="h-7 w-7 text-primary-500" />
+              Transactions
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Recettes et dépenses jour par jour
+              Suivi des recettes et dépenses jour par jour
             </p>
           </div>
         </div>
+        <button
+          onClick={() => fetchTransactions()}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+        >
+          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* Total Recettes */}
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <p className="text-green-700 dark:text-green-400 font-medium">Total Recettes</p>
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-500/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-green-500" />
             </div>
-          </div>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {formatCurrency(totals.revenue)}
-          </p>
-          <p className="text-xs text-green-500 mt-1">
-            {totals.orderCount} commande{totals.orderCount > 1 ? 's' : ''}
-          </p>
-        </div>
-
-        {/* Total Dépenses */}
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-red-600" />
-              <p className="text-red-700 dark:text-red-400 font-medium">Total Dépenses</p>
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-            {formatCurrency(totals.expenses)}
-          </p>
-          <p className="text-xs text-red-500 mt-1">
-            {totals.expensesCount} dépense{totals.expensesCount > 1 ? 's' : ''}
-          </p>
-        </div>
-
-        {/* Bénéfice Net */}
-        <div
-          className={`rounded-lg p-6 border ${
-            totals.netProfit >= 0
-              ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700/50'
-              : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700/50'
-          }`}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Wallet
-                className={`h-5 w-5 ${
-                  totals.netProfit >= 0 ? 'text-emerald-600' : 'text-orange-600'
-                }`}
-              />
-              <p
-                className={`font-medium ${
-                  totals.netProfit >= 0
-                    ? 'text-emerald-700 dark:text-emerald-400'
-                    : 'text-orange-700 dark:text-orange-400'
-                }`}
-              >
-                Bénéfice Net
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Recettes</p>
+              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                {formatCurrency(totals.revenue)}
               </p>
             </div>
           </div>
-          <p
-            className={`text-2xl font-bold ${
-              totals.netProfit >= 0
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-orange-600 dark:text-orange-400'
-            }`}
-          >
-            {totals.netProfit >= 0 ? '+' : ''}
-            {formatCurrency(totals.netProfit)}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Recettes - Dépenses</p>
+        </div>
+
+        {/* Total Dépenses */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <TrendingDown className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Dépenses</p>
+              <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                {formatCurrency(totals.expenses)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bénéfice Net */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${totals.netProfit >= 0 ? 'bg-emerald-500/20' : 'bg-orange-500/20'}`}>
+              <Wallet className={`h-5 w-5 ${totals.netProfit >= 0 ? 'text-emerald-500' : 'text-orange-500'}`} />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Bénéfice</p>
+              <p className={`text-lg font-bold ${totals.netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                {totals.netProfit >= 0 ? '+' : ''}{formatCurrency(totals.netProfit)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Commandes */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <ShoppingCart className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Commandes</p>
+              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                {totals.orderCount}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Factures */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-500/20 rounded-lg">
+              <Receipt className="h-5 w-5 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Factures</p>
+              <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                {analytics?.standaloneInvoices?.total || 0}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Jours avec activité */}
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <CalendarDays className="h-5 w-5 text-purple-500" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Jours actifs</p>
+              <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                {transactions.filter(t => t.revenue > 0 || t.expensesTotal > 0).length}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Period Selector */}
-      <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-400" />
-            <span className="text-sm font-medium text-gray-700 dark:text-white">Période :</span>
+      {/* Revenue Sources Breakdown */}
+      {analytics && (
+        <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Détail des sources de revenus
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Commandes</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromOrders)}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Factures</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromStandaloneInvoices)}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Sur-mesure</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromCustomOrders)}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Paiements auto.</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromStandalonePayments)}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Acomptes fact.</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromInvoicePayments)}</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+              <p className="text-xs text-gray-500 dark:text-gray-400">RDV</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromAppointments)}</p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {PERIODS.map((p) => (
-              <button
-                key={p.value}
-                onClick={() => setPeriod(p.value)}
-                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                  period === p.value
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-          {period === 'custom' && (
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-gray-200 dark:border-dark-700">
+        <div className="flex flex-col gap-4">
+          {/* Period selector */}
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-white">Période :</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {PERIODS.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => setPeriod(p.value)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    period === p.value
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-600'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            {period === 'custom' && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white"
+                />
+                <span className="text-gray-500">-</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Search and filters row */}
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white"
-              />
-              <span className="text-gray-500">-</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white"
+                type="text"
+                placeholder="Rechercher par date..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
-          )}
+
+            {/* Activity filter */}
+            <label className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnlyWithActivity}
+                onChange={(e) => setShowOnlyWithActivity(e.target.checked)}
+                className="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Jours avec activité uniquement</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -358,7 +525,7 @@ export default function TransactionsPage() {
         <div className="flex items-center justify-center min-h-[300px]">
           <Loader2 className="h-8 w-8 animate-spin text-primary-400" />
         </div>
-      ) : transactions.length === 0 ? (
+      ) : filteredTransactions.length === 0 ? (
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center">
           <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -371,88 +538,126 @@ export default function TransactionsPage() {
       ) : (
         <>
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-dark-900">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Recettes
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Dépenses
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Bénéfice
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Commandes
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
-                {paginatedTransactions.map((tx) => (
-                  <tr key={tx.date} className="hover:bg-gray-50 dark:hover:bg-dark-700/50">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        {formatDate(tx.date)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <span
-                        className={`font-medium ${
-                          tx.revenue > 0
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        {tx.revenue > 0 ? '+' : ''}
-                        {formatCurrency(tx.revenue)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <span
-                        className={`font-medium ${
-                          tx.expensesTotal > 0
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        {tx.expensesTotal > 0 ? '-' : ''}
-                        {formatCurrency(tx.expensesTotal)}
-                      </span>
-                      {tx.expensesCount > 0 && (
-                        <span className="text-xs text-gray-500 ml-1">
-                          ({tx.expensesCount})
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <span
-                        className={`font-bold ${
-                          tx.netProfit > 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : tx.netProfit < 0
-                            ? 'text-orange-600 dark:text-orange-400'
-                            : 'text-gray-400'
-                        }`}
-                      >
-                        {tx.netProfit > 0 ? '+' : ''}
-                        {formatCurrency(tx.netProfit)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-                        <ShoppingCart className="h-4 w-4" />
-                        <span>{tx.orderCount}</span>
-                      </div>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-dark-900">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Recettes
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Dépenses
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Bénéfice
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Cmd
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Dép.
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Statut
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-dark-700">
+                  {paginatedTransactions.map((tx) => (
+                    <tr key={tx.date} className="hover:bg-gray-50 dark:hover:bg-dark-700/50">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          {formatDate(tx.date)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <span
+                          className={`font-medium ${
+                            tx.revenue > 0
+                              ? 'text-green-600 dark:text-green-400'
+                              : 'text-gray-400'
+                          }`}
+                        >
+                          {tx.revenue > 0 ? '+' : ''}
+                          {formatCurrency(tx.revenue)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <span
+                          className={`font-medium ${
+                            tx.expensesTotal > 0
+                              ? 'text-red-600 dark:text-red-400'
+                              : 'text-gray-400'
+                          }`}
+                        >
+                          {tx.expensesTotal > 0 ? '-' : ''}
+                          {formatCurrency(tx.expensesTotal)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <span
+                          className={`font-bold ${
+                            tx.netProfit > 0
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : tx.netProfit < 0
+                              ? 'text-orange-600 dark:text-orange-400'
+                              : 'text-gray-400'
+                          }`}
+                        >
+                          {tx.netProfit > 0 ? '+' : ''}
+                          {formatCurrency(tx.netProfit)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        {tx.orderCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full text-xs font-medium">
+                            <ShoppingCart className="h-3 w-3" />
+                            {tx.orderCount}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        {tx.expensesCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-500/20 text-red-600 dark:text-red-400 rounded-full text-xs font-medium">
+                            <TrendingDown className="h-3 w-3" />
+                            {tx.expensesCount}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                        {tx.revenue > 0 || tx.expensesTotal > 0 ? (
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            tx.netProfit > 0
+                              ? 'bg-green-500/20 text-green-600 dark:text-green-400'
+                              : tx.netProfit < 0
+                              ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                              : 'bg-gray-500/20 text-gray-600 dark:text-gray-400'
+                          }`}>
+                            {tx.netProfit > 0 ? (
+                              <><CheckCircle className="h-3 w-3" /> Positif</>
+                            ) : tx.netProfit < 0 ? (
+                              <><TrendingDown className="h-3 w-3" /> Négatif</>
+                            ) : (
+                              <><Clock className="h-3 w-3" /> Neutre</>
+                            )}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">Aucune activité</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Pagination */}
@@ -476,7 +681,7 @@ export default function TransactionsPage() {
                 </select>
                 <span className="text-sm text-gray-500 dark:text-gray-400">jours</span>
                 <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">
-                  ({transactions.length} total)
+                  ({filteredTransactions.length} total)
                 </span>
               </div>
 
