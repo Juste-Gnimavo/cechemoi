@@ -182,7 +182,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 16
-  page.drawText('Boutique de mode sur-mesure et pret-a-porter', {
+  page.drawText('Boutique de mode sur-mesure et prêt-à-porter', {
     x: headerX,
     y: yPos,
     size: 9,
