@@ -77,17 +77,72 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // Get standalone payments (from /payer/ flow) - COMPLETED only
+    const standalonePayments = await prisma.standalonePayment.findMany({
+      where: {
+        status: 'COMPLETED',
+        ...(hasDateFilter && { paidAt: dateFilter }),
+      },
+      select: {
+        id: true,
+        amount: true,
+        paidAt: true,
+      },
+    })
+
+    // Get invoice payments (for partial payments tracking)
+    const invoicePayments = await prisma.invoicePayment.findMany({
+      where: hasDateFilter ? { paidAt: dateFilter } : {},
+      include: {
+        invoice: {
+          select: {
+            orderId: true,
+            customOrderId: true,
+          },
+        },
+      },
+    })
+
+    // Filter invoice payments to only include those NOT linked to orders or custom orders
+    // (those are already tracked via receipts or order payments)
+    const standaloneInvoicePayments = invoicePayments.filter(
+      (ip) => !ip.invoice?.orderId && !ip.invoice?.customOrderId
+    )
+
+    // Get paid appointments
+    const paidAppointments = await prisma.appointment.findMany({
+      where: {
+        paymentStatus: 'PAID',
+        paidAmount: { gt: 0 },
+        ...(hasDateFilter && { createdAt: dateFilter }),
+      },
+      select: {
+        id: true,
+        paidAmount: true,
+        createdAt: true,
+      },
+    })
+
     // Calculate revenue metrics - ONLY from PAID orders (paymentStatus = COMPLETED)
     const paidOrders = orders.filter(order => order.paymentStatus === 'COMPLETED')
     const orderRevenue = paidOrders.reduce((sum, order) => sum + order.total, 0)
 
-    // Add standalone invoice revenue
+    // Add standalone invoice revenue (fully paid invoices)
     const standaloneInvoiceRevenue = paidStandaloneInvoices.reduce((sum, inv) => sum + inv.total, 0)
 
     // Add receipts revenue (actual payments from custom orders)
     const receiptsRevenue = receipts.reduce((sum, r) => sum + r.amount, 0)
 
-    const totalRevenue = orderRevenue + standaloneInvoiceRevenue + receiptsRevenue
+    // Add standalone payments revenue (from /payer/ flow)
+    const standalonePaymentsRevenue = standalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
+
+    // Add standalone invoice payments (partial payments not yet fully paid)
+    const standaloneInvoicePaymentsRevenue = standaloneInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
+
+    // Add appointment payments
+    const appointmentRevenue = paidAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
+
+    const totalRevenue = orderRevenue + standaloneInvoiceRevenue + receiptsRevenue + standalonePaymentsRevenue + standaloneInvoicePaymentsRevenue + appointmentRevenue
     const totalOrders = orders.length
     const paidOrdersCount = paidOrders.length
     const averageOrderValue = paidOrdersCount > 0 ? totalRevenue / paidOrdersCount : 0
@@ -177,9 +232,31 @@ export async function GET(req: NextRequest) {
         const rDate = new Date(r.paymentDate)
         return rDate >= dayStart && rDate <= dayEnd
       })
-
       const dayReceiptsRevenue = dayReceipts.reduce((sum, r) => sum + r.amount, 0)
-      const dayRevenue = dayOrderRevenue + dayInvoiceRevenue + dayReceiptsRevenue
+
+      // Add standalone payments for the day
+      const dayStandalonePayments = standalonePayments.filter((sp) => {
+        if (!sp.paidAt) return false
+        const spDate = new Date(sp.paidAt)
+        return spDate >= dayStart && spDate <= dayEnd
+      })
+      const dayStandalonePaymentsRevenue = dayStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
+
+      // Add standalone invoice payments for the day
+      const dayInvoicePayments = standaloneInvoicePayments.filter((ip) => {
+        const ipDate = new Date(ip.paidAt)
+        return ipDate >= dayStart && ipDate <= dayEnd
+      })
+      const dayInvoicePaymentsRevenue = dayInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
+
+      // Add appointment payments for the day
+      const dayAppointments = paidAppointments.filter((a) => {
+        const aDate = new Date(a.createdAt)
+        return aDate >= dayStart && aDate <= dayEnd
+      })
+      const dayAppointmentRevenue = dayAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
+
+      const dayRevenue = dayOrderRevenue + dayInvoiceRevenue + dayReceiptsRevenue + dayStandalonePaymentsRevenue + dayInvoicePaymentsRevenue + dayAppointmentRevenue
 
       // Count all orders for the day (regardless of payment status)
       const dayAllOrders = orders.filter((order) => {
@@ -271,12 +348,59 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // Get previous period standalone payments
+    const previousPeriodStandalonePayments = await prisma.standalonePayment.findMany({
+      where: {
+        status: 'COMPLETED',
+        paidAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
+    // Get previous period invoice payments (for standalone invoices only)
+    const previousPeriodInvoicePayments = await prisma.invoicePayment.findMany({
+      where: {
+        paidAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+      include: {
+        invoice: {
+          select: {
+            orderId: true,
+            customOrderId: true,
+          },
+        },
+      },
+    })
+    const previousStandaloneInvoicePayments = previousPeriodInvoicePayments.filter(
+      (ip) => !ip.invoice?.orderId && !ip.invoice?.customOrderId
+    )
+
+    // Get previous period appointments
+    const previousPeriodAppointments = await prisma.appointment.findMany({
+      where: {
+        paymentStatus: 'PAID',
+        paidAmount: { gt: 0 },
+        createdAt: {
+          gte: previousPeriodStart,
+          lte: previousPeriodEnd,
+        },
+      },
+    })
+
     // Previous period revenue (PAID orders only)
     const previousPaidOrders = previousPeriodOrders.filter(o => o.paymentStatus === 'COMPLETED')
     const previousOrderRevenue = previousPaidOrders.reduce((sum, o) => sum + o.total, 0)
     const previousInvoiceRevenue = previousPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
     const previousReceiptsRevenue = previousPeriodReceipts.reduce((sum, r) => sum + r.amount, 0)
-    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue + previousReceiptsRevenue
+    const previousStandalonePaymentsRevenue = previousPeriodStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
+    const previousInvoicePaymentsRevenue = previousStandaloneInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
+    const previousAppointmentRevenue = previousPeriodAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
+    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue + previousReceiptsRevenue + previousStandalonePaymentsRevenue + previousInvoicePaymentsRevenue + previousAppointmentRevenue
 
     // Previous period orders count
     const previousOrdersCount = previousPeriodOrders.length
@@ -300,10 +424,29 @@ export async function GET(req: NextRequest) {
       return rDate >= currentPeriodStart && rDate <= currentPeriodEnd
     })
 
+    const currentPeriodStandalonePayments = standalonePayments.filter(sp => {
+      if (!sp.paidAt) return false
+      const spDate = new Date(sp.paidAt)
+      return spDate >= currentPeriodStart && spDate <= currentPeriodEnd
+    })
+
+    const currentPeriodInvoicePayments = standaloneInvoicePayments.filter(ip => {
+      const ipDate = new Date(ip.paidAt)
+      return ipDate >= currentPeriodStart && ipDate <= currentPeriodEnd
+    })
+
+    const currentPeriodAppointments = paidAppointments.filter(a => {
+      const aDate = new Date(a.createdAt)
+      return aDate >= currentPeriodStart && aDate <= currentPeriodEnd
+    })
+
     const currentPeriodRevenue =
       currentPeriodPaidOrders.reduce((sum, o) => sum + o.total, 0) +
       currentPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0) +
-      currentPeriodReceipts.reduce((sum, r) => sum + r.amount, 0)
+      currentPeriodReceipts.reduce((sum, r) => sum + r.amount, 0) +
+      currentPeriodStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0) +
+      currentPeriodInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0) +
+      currentPeriodAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
     const currentPeriodOrdersCount = currentPeriodAllOrders.length
 
     // Previous period customers (new customers registered)
@@ -377,6 +520,9 @@ export async function GET(req: NextRequest) {
           fromOrders: orderRevenue,
           fromStandaloneInvoices: standaloneInvoiceRevenue,
           fromCustomOrders: receiptsRevenue,
+          fromStandalonePayments: standalonePaymentsRevenue,
+          fromInvoicePayments: standaloneInvoicePaymentsRevenue,
+          fromAppointments: appointmentRevenue,
           subtotal: totalSubtotal,
           tax: totalTax,
           shipping: totalShipping,

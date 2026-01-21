@@ -28,7 +28,9 @@ import {
   Car,
   Sparkles,
   MoreHorizontal,
-  Eye
+  Eye,
+  FileText,
+  CreditCard
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -52,6 +54,9 @@ interface DashboardStats {
     fromOrders?: number
     fromCustomOrders?: number
     fromStandaloneInvoices?: number
+    fromStandalonePayments?: number
+    fromInvoicePayments?: number
+    fromAppointments?: number
   }
   customOrders?: {
     receiptsCount: number
@@ -703,14 +708,14 @@ export default function AdminDashboard() {
           {canSeeRevenue && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Détail du Revenu</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700/50">
                 <div className="flex items-center gap-2 mb-2">
                   <ShoppingCart className="h-4 w-4 text-green-600" />
                   <p className="text-green-700 dark:text-green-400 text-xs">Boutique</p>
                 </div>
                 <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                  {formatCurrency(stats.revenue.fromOrders || stats.revenue.subtotal)}
+                  {formatCurrency(stats.revenue.fromOrders || 0)}
                 </p>
               </div>
               <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700/50">
@@ -721,27 +726,42 @@ export default function AdminDashboard() {
                 <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
                   {formatCurrency(stats.revenue.fromCustomOrders || 0)}
                 </p>
-                {stats.customOrders && stats.customOrders.receiptsCount > 0 && (
-                  <p className="text-xs text-purple-500 mt-1">
-                    {stats.customOrders.receiptsCount} reçu(s)
-                  </p>
-                )}
               </div>
-              <div className="p-4 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
-                <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Taxes</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="h-4 w-4 text-blue-600" />
+                  <p className="text-blue-700 dark:text-blue-400 text-xs">Factures</p>
+                </div>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {formatCurrency((stats.revenue.fromStandaloneInvoices || 0) + (stats.revenue.fromInvoicePayments || 0))}
+                </p>
+              </div>
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <CreditCard className="h-4 w-4 text-orange-600" />
+                  <p className="text-orange-700 dark:text-orange-400 text-xs">Paiements</p>
+                </div>
+                <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                  {formatCurrency((stats.revenue.fromStandalonePayments || 0) + (stats.revenue.fromAppointments || 0))}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-3 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
+                <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">Taxes</p>
+                <p className="text-base font-bold text-gray-900 dark:text-white">
                   {formatCurrency(stats.revenue.tax)}
                 </p>
               </div>
-              <div className="p-4 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
-                <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Livraison</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+              <div className="p-3 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
+                <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">Livraison</p>
+                <p className="text-base font-bold text-gray-900 dark:text-white">
                   {formatCurrency(stats.revenue.shipping)}
                 </p>
               </div>
-              <div className="p-4 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
-                <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">Réductions</p>
-                <p className="text-lg font-bold text-red-500">
+              <div className="p-3 bg-gray-100 dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700">
+                <p className="text-gray-500 dark:text-gray-400 text-xs mb-1">Réductions</p>
+                <p className="text-base font-bold text-red-500">
                   -{formatCurrency(stats.revenue.discount)}
                 </p>
               </div>
@@ -759,9 +779,14 @@ export default function AdminDashboard() {
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Bilan Financier du Mois</h2>
               </div>
-              <a href="/admin/expenses/reports" className="text-sm text-primary-500 hover:text-primary-400 font-medium">
-                Voir détails
-              </a>
+              <div className="flex items-center gap-3">
+                <a href="/admin/transactions" className="text-sm text-emerald-500 hover:text-emerald-400 font-medium">
+                  Transactions
+                </a>
+                <a href="/admin/expenses/reports" className="text-sm text-primary-500 hover:text-primary-400 font-medium">
+                  Dépenses
+                </a>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Recettes */}

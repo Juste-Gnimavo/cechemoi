@@ -268,10 +268,11 @@ export function AdminHeader() {
           label: 'Dépenses',
           allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
+                      { href: '/admin/expenses/categories', label: 'Catégories' },
             { href: '/admin/expenses', label: 'Toutes les dépenses' },
             { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
-            { href: '/admin/expenses/reports', label: 'Rapports dépenses' },
-            { href: '/admin/expenses/categories', label: 'Catégories' },
+            { href: '/admin/expenses/reports', label: 'Rapports de la caisse' },
+            { href: '/admin/transactions', label: 'Transactions' },
           ],
         },
       ],
