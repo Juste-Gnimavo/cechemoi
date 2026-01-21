@@ -59,11 +59,11 @@ const paymentMethodLabels: Record<string, string> = {
 
 const invoiceStatusLabels: Record<string, { label: string; color: string }> = {
   DRAFT: { label: 'Brouillon', color: 'bg-gray-100 text-gray-700' },
-  SENT: { label: 'Envoyee', color: 'bg-blue-100 text-blue-700' },
+  SENT: { label: 'Envoyée', color: 'bg-blue-100 text-blue-700' },
   PARTIAL: { label: 'Partielle', color: 'bg-yellow-100 text-yellow-700' },
-  PAID: { label: 'Payee', color: 'bg-green-100 text-green-700' },
+  PAID: { label: 'Payée', color: 'bg-green-100 text-green-700' },
   OVERDUE: { label: 'En retard', color: 'bg-red-100 text-red-700' },
-  CANCELLED: { label: 'Annulee', color: 'bg-gray-100 text-gray-700' },
+  CANCELLED: { label: 'Annulée', color: 'bg-gray-100 text-gray-700' },
 }
 
 export default function ReceiptDetailPage() {
@@ -247,7 +247,7 @@ export default function ReceiptDetailPage() {
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6 text-center mb-6">
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Montant paye</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Montant payé</p>
               <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 {formatCurrency(receipt.amount)}
               </p>
@@ -317,7 +317,7 @@ export default function ReceiptDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Commande liee
+                Commande liée
               </h3>
               <Link
                 href={`/admin/custom-orders/${receipt.customOrder.id}`}
@@ -340,7 +340,7 @@ export default function ReceiptDetailPage() {
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Facture liee
+                Facture liée
               </h3>
               <Link
                 href={`/admin/invoices?search=${receipt.invoice.invoiceNumber}`}
@@ -358,7 +358,7 @@ export default function ReceiptDetailPage() {
                 </div>
                 <div className="text-sm text-gray-500">
                   <p>Total: {formatCurrency(receipt.invoice.total)}</p>
-                  <p>Paye: {formatCurrency(receipt.invoice.amountPaid)}</p>
+                  <p>Payé: {formatCurrency(receipt.invoice.amountPaid)}</p>
                 </div>
               </Link>
             </div>

@@ -372,7 +372,7 @@ export default function TailorsPage() {
 
               <p className="text-xs text-gray-400 mt-3 flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                Ajoute le {new Date(tailor.createdAt).toLocaleDateString('fr-FR')}
+                Ajouté le {new Date(tailor.createdAt).toLocaleDateString('fr-FR')}
               </p>
             </div>
           ))}

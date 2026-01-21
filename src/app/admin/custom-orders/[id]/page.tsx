@@ -662,7 +662,7 @@ export default function CustomOrderDetailPage() {
         <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg flex items-center gap-3">
           <AlertTriangle className="h-5 w-5 text-orange-500" />
           <span className="text-orange-600 dark:text-orange-400">
-            Commande livree avec un solde impaye de {order.balance.toLocaleString()} FCFA
+            Commande livrée avec un solde impayé de {order.balance.toLocaleString()} FCFA
           </span>
         </div>
       )}
@@ -1310,7 +1310,7 @@ export default function CustomOrderDetailPage() {
             <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary-400" />
-                Facture liee
+                Facture liée
               </h3>
               <Link
                 href={`/admin/invoices?search=${order.invoice.invoiceNumber}`}
@@ -1326,9 +1326,9 @@ export default function CustomOrderDetailPage() {
                       order.invoice.status === 'PARTIAL' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-gray-100 text-gray-700'
                     }`}>
-                      {order.invoice.status === 'PAID' ? 'Payee' :
+                      {order.invoice.status === 'PAID' ? 'Payée' :
                        order.invoice.status === 'PARTIAL' ? 'Partielle' :
-                       order.invoice.status === 'SENT' ? 'Envoyee' : order.invoice.status}
+                       order.invoice.status === 'SENT' ? 'Envoyée' : order.invoice.status}
                     </span>
                     <span>{order.invoice.amountPaid.toLocaleString()} / {order.invoice.total.toLocaleString()} FCFA</span>
                   </div>

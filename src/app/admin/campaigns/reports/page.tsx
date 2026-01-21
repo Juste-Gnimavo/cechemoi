@@ -252,8 +252,8 @@ export default function CampaignReportsPage() {
         <AdminStatsHeader
           stats={[
             { label: 'Total campagnes', value: stats.total, icon: Megaphone, color: 'primary' },
-            { label: 'Messages envoyes', value: stats.totalSent.toLocaleString(), icon: Send, color: 'blue' },
-            { label: 'Taux de succes', value: `${stats.successRate}%`, icon: CheckCircle, color: 'green' },
+            { label: 'Messages envoyés', value: stats.totalSent.toLocaleString(), icon: Send, color: 'blue' },
+            { label: 'Taux de succès', value: `${stats.successRate}%`, icon: CheckCircle, color: 'green' },
             { label: 'SMS', value: stats.sms, icon: MessageSquare, color: 'blue' },
             { label: 'WhatsApp', value: stats.whatsapp + stats.whatsappCloud, icon: MessageSquare, color: 'green' },
             { label: 'Push', value: stats.push, icon: Bell, color: 'yellow' },

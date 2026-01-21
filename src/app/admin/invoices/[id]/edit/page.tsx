@@ -533,7 +533,7 @@ export default function EditInvoicePage() {
               type="text"
               value={productSearch}
               onChange={(e) => searchProducts(e.target.value)}
-              placeholder="Rechercher un produit a ajouter..."
+              placeholder="Rechercher un produit à ajouter..."
               className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
@@ -671,7 +671,7 @@ export default function EditInvoicePage() {
             {invoice.amountPaid > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-700 space-y-2">
                 <div className="flex items-center justify-between text-green-400">
-                  <span>Deja paye</span>
+                  <span>Déjà payé</span>
                   <span>{formatCurrency(invoice.amountPaid)}</span>
                 </div>
                 <div className={`flex items-center justify-between font-semibold ${
@@ -709,17 +709,17 @@ export default function EditInvoicePage() {
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="DRAFT">Brouillon</option>
-                <option value="SENT">Envoyee</option>
-                <option value="PARTIAL">Acompte verse</option>
-                <option value="PAID">Payee</option>
+                <option value="SENT">Envoyée</option>
+                <option value="PARTIAL">Acompte versé</option>
+                <option value="PAID">Payée</option>
                 <option value="OVERDUE">En retard</option>
-                <option value="CANCELLED">Annulee</option>
-                <option value="REFUNDED">Remboursee</option>
+                <option value="CANCELLED">Annulée</option>
+                <option value="REFUNDED">Remboursée</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Date d'emission</label>
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Date d'émission</label>
               <input
                 type="date"
                 value={issueDate}

@@ -97,13 +97,13 @@ export default function ImportCustomersPage() {
     }
 
     if (customers.length === 0) {
-      toast.error('Aucun client detecte. Verifiez le format.')
+      toast.error('Aucun client détecté. Vérifiez le format.')
       return
     }
 
     setParsedCustomers(customers)
     setResult(null)
-    toast.success(`${customers.length} client(s) detecte(s)`)
+    toast.success(`${customers.length} client(s) détecté(s)`)
   }
 
   const removeCustomer = (index: number) => {

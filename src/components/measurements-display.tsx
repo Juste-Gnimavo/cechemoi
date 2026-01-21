@@ -90,7 +90,7 @@ export function MeasurementsDisplay({
       <div className="p-6 text-center border rounded-lg dark:border-gray-700">
         <Ruler className="w-12 h-12 mx-auto text-gray-400 mb-3" />
         <p className="text-gray-500 dark:text-gray-400">
-          Aucune mensuration enregistree
+          Aucune mensuration enregistrée
         </p>
       </div>
     )
@@ -128,8 +128,8 @@ export function MeasurementsDisplay({
     { label: 'Mi-mollets', value: measurement.longueurRobesMiMollets },
     { label: 'Au niveau des genoux', value: measurement.longueurRobesNiveauGenoux },
     { label: 'Niveau des chevilles', value: measurement.longueurRobesChevilles },
-    { label: 'Apres les genoux (crayon)', value: measurement.longueurRobesApresGenoux },
-    { label: 'Tres longue', value: measurement.longueurRobesTresLongue },
+    { label: 'Après les genoux (crayon)', value: measurement.longueurRobesApresGenoux },
+    { label: 'Très longue', value: measurement.longueurRobesTresLongue },
   ]
 
   const simpleFields3 = [
@@ -146,8 +146,8 @@ export function MeasurementsDisplay({
     { label: 'Mi-mollets', value: measurement.longueurJupeMiMollets },
     { label: 'Au niveau des genoux', value: measurement.longueurJupeNiveauGenoux },
     { label: 'Niveau des chevilles', value: measurement.longueurJupeChevilles },
-    { label: 'Apres les genoux (crayon)', value: measurement.longueurJupeApresGenoux },
-    { label: 'Tres longue', value: measurement.longueurJupeTresLongue },
+    { label: 'Après les genoux (crayon)', value: measurement.longueurJupeApresGenoux },
+    { label: 'Très longue', value: measurement.longueurJupeTresLongue },
   ]
 
   const renderSimpleRow = (num: number, label: string, value: string | null | undefined) => (
@@ -217,7 +217,7 @@ export function MeasurementsDisplay({
             className="flex items-center gap-2 px-3 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="w-4 h-4" />
-            {isDownloading ? 'Telechargement...' : 'Telecharger PDF'}
+            {isDownloading ? 'Téléchargement...' : 'Télécharger PDF'}
           </button>
         )}
       </div>
@@ -241,7 +241,7 @@ export function MeasurementsDisplay({
         {/* Header */}
         <div className="flex items-center gap-2 p-3 bg-red-600 text-white">
           <span className="w-8 text-sm font-medium">N</span>
-          <span className="flex-1 text-sm font-medium">PARTIES CONCERNEES</span>
+          <span className="flex-1 text-sm font-medium">PARTIES CONCERNÉES</span>
           <span className="w-32 text-sm font-medium text-right">MESURES</span>
         </div>
 
@@ -320,7 +320,7 @@ export function MeasurementsDisplay({
                       onClick={() => onDownloadPDF(m.id)}
                       disabled={isDownloading}
                       className="p-2 text-gray-400 hover:text-primary-600 disabled:opacity-50"
-                      title="Telecharger ce PDF"
+                      title="Télécharger ce PDF"
                     >
                       <Download className="w-4 h-4" />
                     </button>
