@@ -431,6 +431,9 @@ export default function AdminDashboard() {
     return sum
   }, 0) || 0
 
+  // Revenue matching the expense period (last 30 days from revenueByDay)
+  const monthlyRevenue = stats.revenueByDay?.reduce((sum, d) => sum + d.revenue, 0) || 0
+
   return (
     <div className="space-y-8">
       {/* Header with Profile Card */}
@@ -771,10 +774,10 @@ export default function AdminDashboard() {
                   <ArrowUp className="h-4 w-4 text-green-500" />
                 </div>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {formatCurrency(stats.revenue.total)}
+                  {formatCurrency(monthlyRevenue)}
                 </p>
                 <p className="text-xs text-green-500 mt-1">
-                  Total des revenus encaissés
+                  Revenus des 30 derniers jours
                 </p>
               </div>
 
@@ -797,7 +800,7 @@ export default function AdminDashboard() {
 
               {/* Bénéfice Net */}
               <div className={`p-4 rounded-lg border ${
-                (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                (monthlyRevenue - (expenseStats?.summary.totalAmount || 0)) >= 0
                   ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700/50'
                   : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-700/50'
               }`}>
@@ -805,21 +808,21 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-emerald-600" />
                     <p className={`font-medium ${
-                      (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                      (monthlyRevenue - (expenseStats?.summary.totalAmount || 0)) >= 0
                         ? 'text-emerald-700 dark:text-emerald-400'
                         : 'text-orange-700 dark:text-orange-400'
                     }`}>Bénéfice Net</p>
                   </div>
                 </div>
                 <p className={`text-2xl font-bold ${
-                  (stats.revenue.total - (expenseStats?.summary.totalAmount || 0)) >= 0
+                  (monthlyRevenue - (expenseStats?.summary.totalAmount || 0)) >= 0
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-orange-600 dark:text-orange-400'
                 }`}>
-                  {formatCurrency(stats.revenue.total - (expenseStats?.summary.totalAmount || 0))}
+                  {formatCurrency(monthlyRevenue - (expenseStats?.summary.totalAmount || 0))}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Recettes - Dépenses
+                  Recettes - Dépenses (30 jours)
                 </p>
               </div>
             </div>
@@ -1443,6 +1446,17 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Gérer les dépenses</span>
                   <Wallet className="h-4 w-4" />
+                </div>
+              </a>
+              )}
+              {isAdminOrManager && (
+              <a
+                href="/admin/transactions"
+                className="block p-3 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700/50 hover:border-emerald-500/50 rounded-lg transition-all text-emerald-700 dark:text-emerald-300"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Transactions journalières</span>
+                  <BarChart3 className="h-4 w-4" />
                 </div>
               </a>
               )}

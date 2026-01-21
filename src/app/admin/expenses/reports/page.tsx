@@ -81,8 +81,8 @@ const PERIODS = [
   { value: 'yesterday', label: 'Hier' },
   { value: 'week', label: '7 derniers jours' },
   { value: 'month', label: '30 derniers jours' },
-  { value: 'year', label: 'Cette annee' },
-  { value: 'custom', label: 'Personnalise' },
+  { value: 'year', label: 'Cette année' },
+  { value: 'custom', label: 'Personnalisé' },
 ]
 
 const ICONS: { [key: string]: any } = {
@@ -175,10 +175,10 @@ export default function ExpenseReportsPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Rapports des Depenses
+              Rapports des Dépenses
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Analyse detaillee de vos depenses
+              Analyse détaillée de vos dépenses
             </p>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function ExpenseReportsPage() {
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-gray-400" />
             <span className="text-sm font-medium text-gray-700 dark:text-white">
-              Periode:
+              Période :
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -247,7 +247,7 @@ export default function ExpenseReportsPage() {
                   <DollarSign className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Depenses</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Dépenses</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {formatCurrency(data.summary.totalAmount)}
                   </p>
@@ -261,7 +261,7 @@ export default function ExpenseReportsPage() {
                   <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Nombre de depenses</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Nombre de dépenses</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {data.summary.count}
                   </p>
@@ -297,7 +297,7 @@ export default function ExpenseReportsPage() {
               <div className="p-4">
                 {data.byCategory.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune donnee
+                    Aucune donnée
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -354,7 +354,7 @@ export default function ExpenseReportsPage() {
               <div className="p-4">
                 {data.byPaymentMethod.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune donnee
+                    Aucune donnée
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -425,7 +425,7 @@ export default function ExpenseReportsPage() {
                 <div className="p-4 border-b border-gray-200 dark:border-dark-700">
                   <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     <FileText className="h-5 w-5 text-gray-400" />
-                    Enregistre par (Staff)
+                    Enregistré par (Staff)
                   </h2>
                 </div>
                 <div className="divide-y divide-gray-200 dark:divide-dark-700">
