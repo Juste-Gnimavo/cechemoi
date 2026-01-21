@@ -10,6 +10,41 @@
 - Always read last session logs MOBILE-SESSIONS-LOGS/* and MOBILE-SESSIONS-LOGS/NEXT-STEP.md to understand what to do.
 - After current session tasks are completed, Always create a new session log in MOBILE-SESSIONS-LOGS/  then create the next session prompt MOBILE-SESSIONS-LOGS/NEXT-STEP.md
 
+---
+
+## LANGUE ET ORTHOGRAPHE
+
+**IMPORTANT - Accents français obligatoires**
+
+L'utilisateur dispose d'un clavier anglais (QWERTY) et ne peut pas facilement saisir les accents français.
+
+**Règle absolue** : Toujours utiliser les accents français corrects dans le code et les textes, même si l'utilisateur écrit sans accents.
+
+Exemples de corrections automatiques :
+- `especes` → `Espèces`
+- `cheque` → `Chèque`
+- `cree` → `Créé`
+- `modifie` → `Modifié`
+- `echeance` → `Échéance`
+- `recu` → `Reçu`
+- `francais` → `Français`
+- `numero` → `Numéro`
+- `etape` → `Étape`
+- `parametres` → `Paramètres`
+
+Accents courants à utiliser :
+- é (e accent aigu)
+- è (e accent grave)
+- ê (e accent circonflexe)
+- à (a accent grave)
+- ù (u accent grave)
+- ç (c cédille)
+- î, ô, û (accents circonflexes)
+
+**Ne jamais copier l'orthographe sans accent de l'utilisateur. Toujours corriger automatiquement.**
+
+---
+
 ## QUICK STATUS
 
 | Component | Status | Progress |
