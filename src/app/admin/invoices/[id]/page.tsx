@@ -85,6 +85,7 @@ const paymentMethodLabels: Record<string, string> = {
   CHECK: 'Chèque',
   ORANGE_MONEY: 'Orange Money',
   MTN_MOBILE_MONEY: 'MTN MoMo',
+  MOOV_MONEY: 'Moov Money',
   WAVE: 'Wave',
   PAIEMENTPRO: 'PaiementPro',
   CARD: 'Carte bancaire',
@@ -1212,22 +1213,23 @@ export default function InvoiceDetailPage() {
                   className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <optgroup label="Paiements manuels">
-                    <option value="CASH">💵 Espèces</option>
-                    <option value="BANK_TRANSFER">🏦 Virement bancaire</option>
-                    <option value="CHECK">📝 Chèque</option>
+                    <option value="CASH">Especes</option>
+                    <option value="BANK_TRANSFER">Virement bancaire</option>
+                    <option value="CHECK">Cheque</option>
                   </optgroup>
-                  <optgroup label="Mobile Money (dépôt direct)">
-                    <option value="ORANGE_MONEY">🟠 Orange Money</option>
-                    <option value="MTN_MOBILE_MONEY">🟡 MTN MoMo</option>
-                    <option value="WAVE">🔵 Wave</option>
+                  <optgroup label="Mobile Money">
+                    <option value="ORANGE_MONEY">Orange Money</option>
+                    <option value="MTN_MOBILE_MONEY">MTN MoMo</option>
+                    <option value="MOOV_MONEY">Moov Money</option>
+                    <option value="WAVE">Wave</option>
                   </optgroup>
                   <optgroup label="Paiements en ligne">
-                    <option value="CARD">💳 Carte bancaire</option>
-                    <option value="PAYPAL">🅿️ PayPal</option>
-                    <option value="PAIEMENTPRO">🌐 PaiementPro</option>
+                    <option value="CARD">Carte bancaire</option>
+                    <option value="PAYPAL">PayPal</option>
+                    <option value="PAIEMENTPRO">PaiementPro</option>
                   </optgroup>
                   <optgroup label="Autre">
-                    <option value="OTHER">📋 Autre</option>
+                    <option value="OTHER">Autre</option>
                   </optgroup>
                 </select>
               </div>
@@ -1259,19 +1261,6 @@ export default function InvoiceDetailPage() {
                 />
               </div>
 
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Notes (optionnel)
-                </label>
-                <textarea
-                  value={paymentForm.notes}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
-                  placeholder="Notes sur ce paiement..."
-                  rows={2}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
             </div>
 
             {/* Modal Footer */}

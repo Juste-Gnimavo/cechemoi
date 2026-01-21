@@ -16,6 +16,7 @@ const PAYMENT_METHODS = [
   'CHECK',
   'ORANGE_MONEY',    // Direct deposit to business Orange Money
   'MTN_MOBILE_MONEY', // Direct deposit to business MTN
+  'MOOV_MONEY',      // Direct deposit to business Moov
   'WAVE',            // Direct deposit to business Wave
   'PAIEMENTPRO',     // Via PaiementPro gateway
   'CARD',            // Direct card payment
