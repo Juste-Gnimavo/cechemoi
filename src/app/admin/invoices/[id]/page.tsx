@@ -1213,9 +1213,9 @@ export default function InvoiceDetailPage() {
                   className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <optgroup label="Paiements manuels">
-                    <option value="CASH">Especes</option>
+                    <option value="CASH">Espèces</option>
                     <option value="BANK_TRANSFER">Virement bancaire</option>
-                    <option value="CHECK">Cheque</option>
+                    <option value="CHECK">Chèque</option>
                   </optgroup>
                   <optgroup label="Mobile Money">
                     <option value="ORANGE_MONEY">Orange Money</option>
