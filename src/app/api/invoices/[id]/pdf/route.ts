@@ -446,7 +446,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   // =============================================
   // ARTICLES TABLE
   // =============================================
-  const tableTop = yPos - 90
+  const tableTop = yPos - 120
   const tableWidth = width - margin * 2
 
   // Column positions
@@ -780,8 +780,8 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Legal disclaimer
-  const legalText = 'Toute tenue ou tout accessoire paye, retire ou livre ne pourra faire l\'objet ni de retour, ni d\'echange, ni de remboursement.'
-  const legalText2 = 'Le paiement vaut acceptation sans reserve.'
+  const legalText = 'Toute tenue ou tout accessoire pay\u00e9, retir\u00e9 ou livr\u00e9 ne pourra faire l\'objet ni de retour, ni d\'\u00e9change, ni de remboursement.'
+  const legalText2 = 'Le paiement vaut acceptation sans r\u00e9serve.'
   const legalWidth = helvetica.widthOfTextAtSize(legalText, 7)
   const legal2Width = helvetica.widthOfTextAtSize(legalText2, 7)
   page.drawText(legalText, {
