@@ -551,7 +551,7 @@ export default function EditCustomerPage() {
               <h3 className="font-semibold text-orange-400">Date d'inscription</h3>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              Modifier la date d'inscription du client si necessaire.
+              Modifier la date d'inscription du client si nécessaire.
             </p>
             <input
               type="datetime-local"

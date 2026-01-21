@@ -40,12 +40,12 @@ interface Stats {
 }
 
 const paymentMethodLabels: Record<string, string> = {
-  CASH: 'Especes',
+  CASH: 'Espèces',
   WAVE: 'Wave',
   ORANGE_MONEY: 'Orange Money',
   MTN_MOBILE_MONEY: 'MTN MoMo',
   BANK_TRANSFER: 'Virement',
-  CHECK: 'Cheque',
+  CHECK: 'Chèque',
   CARD: 'Carte',
   OTHER: 'Autre',
 }
@@ -113,14 +113,14 @@ export default function ReceiptsPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `recu_${id}.pdf`
+      a.download = `reçu_${id}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download error:', error)
-      alert('Erreur lors du telechargement')
+      alert('Erreur lors du téléchargement')
     } finally {
       setDownloadingId(null)
     }
@@ -148,10 +148,10 @@ export default function ReceiptsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Receipt className="w-7 h-7" />
-            {isToday ? "Recus d'aujourd'hui" : 'Tous les recus'}
+            {isToday ? "Reçus d'aujourd'hui" : 'Tous les reçus'}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {total} recu{total > 1 ? 's' : ''} au total
+            {total} reçu{total > 1 ? 's' : ''} au total
           </p>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function ReceiptsPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatCurrency(stats.today.total)}
                 </p>
-                <p className="text-xs text-gray-400">{stats.today.count} recu(s)</p>
+                <p className="text-xs text-gray-400">{stats.today.count} reçu(s)</p>
               </div>
               <TrendingUp className="w-8 h-8 text-green-500" />
             </div>
@@ -178,7 +178,7 @@ export default function ReceiptsPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatCurrency(stats.week.total)}
                 </p>
-                <p className="text-xs text-gray-400">{stats.week.count} recu(s)</p>
+                <p className="text-xs text-gray-400">{stats.week.count} reçu(s)</p>
               </div>
               <TrendingUp className="w-8 h-8 text-blue-500" />
             </div>
@@ -190,7 +190,7 @@ export default function ReceiptsPage() {
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {formatCurrency(stats.month.total)}
                 </p>
-                <p className="text-xs text-gray-400">{stats.month.count} recu(s)</p>
+                <p className="text-xs text-gray-400">{stats.month.count} reçu(s)</p>
               </div>
               <TrendingUp className="w-8 h-8 text-purple-500" />
             </div>
@@ -262,7 +262,7 @@ export default function ReceiptsPage() {
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    N Recu
+                    N° Reçu
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Date

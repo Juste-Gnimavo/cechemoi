@@ -151,7 +151,7 @@ export default function EditInvoicePage() {
           setItems([{ description: '', quantity: 1, unitPrice: 0, total: 0 }])
         }
       } else {
-        toast.error(data.error || 'Facture non trouvee')
+        toast.error(data.error || 'Facture non trouvée')
         router.push('/admin/invoices')
       }
     } catch (error) {
@@ -318,19 +318,19 @@ export default function EditInvoicePage() {
       try {
         data = text ? JSON.parse(text) : {}
       } catch {
-        throw new Error('Reponse invalide du serveur')
+        throw new Error('Réponse invalide du serveur')
       }
 
       if (data.success) {
         success()
-        toast.success('Facture mise a jour avec succes')
+        toast.success('Facture mise à jour avec succès')
         router.push(`/admin/invoices/${params.id}`)
       } else {
-        toast.error(data.error || 'Erreur lors de la mise a jour')
+        toast.error(data.error || 'Erreur lors de la mise à jour')
       }
     } catch (error) {
       console.error('Error updating invoice:', error)
-      toast.error('Erreur lors de la mise a jour')
+      toast.error('Erreur lors de la mise à jour')
     } finally {
       setSaving(false)
     }
@@ -351,7 +351,7 @@ export default function EditInvoicePage() {
   if (!invoice) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-gray-400">Facture non trouvee</div>
+        <div className="text-gray-400">Facture non trouvée</div>
       </div>
     )
   }
@@ -365,7 +365,7 @@ export default function EditInvoicePage() {
             Modifier Facture {invoice.invoiceNumber}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Modifiez les details de la facture
+            Modifiez les détails de la facture
           </p>
         </div>
         <Link
@@ -384,7 +384,7 @@ export default function EditInvoicePage() {
           <div>
             <p className="text-orange-400 font-medium">Attention : Paiements existants</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              Cette facture a deja recu {formatCurrency(invoice.amountPaid)} de paiements.
+              Cette facture a déjà reçu {formatCurrency(invoice.amountPaid)} de paiements.
               Modifier le total peut affecter le solde restant.
             </p>
           </div>
@@ -487,7 +487,7 @@ export default function EditInvoicePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Date d'echeance</label>
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Date d'échéance</label>
               <input
                 type="date"
                 value={dueDate}

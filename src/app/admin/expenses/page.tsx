@@ -43,12 +43,12 @@ interface Expense {
 }
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  CASH: 'Especes',
+  CASH: 'Espèces',
   BANK_TRANSFER: 'Virement',
   ORANGE_MONEY: 'Orange Money',
   MTN_MOMO: 'MTN MoMo',
   WAVE: 'Wave',
-  CHECK: 'Cheque',
+  CHECK: 'Chèque',
   CARD: 'Carte',
 }
 

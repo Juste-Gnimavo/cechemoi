@@ -20,12 +20,12 @@ interface StaffMember {
 }
 
 const PAYMENT_METHODS = [
-  { value: 'CASH', label: 'Especes' },
+  { value: 'CASH', label: 'Espèces' },
   { value: 'BANK_TRANSFER', label: 'Virement bancaire' },
   { value: 'ORANGE_MONEY', label: 'Orange Money' },
   { value: 'MTN_MOMO', label: 'MTN MoMo' },
   { value: 'WAVE', label: 'Wave' },
-  { value: 'CHECK', label: 'Cheque' },
+  { value: 'CHECK', label: 'Chèque' },
   { value: 'CARD', label: 'Carte bancaire' },
 ]
 

@@ -47,12 +47,12 @@ interface ReceiptDetail {
 }
 
 const paymentMethodLabels: Record<string, string> = {
-  CASH: 'Especes',
+  CASH: 'Espèces',
   WAVE: 'Wave',
   ORANGE_MONEY: 'Orange Money',
   MTN_MOBILE_MONEY: 'MTN MoMo',
   BANK_TRANSFER: 'Virement bancaire',
-  CHECK: 'Cheque',
+  CHECK: 'Chèque',
   CARD: 'Carte bancaire',
   OTHER: 'Autre',
 }
@@ -105,14 +105,14 @@ export default function ReceiptDetailPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `recu_${receipt.receiptNumber}.pdf`
+      a.download = `reçu_${receipt.receiptNumber}.pdf`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (error) {
       console.error('Download error:', error)
-      alert('Erreur lors du telechargement')
+      alert('Erreur lors du téléchargement')
     } finally {
       setDownloading(false)
     }
@@ -120,7 +120,7 @@ export default function ReceiptDetailPage() {
 
   const handleDelete = async () => {
     if (!receipt) return
-    if (!confirm('Etes-vous sur de vouloir supprimer ce recu ?')) return
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce reçu ?')) return
 
     setDeleting(true)
     try {
@@ -192,10 +192,10 @@ export default function ReceiptDetailPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Receipt className="w-7 h-7 text-purple-600" />
-              Recu {receipt.receiptNumber}
+              Reçu {receipt.receiptNumber}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Emis le {formatDate(receipt.paymentDate)}
+              Émis le {formatDate(receipt.paymentDate)}
             </p>
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function ReceiptDetailPage() {
               </div>
               {receipt.createdByName && (
                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-700">
-                  <span className="text-gray-500 dark:text-gray-400">Recu par</span>
+                  <span className="text-gray-500 dark:text-gray-400">Reçu par</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {receipt.createdByName}
                   </span>
