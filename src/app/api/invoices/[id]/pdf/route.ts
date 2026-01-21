@@ -191,7 +191,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 12
-  page.drawText('Abidjan, Cote d\'Ivoire', {
+  page.drawText('Abidjan, Côte d\'Ivoire', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -345,7 +345,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   if (invoice.order?.shippingAddress) {
     const cityCountry = [
       invoice.order.shippingAddress.city,
-      invoice.order.shippingAddress.country || 'Cote d\'Ivoire'
+      invoice.order.shippingAddress.country || 'Côte d\'Ivoire'
     ].filter(Boolean).join(', ')
 
     if (cityCountry) {
@@ -360,7 +360,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     }
   } else {
     // Default to Cote d'Ivoire if no shipping address
-    page.drawText('Cote d\'Ivoire', {
+    page.drawText('Côte d\'Ivoire', {
       x: billingX,
       y: billingY,
       size: 9,
@@ -800,7 +800,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Tagline
-  const taglineText = 'CECHEMOI - Elegance africaine sur-mesure. Mode feminine personnalisee a Abidjan'
+  const taglineText = 'CÈCHÉMOI - Élégance africaine sur-mesure. Mode féminine personnalisée à Abidjan'
   const taglineWidth = helveticaBold.widthOfTextAtSize(taglineText, 8)
   page.drawText(taglineText, {
     x: (width - taglineWidth) / 2,
@@ -811,7 +811,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Contact info
-  const contactText = 'Abidjan, Cote d\'Ivoire | email: cechemoicreations@gmail.com | Tel: +225 0759545410 | Site web: www.cechemoi.com'
+  const contactText = 'Abidjan, Côte d\'Ivoire | email: cechemoicreations@gmail.com | Tel: +225 0759545410 | Site web: www.cechemoi.com'
   const contactWidth = helvetica.widthOfTextAtSize(contactText, 8)
   page.drawText(contactText, {
     x: (width - contactWidth) / 2,
