@@ -114,7 +114,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
 
   if (!isPaid) {
     // Large diagonal watermark "NON PAYEE" - centered on page
-    const watermarkText = 'NON PAYEE'
+    const watermarkText = 'NON PAYÉE'
     const watermarkSize = 80
     const watermarkWidth = helveticaBold.widthOfTextAtSize(watermarkText, watermarkSize)
     page.drawText(watermarkText, {
@@ -127,7 +127,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     })
   } else {
     // Large diagonal watermark "PAYEE" - centered on page (for paid invoices)
-    const watermarkText = 'PAYEE'
+    const watermarkText = 'PAYÉE'
     const watermarkSize = 80
     const watermarkWidth = helveticaBold.widthOfTextAtSize(watermarkText, watermarkSize)
     page.drawText(watermarkText, {
@@ -287,7 +287,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const shippingX = margin + colWidth + 30
 
   // Billing Section Header
-  page.drawText('FACTURER A', {
+  page.drawText('FACTURÉ À', {
     x: billingX,
     y: yPos,
     size: 11,
@@ -306,7 +306,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
 
   if (invoice.customerPhone) {
     billingY -= 14
-    page.drawText(`Tel: ${safeText(invoice.customerPhone)}`, {
+    page.drawText(`Tél: ${safeText(invoice.customerPhone)}`, {
       x: billingX,
       y: billingY,
       size: 10,
@@ -341,8 +341,37 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     }
   }
 
+  // City and Country - from shipping address if available
+  if (invoice.order?.shippingAddress) {
+    const cityCountry = [
+      invoice.order.shippingAddress.city,
+      invoice.order.shippingAddress.country || 'Cote d\'Ivoire'
+    ].filter(Boolean).join(', ')
+
+    if (cityCountry) {
+      page.drawText(cityCountry, {
+        x: billingX,
+        y: billingY,
+        size: 9,
+        font: helvetica,
+        color: textColor,
+      })
+      billingY -= 12
+    }
+  } else {
+    // Default to Cote d'Ivoire if no shipping address
+    page.drawText('Cote d\'Ivoire', {
+      x: billingX,
+      y: billingY,
+      size: 9,
+      font: helvetica,
+      color: textColor,
+    })
+    billingY -= 12
+  }
+
   // Shipping Section Header
-  page.drawText('LIVRER A', {
+  page.drawText('LIVRÉ À', {
     x: shippingX,
     y: yPos,
     size: 11,
@@ -405,7 +434,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
       })
     }
   } else {
-    page.drawText('Meme adresse que la facturation', {
+    page.drawText('Même adresse que la facturation', {
       x: shippingX,
       y: shippingY,
       size: 10,
@@ -701,7 +730,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     })
 
     // Stamp text
-    page.drawText('PAYEE', {
+    page.drawText('PAYÉE', {
       x: stampCenterX - 28,
       y: stampCenterY - 6,
       size: 16,
@@ -740,22 +769,42 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   // =============================================
   // FOOTER
   // =============================================
-  const footerY = 70
+  const footerY = 55
 
   // Footer top line
   page.drawLine({
-    start: { x: margin, y: footerY + 25 },
-    end: { x: width - margin, y: footerY + 25 },
+    start: { x: margin, y: footerY + 55 },
+    end: { x: width - margin, y: footerY + 55 },
     thickness: 2,
     color: primaryColor,
   })
 
+  // Legal disclaimer
+  const legalText = 'Toute tenue ou tout accessoire paye, retire ou livre ne pourra faire l\'objet ni de retour, ni d\'echange, ni de remboursement.'
+  const legalText2 = 'Le paiement vaut acceptation sans reserve.'
+  const legalWidth = helvetica.widthOfTextAtSize(legalText, 7)
+  const legal2Width = helvetica.widthOfTextAtSize(legalText2, 7)
+  page.drawText(legalText, {
+    x: (width - legalWidth) / 2,
+    y: footerY + 42,
+    size: 7,
+    font: helvetica,
+    color: lightGray,
+  })
+  page.drawText(legalText2, {
+    x: (width - legal2Width) / 2,
+    y: footerY + 32,
+    size: 7,
+    font: helvetica,
+    color: lightGray,
+  })
+
   // Tagline
-  const taglineText = 'CÈCHÉMOI - Elegance africaine sur-mesure. Mode feminine personnalisee a Abidjan'
+  const taglineText = 'CECHEMOI - Elegance africaine sur-mesure. Mode feminine personnalisee a Abidjan'
   const taglineWidth = helveticaBold.widthOfTextAtSize(taglineText, 8)
   page.drawText(taglineText, {
     x: (width - taglineWidth) / 2,
-    y: footerY + 10,
+    y: footerY + 18,
     size: 8,
     font: helveticaBold,
     color: primaryColor,
@@ -766,7 +815,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const contactWidth = helvetica.widthOfTextAtSize(contactText, 8)
   page.drawText(contactText, {
     x: (width - contactWidth) / 2,
-    y: footerY - 3,
+    y: footerY + 5,
     size: 8,
     font: helvetica,
     color: lightGray,
@@ -777,7 +826,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const thankYouWidth = helveticaBold.widthOfTextAtSize(thankYouText, 9)
   page.drawText(thankYouText, {
     x: (width - thankYouWidth) / 2,
-    y: footerY - 29,
+    y: footerY - 10,
     size: 9,
     font: helveticaBold,
     color: textColor,

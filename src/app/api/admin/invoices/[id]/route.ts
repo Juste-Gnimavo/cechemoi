@@ -120,6 +120,9 @@ export async function PUT(
       issueDate,
       notes,
       items,
+      tax,
+      shippingCost,
+      discount,
       sendNotification,
     } = body
 
@@ -146,12 +149,18 @@ export async function PUT(
     if (issueDate !== undefined) updateData.issueDate = issueDate ? new Date(issueDate) : new Date()
     if (notes !== undefined) updateData.notes = notes
 
+    // Handle tax, shipping, discount updates
+    if (tax !== undefined) updateData.tax = Number(tax) || 0
+    if (shippingCost !== undefined) updateData.shippingCost = Number(shippingCost) || 0
+    if (discount !== undefined) updateData.discount = Number(discount) || 0
+
     // If status changed to PAID and no manual paidDate was provided, set paidDate automatically
     if (status === InvoiceStatus.PAID && !existingInvoice.paidDate && paidDate === undefined) {
       updateData.paidDate = new Date()
     }
 
     // Handle items update if provided
+    let newSubtotal = existingInvoice.subtotal
     if (items && Array.isArray(items)) {
       // Delete existing items
       await prisma.invoiceItem.deleteMany({
@@ -169,17 +178,28 @@ export async function PUT(
         })),
       }
 
-      // Recalculate totals
-      const subtotal = items.reduce(
+      // Calculate new subtotal from items
+      newSubtotal = items.reduce(
         (sum: number, item: any) => sum + item.quantity * item.unitPrice,
         0
       )
-      updateData.subtotal = subtotal
-      updateData.total =
-        subtotal +
-        (existingInvoice.tax || 0) +
-        (existingInvoice.shippingCost || 0) -
-        (existingInvoice.discount || 0)
+      updateData.subtotal = newSubtotal
+    }
+
+    // Recalculate total if any amount-related field changed
+    const needsRecalculation =
+      items !== undefined ||
+      tax !== undefined ||
+      shippingCost !== undefined ||
+      discount !== undefined
+
+    if (needsRecalculation) {
+      const finalTax = updateData.tax !== undefined ? updateData.tax : existingInvoice.tax
+      const finalShipping = updateData.shippingCost !== undefined ? updateData.shippingCost : existingInvoice.shippingCost
+      const finalDiscount = updateData.discount !== undefined ? updateData.discount : existingInvoice.discount
+      const finalSubtotal = updateData.subtotal !== undefined ? updateData.subtotal : existingInvoice.subtotal
+
+      updateData.total = finalSubtotal + (finalTax || 0) + (finalShipping || 0) - (finalDiscount || 0)
     }
 
     const invoice = await prisma.invoice.update({

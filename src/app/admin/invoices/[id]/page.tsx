@@ -30,6 +30,9 @@ import {
   Wallet,
   Banknote,
   X,
+  Receipt,
+  ExternalLink,
+  Pencil,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -53,6 +56,7 @@ interface InvoicePayment {
   id: string
   amount: number
   paymentMethod: string
+  paymentType: 'DEPOSIT' | 'INSTALLMENT' | 'FINAL'
   reference: string | null
   paidAt: string
   notes: string | null
@@ -60,7 +64,18 @@ interface InvoicePayment {
     id: string
     name: string
   } | null
+  receipt: {
+    id: string
+    receiptNumber: string
+  } | null
   createdAt: string
+}
+
+// Payment type labels and colors
+const paymentTypeConfig: Record<string, { label: string; color: string }> = {
+  DEPOSIT: { label: 'Avance', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  INSTALLMENT: { label: 'Acompte', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  FINAL: { label: 'Solde', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
 }
 
 // Payment method labels
@@ -149,6 +164,7 @@ export default function InvoiceDetailPage() {
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
     paymentMethod: 'CASH',
+    paymentType: '' as '' | 'DEPOSIT' | 'INSTALLMENT' | 'FINAL', // Empty means auto-detect
     reference: '',
     paidAt: new Date().toISOString().split('T')[0],
     notes: '',
@@ -211,6 +227,7 @@ export default function InvoiceDetailPage() {
         body: JSON.stringify({
           amount: parseFloat(paymentForm.amount),
           paymentMethod: paymentForm.paymentMethod,
+          paymentType: paymentForm.paymentType || undefined, // undefined = auto-detect
           reference: paymentForm.reference || null,
           paidAt: paymentForm.paidAt,
           notes: paymentForm.notes || null,
@@ -230,6 +247,7 @@ export default function InvoiceDetailPage() {
         setPaymentForm({
           amount: '',
           paymentMethod: 'CASH',
+          paymentType: '',
           reference: '',
           paidAt: new Date().toISOString().split('T')[0],
           notes: '',
@@ -541,13 +559,20 @@ export default function InvoiceDetailPage() {
             <RefreshCw className={`h-4 w-4 ${updating ? 'animate-spin' : ''}`} />
             Actualiser
           </button>
+          <Link
+            href={`/admin/invoices/${params.id}/edit`}
+            className="flex items-center gap-2 px-4 py-2 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded-lg transition-all duration-200"
+          >
+            <Pencil className="h-4 w-4" />
+            Modifier facture
+          </Link>
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
             >
               <Edit className="h-4 w-4" />
-              Modifier
+              Options
             </button>
           ) : (
             <button
@@ -750,8 +775,9 @@ export default function InvoiceDetailPage() {
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-dark-700 print:border-gray-300">
                       <th className="text-left py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Date</th>
+                      <th className="text-left py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Type</th>
                       <th className="text-left py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Mode</th>
-                      <th className="text-left py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Référence</th>
+                      <th className="text-left py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Réf / Reçu</th>
                       <th className="text-right py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm">Montant</th>
                       <th className="text-right py-2 text-gray-500 dark:text-gray-400 print:text-gray-600 font-medium text-sm print:hidden">Actions</th>
                     </tr>
@@ -763,6 +789,8 @@ export default function InvoiceDetailPage() {
                       const paidAfterThis = paymentsUpToThis.reduce((sum, p) => sum + p.amount, 0)
                       const balanceAfterThis = invoice.total - (invoice.amountPaid || 0) + paidAfterThis - payment.amount
 
+                      const typeConfig = paymentTypeConfig[payment.paymentType] || paymentTypeConfig.INSTALLMENT
+
                       return (
                         <tr key={payment.id} className="border-b border-gray-200 dark:border-dark-800 print:border-gray-200 last:border-0">
                           <td className="py-3 text-gray-900 dark:text-white print:text-gray-900 text-sm">
@@ -772,16 +800,31 @@ export default function InvoiceDetailPage() {
                               year: 'numeric',
                             })}
                           </td>
+                          <td className="py-3 text-sm">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${typeConfig.color}`}>
+                              {typeConfig.label}
+                            </span>
+                          </td>
                           <td className="py-3 text-gray-900 dark:text-white print:text-gray-900 text-sm">
                             <span className="px-2 py-1 bg-gray-100 dark:bg-dark-800 print:bg-gray-100 rounded text-xs">
                               {paymentMethodLabels[payment.paymentMethod] || payment.paymentMethod}
                             </span>
                           </td>
                           <td className="py-3 text-gray-600 dark:text-gray-300 print:text-gray-600 text-sm">
-                            {payment.reference || '-'}
+                            {payment.reference && <span className="block">{payment.reference}</span>}
+                            {payment.receipt && (
+                              <Link
+                                href={`/admin/receipts/${payment.receipt.id}`}
+                                className="flex items-center gap-1 text-primary-400 hover:text-primary-300 text-xs mt-1"
+                              >
+                                <Receipt className="h-3 w-3" />
+                                {payment.receipt.receiptNumber}
+                              </Link>
+                            )}
                             {payment.notes && (
                               <p className="text-xs text-gray-500 mt-1">{payment.notes}</p>
                             )}
+                            {!payment.reference && !payment.receipt && '-'}
                           </td>
                           <td className="py-3 text-right text-green-400 print:text-green-600 font-medium text-sm">
                             +{formatCurrency(payment.amount)}
@@ -1136,6 +1179,26 @@ export default function InvoiceDetailPage() {
                     50%
                   </button>
                 </div>
+              </div>
+
+              {/* Payment Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                  Type de paiement
+                </label>
+                <select
+                  value={paymentForm.paymentType}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentType: e.target.value as '' | 'DEPOSIT' | 'INSTALLMENT' | 'FINAL' })}
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">🔄 Auto-détection</option>
+                  <option value="DEPOSIT">🔵 Avance (premier paiement)</option>
+                  <option value="INSTALLMENT">🟠 Acompte (paiement intermédiaire)</option>
+                  <option value="FINAL">🟢 Solde (paiement final)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Laissez sur "Auto-détection" pour que le système détermine automatiquement le type
+                </p>
               </div>
 
               {/* Payment Method */}

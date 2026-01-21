@@ -521,6 +521,12 @@ enum InvoiceStatus {
   REFUNDED
 }
 
+enum InvoicePaymentType {
+  DEPOSIT       // Avance (premier paiement)
+  INSTALLMENT   // Acompte (paiement intermédiaire)
+  FINAL         // Solde (paiement final)
+}
+
 model Invoice {
   id              String        @id @default(cuid())
   invoiceNumber   String        @unique
@@ -619,6 +625,7 @@ model InvoicePayment {
   // Payment details
   amount          Float         // Amount of this payment
   paymentMethod   PaymentMethod // Payment method used
+  paymentType     InvoicePaymentType @default(INSTALLMENT) // Type de paiement (Avance/Acompte/Solde)
   reference       String?       // Transaction reference / receipt number
   paidAt          DateTime      @default(now()) // When this payment was made
 

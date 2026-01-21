@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { prisma } from '@/lib/prisma'
-import { InvoiceStatus } from '@prisma/client'
+import { InvoiceStatus, InvoicePaymentType } from '@prisma/client'
 import { z } from 'zod'
+import { generateReceiptNumber, getPaymentMethodLabel } from '@/lib/receipt-generator'
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
@@ -22,9 +23,13 @@ const PAYMENT_METHODS = [
   'OTHER',
 ] as const
 
+// Payment types
+const PAYMENT_TYPES = ['DEPOSIT', 'INSTALLMENT', 'FINAL'] as const
+
 const addPaymentSchema = z.object({
   amount: z.number().positive('Le montant doit être positif'),
   paymentMethod: z.enum(PAYMENT_METHODS as unknown as [string, ...string[]]),
+  paymentType: z.enum(PAYMENT_TYPES as unknown as [string, ...string[]]).optional(),
   reference: z.string().optional().nullable(),
   paidAt: z.string().optional(), // ISO date string
   notes: z.string().optional().nullable(),
@@ -49,6 +54,12 @@ export async function GET(
           select: {
             id: true,
             name: true,
+          },
+        },
+        receipt: {
+          select: {
+            id: true,
+            receiptNumber: true,
           },
         },
       },
@@ -109,9 +120,9 @@ export async function POST(
       )
     }
 
-    const { amount, paymentMethod, reference, paidAt, notes } = validationResult.data
+    const { amount, paymentMethod, paymentType, reference, paidAt, notes } = validationResult.data
 
-    // Get the invoice
+    // Get the invoice with customer info for receipt
     const invoice = await prisma.invoice.findUnique({
       where: { id: params.id },
       select: {
@@ -120,6 +131,9 @@ export async function POST(
         total: true,
         amountPaid: true,
         status: true,
+        customerName: true,
+        customerPhone: true,
+        customerEmail: true,
       },
     })
 
@@ -164,16 +178,42 @@ export async function POST(
       newStatus = InvoiceStatus.PARTIAL
     }
 
-    // Create payment and update invoice in a transaction
-    const [payment, updatedInvoice] = await prisma.$transaction([
+    // Check if this is the first payment (for auto-detect DEPOSIT)
+    const existingPaymentsCount = await prisma.invoicePayment.count({
+      where: { invoiceId: params.id },
+    })
+
+    // Determine payment type:
+    // - If balance = 0 after this payment → FINAL
+    // - If no payment type specified and first payment → DEPOSIT
+    // - Otherwise use specified type or default INSTALLMENT
+    let finalPaymentType: InvoicePaymentType
+    if (isFullyPaid) {
+      finalPaymentType = InvoicePaymentType.FINAL
+    } else if (paymentType) {
+      finalPaymentType = paymentType as InvoicePaymentType
+    } else if (existingPaymentsCount === 0) {
+      finalPaymentType = InvoicePaymentType.DEPOSIT
+    } else {
+      finalPaymentType = InvoicePaymentType.INSTALLMENT
+    }
+
+    const paymentDate = paidAt ? new Date(paidAt) : new Date()
+
+    // Generate receipt number for this payment
+    const receiptNumber = await generateReceiptNumber()
+
+    // Create payment, receipt, and update invoice in a transaction
+    const [payment, receipt, updatedInvoice] = await prisma.$transaction([
       // Create the payment record
       prisma.invoicePayment.create({
         data: {
           invoiceId: params.id,
           amount,
           paymentMethod: paymentMethod as any,
+          paymentType: finalPaymentType,
           reference: reference || null,
-          paidAt: paidAt ? new Date(paidAt) : new Date(),
+          paidAt: paymentDate,
           notes: notes || null,
           createdById: (session.user as any).id,
         },
@@ -184,6 +224,21 @@ export async function POST(
               name: true,
             },
           },
+        },
+      }),
+      // Create receipt for this payment
+      prisma.receipt.create({
+        data: {
+          receiptNumber,
+          invoiceId: params.id,
+          customerName: invoice.customerName,
+          customerPhone: invoice.customerPhone || null,
+          customerEmail: invoice.customerEmail || null,
+          amount,
+          paymentMethod: paymentMethod,
+          paymentDate: paymentDate,
+          createdById: (session.user as any).id,
+          createdByName: (session.user as any).name || 'Admin',
         },
       }),
       // Update invoice totals and status
@@ -198,9 +253,25 @@ export async function POST(
       }),
     ])
 
+    // Link receipt to payment
+    await prisma.receipt.update({
+      where: { id: receipt.id },
+      data: { invoicePaymentId: payment.id },
+    })
+
     return NextResponse.json({
       success: true,
-      payment,
+      payment: {
+        ...payment,
+        receipt: {
+          id: receipt.id,
+          receiptNumber: receipt.receiptNumber,
+        },
+      },
+      receipt: {
+        id: receipt.id,
+        receiptNumber: receipt.receiptNumber,
+      },
       invoice: {
         amountPaid: updatedInvoice.amountPaid,
         remainingBalance: updatedInvoice.total - updatedInvoice.amountPaid,
@@ -245,7 +316,7 @@ export async function DELETE(
       )
     }
 
-    // Get the payment
+    // Get the payment with its receipt
     const payment = await prisma.invoicePayment.findUnique({
       where: { id: paymentId },
       include: {
@@ -255,6 +326,11 @@ export async function DELETE(
             total: true,
             amountPaid: true,
             status: true,
+          },
+        },
+        receipt: {
+          select: {
+            id: true,
           },
         },
       },
@@ -282,11 +358,27 @@ export async function DELETE(
       newStatus = InvoiceStatus.PARTIAL
     }
 
-    // Delete payment and update invoice
-    await prisma.$transaction([
+    // Build transaction operations
+    const transactionOperations = []
+
+    // Delete associated receipt first if exists
+    if (payment.receipt) {
+      transactionOperations.push(
+        prisma.receipt.delete({
+          where: { id: payment.receipt.id },
+        })
+      )
+    }
+
+    // Delete payment
+    transactionOperations.push(
       prisma.invoicePayment.delete({
         where: { id: paymentId },
-      }),
+      })
+    )
+
+    // Update invoice
+    transactionOperations.push(
       prisma.invoice.update({
         where: { id: params.id },
         data: {
@@ -295,8 +387,11 @@ export async function DELETE(
           // Clear paidDate if no longer fully paid
           ...(newAmountPaid < payment.invoice.total && { paidDate: null }),
         },
-      }),
-    ])
+      })
+    )
+
+    // Execute transaction
+    await prisma.$transaction(transactionOperations)
 
     return NextResponse.json({
       success: true,
