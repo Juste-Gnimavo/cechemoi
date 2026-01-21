@@ -185,7 +185,7 @@ export default function ServicesPage() {
       }
     } catch (error) {
       console.error('Error adding:', error)
-      toast.error('Erreur lors de la creation')
+      toast.error('Erreur lors de la création')
     } finally {
       setSaving(false)
     }
@@ -349,7 +349,7 @@ export default function ServicesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Icone
+                    Icône
                   </label>
                   <div className="flex gap-2">
                     {iconOptions.map((opt) => (
@@ -399,7 +399,7 @@ export default function ServicesPage() {
                       value={feature}
                       onChange={(e) => updateFeature(idx, e.target.value)}
                       className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                      placeholder="Ex: Analyse complete"
+                      placeholder="Ex: Analyse complète"
                     />
                     <button
                       type="button"
@@ -520,7 +520,7 @@ export default function ServicesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Icone
+                    Icône
                   </label>
                   <div className="flex gap-2">
                     {iconOptions.map((opt) => (

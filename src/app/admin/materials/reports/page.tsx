@@ -68,8 +68,8 @@ const PERIODS = [
   { value: 'yesterday', label: 'Hier' },
   { value: 'week', label: '7 derniers jours' },
   { value: 'month', label: '30 derniers jours' },
-  { value: 'year', label: "Annee en cours" },
-  { value: 'custom', label: 'Personnalise' },
+  { value: 'year', label: "Année en cours" },
+  { value: 'custom', label: 'Personnalisé' },
 ]
 
 export default function MaterialReportsPage() {
@@ -131,7 +131,7 @@ export default function MaterialReportsPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Rapports Materiels
+              Rapports Matériels
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
               Statistiques et analyses du stock atelier
@@ -152,7 +152,7 @@ export default function MaterialReportsPage() {
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="font-medium text-gray-700 dark:text-gray-300">Periode:</span>
+            <span className="font-medium text-gray-700 dark:text-gray-300">Période:</span>
           </div>
           <select
             value={period}
@@ -173,7 +173,7 @@ export default function MaterialReportsPage() {
                 onChange={(e) => setStartDate(e.target.value)}
                 className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white"
               />
-              <span className="text-gray-500">a</span>
+              <span className="text-gray-500">à</span>
               <input
                 type="date"
                 value={endDate}
@@ -196,7 +196,7 @@ export default function MaterialReportsPage() {
         </div>
       ) : !data ? (
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center">
-          <p className="text-gray-500 dark:text-gray-400">Erreur lors du chargement des donnees</p>
+          <p className="text-gray-500 dark:text-gray-400">Erreur lors du chargement des données</p>
         </div>
       ) : (
         <>
@@ -208,7 +208,7 @@ export default function MaterialReportsPage() {
                   <ArrowDownCircle className="h-5 w-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Entrees</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Entrées</p>
                   <p className="text-xl font-bold text-gray-900 dark:text-white">
                     {data.summary.entries.count}
                   </p>
@@ -280,7 +280,7 @@ export default function MaterialReportsPage() {
                       >
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {item.tailor?.name || 'Non assigne'}
+                            {item.tailor?.name || 'Non assigné'}
                           </p>
                           <p className="text-sm text-gray-500">{item.count} mouvements</p>
                         </div>
@@ -342,7 +342,7 @@ export default function MaterialReportsPage() {
                   Mouvements par Staff
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Qui a enregistre les mouvements
+                  Qui a enregistré les mouvements
                 </p>
               </div>
               <div className="p-4">
@@ -392,13 +392,13 @@ export default function MaterialReportsPage() {
               <div className="p-4 border-b border-gray-200 dark:border-dark-700">
                 <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Package className="h-5 w-5 text-primary-500" />
-                  Materiels les plus utilises
+                  Matériels les plus utilisés
                 </h2>
               </div>
               <div className="p-4">
                 {data.topMaterials.length === 0 ? (
                   <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    Aucune donnee sur cette période
+                    Aucune donnée sur cette période
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -412,7 +412,7 @@ export default function MaterialReportsPage() {
                             {item.material?.name || 'Inconnu'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {item.totalQuantity} {item.material?.unit || 'unites'}
+                            {item.totalQuantity} {item.material?.unit || 'unités'}
                           </p>
                         </div>
                         <div className="text-right">

@@ -334,7 +334,7 @@ export default function TailorsPage() {
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                     <Box className="h-3 w-3" />
-                    Materiels utilises
+                    Matériels utilisés
                   </p>
                   <Link
                     href={`/admin/materials/movements?tailorId=${tailor.id}`}

@@ -372,7 +372,7 @@ export default function PushNotificationTemplatesPage() {
                   <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center gap-2 mb-2">
                       <Smartphone className="w-4 h-4 text-gray-400" />
-                      <span className="text-xs text-gray-500">Apercu notification</span>
+                      <span className="text-xs text-gray-500">Aperçu notification</span>
                     </div>
                     <div className="font-medium text-gray-900 text-sm">
                       {template.pushTitle || 'Titre non défini'}
@@ -486,7 +486,7 @@ export default function PushNotificationTemplatesPage() {
 
               {/* Preview */}
               <div className="p-4 bg-gray-900 rounded-lg">
-                <div className="text-xs text-gray-400 mb-2">Apercu iOS/Android</div>
+                <div className="text-xs text-gray-400 mb-2">Aperçu iOS/Android</div>
                 <div className="bg-gray-800 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-6 h-6 bg-purple-600 rounded-lg flex items-center justify-center">

@@ -97,7 +97,7 @@ export default function CustomerSourcesPage() {
               Sources d'Acquisition
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              D'ou viennent vos clients ?
+              D'où viennent vos clients ?
             </p>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function CustomerSourcesPage() {
             { value: 'day', label: "Aujourd'hui" },
             { value: 'week', label: 'Semaine' },
             { value: 'month', label: 'Mois' },
-            { value: 'year', label: 'Annee' },
+            { value: 'year', label: 'Année' },
             { value: 'all', label: 'Tout' },
           ].map((option) => (
             <button
@@ -180,7 +180,7 @@ export default function CustomerSourcesPage() {
             <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <PieChart className="h-5 w-5 text-primary-500" />
-                Repartition par source
+                Répartition par source
               </h2>
 
               {/* Simple visual chart */}
@@ -225,7 +225,7 @@ export default function CustomerSourcesPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary-500" />
-                  Evolution
+                  Évolution
                 </h2>
                 <div className="inline-flex rounded-lg border border-gray-200 dark:border-dark-700 p-0.5">
                   <button
@@ -293,7 +293,7 @@ export default function CustomerSourcesPage() {
           <div className="mt-6 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary-500" />
-              Details par source
+              Détails par source
             </h2>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-dark-700">

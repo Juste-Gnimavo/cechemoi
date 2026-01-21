@@ -92,7 +92,7 @@ export default function NewExpensePage() {
       return
     }
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error('Le montant doit etre positif')
+      toast.error('Le montant doit être positif')
       return
     }
 
@@ -292,7 +292,7 @@ export default function NewExpensePage() {
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-              placeholder="Notes supplementaires..."
+              placeholder="Notes supplémentaires..."
             />
           </div>
         </div>

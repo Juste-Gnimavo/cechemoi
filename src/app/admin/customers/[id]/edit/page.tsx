@@ -403,9 +403,9 @@ export default function EditCustomerPage() {
                 <option value="Facebook">Facebook</option>
                 <option value="TikTok">TikTok</option>
                 <option value="Google">Google</option>
-                <option value="Bouche a oreille">Bouche à oreille (ami/famille)</option>
-                <option value="Publicite">Publicité</option>
-                <option value="Evenement">Évènement / Salon</option>
+                <option value="Bouche à oreille">Bouche à oreille (ami/famille)</option>
+                <option value="Publicité">Publicité</option>
+                <option value="Événement">Événement / Salon</option>
                 <option value="Autre">Autre</option>
               </select>
             </div>
@@ -484,7 +484,7 @@ export default function EditCustomerPage() {
                 placeholder="CI"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Code ISO a 2 lettres
+                Code ISO à 2 lettres
               </p>
             </div>
           </div>
@@ -498,7 +498,7 @@ export default function EditCustomerPage() {
             collapsed={true}
           />
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Les modifications seront enregistrees directement.
+            Les modifications seront enregistrées directement.
           </p>
         </div>
 
@@ -506,13 +506,13 @@ export default function EditCustomerPage() {
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <User className="h-5 w-5 mr-2 text-primary-400" />
-            Programme de Fidelite
+            Programme de Fidélité
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
-                Niveau de fidelite
+                Niveau de fidélité
               </label>
               <select
                 value={loyaltyTier}

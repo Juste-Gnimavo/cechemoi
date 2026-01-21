@@ -282,7 +282,7 @@ export default function TeamMemberProfilePage() {
                 <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Paiements recus</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Paiements reçus</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.paymentsReceived}</p>
                 <p className="text-xs text-gray-400">{stats.paymentsValue.toLocaleString()} FCFA</p>
               </div>
@@ -311,7 +311,7 @@ export default function TeamMemberProfilePage() {
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <ShoppingBag className="h-5 w-5 text-primary-500" />
-              Commandes recentes
+              Commandes récentes
             </h2>
             {recentOrders.length > 0 ? (
               <div className="overflow-x-auto">
@@ -365,7 +365,7 @@ export default function TeamMemberProfilePage() {
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Users className="h-5 w-5 text-primary-500" />
-              Clients créés recemment
+              Clients créés récemment
             </h2>
             {recentCustomers.length > 0 ? (
               <div className="overflow-x-auto">
@@ -431,7 +431,7 @@ export default function TeamMemberProfilePage() {
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-gray-400" />
                 <div>
-                  <p className="text-xs text-gray-500">Role</p>
+                  <p className="text-xs text-gray-500">Rôle</p>
                   <p className="text-sm text-gray-900 dark:text-white">{getRoleLabel(member.role)}</p>
                 </div>
               </div>
@@ -468,7 +468,7 @@ export default function TeamMemberProfilePage() {
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-primary-500" />
-              Paiements recents
+              Paiements récents
             </h2>
             {recentPayments.length > 0 ? (
               <div className="space-y-3">

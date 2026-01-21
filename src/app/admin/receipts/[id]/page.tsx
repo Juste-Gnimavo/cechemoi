@@ -241,7 +241,7 @@ export default function ReceiptDetailPage() {
 
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                RECU DE PAIEMENT
+                REÇU DE PAIEMENT
               </h3>
               <p className="text-purple-600 font-mono mt-2">{receipt.receiptNumber}</p>
             </div>

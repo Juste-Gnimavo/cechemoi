@@ -318,7 +318,7 @@ export default function CustomOrderDetailPage() {
       }
     } catch (error: any) {
       console.error('Error uploading file:', error)
-      toast.error(error.message || 'Erreur lors du telechargement')
+      toast.error(error.message || 'Erreur lors du téléchargement')
     } finally {
       setUploadingFile(false)
       // Reset input
@@ -359,7 +359,7 @@ export default function CustomOrderDetailPage() {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Notes enregistrees')
+        toast.success('Notes enregistrées')
         setEditingNotes(false)
         fetchOrder()
       } else {
@@ -1029,7 +1029,7 @@ export default function CustomOrderDetailPage() {
                     )}
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-dark-700">
                       {payment.receivedBy && (
-                        <p className="text-xs text-gray-400">Recu par {payment.receivedBy.name}</p>
+                        <p className="text-xs text-gray-400">Reçu par {payment.receivedBy.name}</p>
                       )}
                       {payment.receipt && (
                         <Link

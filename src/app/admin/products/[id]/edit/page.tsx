@@ -673,8 +673,8 @@ export default function EditProductPage() {
                 >
                   <option value="">Sélectionner</option>
                   <option value="Robe">Robe</option>
-                  <option value="Robe de soiree">Robe de soirée</option>
-                  <option value="Robe de mariee">Robe de mariée</option>
+                  <option value="Robe de soirée">Robe de soirée</option>
+                  <option value="Robe de mariée">Robe de mariée</option>
                   <option value="Robe traditionnelle">Robe traditionnelle</option>
                   <option value="Ensemble">Ensemble</option>
                   <option value="Ensemble homme">Ensemble homme</option>
@@ -717,9 +717,9 @@ export default function EditProductPage() {
                   <option value="Moderne">Moderne</option>
                   <option value="Casual">Casual</option>
                   <option value="Chic">Chic</option>
-                  <option value="Ceremonie">Cérémonie</option>
+                  <option value="Cérémonie">Cérémonie</option>
                   <option value="Mariage">Mariage</option>
-                  <option value="Soiree">Soirée</option>
+                  <option value="Soirée">Soirée</option>
                   <option value="Travail">Travail</option>
                   <option value="Streetwear">Streetwear</option>
                 </select>

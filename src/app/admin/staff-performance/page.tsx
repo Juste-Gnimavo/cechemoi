@@ -148,7 +148,7 @@ export default function StaffPerformancePage() {
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `performance-equipe-${new Date().toISOString().split('T')[0]}.csv`
+    link.download = `performance-équipe-${new Date().toISOString().split('T')[0]}.csv`
     link.click()
 
     toast.success('Export CSV téléchargé')
@@ -316,7 +316,7 @@ export default function StaffPerformancePage() {
                     <SortButton field="name">Membre</SortButton>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Role
+                    Rôle
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     <SortButton field="customersCreated">Clients Créés</SortButton>

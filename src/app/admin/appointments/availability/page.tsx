@@ -147,7 +147,7 @@ export default function AvailabilityPage() {
       }
     } catch (error) {
       console.error('Error adding:', error)
-      toast.error('Erreur lors de la creation')
+      toast.error('Erreur lors de la création')
     } finally {
       setSaving(false)
     }
@@ -260,7 +260,7 @@ export default function AvailabilityPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Ferméture
+                    Fermeture
                   </label>
                   <input
                     type="time"

@@ -37,7 +37,7 @@ export default function ImportCustomersPage() {
 
   const parseText = () => {
     if (!rawText.trim()) {
-      toast.error('Veuillez coller des donnees')
+      toast.error('Veuillez coller des données')
       return
     }
 
@@ -112,7 +112,7 @@ export default function ImportCustomersPage() {
 
   const importCustomers = async () => {
     if (parsedCustomers.length === 0) {
-      toast.error('Aucun client a importer')
+      toast.error('Aucun client à importer')
       return
     }
 
@@ -128,10 +128,10 @@ export default function ImportCustomersPage() {
       if (data.success) {
         setResult(data.results)
         if (data.results.created > 0) {
-          toast.success(`${data.results.created} client(s) importe(s)`)
+          toast.success(`${data.results.created} client(s) importé(s)`)
         }
         if (data.results.skipped > 0) {
-          toast.error(`${data.results.skipped} client(s) ignore(s)`)
+          toast.error(`${data.results.skipped} client(s) ignoré(s)`)
         }
         // Clear parsed if all successful
         if (data.results.skipped === 0) {
@@ -170,7 +170,7 @@ export default function ImportCustomersPage() {
               Importer des Clients
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Collez vos donnees clients pour les importer en masse
+              Collez vos données clients pour les importer en masse
             </p>
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function ImportCustomersPage() {
 
       {/* Delimiter Selection */}
       <div className="mb-4 flex items-center gap-4">
-        <span className="text-sm text-gray-700 dark:text-gray-300">Separateur:</span>
+        <span className="text-sm text-gray-700 dark:text-gray-300">Séparateur:</span>
         <div className="inline-flex rounded-lg border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 p-1">
           {[
             { value: 'auto', label: 'Auto' },
@@ -225,7 +225,7 @@ export default function ImportCustomersPage() {
       <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
           <FileText className="h-4 w-4 inline mr-2" />
-          Collez vos donnees ici
+          Collez vos données ici
         </label>
         <textarea
           value={rawText}
@@ -261,7 +261,7 @@ export default function ImportCustomersPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Users className="h-5 w-5 text-primary-500" />
-              Apercu ({parsedCustomers.length} clients)
+              Aperçu ({parsedCustomers.length} clients)
             </h2>
             <button
               onClick={importCustomers}
@@ -315,7 +315,7 @@ export default function ImportCustomersPage() {
       {/* Import Results */}
       {result && (
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Resultat de l'import</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Résultat de l'import</h2>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -330,13 +330,13 @@ export default function ImportCustomersPage() {
                 <AlertTriangle className="h-5 w-5 text-yellow-500" />
                 <span className="text-2xl font-bold text-yellow-600">{result.skipped}</span>
               </div>
-              <p className="text-sm text-yellow-600">Client(s) ignore(s)</p>
+              <p className="text-sm text-yellow-600">Client(s) ignoré(s)</p>
             </div>
           </div>
 
           {result.errors.length > 0 && (
             <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Details des erreurs:</h3>
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Détails des erreurs:</h3>
               <div className="max-h-40 overflow-y-auto bg-gray-50 dark:bg-dark-900 rounded-lg p-3">
                 {result.errors.map((error, index) => (
                   <p key={index} className="text-sm text-red-600 dark:text-red-400">

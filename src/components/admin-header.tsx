@@ -242,7 +242,6 @@ export function AdminHeader() {
             { href: '/admin/invoices?status=cancelled', label: 'Factures annulées' },
             { href: '/admin/invoices?status=refunded', label: 'Factures remboursées' },
             { href: '/admin/invoices/standalone-payments', label: 'Paiements autonomes', badge: 'NEW' },
-            { href: '/admin/invoices/transactions', label: 'Toutes les transactions' },
           ],
         },
         {
@@ -271,7 +270,6 @@ export function AdminHeader() {
                       { href: '/admin/expenses/categories', label: 'Catégories' },
             { href: '/admin/expenses', label: 'Toutes les dépenses' },
             { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
-            { href: '/admin/expenses/reports', label: 'Rapports de la caisse' },
             { href: '/admin/transactions', label: 'Transactions' },
           ],
         },

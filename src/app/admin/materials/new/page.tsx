@@ -95,10 +95,10 @@ export default function NewMaterialPage() {
         toast.success('Matériel créé avec succès')
         router.push('/admin/materials')
       } else {
-        toast.error(data.error || 'Erreur lors de la creation')
+        toast.error(data.error || 'Erreur lors de la création')
       }
     } catch (error) {
-      toast.error('Erreur lors de la creation')
+      toast.error('Erreur lors de la création')
     } finally {
       setSaving(false)
     }

@@ -226,7 +226,7 @@ function MovementsContent() {
             className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
           >
             <option value="">Tous les types</option>
-            <option value="IN">Entrees</option>
+            <option value="IN">Entrées</option>
             <option value="OUT">Sorties</option>
             <option value="ADJUST">Ajustements</option>
             <option value="RETURN">Retours</option>
@@ -260,7 +260,7 @@ function MovementsContent() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
-            placeholder="Date debut"
+            placeholder="Date début"
           />
           <input
             type="date"

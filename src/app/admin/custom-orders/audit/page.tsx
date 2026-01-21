@@ -187,7 +187,7 @@ export default function CustomOrdersAuditPage() {
             {[
               { value: 'week', label: 'Semaine' },
               { value: 'month', label: 'Mois' },
-              { value: 'custom', label: 'Personnalise' },
+              { value: 'custom', label: 'Personnalisé' },
             ].map((option) => (
               <button
                 key={option.value}
@@ -215,7 +215,7 @@ export default function CustomOrdersAuditPage() {
                   className="px-3 py-1.5 text-sm bg-gray-50 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white"
                 />
               </div>
-              <span className="text-gray-400">a</span>
+              <span className="text-gray-400">à</span>
               <input
                 type="date"
                 value={endDate}
@@ -422,7 +422,7 @@ export default function CustomOrdersAuditPage() {
                         disabled={page <= 1}
                         className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-900 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-800 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Precedent
+                        Précédent
                       </button>
                       <button
                         onClick={() => setPage(page + 1)}
