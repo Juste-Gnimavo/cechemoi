@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
       dateFilter.gte = new Date(startDate)
     }
     if (endDate) {
-      dateFilter.lte = new Date(endDate)
+      // Set to end of day to include all items from that day
+      const endDateTime = new Date(endDate)
+      endDateTime.setHours(23, 59, 59, 999)
+      dateFilter.lte = endDateTime
     }
 
     const hasDateFilter = Object.keys(dateFilter).length > 0
