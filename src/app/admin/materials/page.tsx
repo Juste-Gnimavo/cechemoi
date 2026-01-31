@@ -37,6 +37,24 @@ interface Material {
   movementsCount: number
 }
 
+// Unit labels with proper French accents
+const UNIT_LABELS: Record<string, string> = {
+  metre: 'Mètre',
+  cm: 'cm',
+  piece: 'Pièce',
+  bobine: 'Bobine',
+  rouleau: 'Rouleau',
+  kg: 'kg',
+  g: 'g',
+  paquet: 'Paquet',
+  boite: 'Boîte',
+}
+
+// Helper to get unit label with fallback
+const getUnitLabel = (unit: string): string => {
+  return UNIT_LABELS[unit] || unit
+}
+
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -121,34 +139,60 @@ export default function MaterialsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Stock Matériels</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Gestion du stock des matériels de l'atelier
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Stock Matériels</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
+              Gestion du stock des matériels de l'atelier
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/materials/in"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+            >
+              <ArrowDownCircle className="h-4 w-4" />
+              Entrée
+            </Link>
+            <Link
+              href="/admin/materials/out"
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+            >
+              <ArrowUpCircle className="h-4 w-4" />
+              Sortie
+            </Link>
+            <Link
+              href="/admin/materials/new"
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Nouveau
+            </Link>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        {/* Quick Navigation */}
+        <div className="flex flex-wrap gap-2">
           <Link
-            href="/admin/materials/in"
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+            href="/admin/materials/movements"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           >
-            <ArrowDownCircle className="h-4 w-4" />
-            Entrée
+            <RefreshCw className="h-3.5 w-3.5" />
+            Historique
           </Link>
           <Link
-            href="/admin/materials/out"
-            className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+            href="/admin/materials/categories"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           >
-            <ArrowUpCircle className="h-4 w-4" />
-            Sortie
+            <Filter className="h-3.5 w-3.5" />
+            Catégories
           </Link>
           <Link
-            href="/admin/materials/new"
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+            href="/admin/materials/reports"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
           >
-            <Plus className="h-4 w-4" />
-            Nouveau
+            <Package className="h-3.5 w-3.5" />
+            Rapports
           </Link>
         </div>
       </div>
@@ -345,7 +389,7 @@ export default function MaterialsPage() {
                             : 'text-gray-900 dark:text-white'
                         }`}
                       >
-                        {material.stock} {material.unit}
+                        {material.stock} {getUnitLabel(material.unit)}
                       </span>
                       {material.lowStockThreshold > 0 && (
                         <p className="text-xs text-gray-400">
@@ -404,30 +448,6 @@ export default function MaterialsPage() {
         </div>
       )}
 
-      {/* Quick Links */}
-      <div className="flex flex-wrap gap-4">
-        <Link
-          href="/admin/materials/movements"
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Historique des mouvements
-        </Link>
-        <Link
-          href="/admin/materials/categories"
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
-        >
-          <Filter className="h-4 w-4" />
-          Gérer les catégories
-        </Link>
-        <Link
-          href="/admin/materials/reports"
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
-        >
-          <Package className="h-4 w-4" />
-          Rapports
-        </Link>
-      </div>
     </div>
   )
 }

@@ -10,7 +10,7 @@ interface CustomerMeasurement {
   takenByStaffName?: string | null
 
   // All measurements are strings to allow flexible input like "87-2" or "50 - 45"
-  // Upper body
+  // Upper body (1-9)
   dos?: string | null
   carrureDevant?: string | null
   carrureDerriere?: string | null
@@ -21,24 +21,40 @@ interface CustomerMeasurement {
   longueurDetaille?: string | null
   bassin?: string | null
 
-  // Arms
-  longueurManches?: string | null
+  // Arms (10-12)
+  // 10. LONGUEUR DES MANCHES - 4 sub-fields (standalone)
+  longueurManchesCourtes?: string | null
+  longueurManchesAvantCoudes?: string | null
+  longueurManchesNiveau34?: string | null
+  longueurManchesLongues?: string | null
   tourDeManche?: string | null
   poignets?: string | null
 
-  // Torso
+  // Torso (13-17)
   pinces?: string | null
   longueurTotale?: string | null
-  longueurRobes?: string | null
+  // 15. LONGUEUR DES ROBES - 6 sub-fields (standalone)
+  longueurRobesAvantGenoux?: string | null
+  longueurRobesNiveauGenoux?: string | null
+  longueurRobesApresGenoux?: string | null
+  longueurRobesMiMollets?: string | null
+  longueurRobesChevilles?: string | null
+  longueurRobesTresLongue?: string | null
   longueurTunique?: string | null
   ceinture?: string | null
 
-  // Lower body
+  // Lower body (18-22)
   longueurPantalon?: string | null
   frappe?: string | null
   cuisse?: string | null
   genoux?: string | null
-  longueurJupe?: string | null
+  // 22. LONGUEUR JUPE - 6 sub-fields (standalone)
+  longueurJupeAvantGenoux?: string | null
+  longueurJupeNiveauGenoux?: string | null
+  longueurJupeApresGenoux?: string | null
+  longueurJupeMiMollets?: string | null
+  longueurJupeChevilles?: string | null
+  longueurJupeTresLongue?: string | null
 
   // Notes
   autresMesures?: string | null
@@ -116,69 +132,16 @@ function formatMeasurement(value: number | string | null | undefined, unit: stri
     return `${value} ${unit}`
   }
 
-  // If it's a string, check if it's JSON (new format with sub-values)
+  // If it's a string, return as-is (already formatted or a simple value)
   if (typeof value === 'string') {
-    // Check if it's a custom numeric value like "45cm"
-    if (value.match(/^\d+(\.\d+)?\s*(cm|inches)?$/i)) {
-      return value
+    // Check if value already has a unit
+    if (value.match(/\d+(\.\d+)?\s*(cm|inches)?$/i)) {
+      return value.includes('cm') || value.includes('inches') ? value : `${value} ${unit}`
     }
-    // Try to parse as JSON (new format)
-    try {
-      const parsed = JSON.parse(value)
-      if (typeof parsed === 'object' && parsed !== null) {
-        return formatLengthSubValues(parsed, unit)
-      }
-    } catch {
-      // Not JSON, return as legacy format
-      return getLengthOptionLabel(value)
-    }
+    return value
   }
 
   return String(value)
-}
-
-// Format JSON sub-values for length fields
-function formatLengthSubValues(values: Record<string, number | null | undefined>, unit: string): string {
-  const labels: Record<string, string> = {
-    // Sleeve lengths (longueurManches)
-    manchesCourtes: 'Courtes',
-    avantCoudes: 'Av. coudes',
-    niveau34: '3/4',
-    manchesLongues: 'Longues',
-    // Dress/Skirt lengths (longueurRobes, longueurJupe)
-    avantGenoux: 'Av. genoux',
-    niveauGenoux: 'Niv. genoux',
-    apresGenoux: 'Ap. genoux',
-    miMollets: 'Mi-mollets',
-    chevilles: 'Chevilles',
-    tresLongue: 'Tres longue',
-  }
-
-  const parts: string[] = []
-  for (const [key, val] of Object.entries(values)) {
-    if (val !== null && val !== undefined && val !== 0) {
-      const label = labels[key] || key
-      parts.push(`${label}: ${val}`)
-    }
-  }
-
-  return parts.length > 0 ? parts.join(', ') : ''
-}
-
-function getLengthOptionLabel(value: string): string {
-  const options: Record<string, string> = {
-    'courtes': 'Manches courtes',
-    'avant-coudes': 'Avant les coudes',
-    'niveau-3-4': 'Niveau 3/4',
-    'longues': 'Manches longues',
-    'avant-genoux': 'Avant les genoux',
-    'niveau-genoux': 'Au niveau des genoux',
-    'apres-genoux': 'Apres les genoux (crayon)',
-    'mi-mollets': 'Mi-mollets',
-    'chevilles': 'Niveau des chevilles',
-    'tres-longue': 'Tres longue',
-  }
-  return options[value] || value
 }
 
 function wrapText(text: string, maxChars: number): string[] {
@@ -435,7 +398,6 @@ export async function generateMeasurementsPDF(
   yPos = headerY - photoBoxSize - 8
 
   const lineHeight = 14 // Reduced line height
-  const infoWidth = width - margin - photoBoxSize - 20 // Leave space for photo
 
   drawInfoLineWithUnderline(
     page, 'DATE', formatDate(measurement.measurementDate),
@@ -486,7 +448,6 @@ export async function generateMeasurementsPDF(
   const tableWidth = width - margin * 2
   const colNumWidth = 30
   const colLabelWidth = 200
-  const colValueWidth = tableWidth - colNumWidth - colLabelWidth
 
   // Table Header - Red background like original
   page.drawRectangle({
@@ -567,7 +528,6 @@ export async function generateMeasurementsPDF(
   ]
 
   const rowHeight = 16 // Reduced row height
-  const expandedRowHeight = 32 // For rows with sub-options
   let rowY = tableStartY - 35
 
   // Helper function to draw a standard row
@@ -638,12 +598,11 @@ export async function generateMeasurementsPDF(
     rowY -= rowHeight
   }
 
-  // Helper to draw expanded row with sub-options (like client-profile.jpeg)
+  // Helper to draw expanded row with sub-options (standalone fields)
   const drawExpandedRow = (
     num: number,
     label: string,
-    jsonValue: string | null | undefined,
-    subLabels: Array<[string, string]>, // [key, label] pairs
+    subValues: Array<[string, string | null | undefined]>, // [label, value] pairs
     numLines: number
   ) => {
     const expandedHeight = numLines * 10 + 10 // Reduced height
@@ -693,25 +652,14 @@ export async function generateMeasurementsPDF(
       color: tableBorderColor,
     })
 
-    // Parse values
-    let values: Record<string, number | null | undefined> = {}
-    if (jsonValue) {
-      try {
-        values = JSON.parse(jsonValue)
-      } catch {
-        // Legacy format - ignore
-      }
-    }
-
     // Draw sub-options in two columns
     const valueColStart = margin + colNumWidth + colLabelWidth + 6
     const valueColWidth = (tableWidth - colNumWidth - colLabelWidth) / 2
     let subRowY = rowY + 1
 
-    for (let i = 0; i < subLabels.length; i += 2) {
+    for (let i = 0; i < subValues.length; i += 2) {
       // Left column
-      const [leftKey, leftLabel] = subLabels[i]
-      const leftVal = values[leftKey]
+      const [leftLabel, leftVal] = subValues[i]
       page.drawText(`${leftLabel}: ${leftVal ?? ''}`, {
         x: valueColStart,
         y: subRowY,
@@ -721,9 +669,8 @@ export async function generateMeasurementsPDF(
       })
 
       // Right column (if exists)
-      if (i + 1 < subLabels.length) {
-        const [rightKey, rightLabel] = subLabels[i + 1]
-        const rightVal = values[rightKey]
+      if (i + 1 < subValues.length) {
+        const [rightLabel, rightVal] = subValues[i + 1]
         page.drawText(`${rightLabel}: ${rightVal ?? ''}`, {
           x: valueColStart + valueColWidth,
           y: subRowY,
@@ -752,16 +699,15 @@ export async function generateMeasurementsPDF(
     drawStandardRow(m)
   }
 
-  // Row 10: LONGUEUR DES MANCHES (expanded)
+  // Row 10: LONGUEUR DES MANCHES (expanded - standalone fields)
   drawExpandedRow(
     10,
     'LONGUEUR DES MANCHES',
-    measurement.longueurManches,
     [
-      ['manchesCourtes', 'Manches courtes'],
-      ['niveau34', 'Niveau 3/4'],
-      ['avantCoudes', 'Avant les coudes'],
-      ['manchesLongues', 'Manches longues'],
+      ['Manches courtes', measurement.longueurManchesCourtes],
+      ['Niveau 3/4', measurement.longueurManchesNiveau34],
+      ['Avant les coudes', measurement.longueurManchesAvantCoudes],
+      ['Manches longues', measurement.longueurManchesLongues],
     ],
     2
   )
@@ -771,18 +717,17 @@ export async function generateMeasurementsPDF(
     drawStandardRow(m)
   }
 
-  // Row 15: LONGUEUR DES ROBES (expanded)
+  // Row 15: LONGUEUR DES ROBES (expanded - standalone fields)
   drawExpandedRow(
     15,
     'LONGUEUR DES ROBES',
-    measurement.longueurRobes,
     [
-      ['avantGenoux', 'Avant les genoux'],
-      ['miMollets', 'Mi-mollets'],
-      ['niveauGenoux', 'Au niveau des genoux'],
-      ['chevilles', 'Niveau des chevilles'],
-      ['apresGenoux', 'Apres les genoux (crayon)'],
-      ['tresLongue', 'Tres longue'],
+      ['Avant les genoux', measurement.longueurRobesAvantGenoux],
+      ['Mi-mollets', measurement.longueurRobesMiMollets],
+      ['Au niveau des genoux', measurement.longueurRobesNiveauGenoux],
+      ['Niveau des chevilles', measurement.longueurRobesChevilles],
+      ['Apres les genoux (crayon)', measurement.longueurRobesApresGenoux],
+      ['Tres longue', measurement.longueurRobesTresLongue],
     ],
     3
   )
@@ -792,18 +737,17 @@ export async function generateMeasurementsPDF(
     drawStandardRow(m)
   }
 
-  // Row 22: LONGUEUR JUPE (expanded)
+  // Row 22: LONGUEUR JUPE (expanded - standalone fields)
   drawExpandedRow(
     22,
     'LONGUEUR JUPE',
-    measurement.longueurJupe,
     [
-      ['avantGenoux', 'Avant les genoux'],
-      ['miMollets', 'Mi-mollets'],
-      ['niveauGenoux', 'Au niveau des genoux'],
-      ['chevilles', 'Niveau des chevilles'],
-      ['apresGenoux', 'Apres les genoux (crayon)'],
-      ['tresLongue', 'Tres longue'],
+      ['Avant les genoux', measurement.longueurJupeAvantGenoux],
+      ['Mi-mollets', measurement.longueurJupeMiMollets],
+      ['Au niveau des genoux', measurement.longueurJupeNiveauGenoux],
+      ['Niveau des chevilles', measurement.longueurJupeChevilles],
+      ['Apres les genoux (crayon)', measurement.longueurJupeApresGenoux],
+      ['Tres longue', measurement.longueurJupeTresLongue],
     ],
     3
   )
