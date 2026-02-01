@@ -959,7 +959,7 @@ export default function InvoiceDetailPage() {
                     <button
                       onClick={() => confirmStatusChange('PAID')}
                       disabled={updating}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg text-sm transition-all"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg text-sm transition-all shadow-sm"
                     >
                       <CheckCircle className="h-4 w-4" />
                       Marquer payée
