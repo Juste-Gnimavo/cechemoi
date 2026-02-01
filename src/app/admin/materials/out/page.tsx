@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, ArrowLeft, ArrowUpCircle, Package, User, FileText, AlertTriangle, Plus, Trash2, Calendar } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowUpCircle, Package, User, FileText, AlertTriangle, Plus, Trash2, Calendar, Scissors, Sparkles } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Material {
@@ -278,6 +278,25 @@ function MaterialOutForm() {
         </div>
       </div>
 
+      {/* Intro Card */}
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-5 text-white shadow-lg">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-white/20 rounded-lg">
+            <Scissors className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Sortie multi-matériels
+            </h2>
+            <p className="text-orange-100 mt-1 text-sm">
+              Pour confectionner une tenue, ajoutez tous les matériels nécessaires en un seul enregistrement :
+              tissu, fil, boutons, fermeture éclair, dentelle, doublure...
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-6">
@@ -292,9 +311,9 @@ function MaterialOutForm() {
               <button
                 type="button"
                 onClick={addMaterialRow}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg shadow-sm hover:shadow transition-all"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5" />
                 Ajouter un matériel
               </button>
             </div>
