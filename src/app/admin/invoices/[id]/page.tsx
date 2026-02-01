@@ -534,106 +534,130 @@ export default function InvoiceDetailPage() {
   return (
     <div className="space-y-6 print:space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between print:hidden">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/invoices"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-all duration-200"
-          >
-            <ArrowLeft className="h-5 w-5 text-gray-400" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Facture {invoice.invoiceNumber}
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              Créée le {formatDateTime(invoice.createdAt)}
-            </p>
+      <div className="print:hidden space-y-4">
+        {/* Row 1: Title + Status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/invoices"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-dark-800 rounded-lg transition-all duration-200"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-400" />
+            </Link>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {invoice.invoiceNumber}
+                </h1>
+                {getStatusBadge(invoice.status)}
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                Créée le {formatDateTime(invoice.createdAt)}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-3 flex-wrap">
-          <button
-            onClick={fetchInvoice}
-            disabled={updating}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
-          >
-            <RefreshCw className={`h-4 w-4 ${updating ? 'animate-spin' : ''}`} />
-            Actualiser
-          </button>
-          <Link
-            href={`/admin/invoices/${params.id}/edit`}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded-lg transition-all duration-200"
-          >
-            <Pencil className="h-4 w-4" />
-            Modifier facture
-          </Link>
-          {!isEditing ? (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
-            >
-              <Edit className="h-4 w-4" />
-              Options
-            </button>
-          ) : (
-            <button
-              onClick={handleSaveChanges}
-              disabled={updating}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200"
-            >
-              {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Enregistrer
-            </button>
-          )}
-          <a
-            href={`/api/invoices/${invoice.id}/pdf`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
-          >
-            <FileText className="h-4 w-4" />
-            Voir PDF
-          </a>
-          <a
-            href={`/api/invoices/${invoice.id}/pdf`}
-            download={`facture-${invoice.invoiceNumber}.pdf`}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
-          >
-            <Download className="h-4 w-4" />
-            Télécharger
-          </a>
-          <button
-            onClick={handleResendNotification}
-            disabled={sendingNotification}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border border-purple-500/30 rounded-lg transition-all duration-200"
-          >
-            {sendingNotification ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
-            Renvoyer notif.
-          </button>
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"
-          >
-            <Printer className="h-4 w-4" />
-            Imprimer
-          </button>
+          {/* Primary Action */}
           {!['PAID', 'CANCELLED', 'REFUNDED'].includes(invoice.status) && (
             <button
               onClick={() => setShowPaymentModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-green-500/25"
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-green-500/25"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               AJOUTER UN ACOMPTE
             </button>
           )}
-          <button
-            onClick={confirmDeleteInvoice}
-            disabled={deleting}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded-lg transition-all duration-200"
-          >
-            <Trash2 className={`h-4 w-4 ${deleting ? 'animate-spin' : ''}`} />
-            Supprimer
-          </button>
+        </div>
+
+        {/* Row 2: Action Buttons */}
+        <div className="flex items-center justify-between bg-white/50 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 p-3">
+          {/* Left: Edit Actions */}
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/admin/invoices/${params.id}/edit`}
+              className="flex items-center gap-2 px-3 py-2 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded-lg transition-all duration-200 text-sm font-medium"
+            >
+              <Pencil className="h-4 w-4" />
+              Modifier
+            </Link>
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-sm"
+              >
+                <Edit className="h-4 w-4" />
+                Options
+              </button>
+            ) : (
+              <button
+                onClick={handleSaveChanges}
+                disabled={updating}
+                className="flex items-center gap-2 px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200 text-sm"
+              >
+                {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Enregistrer
+              </button>
+            )}
+
+            <div className="w-px h-6 bg-gray-200 dark:bg-dark-700 mx-1" />
+
+            {/* Document Actions */}
+            <a
+              href={`/api/invoices/${invoice.id}/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-sm"
+              title="Voir PDF"
+            >
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">PDF</span>
+            </a>
+            <a
+              href={`/api/invoices/${invoice.id}/pdf`}
+              download={`facture-${invoice.invoiceNumber}.pdf`}
+              className="p-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200"
+              title="Télécharger"
+            >
+              <Download className="h-4 w-4" />
+            </a>
+            <button
+              onClick={handlePrint}
+              className="p-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200"
+              title="Imprimer"
+            >
+              <Printer className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Right: Secondary & Danger Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchInvoice}
+              disabled={updating}
+              className="p-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200"
+              title="Actualiser"
+            >
+              <RefreshCw className={`h-4 w-4 ${updating ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={handleResendNotification}
+              disabled={sendingNotification}
+              className="p-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg transition-all duration-200"
+              title="Renvoyer notification"
+            >
+              {sendingNotification ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+            </button>
+
+            <div className="w-px h-6 bg-gray-200 dark:bg-dark-700 mx-1" />
+
+            <button
+              onClick={confirmDeleteInvoice}
+              disabled={deleting}
+              className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded-lg transition-all duration-200"
+              title="Supprimer la facture"
+            >
+              <Trash2 className={`h-4 w-4 ${deleting ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
