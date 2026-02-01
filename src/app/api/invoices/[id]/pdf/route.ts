@@ -9,9 +9,9 @@ export const dynamic = 'force-dynamic'
 
 // Payment method labels
 const paymentMethodLabels: Record<string, string> = {
-  CASH: 'Especes',
+  CASH: 'Espèces',
   BANK_TRANSFER: 'Virement bancaire',
-  CHECK: 'Cheque',
+  CHECK: 'Chèque',
   ORANGE_MONEY: 'Orange Money',
   MTN_MOBILE_MONEY: 'MTN MoMo',
   MOOV_MONEY: 'Moov Money',
@@ -234,7 +234,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   yPos -= 11
-  page.drawText('Tel / WhatsApp: +225 0759545410', {
+  page.drawText('Tél / WhatsApp: +225 0759545410', {
     x: headerX,
     y: yPos,
     size: 9,
@@ -363,12 +363,12 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Get country info
-  const country = invoice.order?.shippingAddress?.country || 'Cote d\'Ivoire'
+  const country = invoice.order?.shippingAddress?.country || 'Côte d\'Ivoire'
 
   if (extractedPhone) {
     billingY -= 14
     // Phone and country on the same line
-    page.drawText(`Tel: ${safeText(extractedPhone)} - ${country}`, {
+    page.drawText(`Tél: ${safeText(extractedPhone)} - ${country}`, {
       x: billingX,
       y: billingY,
       size: 10,
@@ -448,7 +448,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     })
 
     shippingY -= 14
-    page.drawText(`Tel: ${safeText(addr.phone)}`, {
+    page.drawText(`Tél: ${safeText(addr.phone)}`, {
       x: shippingX,
       y: shippingY,
       size: 10,
@@ -797,7 +797,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
 
   if (amountPaid > 0 || invoice.payments?.length > 0) {
     // Amount paid
-    page.drawText('Montant paye', {
+    page.drawText('Montant payé', {
       x: totalsX,
       y: paymentSummaryY,
       size: 10,
@@ -886,14 +886,14 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
       font: helveticaBold,
       color: textColor,
     })
-    page.drawText('Reference', {
+    page.drawText('Référence', {
       x: payCol4,
       y: currentYPos - 7,
       size: 8,
       font: helveticaBold,
       color: textColor,
     })
-    page.drawText('Recu', {
+    page.drawText('Reçu', {
       x: payCol5,
       y: currentYPos - 7,
       size: 8,
@@ -1002,7 +1002,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     })
 
     currentYPos -= 15
-    page.drawText('Total paye:', {
+    page.drawText('Total payé:', {
       x: payCol4,
       y: currentYPos,
       size: 9,
@@ -1092,7 +1092,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   // Contact info
-  const contactText = 'Abidjan, Côte d\'Ivoire | email: cechemoicreations@gmail.com | Tel: +225 0759545410 | Site web: www.cechemoi.com'
+  const contactText = 'Abidjan, Côte d\'Ivoire | email: cechemoicreations@gmail.com | Tél: +225 0759545410 | Site web: www.cechemoi.com'
   const contactWidth = helvetica.widthOfTextAtSize(contactText, 8)
   page.drawText(contactText, {
     x: (width - contactWidth) / 2,
