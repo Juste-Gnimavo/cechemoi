@@ -7,6 +7,28 @@ import * as path from 'path'
 // Force dynamic rendering for API routes
 export const dynamic = 'force-dynamic'
 
+// Payment method labels
+const paymentMethodLabels: Record<string, string> = {
+  CASH: 'Especes',
+  BANK_TRANSFER: 'Virement bancaire',
+  CHECK: 'Cheque',
+  ORANGE_MONEY: 'Orange Money',
+  MTN_MOBILE_MONEY: 'MTN MoMo',
+  MOOV_MONEY: 'Moov Money',
+  WAVE: 'Wave',
+  PAIEMENTPRO: 'PaiementPro',
+  CARD: 'Carte bancaire',
+  PAYPAL: 'PayPal',
+  OTHER: 'Autre',
+}
+
+// Payment type labels
+const paymentTypeLabels: Record<string, string> = {
+  DEPOSIT: 'Avance',
+  INSTALLMENT: 'Acompte',
+  FINAL: 'Solde',
+}
+
 // Sanitize text for PDF - replace special Unicode characters that WinAnsi cannot encode
 function sanitizeForPdf(text: string): string {
   if (!text) return ''
@@ -56,6 +78,19 @@ export async function GET(
             shippingAddress: true,
           },
         },
+        payments: {
+          include: {
+            receipt: {
+              select: {
+                id: true,
+                receiptNumber: true,
+              },
+            },
+          },
+          orderBy: {
+            paidAt: 'asc',
+          },
+        },
       },
     })
 
@@ -102,7 +137,6 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const tableRowAltBg = rgb(0.98, 0.97, 0.96)
   const successColor = rgb(0.15, 0.55, 0.25)
   const paidStampColor = rgb(0.15, 0.55, 0.25)  // Green for PAID
-  const unpaidStampColor = rgb(0.8, 0.2, 0.2)   // Red for UNPAID
 
   let yPos = height - margin
 
@@ -296,7 +330,31 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   })
 
   let billingY = yPos - 18
-  page.drawText(safeText(invoice.customerName), {
+
+  // Parse customer name - separate phone if mixed in
+  let displayName = invoice.customerName || ''
+  let extractedPhone = invoice.customerPhone || ''
+
+  // Check if customerName contains phone number (various formats)
+  const phonePatterns = [
+    /\n?Tél\s*:\s*([+\d\s]+)/i,
+    /\nTel\s*:\s*([+\d\s]+)/i,
+    /\n([+]?\d{10,15})/,
+  ]
+
+  for (const pattern of phonePatterns) {
+    const match = displayName.match(pattern)
+    if (match) {
+      // Extract the phone and clean the name
+      if (!extractedPhone) {
+        extractedPhone = match[1].trim()
+      }
+      displayName = displayName.replace(match[0], '').trim()
+      break
+    }
+  }
+
+  page.drawText(safeText(displayName), {
     x: billingX,
     y: billingY,
     size: 11,
@@ -304,9 +362,9 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     color: textColor,
   })
 
-  if (invoice.customerPhone) {
+  if (extractedPhone) {
     billingY -= 14
-    page.drawText(`Tél: ${safeText(invoice.customerPhone)}`, {
+    page.drawText(`Tél: ${safeText(extractedPhone)}`, {
       x: billingX,
       y: billingY,
       size: 10,
@@ -370,18 +428,19 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     billingY -= 12
   }
 
-  // Shipping Section Header
-  page.drawText('LIVRÉ À', {
-    x: shippingX,
-    y: yPos,
-    size: 11,
-    font: helveticaBold,
-    color: primaryColor,
-  })
-
-  let shippingY = yPos - 18
+  // Shipping Section - Only show if there's a different shipping address
   if (invoice.order?.shippingAddress) {
     const addr = invoice.order.shippingAddress
+
+    page.drawText('LIVRÉ À', {
+      x: shippingX,
+      y: yPos,
+      size: 11,
+      font: helveticaBold,
+      color: primaryColor,
+    })
+
+    let shippingY = yPos - 18
 
     page.drawText(safeText(addr.fullName), {
       x: shippingX,
@@ -433,15 +492,8 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
         color: lightGray,
       })
     }
-  } else {
-    page.drawText('Même adresse que la facturation', {
-      x: shippingX,
-      y: shippingY,
-      size: 10,
-      font: helvetica,
-      color: lightGray,
-    })
   }
+  // If no shipping address, we simply don't show the "LIVRÉ À" section
 
   // =============================================
   // ARTICLES TABLE
@@ -740,10 +792,242 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   }
 
   // =============================================
+  // PAYMENT SUMMARY (Amount Paid & Remaining)
+  // =============================================
+  let paymentSummaryY = totalsY - 110
+  const amountPaid = invoice.amountPaid || 0
+  const remainingBalance = invoice.total - amountPaid
+
+  if (amountPaid > 0 || invoice.payments?.length > 0) {
+    // Amount paid
+    page.drawText('Montant paye', {
+      x: totalsX,
+      y: paymentSummaryY,
+      size: 10,
+      font: helvetica,
+      color: successColor,
+    })
+    page.drawText(formatCurrency(amountPaid), {
+      x: totalsX + 120,
+      y: paymentSummaryY,
+      size: 10,
+      font: helveticaBold,
+      color: successColor,
+    })
+
+    // Remaining balance
+    paymentSummaryY -= 15
+    const balanceColor = remainingBalance > 0 ? rgb(0.8, 0.4, 0.1) : successColor // Orange if remaining, green if paid
+    page.drawText('Solde restant', {
+      x: totalsX,
+      y: paymentSummaryY,
+      size: 10,
+      font: helveticaBold,
+      color: balanceColor,
+    })
+    page.drawText(formatCurrency(remainingBalance), {
+      x: totalsX + 120,
+      y: paymentSummaryY,
+      size: 10,
+      font: helveticaBold,
+      color: balanceColor,
+    })
+  }
+
+  // =============================================
+  // PAYMENT HISTORY SECTION
+  // =============================================
+  let currentYPos = paymentSummaryY - 40
+
+  if (invoice.payments && invoice.payments.length > 0) {
+    // Section header
+    page.drawText('HISTORIQUE DES PAIEMENTS', {
+      x: margin,
+      y: currentYPos,
+      size: 11,
+      font: helveticaBold,
+      color: primaryColor,
+    })
+
+    currentYPos -= 20
+
+    // Table header background
+    page.drawRectangle({
+      x: margin,
+      y: currentYPos - 12,
+      width: tableWidth,
+      height: 18,
+      color: rgb(0.95, 0.95, 0.95),
+    })
+
+    // Table headers
+    const payCol1 = margin + 5          // Date
+    const payCol2 = margin + 80         // Type
+    const payCol3 = margin + 145        // Mode
+    const payCol4 = margin + 260        // Référence
+    const payCol5 = margin + 380        // Reçu
+    const payCol6 = margin + 450        // Montant
+
+    page.drawText('Date', {
+      x: payCol1,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText('Type', {
+      x: payCol2,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText('Mode', {
+      x: payCol3,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText('Reference', {
+      x: payCol4,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText('Recu', {
+      x: payCol5,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText('Montant', {
+      x: payCol6,
+      y: currentYPos - 7,
+      size: 8,
+      font: helveticaBold,
+      color: textColor,
+    })
+
+    currentYPos -= 25
+
+    // Payment rows
+    for (let i = 0; i < invoice.payments.length; i++) {
+      const payment = invoice.payments[i]
+
+      // Check if we need page break (leave space for footer)
+      if (currentYPos < 130) break
+
+      // Alternating row background
+      if (i % 2 === 0) {
+        page.drawRectangle({
+          x: margin,
+          y: currentYPos - 8,
+          width: tableWidth,
+          height: 18,
+          color: tableRowAltBg,
+        })
+      }
+
+      // Date
+      const paymentDate = new Date(payment.paidAt)
+      const dateStr = paymentDate.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+      page.drawText(sanitizeForPdf(dateStr), {
+        x: payCol1,
+        y: currentYPos - 3,
+        size: 8,
+        font: helvetica,
+        color: textColor,
+      })
+
+      // Type
+      const typeLabel = paymentTypeLabels[payment.paymentType] || payment.paymentType
+      page.drawText(typeLabel, {
+        x: payCol2,
+        y: currentYPos - 3,
+        size: 8,
+        font: helveticaBold,
+        color: payment.paymentType === 'FINAL' ? successColor : (payment.paymentType === 'DEPOSIT' ? rgb(0.2, 0.4, 0.8) : rgb(0.8, 0.4, 0.1)),
+      })
+
+      // Mode
+      const methodLabel = paymentMethodLabels[payment.paymentMethod] || payment.paymentMethod
+      page.drawText(truncateText(methodLabel, 18), {
+        x: payCol3,
+        y: currentYPos - 3,
+        size: 8,
+        font: helvetica,
+        color: textColor,
+      })
+
+      // Reference
+      page.drawText(payment.reference ? truncateText(payment.reference, 18) : '-', {
+        x: payCol4,
+        y: currentYPos - 3,
+        size: 8,
+        font: helvetica,
+        color: lightGray,
+      })
+
+      // Receipt number
+      page.drawText(payment.receipt?.receiptNumber ? truncateText(payment.receipt.receiptNumber, 12) : '-', {
+        x: payCol5,
+        y: currentYPos - 3,
+        size: 8,
+        font: helvetica,
+        color: primaryColor,
+      })
+
+      // Amount
+      page.drawText(`+${formatCurrency(payment.amount)}`, {
+        x: payCol6,
+        y: currentYPos - 3,
+        size: 8,
+        font: helveticaBold,
+        color: successColor,
+      })
+
+      currentYPos -= 18
+    }
+
+    // Total row
+    page.drawLine({
+      start: { x: margin, y: currentYPos },
+      end: { x: width - margin, y: currentYPos },
+      thickness: 1,
+      color: primaryColor,
+    })
+
+    currentYPos -= 15
+    page.drawText('Total paye:', {
+      x: payCol4,
+      y: currentYPos,
+      size: 9,
+      font: helveticaBold,
+      color: textColor,
+    })
+    page.drawText(formatCurrency(amountPaid), {
+      x: payCol6,
+      y: currentYPos,
+      size: 9,
+      font: helveticaBold,
+      color: successColor,
+    })
+
+    currentYPos -= 25
+  }
+
+  // =============================================
   // NOTES SECTION
   // =============================================
   if (invoice.notes) {
-    const notesY = totalsY - 120
+    const notesY = invoice.payments?.length > 0 ? currentYPos : totalsY - 120
     page.drawText('Notes:', {
       x: margin,
       y: notesY,
