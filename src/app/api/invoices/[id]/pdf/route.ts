@@ -362,9 +362,23 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     color: textColor,
   })
 
+  // Get country info
+  const country = invoice.order?.shippingAddress?.country || 'Cote d\'Ivoire'
+
   if (extractedPhone) {
     billingY -= 14
-    page.drawText(`Tél: ${safeText(extractedPhone)}`, {
+    // Phone and country on the same line
+    page.drawText(`Tel: ${safeText(extractedPhone)} - ${country}`, {
+      x: billingX,
+      y: billingY,
+      size: 10,
+      font: helvetica,
+      color: textColor,
+    })
+  } else {
+    // No phone, just show country
+    billingY -= 14
+    page.drawText(country, {
       x: billingX,
       y: billingY,
       size: 10,
@@ -399,26 +413,9 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
     }
   }
 
-  // City and Country - from shipping address if available
-  if (invoice.order?.shippingAddress) {
-    const cityCountry = [
-      invoice.order.shippingAddress.city,
-      invoice.order.shippingAddress.country || 'Côte d\'Ivoire'
-    ].filter(Boolean).join(', ')
-
-    if (cityCountry) {
-      page.drawText(cityCountry, {
-        x: billingX,
-        y: billingY,
-        size: 9,
-        font: helvetica,
-        color: textColor,
-      })
-      billingY -= 12
-    }
-  } else {
-    // Default to Cote d'Ivoire if no shipping address
-    page.drawText('Côte d\'Ivoire', {
+  // City info - only if available from shipping address
+  if (invoice.order?.shippingAddress?.city) {
+    page.drawText(invoice.order.shippingAddress.city, {
       x: billingX,
       y: billingY,
       size: 9,
