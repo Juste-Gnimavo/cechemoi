@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, ArrowLeft, ArrowDownCircle, Package, Plus } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowDownCircle, Package, Plus, Calendar } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Material {
@@ -28,6 +28,7 @@ function MaterialInForm() {
   const [materialId, setMaterialId] = useState(initialMaterialId || '')
   const [quantity, setQuantity] = useState('')
   const [unitPrice, setUnitPrice] = useState('')
+  const [movementDate, setMovementDate] = useState('')
   const [reference, setReference] = useState('')
   const [notes, setNotes] = useState('')
 
@@ -86,6 +87,7 @@ function MaterialInForm() {
           unitPrice: parseFloat(unitPrice) || selectedMaterial?.unitPrice || 0,
           reference: reference || null,
           notes: notes || null,
+          ...(movementDate && { createdAt: movementDate }),
         }),
       })
       const data = await res.json()
@@ -239,6 +241,23 @@ function MaterialInForm() {
                 Coût total: {formatPrice(parseFloat(quantity) * parseFloat(unitPrice))}
               </p>
             )}
+          </div>
+
+          {/* Movement Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+              <Calendar className="h-4 w-4 inline mr-1" />
+              Date de réception (optionnel)
+            </label>
+            <input
+              type="datetime-local"
+              value={movementDate}
+              onChange={(e) => setMovementDate(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Laissez vide pour utiliser la date et l'heure actuelles
+            </p>
           </div>
 
           {/* Reference */}

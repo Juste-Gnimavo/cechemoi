@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, ArrowLeft, ArrowUpCircle, Package, User, FileText, AlertTriangle } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowUpCircle, Package, User, FileText, AlertTriangle, Plus, Trash2, Calendar } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Material {
@@ -27,6 +27,12 @@ interface CustomOrder {
   customer: { name: string }
 }
 
+interface MaterialRow {
+  id: string
+  materialId: string
+  quantity: string
+}
+
 function MaterialOutForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -39,15 +45,24 @@ function MaterialOutForm() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  // Form state
-  const [materialId, setMaterialId] = useState(initialMaterialId || '')
-  const [quantity, setQuantity] = useState('')
+  // Form state - multiple materials
+  const [materialRows, setMaterialRows] = useState<MaterialRow[]>([
+    { id: crypto.randomUUID(), materialId: initialMaterialId || '', quantity: '' }
+  ])
+  const [movementDate, setMovementDate] = useState('')
   const [tailorId, setTailorId] = useState('')
   const [customOrderId, setCustomOrderId] = useState(initialOrderId || '')
   const [notes, setNotes] = useState('')
 
-  // Selected material info
-  const selectedMaterial = materials.find((m) => m.id === materialId)
+  // Get selected materials for each row
+  const getSelectedMaterial = (materialId: string) => materials.find((m) => m.id === materialId)
+
+  // Get already selected material IDs (for filtering dropdowns)
+  const getSelectedMaterialIds = (excludeRowId: string) => {
+    return materialRows
+      .filter(row => row.id !== excludeRowId && row.materialId)
+      .map(row => row.materialId)
+  }
 
   useEffect(() => {
     fetchData()
@@ -82,46 +97,135 @@ function MaterialOutForm() {
     }
   }
 
+  // Add a new material row
+  const addMaterialRow = () => {
+    setMaterialRows([...materialRows, { id: crypto.randomUUID(), materialId: '', quantity: '' }])
+  }
+
+  // Remove a material row
+  const removeMaterialRow = (rowId: string) => {
+    if (materialRows.length > 1) {
+      setMaterialRows(materialRows.filter(row => row.id !== rowId))
+    }
+  }
+
+  // Update a material row
+  const updateMaterialRow = (rowId: string, field: 'materialId' | 'quantity', value: string) => {
+    setMaterialRows(materialRows.map(row =>
+      row.id === rowId ? { ...row, [field]: value } : row
+    ))
+  }
+
+  // Validate all rows
+  const validateRows = (): { valid: boolean; errors: string[] } => {
+    const errors: string[] = []
+
+    // Check at least one row has material and quantity
+    const validRows = materialRows.filter(row => row.materialId && row.quantity && parseFloat(row.quantity) > 0)
+    if (validRows.length === 0) {
+      errors.push('Au moins un matériel avec une quantité est requis')
+    }
+
+    // Check for duplicates
+    const materialIds = materialRows.filter(r => r.materialId).map(r => r.materialId)
+    const uniqueIds = new Set(materialIds)
+    if (materialIds.length !== uniqueIds.size) {
+      errors.push('Chaque matériel ne peut être ajouté qu\'une seule fois')
+    }
+
+    // Check stock for each row
+    materialRows.forEach((row, index) => {
+      if (row.materialId && row.quantity) {
+        const qty = parseFloat(row.quantity)
+        const material = getSelectedMaterial(row.materialId)
+        if (material && qty > material.stock) {
+          errors.push(`Matériel #${index + 1} (${material.name}): Stock insuffisant`)
+        }
+        if (qty <= 0) {
+          errors.push(`Matériel #${index + 1}: La quantité doit être positive`)
+        }
+      }
+    })
+
+    return { valid: errors.length === 0, errors }
+  }
+
+  // Calculate total cost
+  const calculateTotalCost = () => {
+    return materialRows.reduce((total, row) => {
+      if (row.materialId && row.quantity) {
+        const material = getSelectedMaterial(row.materialId)
+        if (material) {
+          return total + (parseFloat(row.quantity) * material.unitPrice)
+        }
+      }
+      return total
+    }, 0)
+  }
+
+  // Get summary items
+  const getSummaryItems = () => {
+    return materialRows
+      .filter(row => row.materialId && row.quantity && parseFloat(row.quantity) > 0)
+      .map(row => {
+        const material = getSelectedMaterial(row.materialId)!
+        const qty = parseFloat(row.quantity)
+        return {
+          name: material.name,
+          quantity: qty,
+          unit: material.unit,
+          cost: qty * material.unitPrice
+        }
+      })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!materialId || !quantity) {
-      toast.error('Matériel et quantité sont requis')
-      return
-    }
-
-    const qty = parseFloat(quantity)
-    if (qty <= 0) {
-      toast.error('La quantité doit être positive')
-      return
-    }
-
-    if (selectedMaterial && qty > selectedMaterial.stock) {
-      toast.error(`Stock insuffisant. Stock disponible: ${selectedMaterial.stock} ${selectedMaterial.unit}`)
+    const { valid, errors } = validateRows()
+    if (!valid) {
+      errors.forEach(error => toast.error(error))
       return
     }
 
     setSaving(true)
-    try {
-      const res = await fetch('/api/admin/materials/movements', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          materialId,
-          type: 'OUT',
-          quantity: qty,
-          tailorId: tailorId || null,
-          customOrderId: customOrderId || null,
-          notes: notes || null,
-        }),
-      })
-      const data = await res.json()
+    const validRows = materialRows.filter(row => row.materialId && row.quantity && parseFloat(row.quantity) > 0)
+    let successCount = 0
+    const failedMaterials: string[] = []
 
-      if (data.success) {
-        toast.success('Sortie enregistrée avec succès')
+    try {
+      for (const row of validRows) {
+        const material = getSelectedMaterial(row.materialId)
+        const res = await fetch('/api/admin/materials/movements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            materialId: row.materialId,
+            type: 'OUT',
+            quantity: parseFloat(row.quantity),
+            tailorId: tailorId || null,
+            customOrderId: customOrderId || null,
+            notes: notes || null,
+            ...(movementDate && { createdAt: movementDate }),
+          }),
+        })
+        const data = await res.json()
+
+        if (data.success) {
+          successCount++
+        } else {
+          failedMaterials.push(material?.name || 'Inconnu')
+        }
+      }
+
+      if (failedMaterials.length === 0) {
+        toast.success(`${successCount} sortie(s) enregistrée(s) avec succès`)
         router.push('/admin/materials')
       } else {
-        toast.error(data.error || 'Erreur lors de l\'enregistrement')
+        toast.error(`Échec pour: ${failedMaterials.join(', ')}`)
+        if (successCount > 0) {
+          toast.success(`${successCount} sortie(s) réussie(s)`)
+        }
       }
     } catch (error) {
       toast.error('Erreur lors de l\'enregistrement')
@@ -142,8 +246,19 @@ function MaterialOutForm() {
     )
   }
 
+  const summaryItems = getSummaryItems()
+  const totalCost = calculateTotalCost()
+  const hasValidRows = materialRows.some(row => row.materialId && row.quantity && parseFloat(row.quantity) > 0)
+  const hasStockWarning = materialRows.some(row => {
+    if (row.materialId && row.quantity) {
+      const material = getSelectedMaterial(row.materialId)
+      return material && parseFloat(row.quantity) > material.stock
+    }
+    return false
+  })
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
@@ -158,7 +273,7 @@ function MaterialOutForm() {
             Sortie de Matériel
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Enregistrer une sortie de matériel pour un couturier
+            Enregistrer une ou plusieurs sorties de matériel
           </p>
         </div>
       </div>
@@ -166,92 +281,155 @@ function MaterialOutForm() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-6">
-          {/* Material Selection */}
+
+          {/* Materials Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-white">
+                <Package className="h-4 w-4 inline mr-1" />
+                Matériels <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={addMaterialRow}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Ajouter un matériel
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {materialRows.map((row, index) => {
+                const selectedMaterial = getSelectedMaterial(row.materialId)
+                const selectedIds = getSelectedMaterialIds(row.id)
+                const availableMaterials = materials.filter(m => !selectedIds.includes(m.id))
+                const hasQuantityWarning = selectedMaterial && row.quantity && parseFloat(row.quantity) > selectedMaterial.stock
+
+                return (
+                  <div key={row.id} className="border border-gray-200 dark:border-dark-600 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Matériel #{index + 1}
+                      </span>
+                      {materialRows.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeMaterialRow(row.id)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-3">
+                      {/* Material Dropdown */}
+                      <div className="col-span-8">
+                        <select
+                          value={row.materialId}
+                          onChange={(e) => updateMaterialRow(row.id, 'materialId', e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                          <option value="">Sélectionner un matériel</option>
+                          {availableMaterials.map((mat) => (
+                            <option key={mat.id} value={mat.id}>
+                              {mat.name} ({mat.category.name}) - Stock: {mat.stock} {mat.unit}
+                            </option>
+                          ))}
+                          {/* Include selected material if already chosen */}
+                          {row.materialId && !availableMaterials.find(m => m.id === row.materialId) && selectedMaterial && (
+                            <option value={row.materialId}>
+                              {selectedMaterial.name} ({selectedMaterial.category.name}) - Stock: {selectedMaterial.stock} {selectedMaterial.unit}
+                            </option>
+                          )}
+                        </select>
+                      </div>
+
+                      {/* Quantity */}
+                      <div className="col-span-4">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={row.quantity}
+                            onChange={(e) => updateMaterialRow(row.id, 'quantity', e.target.value)}
+                            min="0.01"
+                            step="0.01"
+                            placeholder="Qté"
+                            className={`flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-900 border rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                              hasQuantityWarning
+                                ? 'border-red-500 dark:border-red-500'
+                                : 'border-gray-200 dark:border-dark-700'
+                            }`}
+                          />
+                          {selectedMaterial && (
+                            <span className="px-2 py-2 bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm whitespace-nowrap">
+                              {selectedMaterial.unit}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Selected Material Info Card */}
+                    {selectedMaterial && (
+                      <div className={`rounded-lg p-3 ${
+                        hasQuantityWarning
+                          ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                          : 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800'
+                      }`}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className={`font-medium ${hasQuantityWarning ? 'text-red-900 dark:text-red-100' : 'text-orange-900 dark:text-orange-100'}`}>
+                              <Package className="h-4 w-4 inline mr-1" />
+                              {selectedMaterial.name}
+                            </p>
+                            <p className={`text-sm ${hasQuantityWarning ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+                              {selectedMaterial.category.name} • Prix: {formatPrice(selectedMaterial.unitPrice)}/{selectedMaterial.unit}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm ${hasQuantityWarning ? 'text-red-700 dark:text-red-300' : 'text-orange-700 dark:text-orange-300'}`}>
+                              Stock: {selectedMaterial.stock}{selectedMaterial.unit}
+                            </p>
+                            {row.quantity && parseFloat(row.quantity) > 0 && (
+                              <p className={`text-sm font-medium ${hasQuantityWarning ? 'text-red-900 dark:text-red-100' : 'text-orange-900 dark:text-orange-100'}`}>
+                                Coût: {formatPrice(parseFloat(row.quantity) * selectedMaterial.unitPrice)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        {hasQuantityWarning && (
+                          <div className="mt-2 flex items-center gap-1 text-red-700 dark:text-red-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-sm">Stock insuffisant!</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Movement Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              <Package className="h-4 w-4 inline mr-1" />
-              Matériel <span className="text-red-500">*</span>
+              <Calendar className="h-4 w-4 inline mr-1" />
+              Date du mouvement (optionnel)
             </label>
-            <select
-              value={materialId}
-              onChange={(e) => setMaterialId(e.target.value)}
-              required
+            <input
+              type="datetime-local"
+              value={movementDate}
+              onChange={(e) => setMovementDate(e.target.value)}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Sélectionner un matériel</option>
-              {materials.map((mat) => (
-                <option key={mat.id} value={mat.id}>
-                  {mat.name} ({mat.category.name}) - Stock: {mat.stock} {mat.unit}
-                </option>
-              ))}
-            </select>
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Laissez vide pour utiliser la date et l'heure actuelles
+            </p>
           </div>
-
-          {/* Selected Material Info */}
-          {selectedMaterial && (
-            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-medium text-orange-900 dark:text-orange-100">
-                    {selectedMaterial.name}
-                  </p>
-                  <p className="text-sm text-orange-700 dark:text-orange-300">
-                    {selectedMaterial.category.name}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-orange-700 dark:text-orange-300">Stock disponible</p>
-                  <p className="text-xl font-bold text-orange-900 dark:text-orange-100">
-                    {selectedMaterial.stock} {selectedMaterial.unit}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-orange-200 dark:border-orange-700">
-                <p className="text-sm text-orange-700 dark:text-orange-300">
-                  Prix unitaire: {formatPrice(selectedMaterial.unitPrice)} / {selectedMaterial.unit}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Quantity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              Quantité <span className="text-red-500">*</span>
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                required
-                min="0.01"
-                step="0.01"
-                className="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Ex: 2.5"
-              />
-              {selectedMaterial && (
-                <span className="px-3 py-2 bg-gray-200 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg">
-                  {selectedMaterial.unit}
-                </span>
-              )}
-            </div>
-            {selectedMaterial && quantity && parseFloat(quantity) > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Coût: {formatPrice(parseFloat(quantity) * selectedMaterial.unitPrice)}
-              </p>
-            )}
-          </div>
-
-          {/* Stock Warning */}
-          {selectedMaterial && quantity && parseFloat(quantity) > selectedMaterial.stock && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700 dark:text-red-400">
-                Attention: Stock insuffisant! Disponible: {selectedMaterial.stock} {selectedMaterial.unit}
-              </p>
-            </div>
-          )}
 
           {/* Tailor Selection */}
           <div>
@@ -308,6 +486,35 @@ function MaterialOutForm() {
           </div>
         </div>
 
+        {/* Summary */}
+        {summaryItems.length > 0 && (
+          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Récapitulatif
+            </h3>
+            <div className="space-y-2">
+              {summaryItems.map((item, index) => (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {item.name} ({item.quantity} {item.unit})
+                  </span>
+                  <span className="font-medium text-gray-900 dark:text-white">
+                    {formatPrice(item.cost)}
+                  </span>
+                </div>
+              ))}
+              <div className="border-t border-gray-200 dark:border-dark-600 pt-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-900 dark:text-white">Total</span>
+                  <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                    {formatPrice(totalCost)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">
           <Link
@@ -318,7 +525,7 @@ function MaterialOutForm() {
           </Link>
           <button
             type="submit"
-            disabled={saving || !materialId || !quantity}
+            disabled={saving || !hasValidRows || hasStockWarning}
             className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors disabled:opacity-50"
           >
             {saving ? (
@@ -326,7 +533,7 @@ function MaterialOutForm() {
             ) : (
               <ArrowUpCircle className="h-4 w-4" />
             )}
-            Enregistrer la sortie
+            Enregistrer les sorties
           </button>
         </div>
       </form>

@@ -142,6 +142,7 @@ export async function POST(req: NextRequest) {
       customOrderItemId,
       notes,
       reference,
+      createdAt, // Optional custom date for offline/past movements
     } = body
 
     if (!materialId || !type || !quantity) {
@@ -238,6 +239,7 @@ export async function POST(req: NextRequest) {
           createdByName: (session.user as any).name || 'Staff',
           notes: notes || null,
           reference: reference || null,
+          ...(createdAt && { createdAt: new Date(createdAt) }), // Custom date for offline/past movements
         },
         include: {
           material: {
