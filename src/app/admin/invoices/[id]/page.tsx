@@ -617,6 +617,15 @@ export default function InvoiceDetailPage() {
             <Printer className="h-4 w-4" />
             Imprimer
           </button>
+          {!['PAID', 'CANCELLED', 'REFUNDED'].includes(invoice.status) && (
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-green-500/25"
+            >
+              <Plus className="h-4 w-4" />
+              AJOUTER UN ACOMPTE
+            </button>
+          )}
           <button
             onClick={confirmDeleteInvoice}
             disabled={deleting}
@@ -784,12 +793,7 @@ export default function InvoiceDetailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {payments.map((payment, index) => {
-                      // Calculate running balance
-                      const paymentsUpToThis = payments.slice(index)
-                      const paidAfterThis = paymentsUpToThis.reduce((sum, p) => sum + p.amount, 0)
-                      const balanceAfterThis = invoice.total - (invoice.amountPaid || 0) + paidAfterThis - payment.amount
-
+                    {payments.map((payment) => {
                       const typeConfig = paymentTypeConfig[payment.paymentType] || paymentTypeConfig.INSTALLMENT
 
                       return (
@@ -1108,17 +1112,19 @@ export default function InvoiceDetailPage() {
       {showPaymentModal && invoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
-          <div className="relative bg-white dark:bg-dark-900 rounded-2xl border border-gray-200 dark:border-dark-700 shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white dark:bg-dark-900 rounded-2xl border border-gray-200 dark:border-dark-700 shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-dark-700">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <Banknote className="h-5 w-5 text-green-400" />
-                  Ajouter un paiement
-                </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Facture {invoice.invoiceNumber}
-                </p>
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                    Ajouter un paiement
+                  </h2>
+                </div>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {invoice.invoiceNumber}
+                </span>
               </div>
               <button
                 onClick={() => setShowPaymentModal(false)}
@@ -1128,143 +1134,152 @@ export default function InvoiceDetailPage() {
               </button>
             </div>
 
-            {/* Payment Summary */}
-            <div className="px-6 py-4 bg-gray-50 dark:bg-dark-800/50 border-b border-gray-200 dark:border-dark-700">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Total facture</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">{formatCurrency(invoice.total)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Déjà payé</p>
-                  <p className="text-lg font-bold text-green-400">{formatCurrency(invoice.amountPaid || 0)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Reste à payer</p>
-                  <p className="text-lg font-bold text-orange-400">{formatCurrency(invoice.total - (invoice.amountPaid || 0))}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-4">
-              {/* Amount */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Montant <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    value={paymentForm.amount}
-                    onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
-                    placeholder="0"
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">CFA</span>
+            {/* Payment Summary - Compact */}
+            <div className="px-4 py-3 bg-gray-50 dark:bg-dark-800/50 border-b border-gray-200 dark:border-dark-700">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-6">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white">{formatCurrency(invoice.total)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Payé</p>
+                    <p className="text-base font-bold text-green-400">{formatCurrency(invoice.amountPaid || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Reste</p>
+                    <p className="text-base font-bold text-orange-400">{formatCurrency(invoice.total - (invoice.amountPaid || 0))}</p>
+                  </div>
                 </div>
                 {/* Quick amount buttons */}
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setPaymentForm({ ...paymentForm, amount: String(invoice.total - (invoice.amountPaid || 0)) })}
-                    className="px-3 py-1 text-xs bg-green-500/10 text-green-400 border border-green-500/30 rounded hover:bg-green-500/20"
+                    className="px-3 py-1.5 text-xs bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/20 font-medium"
                   >
-                    Solder ({formatCurrency(invoice.total - (invoice.amountPaid || 0))})
+                    Solder tout
                   </button>
                   <button
                     type="button"
                     onClick={() => setPaymentForm({ ...paymentForm, amount: String(Math.round((invoice.total - (invoice.amountPaid || 0)) / 2)) })}
-                    className="px-3 py-1 text-xs bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded hover:bg-orange-500/20"
+                    className="px-3 py-1.5 text-xs bg-orange-500/10 text-orange-400 border border-orange-500/30 rounded-lg hover:bg-orange-500/20 font-medium"
                   >
                     50%
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* Payment Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Type de paiement
-                </label>
-                <select
-                  value={paymentForm.paymentType}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentType: e.target.value as '' | 'DEPOSIT' | 'INSTALLMENT' | 'FINAL' })}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">🔄 Auto-détection</option>
-                  <option value="DEPOSIT">🔵 Avance (premier paiement)</option>
-                  <option value="INSTALLMENT">🟠 Acompte (paiement intermédiaire)</option>
-                  <option value="FINAL">🟢 Solde (paiement final)</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Laissez sur "Auto-détection" pour que le système détermine automatiquement le type
-                </p>
+            {/* Modal Body - 2 columns on desktop */}
+            <div className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  {/* Amount */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
+                      Montant <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={paymentForm.amount}
+                        onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
+                        placeholder="0"
+                        className="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">CFA</span>
+                    </div>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
+                      Mode de paiement <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={paymentForm.paymentMethod}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <optgroup label="Paiements manuels">
+                        <option value="CASH">Espèces</option>
+                        <option value="BANK_TRANSFER">Virement bancaire</option>
+                        <option value="CHECK">Chèque</option>
+                      </optgroup>
+                      <optgroup label="Mobile Money">
+                        <option value="ORANGE_MONEY">Orange Money</option>
+                        <option value="MTN_MOBILE_MONEY">MTN MoMo</option>
+                        <option value="MOOV_MONEY">Moov Money</option>
+                        <option value="WAVE">Wave</option>
+                      </optgroup>
+                      <optgroup label="Paiements en ligne">
+                        <option value="CARD">Carte bancaire</option>
+                        <option value="PAYPAL">PayPal</option>
+                        <option value="PAIEMENTPRO">PaiementPro</option>
+                      </optgroup>
+                      <optgroup label="Autre">
+                        <option value="OTHER">Autre</option>
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  {/* Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
+                      Date du paiement
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentForm.paidAt}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, paidAt: e.target.value })}
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  {/* Payment Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
+                      Type de paiement
+                    </label>
+                    <select
+                      value={paymentForm.paymentType}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, paymentType: e.target.value as '' | 'DEPOSIT' | 'INSTALLMENT' | 'FINAL' })}
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">🔄 Auto-détection</option>
+                      <option value="DEPOSIT">🔵 Avance (1er paiement)</option>
+                      <option value="INSTALLMENT">🟠 Acompte (intermédiaire)</option>
+                      <option value="FINAL">🟢 Solde (final)</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto = le système détermine le type
+                    </p>
+                  </div>
+
+                  {/* Reference */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1.5">
+                      Référence / N° transaction
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentForm.reference}
+                      onChange={(e) => setPaymentForm({ ...paymentForm, reference: e.target.value })}
+                      placeholder="Ex: TXN123456..."
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
               </div>
-
-              {/* Payment Method */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Mode de paiement <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={paymentForm.paymentMethod}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, paymentMethod: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <optgroup label="Paiements manuels">
-                    <option value="CASH">Espèces</option>
-                    <option value="BANK_TRANSFER">Virement bancaire</option>
-                    <option value="CHECK">Chèque</option>
-                  </optgroup>
-                  <optgroup label="Mobile Money">
-                    <option value="ORANGE_MONEY">Orange Money</option>
-                    <option value="MTN_MOBILE_MONEY">MTN MoMo</option>
-                    <option value="MOOV_MONEY">Moov Money</option>
-                    <option value="WAVE">Wave</option>
-                  </optgroup>
-                  <optgroup label="Paiements en ligne">
-                    <option value="CARD">Carte bancaire</option>
-                    <option value="PAYPAL">PayPal</option>
-                    <option value="PAIEMENTPRO">PaiementPro</option>
-                  </optgroup>
-                  <optgroup label="Autre">
-                    <option value="OTHER">Autre</option>
-                  </optgroup>
-                </select>
-              </div>
-
-              {/* Reference */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Référence / N° transaction
-                </label>
-                <input
-                  type="text"
-                  value={paymentForm.reference}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, reference: e.target.value })}
-                  placeholder="Ex: TXN123456, Reçu #789..."
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-
-              {/* Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Date du paiement
-                </label>
-                <input
-                  type="date"
-                  value={paymentForm.paidAt}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, paidAt: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-dark-700">
+            <div className="flex items-center justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-800/30">
               <button
                 onClick={() => setShowPaymentModal(false)}
                 className="px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors"
@@ -1274,14 +1289,14 @@ export default function InvoiceDetailPage() {
               <button
                 onClick={handleAddPayment}
                 disabled={addingPayment || !paymentForm.amount}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {addingPayment ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <CheckCircle className="h-4 w-4" />
                 )}
-                <span>{addingPayment ? 'Enregistrement...' : 'Enregistrer le paiement'}</span>
+                <span>{addingPayment ? 'Enregistrement...' : 'Enregistrer'}</span>
               </button>
             </div>
           </div>
