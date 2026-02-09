@@ -315,6 +315,26 @@ function MaterialOutForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-6">
 
+          {/* Custom Order Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+              <FileText className="h-4 w-4 inline mr-1" />
+              Commande sur mesure (pour quelle commande)
+            </label>
+            <select
+              value={customOrderId}
+              onChange={(e) => setCustomOrderId(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option value="">Sélectionner une commande (optionnel)</option>
+              {orders.map((order) => (
+                <option key={order.id} value={order.id}>
+                  {order.orderNumber} - {order.customer.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Materials Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -480,26 +500,6 @@ function MaterialOutForm() {
               {tailors.map((tailor) => (
                 <option key={tailor.id} value={tailor.id}>
                   {tailor.name} ({tailor.phone})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Custom Order Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-              <FileText className="h-4 w-4 inline mr-1" />
-              Commande sur mesure (pour quelle commande)
-            </label>
-            <select
-              value={customOrderId}
-              onChange={(e) => setCustomOrderId(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="">Sélectionner une commande (optionnel)</option>
-              {orders.map((order) => (
-                <option key={order.id} value={order.id}>
-                  {order.orderNumber} - {order.customer.name}
                 </option>
               ))}
             </select>
