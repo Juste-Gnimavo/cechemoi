@@ -258,7 +258,11 @@ export async function POST(req: NextRequest) {
       }),
       prisma.material.update({
         where: { id: materialId },
-        data: { stock: newStock },
+        data: {
+          stock: newStock,
+          // Update unitPrice on IN movements when a price is provided
+          ...(type === 'IN' && effectiveUnitPrice > 0 && { unitPrice: effectiveUnitPrice }),
+        },
       }),
     ])
 

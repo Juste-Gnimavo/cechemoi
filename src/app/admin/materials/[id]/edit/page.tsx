@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, ArrowLeft, Save, Package, History } from 'lucide-react'
@@ -23,8 +23,8 @@ const UNITS = [
   { value: 'boite', label: 'Boîte' },
 ]
 
-export default function EditMaterialPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function EditMaterialPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const router = useRouter()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)

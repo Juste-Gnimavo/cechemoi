@@ -89,12 +89,48 @@ export async function GET(req: NextRequest) {
       AND "stock" <= "lowStockThreshold"
     ` as any[]
 
+    // For materials with unitPrice = 0, get the latest movement unitPrice as fallback
+    const materialsWithZeroPrice = materials.filter((m) => m.unitPrice === 0)
+    const movementPriceMap = new Map<string, number>()
+
+    if (materialsWithZeroPrice.length > 0) {
+      const zeroIds = materialsWithZeroPrice.map((m) => m.id)
+      const latestPrices = (await prisma.$queryRaw`
+        SELECT DISTINCT ON ("materialId") "materialId", "unitPrice"
+        FROM "MaterialMovement"
+        WHERE "materialId" = ANY(${zeroIds})
+        AND "unitPrice" > 0
+        ORDER BY "materialId", "createdAt" DESC
+      `) as { materialId: string; unitPrice: number }[]
+
+      for (const row of latestPrices) {
+        movementPriceMap.set(row.materialId, row.unitPrice)
+        // Also fix the material's unitPrice in the database for future queries
+        prisma.material
+          .update({
+            where: { id: row.materialId },
+            data: { unitPrice: row.unitPrice },
+          })
+          .catch(() => {})
+      }
+    }
+
+    // Apply effective unit prices
+    const materialsWithPrices = materials.map((m) => {
+      const effectiveUnitPrice =
+        m.unitPrice > 0 ? m.unitPrice : movementPriceMap.get(m.id) || 0
+      return { ...m, unitPrice: effectiveUnitPrice }
+    })
+
     // Calculate stats
-    const totalValue = materials.reduce((sum, m) => sum + m.stock * m.unitPrice, 0)
+    const totalValue = materialsWithPrices.reduce(
+      (sum, m) => sum + m.stock * m.unitPrice,
+      0
+    )
 
     return NextResponse.json({
       success: true,
-      materials: materials.map((m) => ({
+      materials: materialsWithPrices.map((m) => ({
         ...m,
         movementsCount: m._count.movements,
         isLowStock: m.lowStockThreshold > 0 && m.stock <= m.lowStockThreshold,
