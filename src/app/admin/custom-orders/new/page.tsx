@@ -282,7 +282,6 @@ export default function NewCustomOrderPage() {
 
   // Calculate totals
   const totalCost = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-  const balance = totalCost + materialCost - deposit
 
   // Form validation
   const isValid =
@@ -402,6 +401,21 @@ export default function NewCustomOrderPage() {
           <ArrowLeft className="h-4 w-4" />
           <span>Retour</span>
         </Link>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-start gap-3">
+        <svg className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div className="text-sm text-blue-700 dark:text-blue-300">
+          <p>
+            Après la création de la commande, vous pourrez ajouter les <strong>sorties de matériels</strong> (tissu, fil, boutons...) et leur coût global depuis la page de la commande.
+          </p>
+          <p className="mt-1">
+            Les <strong>acomptes</strong> et paiements pourront également être enregistrés par la suite.
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
