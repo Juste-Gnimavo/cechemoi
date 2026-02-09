@@ -693,7 +693,7 @@ export default function NewCustomOrderPage() {
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary-400" />
-            Dates & Priorité
+            Dates
           </h2>
 
           <div className="grid grid-cols-1 gap-4">
@@ -725,86 +725,23 @@ export default function NewCustomOrderPage() {
               />
               <p className="text-xs text-gray-500 mt-1">Événement ou deadline du client</p>
             </div>
-
-            {/* Priority */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Priorité</label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="NORMAL">Normal (30 jours)</option>
-                <option value="URGENT">Urgent (+20% prix)</option>
-                <option value="VIP">VIP / Rush (+40% prix)</option>
-              </select>
-            </div>
           </div>
         </div>
 
-        {/* Payment & Costs */}
+        {/* Cost Summary */}
         <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Coût & Paiement</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Récapitulatif</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Material Cost */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
-                Coût du matériel (FCFA)
-              </label>
-              <input
-                type="number"
-                onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                value={materialCost}
-                onChange={(e) => setMaterialCost(parseInt(e.target.value) || 0)}
-                min="0"
-                step="500"
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">Tissu, boutons, fermetures...</p>
-            </div>
-
-            {/* Deposit */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Avance reçue (FCFA)</label>
-              <input
-                type="number"
-                onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                value={deposit}
-                onChange={(e) => setDeposit(parseInt(e.target.value) || 0)}
-                min="0"
-                step="500"
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">Montant déjà payé par le client</p>
-            </div>
-          </div>
-
-          {/* Summary */}
-          <div className="mt-6 p-4 bg-gray-100 dark:bg-dark-900 rounded-lg">
+          <div className="p-4 bg-gray-100 dark:bg-dark-900 rounded-lg">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">Coût des tenues:</span>
                 <span className="text-gray-900 dark:text-white">{totalCost.toLocaleString()} FCFA</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Coût du matériel:</span>
-                <span className="text-gray-900 dark:text-white">{materialCost.toLocaleString()} FCFA</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Avance:</span>
-                <span className="text-green-500">-{deposit.toLocaleString()} FCFA</span>
-              </div>
               <div className="border-t border-gray-200 dark:border-dark-700 pt-2 mt-2">
-                <div className="flex justify-between font-semibold">
-                  <span className="text-gray-900 dark:text-white">Total à payer:</span>
-                  <span className="text-gray-900 dark:text-white">{(totalCost + materialCost).toLocaleString()} FCFA</span>
-                </div>
-                <div className="flex justify-between font-semibold text-lg mt-1">
-                  <span className={balance > 0 ? 'text-orange-500' : 'text-green-500'}>Reliquat:</span>
-                  <span className={balance > 0 ? 'text-orange-500' : 'text-green-500'}>
-                    {balance.toLocaleString()} FCFA
-                  </span>
+                <div className="flex justify-between font-semibold text-lg">
+                  <span className="text-gray-900 dark:text-white">Total:</span>
+                  <span className="text-gray-900 dark:text-white">{totalCost.toLocaleString()} FCFA</span>
                 </div>
               </div>
             </div>
