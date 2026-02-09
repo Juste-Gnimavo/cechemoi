@@ -203,6 +203,7 @@ function MaterialInForm() {
                 type="number"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 required
                 min="0.01"
                 step="0.01"
@@ -231,6 +232,7 @@ function MaterialInForm() {
               type="number"
               value={unitPrice}
               onChange={(e) => setUnitPrice(e.target.value)}
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
               min="0"
               step="0.01"
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"

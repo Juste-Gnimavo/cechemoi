@@ -373,6 +373,7 @@ function MaterialOutForm() {
                             type="number"
                             value={row.quantity}
                             onChange={(e) => updateMaterialRow(row.id, 'quantity', e.target.value)}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
                             min="0.01"
                             step="0.01"
                             placeholder="Qté"
