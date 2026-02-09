@@ -297,6 +297,20 @@ function MaterialOutForm() {
         </div>
       </div>
 
+      {/* Warning Banner */}
+      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4 flex items-start gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="font-medium text-amber-800 dark:text-amber-200">
+            Action irréversible
+          </p>
+          <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            La sortie de stock est irréversible et ne peut pas être modifiée par la suite.
+            Veuillez vérifier soigneusement les quantités avant de valider.
+          </p>
+        </div>
+      </div>
+
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-6">

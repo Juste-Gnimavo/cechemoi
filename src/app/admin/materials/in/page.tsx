@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, ArrowLeft, ArrowDownCircle, Package, Plus, Calendar } from 'lucide-react'
+import { Loader2, ArrowLeft, ArrowDownCircle, Package, Plus, Calendar, AlertTriangle } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 interface Material {
@@ -134,6 +134,20 @@ function MaterialInForm() {
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
             Enregistrer une réception de matériel (achat, livraison)
+          </p>
+        </div>
+      </div>
+
+      {/* Warning Banner */}
+      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl p-4 flex items-start gap-3">
+        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+        <div>
+          <p className="font-medium text-amber-800 dark:text-amber-200">
+            Action irréversible
+          </p>
+          <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            L'ajout de stock est irréversible et ne peut pas être modifié par la suite.
+            Veuillez vérifier soigneusement la quantité et le prix unitaire avant de valider.
           </p>
         </div>
       </div>
