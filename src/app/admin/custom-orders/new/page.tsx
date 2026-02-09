@@ -604,6 +604,7 @@ export default function NewCustomOrderPage() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Quantité</label>
                     <input
                       type="number"
+                      onWheel={(e) => (e.target as HTMLInputElement).blur()}
                       value={item.quantity}
                       onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
                       min="1"
@@ -618,6 +619,7 @@ export default function NewCustomOrderPage() {
                     </label>
                     <input
                       type="number"
+                      onWheel={(e) => (e.target as HTMLInputElement).blur()}
                       value={item.unitPrice}
                       onChange={(e) => updateItem(item.id, 'unitPrice', parseInt(e.target.value) || 0)}
                       min="0"
@@ -653,6 +655,7 @@ export default function NewCustomOrderPage() {
                     </label>
                     <input
                       type="number"
+                      onWheel={(e) => (e.target as HTMLInputElement).blur()}
                       value={item.estimatedHours || ''}
                       onChange={(e) =>
                         updateItem(item.id, 'estimatedHours', e.target.value ? parseFloat(e.target.value) : null)
@@ -751,6 +754,7 @@ export default function NewCustomOrderPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={materialCost}
                 onChange={(e) => setMaterialCost(parseInt(e.target.value) || 0)}
                 min="0"
@@ -765,6 +769,7 @@ export default function NewCustomOrderPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">Avance reçue (FCFA)</label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={deposit}
                 onChange={(e) => setDeposit(parseInt(e.target.value) || 0)}
                 min="0"

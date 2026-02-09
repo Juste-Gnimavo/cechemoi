@@ -216,6 +216,7 @@ export default function PaymentFollowUpPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   min="1"
                   max="168"
                   value={settings.reminder1Delay}
@@ -262,6 +263,7 @@ export default function PaymentFollowUpPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   min="1"
                   max="336"
                   value={settings.reminder2Delay}
@@ -308,6 +310,7 @@ export default function PaymentFollowUpPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   min="1"
                   max="504"
                   value={settings.reminder3Delay}

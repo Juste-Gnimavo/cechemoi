@@ -248,6 +248,7 @@ export default function EditMaterialPage({ params }: { params: { id: string } })
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
                 min="0"
@@ -264,6 +265,7 @@ export default function EditMaterialPage({ params }: { params: { id: string } })
             </label>
             <input
               type="number"
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
               value={lowStockThreshold}
               onChange={(e) => setLowStockThreshold(e.target.value)}
               min="0"

@@ -1354,6 +1354,7 @@ export default function CustomOrderDetailPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={paymentAmount}
                   onChange={(e) => setPaymentAmount(parseInt(e.target.value) || 0)}
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white"

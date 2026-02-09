@@ -182,6 +182,7 @@ export default function NewCouponPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 step="0.01"
                 min="0"
                 value={formData.discountValue}
@@ -203,6 +204,7 @@ export default function NewCouponPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 step="0.01"
                 min="0"
                 value={formData.minimumOrderAmount}
@@ -222,6 +224,7 @@ export default function NewCouponPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   step="0.01"
                   min="0"
                   value={formData.maximumDiscount}
@@ -245,6 +248,7 @@ export default function NewCouponPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 min="1"
                 value={formData.usageLimit}
                 onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
@@ -260,6 +264,7 @@ export default function NewCouponPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 min="1"
                 value={formData.usageLimitPerUser}
                 onChange={(e) =>

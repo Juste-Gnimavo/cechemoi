@@ -277,6 +277,7 @@ export default function AvailabilityPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={newSlot.slotDuration}
                     onChange={(e) => setNewSlot({ ...newSlot, slotDuration: parseInt(e.target.value) })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -290,6 +291,7 @@ export default function AvailabilityPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={newSlot.breakBetween}
                     onChange={(e) => setNewSlot({ ...newSlot, breakBetween: parseInt(e.target.value) })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -404,6 +406,7 @@ export default function AvailabilityPage() {
                     {editingId === slot.id ? (
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={editForm.slotDuration || 60}
                         onChange={(e) => setEditForm({ ...editForm, slotDuration: parseInt(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
@@ -418,6 +421,7 @@ export default function AvailabilityPage() {
                     {editingId === slot.id ? (
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={editForm.breakBetween || 15}
                         onChange={(e) => setEditForm({ ...editForm, breakBetween: parseInt(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"

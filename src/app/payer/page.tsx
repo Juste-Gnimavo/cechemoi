@@ -67,6 +67,7 @@ export default function PayerPage() {
                 <div className="relative">
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     id="amount"
                     inputMode="numeric"
                     pattern="[0-9]*"

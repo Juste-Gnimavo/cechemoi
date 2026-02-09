@@ -439,6 +439,7 @@ export default function TaxManagementPage() {
                 <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Taux (%) *</label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={rateForm.rate}
                   onChange={(e) =>
                     setRateForm({ ...rateForm, rate: parseFloat(e.target.value) || 0 })
@@ -555,6 +556,7 @@ export default function TaxManagementPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={classForm.rate || ''}
                   onChange={(e) =>
                     setClassForm({

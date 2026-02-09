@@ -165,6 +165,7 @@ export default function RefundModal({
             </label>
             <input
               type="number"
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
               min="0"
               max={maxRefundAmount}
               step="1"

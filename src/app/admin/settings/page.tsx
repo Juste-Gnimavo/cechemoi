@@ -356,6 +356,7 @@ export default function SettingsPage() {
                 <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Nombre de décimales</label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={settings.decimals}
                   onChange={(e) => setSettings({ ...settings, decimals: parseInt(e.target.value) })}
                   min="0"
@@ -370,6 +371,7 @@ export default function SettingsPage() {
                   <span className="text-gray-500 dark:text-gray-400">1 EUR =</span>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={settings.eurToXofRate}
                     onChange={(e) => setSettings({ ...settings, eurToXofRate: parseFloat(e.target.value) || 680 })}
                     min="1"
@@ -561,6 +563,7 @@ export default function SettingsPage() {
                 <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Produits par page</label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={settings.productsPerPage}
                   onChange={(e) => setSettings({ ...settings, productsPerPage: parseInt(e.target.value) })}
                   min="1"
@@ -603,6 +606,7 @@ export default function SettingsPage() {
                 <label className="block text-sm text-gray-700 dark:text-gray-300 mb-2">Seuil de stock bas</label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={settings.lowStockThreshold}
                   onChange={(e) => setSettings({ ...settings, lowStockThreshold: parseInt(e.target.value) })}
                   min="0"

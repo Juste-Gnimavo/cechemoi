@@ -415,6 +415,7 @@ export default function ExpenseCategoriesPage() {
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={sortOrder}
                   onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
                   min="0"

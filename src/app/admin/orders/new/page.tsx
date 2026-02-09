@@ -859,6 +859,7 @@ export default function NewOrderPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Aucune méthode de livraison configurée</p>
                     <input
                       type="number"
+                      onWheel={(e) => (e.target as HTMLInputElement).blur()}
                       value={shippingCost}
                       onChange={(e) => setShippingCost(Number(e.target.value))}
                       placeholder="Frais de livraison manuels..."
@@ -1038,6 +1039,7 @@ export default function NewOrderPage() {
                 <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Remise manuelle</label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={discount}
                   onChange={(e) => setDiscount(Number(e.target.value))}
                   min="0"
@@ -1059,6 +1061,7 @@ export default function NewOrderPage() {
                 ) : (
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={shippingCost}
                     onChange={(e) => setShippingCost(Number(e.target.value))}
                     min="0"

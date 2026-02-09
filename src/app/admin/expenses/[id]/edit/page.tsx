@@ -239,6 +239,7 @@ export default function EditExpensePage() {
             </label>
             <input
               type="number"
+              onWheel={(e) => (e.target as HTMLInputElement).blur()}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required

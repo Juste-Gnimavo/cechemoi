@@ -385,6 +385,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={formData.cost}
                   onChange={(e) =>
                     setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })
@@ -404,6 +405,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                 </label>
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={formData.minOrderAmount || ''}
                   onChange={(e) =>
                     setFormData({
@@ -443,6 +445,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                     <div key={index} className="flex items-center gap-2">
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.min}
                         onChange={(e) =>
                           handleUpdateWeightRange(
@@ -459,6 +462,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                       <span className="text-gray-500 dark:text-gray-400">à</span>
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.max || ''}
                         onChange={(e) =>
                           handleUpdateWeightRange(
@@ -475,6 +479,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                       <span className="text-gray-500 dark:text-gray-400">=</span>
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.cost}
                         onChange={(e) =>
                           handleUpdateWeightRange(
@@ -525,6 +530,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                     <div key={index} className="flex items-center gap-2">
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.min}
                         onChange={(e) =>
                           handleUpdatePriceRange(
@@ -541,6 +547,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                       <span className="text-gray-500 dark:text-gray-400">à</span>
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.max || ''}
                         onChange={(e) =>
                           handleUpdatePriceRange(
@@ -557,6 +564,7 @@ export default function EditShippingMethodPage({ params }: { params: { id: strin
                       <span className="text-gray-500 dark:text-gray-400">=</span>
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={range.cost}
                         onChange={(e) =>
                           handleUpdatePriceRange(

@@ -532,6 +532,7 @@ export default function EditCustomerPage() {
               </label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={loyaltyPoints}
                 onChange={(e) => setLoyaltyPoints(parseInt(e.target.value) || 0)}
                 min="0"

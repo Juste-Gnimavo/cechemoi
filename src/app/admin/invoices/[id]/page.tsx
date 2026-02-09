@@ -1207,6 +1207,7 @@ export default function InvoiceDetailPage() {
                     <div className="relative">
                       <input
                         type="number"
+                        onWheel={(e) => (e.target as HTMLInputElement).blur()}
                         value={paymentForm.amount}
                         onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}
                         placeholder="0"

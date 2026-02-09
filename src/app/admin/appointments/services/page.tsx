@@ -324,6 +324,7 @@ export default function ServicesPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={newService.price}
                     onChange={(e) => setNewService({ ...newService, price: parseInt(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -338,6 +339,7 @@ export default function ServicesPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={newService.duration}
                     onChange={(e) => setNewService({ ...newService, duration: parseInt(e.target.value) || 60 })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -495,6 +497,7 @@ export default function ServicesPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={editForm.price || 0}
                     onChange={(e) => setEditForm({ ...editForm, price: parseInt(e.target.value) || 0 })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -509,6 +512,7 @@ export default function ServicesPage() {
                   </label>
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={editForm.duration || 60}
                     onChange={(e) => setEditForm({ ...editForm, duration: parseInt(e.target.value) || 60 })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"

@@ -787,6 +787,7 @@ export default function NewInvoicePage() {
                 <div className="col-span-2">
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={item.quantity}
                     onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
                     min="1"
@@ -798,6 +799,7 @@ export default function NewInvoicePage() {
                 <div className="col-span-2">
                   <input
                     type="number"
+                    onWheel={(e) => (e.target as HTMLInputElement).blur()}
                     value={item.unitPrice}
                     onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
                     min="0"
@@ -947,6 +949,7 @@ export default function NewInvoicePage() {
               <label className="text-gray-500 dark:text-gray-400">Taxe</label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={tax}
                 onChange={(e) => setTax(parseFloat(e.target.value) || 0)}
                 min="0"
@@ -967,6 +970,7 @@ export default function NewInvoicePage() {
               ) : (
                 <input
                   type="number"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   value={shippingCost}
                   onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
                   min="0"
@@ -981,6 +985,7 @@ export default function NewInvoicePage() {
               <label className="text-gray-500 dark:text-gray-400">Remise</label>
               <input
                 type="number"
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 value={discount}
                 onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
                 min="0"
