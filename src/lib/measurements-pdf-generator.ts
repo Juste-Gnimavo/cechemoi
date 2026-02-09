@@ -507,7 +507,7 @@ export async function generateMeasurementsPDF(
     { num: 5, label: 'EPAULE MANCHE', value: measurement.epauleManche },
     { num: 6, label: 'POITRINE', value: measurement.poitrine },
     { num: 7, label: 'TOUR DE TAILLE', value: measurement.tourDeTaille },
-    { num: 8, label: 'LONGUEUR DETAILLE', value: measurement.longueurDetaille },
+    { num: 8, label: 'LONGUEUR DE TAILLE', value: measurement.longueurDetaille },
     { num: 9, label: 'BASSIN', value: measurement.bassin },
   ]
 

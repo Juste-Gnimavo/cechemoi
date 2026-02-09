@@ -197,7 +197,7 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
+    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 

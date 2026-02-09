@@ -1960,7 +1960,7 @@ model CustomerMeasurement {
   epauleManche      String?  // 5. EPAULE MANCHE (shoulder to sleeve)
   poitrine          String?  // 6. POITRINE (chest/bust)
   tourDeTaille      String?  // 7. TOUR DE TAILLE (waist)
-  longueurDetaille  String?  // 8. LONGUEUR DETAILLE
+  longueurDetaille  String?  // 8. LONGUEUR DE TAILLE
   bassin            String?  // 9. BASSIN (hip)
 
   // Arms (10-12)

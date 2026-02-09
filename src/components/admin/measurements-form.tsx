@@ -236,7 +236,7 @@ export function MeasurementsForm({
               {renderTextInput('epauleManche', 'EPAULE MANCHE', 5)}
               {renderTextInput('poitrine', 'POITRINE', 6)}
               {renderTextInput('tourDeTaille', 'TOUR DE TAILLE', 7)}
-              {renderTextInput('longueurDetaille', 'LONGUEUR DETAILLE', 8)}
+              {renderTextInput('longueurDetaille', 'LONGUEUR DE TAILLE', 8)}
               {renderTextInput('bassin', 'BASSIN', 9)}
 
               {/* 10. LONGUEUR DES MANCHES - 4 sub-fields */}
