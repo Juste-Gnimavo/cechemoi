@@ -207,6 +207,8 @@ export function AdminHeader() {
             { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
             { href: '/admin/custom-orders/audit', label: 'Audit & Statistiques', allowedRoles: ['ADMIN'] },
             { href: '/admin/production', label: 'Suivi Production' },
+          { href: '/admin/custom-orders/fiche-suivi-confection', label: 'Fiche de Suivi Confection' },
+
           ],
         },
         {
