@@ -311,6 +311,13 @@ const pushNotificationTemplates: Record<NotificationTrigger, {
     description: 'Notification push admin nouveau RDV',
     recipientType: 'admin',
   },
+  BIRTHDAY_GREETING: {
+    title: 'Joyeux anniversaire !',
+    body: 'Toute l\'équipe CÈCHÉMOI vous souhaite un merveilleux anniversaire {customer_first_name} !',
+    name: 'Voeux anniversaire - Push',
+    description: 'Notification push voeux d\'anniversaire client',
+    recipientType: 'customer',
+  },
 }
 
 async function seedPushTemplates() {

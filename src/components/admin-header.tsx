@@ -348,6 +348,7 @@ export function AdminHeader() {
             { href: '/admin/notifications/logs', label: 'Logs' },
             { href: '/admin/notifications/templates', label: 'Modèles de message' },
             { href: '/admin/notifications/follow-up', label: 'Messages de relance' },
+            { href: '/admin/notifications/birthdays', label: 'Anniversaires', badge: 'NEW' },
             { href: '/admin/notifications/settings', label: 'Paramètres' },
           ],
         },

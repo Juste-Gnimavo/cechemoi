@@ -1359,6 +1359,8 @@ enum NotificationTrigger {
   APPOINTMENT_REMINDER         // Customer: Reminder before appointment
   APPOINTMENT_CANCELLED        // Customer: Appointment cancelled
   APPOINTMENT_BOOKED_ADMIN     // Admin: New appointment notification
+  // Birthday greetings
+  BIRTHDAY_GREETING              // Voeux d'anniversaire client
 }
 
 model NotificationTemplate {
@@ -2429,4 +2431,22 @@ model Expense {
   @@index([paymentDate])
   @@index([createdById])
   @@index([createdAt])
+}
+
+// ======================================
+// Birthday Greeting Log
+// ======================================
+model BirthdayGreetingLog {
+  id        String   @id @default(cuid())
+  userId    String
+  year      Int
+  sentAt    DateTime @default(now())
+  status    String   @default("sent") // 'sent' | 'failed'
+  channels  String[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, year])
+  @@index([year])
+  @@index([userId])
 }

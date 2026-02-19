@@ -443,6 +443,19 @@ export class NotificationService {
       vars.low_stock_products = data.lowStockProducts || 0
     }
 
+    // Birthday greeting
+    if (trigger === 'BIRTHDAY_GREETING') {
+      const user = await prisma.user.findUnique({
+        where: { id: data.userId },
+      })
+
+      if (user) {
+        vars.customer_name = user.name || 'Client'
+        vars.customer_first_name = user.name?.split(' ')[0] || 'Client'
+        vars.recipientPhone = user.whatsappNumber || user.phone
+      }
+    }
+
     // Direct data passthrough - allows callers to pass variables directly
     // This handles cases like admin-created invoices without orders
     if (data.customer_name && !vars.customer_name) vars.customer_name = data.customer_name
@@ -1300,6 +1313,23 @@ export class NotificationService {
     } catch (error) {
       console.error('Error processing scheduled notifications:', error)
     }
+  }
+
+  // =========================================================================
+  // BIRTHDAY GREETING
+  // =========================================================================
+
+  /**
+   * Send birthday greeting to a customer
+   * Sends BOTH SMS and WhatsApp simultaneously
+   */
+  async sendBirthdayGreeting(userId: string): Promise<NotificationResult> {
+    return this.sendNotification({
+      trigger: 'BIRTHDAY_GREETING',
+      recipientType: 'customer',
+      data: { userId },
+      sendBoth: true,
+    })
   }
 
   /**
