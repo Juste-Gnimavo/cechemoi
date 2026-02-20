@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, Mail, Send, User, MapPin, Globe, Image as ImageIcon, ExternalLink, UserPlus, Gift, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react'
@@ -37,6 +37,36 @@ export default function NewCustomerPage() {
   const [image, setImage] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [howDidYouHearAboutUs, setHowDidYouHearAboutUs] = useState('')
+  const [customSource, setCustomSource] = useState('')
+  const [availableSources, setAvailableSources] = useState<string[]>([])
+
+  // Default sources for the dropdown
+  const DEFAULT_SOURCES = ['Instagram', 'Facebook', 'TikTok', 'Google', 'Bouche à oreille', 'Publicité', 'Événement']
+
+  // Fetch existing sources from API
+  useEffect(() => {
+    const fetchSources = async () => {
+      try {
+        const res = await fetch('/api/admin/customers/sources?period=all')
+        const data = await res.json()
+        if (data.success && data.stats) {
+          const apiSources = data.stats
+            .map((s: { source: string }) => s.source)
+            .filter((s: string) => s !== 'Non spécifié')
+          setAvailableSources(apiSources)
+        }
+      } catch (error) {
+        console.error('Error fetching sources:', error)
+      }
+    }
+    fetchSources()
+  }, [])
+
+  // Build merged source options: defaults + API sources (deduplicated)
+  const sourceOptions = [
+    ...DEFAULT_SOURCES,
+    ...availableSources.filter(s => !DEFAULT_SOURCES.includes(s) && s !== 'Autre'),
+  ]
 
   // Measurements
   const [measurementsData, setMeasurementsData] = useState<any>(null)
@@ -149,7 +179,7 @@ export default function NewCustomerPage() {
           whatsappNumber: whatsappNumber || phone,
           image: image || null,
           dateOfBirth: formatDateToISO(dateOfBirth),
-          howDidYouHearAboutUs: howDidYouHearAboutUs || null,
+          howDidYouHearAboutUs: (howDidYouHearAboutUs === 'Autre' && customSource.trim() ? customSource.trim() : howDidYouHearAboutUs) || null,
           city: city || null,
           country: country || null,
           countryCode: countryCode || null,
@@ -201,6 +231,7 @@ export default function NewCustomerPage() {
     setImage('')
     setDateOfBirth('')
     setHowDidYouHearAboutUs('')
+    setCustomSource('')
     setMeasurementsData(null)
     setCity('')
     setCountry('Côte d\'Ivoire')
@@ -352,19 +383,29 @@ export default function NewCustomerPage() {
               </label>
               <select
                 value={howDidYouHearAboutUs}
-                onChange={(e) => setHowDidYouHearAboutUs(e.target.value)}
+                onChange={(e) => {
+                  setHowDidYouHearAboutUs(e.target.value)
+                  if (e.target.value !== 'Autre') setCustomSource('')
+                }}
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">Sélectionner...</option>
-                <option value="Instagram">Instagram</option>
-                <option value="Facebook">Facebook</option>
-                <option value="TikTok">TikTok</option>
-                <option value="Google">Google</option>
-                <option value="Bouche à oreille">Bouche à oreille (ami/famille)</option>
-                <option value="Publicité">Publicité</option>
-                <option value="Événement">Événement / Salon</option>
+                {sourceOptions.map((source) => (
+                  <option key={source} value={source}>
+                    {source === 'Bouche à oreille' ? 'Bouche à oreille (ami/famille)' : source === 'Événement' ? 'Événement / Salon' : source}
+                  </option>
+                ))}
                 <option value="Autre">Autre</option>
               </select>
+              {howDidYouHearAboutUs === 'Autre' && (
+                <input
+                  type="text"
+                  value={customSource}
+                  onChange={(e) => setCustomSource(e.target.value)}
+                  className="w-full mt-2 px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Précisez la source..."
+                />
+              )}
             </div>
           </div>
 
