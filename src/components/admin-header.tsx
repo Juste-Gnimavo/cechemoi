@@ -254,10 +254,6 @@ export function AdminHeader() {
           allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
           items: [
             { href: '/admin/sales', label: 'Toutes les ventes', badge: 'NEW' },
-            { href: '/admin/sales/today', label: "Ventes d'aujourd'hui" },
-            { href: '/admin/sales/week', label: 'Ventes de la semaine' },
-            { href: '/admin/sales/month', label: 'Ventes du mois' },
-            { href: '/admin/sales/year', label: "Ventes de l'année" },
           ],
         },
         {
