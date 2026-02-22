@@ -238,11 +238,6 @@ export function AdminHeader() {
           items: [
             { href: '/admin/invoices', label: 'Toutes les factures' },
             { href: '/admin/invoices/new', label: 'Créer une facture', badge: 'NEW' },
-            { href: '/admin/invoices?status=paid', label: 'Factures payées' },
-            { href: '/admin/invoices?status=draft', label: 'Factures brouillon' },
-            { href: '/admin/invoices?status=unpaid', label: 'Factures non payées' },
-            { href: '/admin/invoices?status=cancelled', label: 'Factures annulées' },
-            { href: '/admin/invoices?status=refunded', label: 'Factures remboursées' },
             { href: '/admin/invoices/standalone-payments', label: 'Paiements autonomes', badge: 'NEW' },
           ],
         },
