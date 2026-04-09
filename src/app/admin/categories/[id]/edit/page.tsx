@@ -9,7 +9,10 @@ import {
   Trash2,
   Loader2,
   AlertCircle,
-  Package
+  Package,
+  Upload,
+  Image as ImageIcon,
+  X
 } from 'lucide-react'
 
 interface Category {
@@ -31,6 +34,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [category, setCategory] = useState<Category | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -41,6 +45,8 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
   const [parentId, setParentId] = useState('')
+  const [uploadMethod, setUploadMethod] = useState<'upload' | 'url'>('upload')
+  const [isDragging, setIsDragging] = useState(false)
 
   // Error state
   const [error, setError] = useState('')
@@ -80,7 +86,6 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
       const res = await fetch('/api/admin/categories')
       const data = await res.json()
       if (data.success) {
-        // Filter out the current category and its children to prevent circular reference
         const filtered = data.categories.filter(
           (cat: Category) => cat.id !== params.id
         )
@@ -89,6 +94,83 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
     } catch (error) {
       console.error('Error fetching categories:', error)
     }
+  }
+
+  const validateFile = (file: File): boolean => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setError('Type de fichier invalide. Utilisez JPG, PNG, GIF ou WEBP')
+      return false
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setError('Fichier trop volumineux. Maximum 50MB')
+      return false
+    }
+    return true
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !validateFile(file)) return
+    setError('')
+    await uploadFile(file)
+  }
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (!file || !validateFile(file)) return
+    setError('')
+    await uploadFile(file)
+  }
+
+  const uploadFile = async (file: File) => {
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('category', 'categories')
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        setImage(data.url)
+      } else {
+        setError(data.error || 'Erreur lors du téléchargement')
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      setError('Erreur lors du téléchargement')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeImage = () => {
+    setImage('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -275,30 +357,141 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
             <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
               Image <span className="text-gray-500 text-xs font-normal">(optionnel - logo par défaut si non fourni)</span>
             </label>
-            <input
-              type="text"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              placeholder="/uploads/categories/image.jpg ou https://example.com/image.jpg"
-              className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              URL complète (https://...) ou chemin relatif (/uploads/...)
-            </p>
 
-            {/* Image Preview */}
-            {image && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Aperçu :</p>
-                <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
-                  <img
-                    src={image}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={() => setError("URL de l'image invalide")}
-                  />
-                </div>
-              </div>
+            {/* Upload Method Tabs */}
+            <div className="flex space-x-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setUploadMethod('upload')}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  uploadMethod === 'upload'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-dark-900 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-dark-700'
+                }`}
+              >
+                <Upload className="h-4 w-4 inline mr-2" />
+                Télécharger un fichier
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadMethod('url')}
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  uploadMethod === 'url'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-dark-900 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-dark-700'
+                }`}
+              >
+                <ImageIcon className="h-4 w-4 inline mr-2" />
+                URL de l'image
+              </button>
+            </div>
+
+            {/* Upload Method: File Upload */}
+            {uploadMethod === 'upload' && (
+              <>
+                {!image && !uploading && (
+                  <div
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                      isDragging
+                        ? 'border-primary-500 bg-primary-500/10'
+                        : 'border-gray-300 dark:border-dark-700 hover:border-primary-500'
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      id="imageInput"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <label htmlFor="imageInput" className="cursor-pointer block">
+                      <Upload className={`h-12 w-12 mx-auto mb-3 transition-colors ${
+                        isDragging ? 'text-primary-500' : 'text-gray-400 dark:text-gray-500'
+                      }`} />
+                      <p className="text-gray-900 dark:text-white mb-1 font-medium">
+                        {isDragging ? 'Déposez votre image ici' : 'Glissez-déposez une image ou cliquez pour parcourir'}
+                      </p>
+                      <p className="text-sm text-gray-500">JPG, PNG, GIF, WEBP (max 50MB)</p>
+                    </label>
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="p-6 bg-primary-500/10 border border-primary-500/30 rounded-lg text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary-500 mx-auto mb-2" />
+                    <p className="text-sm text-primary-400">Téléchargement en cours...</p>
+                  </div>
+                )}
+
+                {image && !uploading && (
+                  <div className="relative border border-gray-200 dark:border-dark-700 rounded-lg p-4 bg-gray-100 dark:bg-dark-900">
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden mb-2">
+                      <img
+                        src={image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-all duration-200"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate flex-1">Image actuelle</p>
+                      <label
+                        htmlFor="imageInputReplace"
+                        className="text-xs text-primary-500 hover:text-primary-400 cursor-pointer font-medium"
+                      >
+                        Remplacer
+                      </label>
+                      <input
+                        type="file"
+                        id="imageInputReplace"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Upload Method: URL */}
+            {uploadMethod === 'url' && (
+              <>
+                <input
+                  type="url"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  URL complète de l'image de la catégorie
+                </p>
+
+                {image && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Aperçu :</p>
+                    <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
+                      <img
+                        src={image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={() => setError("URL de l'image invalide")}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -321,7 +514,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
             </select>
             {category.parent && (
               <p className="text-xs text-gray-500 mt-2">
-                Actuellement sous: {category.parent.name}
+                Actuellement sous : {category.parent.name}
               </p>
             )}
           </div>
@@ -377,7 +570,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
               {category._count && category._count.products > 0 && (
                 <div className="bg-yellow-500/10 border border-yellow-500 rounded-lg p-3">
                   <p className="text-yellow-600 dark:text-yellow-500 text-sm">
-                    ⚠️ Cette catégorie contient {category._count.products} produit(s). Vous devez d'abord déplacer ou supprimer ces produits.
+                    Cette catégorie contient {category._count.products} produit(s). Vous devez d'abord déplacer ou supprimer ces produits.
                   </p>
                 </div>
               )}
@@ -385,7 +578,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
               {category.children && category.children.length > 0 && (
                 <div className="bg-yellow-500/10 border border-yellow-500 rounded-lg p-3">
                   <p className="text-yellow-600 dark:text-yellow-500 text-sm">
-                    ⚠️ Cette catégorie a {category.children.length} sous-catégorie(s). Vous devez d'abord les déplacer ou les supprimer.
+                    Cette catégorie a {category.children.length} sous-catégorie(s). Vous devez d'abord les déplacer ou les supprimer.
                   </p>
                 </div>
               )}
