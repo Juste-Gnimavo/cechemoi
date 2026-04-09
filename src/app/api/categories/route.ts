@@ -22,12 +22,17 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
     const includeChildren = searchParams.get('includeChildren') !== 'false' // default true
     const includeProductCount = searchParams.get('includeProductCount') === 'true'
-    const published = searchParams.get('published') !== 'false' // default true
+    const slug = searchParams.get('slug') || ''
 
-    // Build where clause - only show categories with products or that have children
+    // Build where clause
     const where: any = {}
 
-    // Fetch all categories with their relationships
+    // Filter by slug if provided
+    if (slug) {
+      where.slug = slug
+    }
+
+    // Fetch categories
     const categories = await prisma.category.findMany({
       where,
       include: {

@@ -9,8 +9,14 @@ const redisConfig = {
   db: parseInt(process.env.REDIS_DB || '0'),
   tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
   keyPrefix: process.env.REDIS_PREFIX ? `${process.env.REDIS_PREFIX}:` : 'cechemoi:',
-  retryDelayOnFailover: 100,
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: 1,
+  retryStrategy: (times: number) => {
+    if (times > 3) {
+      // Stop retrying after 3 attempts — app works fine without Redis
+      return null
+    }
+    return Math.min(times * 500, 3000)
+  },
   lazyConnect: true, // Don't connect immediately
 }
 
@@ -21,6 +27,7 @@ const DEFAULT_TTL = parseInt(process.env.REDIS_TTL || '3600')
 let redisClient: Redis | null = null
 let isConnected = false
 let connectionAttempted = false
+let errorLogged = false
 
 // Get Redis client instance
 function getRedisClient(): Redis | null {
@@ -34,12 +41,17 @@ function getRedisClient(): Redis | null {
 
     redisClient.on('connect', () => {
       isConnected = true
+      errorLogged = false
       console.log('Redis connected successfully')
     })
 
     redisClient.on('error', (err) => {
-      console.error('Redis connection error:', err.message)
       isConnected = false
+      // Log only once to avoid spamming
+      if (!errorLogged) {
+        console.warn(`Redis unavailable: ${err.message} — app will work without cache`)
+        errorLogged = true
+      }
     })
 
     redisClient.on('close', () => {
