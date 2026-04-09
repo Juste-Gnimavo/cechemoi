@@ -14,9 +14,9 @@ interface Product {
   price: number
   salePrice: number | null
   images: string[]
-  wineType: string | null
-  region: string | null
-  vintage: string | null
+  garmentType: string | null
+  style: string | null
+  collection: string | null
   mainCategorySlug: string | null
   subCategorySlug: string | null
 }
@@ -143,7 +143,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher des vins, champagnes, spiritueux..."
+              placeholder="Rechercher des robes, ensembles, accessoires..."
               className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none text-lg"
             />
             {loading && (
@@ -219,19 +219,19 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           {product.name}
                         </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {product.wineType && (
-                            <span>{product.wineType}</span>
+                          {product.garmentType && (
+                            <span>{product.garmentType}</span>
                           )}
-                          {product.region && (
+                          {product.style && (
                             <>
                               <span>•</span>
-                              <span>{product.region}</span>
+                              <span>{product.style}</span>
                             </>
                           )}
-                          {product.vintage && (
+                          {product.collection && (
                             <>
                               <span>•</span>
-                              <span>{product.vintage}</span>
+                              <span>{product.collection}</span>
                             </>
                           )}
                         </div>

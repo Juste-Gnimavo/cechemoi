@@ -79,11 +79,11 @@ export function MiniCart() {
               <ShoppingCart className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
               <p className="text-gray-500 dark:text-gray-400">Votre panier est vide</p>
               <Link
-                href="/vins"
+                href="/catalogue"
                 onClick={() => setIsOpen(false)}
                 className="mt-4 inline-block text-primary-600 dark:text-primary-500 hover:text-primary-500 dark:hover:text-primary-400 text-sm font-medium"
               >
-                Découvrir nos vins
+                Découvrir nos créations
               </Link>
             </div>
           ) : (

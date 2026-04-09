@@ -17,9 +17,9 @@ interface ProductCardProps {
     price: number
     salePrice: number | null
     image: string
-    wineType?: string
-    region?: string
-    vintage?: string
+    garmentType?: string
+    style?: string
+    collection?: string
     mainCategorySlug?: string | null
     subCategorySlug?: string | null
     featured?: boolean
@@ -109,9 +109,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-gray-900 dark:text-white font-semibold mb-1 line-clamp-2 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
             {product.name}
           </h3>
-          {product.region && (
+          {product.style && (
             <p className="text-gray-500 text-sm mb-3">
-              {product.region} {product.vintage && `• ${product.vintage}`}
+              {product.style} {product.collection && `• ${product.collection}`}
             </p>
           )}
           <div className="flex items-center justify-between">

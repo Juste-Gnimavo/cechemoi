@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
  *   - limit: number of products to return (default: 8)
  *   - page: page number for pagination (default: 1)
  *   - category: filter by category slug (optional)
- *   - wineType: filter by wine type (optional)
+ *   - garmentType: filter by garment type (optional)
  */
 export async function GET(req: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '8')
     const page = parseInt(searchParams.get('page') || '1')
     const categorySlug = searchParams.get('category')
-    const wineType = searchParams.get('wineType')
+    const garmentType = searchParams.get('garmentType')
 
     const skip = (page - 1) * limit
 
@@ -46,10 +46,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Filter by wine type if provided
-    if (wineType) {
-      where.wineType = {
-        equals: wineType,
+    // Filter by garment type if provided
+    if (garmentType) {
+      where.garmentType = {
+        equals: garmentType,
         mode: 'insensitive',
       }
     }
@@ -98,10 +98,10 @@ export async function GET(req: NextRequest) {
         images: product.images,
         stock: product.stock,
         featured: product.featured,
-        wineType: product.wineType,
-        region: product.region,
+        garmentType: product.garmentType,
+        style: product.style,
         country: product.country,
-        vintage: product.vintage,
+        collection: product.collection,
         category: product.category,
         rating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
         reviewCount: product.reviews.length,

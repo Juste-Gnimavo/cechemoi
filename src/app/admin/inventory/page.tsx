@@ -95,7 +95,7 @@ export default function InventoryPage() {
   const handleSendAlerts = async () => {
     try {
       setSendingAlerts(true)
-      const response = await fetch('/api/admin/inventory/alerts/send', {
+      const response = await fetch('/api/admin/inventory/alerts', {
         method: 'POST',
       })
       const data = await response.json()
@@ -242,7 +242,7 @@ export default function InventoryPage() {
               Stock faible
             </h2>
             <Link
-              href="/admin/inventory/alerts?type=low"
+              href="/admin/products?stockStatus=lowStock"
               className="text-primary-500 text-sm hover:underline"
             >
               Voir tout
@@ -283,7 +283,7 @@ export default function InventoryPage() {
               Rupture de stock
             </h2>
             <Link
-              href="/admin/inventory/alerts?type=out"
+              href="/admin/products?stockStatus=outOfStock"
               className="text-primary-500 text-sm hover:underline"
             >
               Voir tout

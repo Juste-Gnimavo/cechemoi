@@ -201,15 +201,14 @@ export async function POST(req: NextRequest) {
       categoryIds, // Additional categories (multi-category support)
       published,
       featured,
-      isWine, // Product type flag
-      // Wine specific
-      vintage,
-      region,
+      hasDetails, // Show clothing detail fields
+      // Clothing specific
+      collection,
+      style,
       country,
-      grapeVariety,
-      alcoholContent,
-      volume,
-      wineType,
+      fabric,
+      sizes,
+      garmentType,
       // Metadata
       weight,
       dimensions,
@@ -241,9 +240,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ce SKU existe déjà' }, { status: 400 })
     }
 
-    // Generate slug if not provided
+    // Generate slug if not provided (normalize accents for URL-safe slugs)
     const productSlug =
-      slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+      slug || name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '')
 
     // Check if slug exists
     const existingSlug = await prisma.product.findUnique({
@@ -271,15 +270,13 @@ export async function POST(req: NextRequest) {
         categoryId,
         published: published !== false,
         featured: featured === true,
-        isWine: isWine !== false, // Default to true for backward compatibility
-        // Wine fields (only relevant if isWine is true)
-        vintage: isWine !== false ? vintage : null,
-        region: isWine !== false ? region : null,
-        country: isWine !== false ? country : null,
-        grapeVariety: isWine !== false ? grapeVariety : null,
-        alcoholContent: isWine !== false && alcoholContent ? parseFloat(alcoholContent) : null,
-        volume: isWine !== false ? volume : null,
-        wineType: isWine !== false ? wineType : null,
+        hasDetails: hasDetails !== false,
+        collection: hasDetails !== false ? collection : null,
+        style: hasDetails !== false ? style : null,
+        country: hasDetails !== false ? country : null,
+        fabric: hasDetails !== false ? fabric : null,
+        sizes: hasDetails !== false ? sizes : null,
+        garmentType: hasDetails !== false ? garmentType : null,
         // Metadata
         weight: weight ? parseFloat(weight) : null,
         dimensions,

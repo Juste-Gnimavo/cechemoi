@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Plus, Search, Edit, Eye, Package, Star, AlertTriangle, CheckCircle, Calendar, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
@@ -52,6 +53,7 @@ interface Pagination {
 }
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [categories, setCategories] = useState<any[]>([])
@@ -67,10 +69,10 @@ export default function ProductsPage() {
   })
 
   const [filters, setFilters] = useState({
-    search: '',
-    categoryId: '',
-    published: '',
-    stockStatus: '',
+    search: searchParams.get('search') || '',
+    categoryId: searchParams.get('category') || '',
+    published: searchParams.get('published') || '',
+    stockStatus: searchParams.get('stockStatus') || '',
   })
 
   useEffect(() => {

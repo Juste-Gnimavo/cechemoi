@@ -126,7 +126,7 @@ async function generateInvoicePDF(invoice: any): Promise<Uint8Array> {
   const margin = 50
 
   // =============================================
-  // COLORS - Brand color #744424 (Wine Burgundy)
+  // COLORS - Brand color #744424
   // =============================================
   const primaryColor = rgb(0.455, 0.267, 0.141)  // #744424
   const textColor = rgb(0.2, 0.2, 0.2)

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Wine, ArrowLeft } from 'lucide-react'
+import { Home, ShoppingBag, ArrowLeft } from 'lucide-react'
 
 export default function NotFound() {
   const router = useRouter()
@@ -27,10 +27,9 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        {/* Wine glass icon */}
         <div className="mb-8 relative">
           <div className="w-32 h-32 mx-auto bg-primary-500/10 rounded-full flex items-center justify-center">
-            <Wine className="w-16 h-16 text-primary-500" />
+            <ShoppingBag className="w-16 h-16 text-primary-500" />
           </div>
           <div className="absolute -top-2 -right-2 w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
             <span className="text-red-400 font-bold text-lg">!</span>
@@ -43,7 +42,7 @@ export default function NotFound() {
           Page introuvable
         </h2>
         <p className="text-gray-400 mb-8">
-          Oups ! Cette page semble avoir disparu comme une bonne bouteille de vin...
+          Oups ! Cette page semble avoir disparu comme un vêtement en édition limitée...
         </p>
 
         {/* Countdown */}
@@ -76,8 +75,8 @@ export default function NotFound() {
         {/* Explore link */}
         <p className="mt-8 text-gray-500">
           Ou explorez notre{' '}
-          <Link href="/vins" className="text-primary-400 hover:text-primary-300 underline">
-            collection de vins
+          <Link href="/catalogue" className="text-primary-400 hover:text-primary-300 underline">
+            catalogue
           </Link>
         </p>
       </div>

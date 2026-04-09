@@ -62,9 +62,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 })
     }
 
-    // Generate slug if not provided
+    // Generate slug if not provided (normalize accents for URL-safe slugs)
     const categorySlug =
-      slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '')
+      slug || name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '')
 
     // Check if slug exists
     const existingSlug = await prisma.category.findUnique({

@@ -100,15 +100,14 @@ export async function PUT(
       categoryIds, // Additional categories (multi-category support)
       published,
       featured,
-      isWine, // Product type flag
-      // Wine specific
-      vintage,
-      region,
+      hasDetails, // Show clothing detail fields
+      // Clothing specific
+      collection,
+      style,
       country,
-      grapeVariety,
-      alcoholContent,
-      volume,
-      wineType,
+      fabric,
+      sizes,
+      garmentType,
       // Metadata
       weight,
       dimensions,
@@ -187,17 +186,14 @@ export async function PUT(
         ...(categoryId && { categoryId }),
         ...(published !== undefined && { published }),
         ...(featured !== undefined && { featured }),
-        ...(isWine !== undefined && { isWine }),
-        // Wine fields (clear if not a wine product)
-        ...(vintage !== undefined && { vintage: isWine === false ? null : vintage }),
-        ...(region !== undefined && { region: isWine === false ? null : region }),
-        ...(country !== undefined && { country: isWine === false ? null : country }),
-        ...(grapeVariety !== undefined && { grapeVariety: isWine === false ? null : grapeVariety }),
-        ...(alcoholContent !== undefined && {
-          alcoholContent: isWine === false ? null : (alcoholContent ? parseFloat(alcoholContent) : null),
-        }),
-        ...(volume !== undefined && { volume: isWine === false ? null : volume }),
-        ...(wineType !== undefined && { wineType: isWine === false ? null : wineType }),
+        ...(hasDetails !== undefined && { hasDetails }),
+        // Clothing detail fields (clear if details not shown)
+        ...(collection !== undefined && { collection: hasDetails === false ? null : collection }),
+        ...(style !== undefined && { style: hasDetails === false ? null : style }),
+        ...(country !== undefined && { country: hasDetails === false ? null : country }),
+        ...(fabric !== undefined && { fabric: hasDetails === false ? null : fabric }),
+        ...(sizes !== undefined && { sizes: hasDetails === false ? null : sizes }),
+        ...(garmentType !== undefined && { garmentType: hasDetails === false ? null : garmentType }),
         // Metadata
         ...(weight !== undefined && {
           weight: weight ? parseFloat(weight) : null,

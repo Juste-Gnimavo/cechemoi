@@ -14,9 +14,9 @@ interface Product {
   price: number
   salePrice: number | null
   images: string[]
-  wineType: string | null
-  region: string | null
-  vintage: string | null
+  garmentType: string | null
+  style: string | null
+  collection: string | null
   stock: number
   mainCategorySlug: string | null
   subCategorySlug: string | null
@@ -143,9 +143,9 @@ export default function CategoryPage() {
                     price: product.price,
                     salePrice: product.salePrice,
                     image: product.images[0] || '/placeholder.png',
-                    wineType: product.wineType || undefined,
-                    region: product.region || undefined,
-                    vintage: product.vintage || undefined,
+                    garmentType: product.garmentType || undefined,
+                    style: product.style || undefined,
+                    collection: product.collection || undefined,
                     mainCategorySlug: product.mainCategorySlug,
                     subCategorySlug: product.subCategorySlug,
                     featured: product.featured,

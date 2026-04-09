@@ -44,20 +44,19 @@ export default function NewProductPage() {
   const [taxClassId, setTaxClassId] = useState('')
   const [published, setPublished] = useState(true)
   const [featured, setFeatured] = useState(false)
-  const [isWine, setIsWine] = useState(true) // Has clothing details toggle
+  const [hasDetails, setHasDetails] = useState(true)
 
   // Marketing - Related and Upsell
   const [relatedProducts, setRelatedProducts] = useState<string[]>([])
   const [upsellProducts, setUpsellProducts] = useState<string[]>([])
 
-  // Clothing specific (using same field names for API compatibility)
-  const [vintage, setVintage] = useState('') // Collection
-  const [region, setRegion] = useState('') // Style
-  const [country, setCountry] = useState('Cote d\'Ivoire') // Origine
-  const [grapeVariety, setGrapeVariety] = useState('') // Tissu/Matiere
-  const [alcoholContent, setAlcoholContent] = useState('') // Not used for clothing
-  const [volume, setVolume] = useState('') // Tailles disponibles
-  const [wineType, setWineType] = useState('') // Type de vêtement
+  // Clothing specific
+  const [collection, setCollection] = useState('')
+  const [style, setStyle] = useState('')
+  const [country, setCountry] = useState('Côte d\'Ivoire')
+  const [fabric, setFabric] = useState('')
+  const [sizes, setSizes] = useState('')
+  const [garmentType, setGarmentType] = useState('')
 
   // Metadata
   const [weight, setWeight] = useState('')
@@ -79,16 +78,22 @@ export default function NewProductPage() {
     fetchTaxClasses()
   }, [])
 
+  const [autoSlug, setAutoSlug] = useState(true)
+
   useEffect(() => {
     // Auto-generate slug from name
-    if (name && !slug) {
+    if (autoSlug && name) {
       const generatedSlug = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/\s+/g, '-')
-        .replace(/[^\w-]/g, '')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
       setSlug(generatedSlug)
     }
-  }, [name])
+  }, [name, autoSlug])
 
   const fetchCategories = async () => {
     try {
@@ -253,18 +258,17 @@ export default function NewProductPage() {
           taxClassId: taxClassId || null,
           published,
           featured,
-          isWine, // Product type flag
+          hasDetails,
           // Marketing
           relatedProducts,
           upsellProducts,
-          // Wine fields (only if isWine is true)
-          vintage: isWine ? vintage : null,
-          region: isWine ? region : null,
-          country: isWine ? country : null,
-          grapeVariety: isWine ? grapeVariety : null,
-          alcoholContent: isWine && alcoholContent ? parseFloat(alcoholContent) : null,
-          volume: isWine ? volume : null,
-          wineType: isWine ? wineType : null,
+          // Clothing detail fields
+          collection: hasDetails ? collection : null,
+          style: hasDetails ? style : null,
+          country: hasDetails ? country : null,
+          fabric: hasDetails ? fabric : null,
+          sizes: hasDetails ? sizes : null,
+          garmentType: hasDetails ? garmentType : null,
           // Metadata
           weight: weight ? parseFloat(weight) : null,
           dimensions,
@@ -352,12 +356,15 @@ export default function NewProductPage() {
                 <input
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
+                  onChange={(e) => {
+                    setSlug(e.target.value)
+                    setAutoSlug(false)
+                  }}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                   placeholder="robe-elegance-wax"
                 />
                 <p className="text-gray-500 text-xs mt-1">
-                  Généré automatiquement si vide
+                  Généré automatiquement depuis le nom. Modifiez pour personnaliser.
                 </p>
               </div>
 
@@ -505,9 +512,9 @@ export default function NewProductPage() {
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-dark-700">
                   <button
                     type="button"
-                    onClick={() => setIsWine(true)}
+                    onClick={() => setHasDetails(true)}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      isWine
+                      hasDetails
                         ? 'bg-primary-500 text-white'
                         : 'bg-gray-200 dark:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
@@ -516,9 +523,9 @@ export default function NewProductPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsWine(false)}
+                    onClick={() => setHasDetails(false)}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      !isWine
+                      !hasDetails
                         ? 'bg-primary-500 text-white'
                         : 'bg-gray-200 dark:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
@@ -529,19 +536,19 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            {!isWine && (
+            {!hasDetails && (
               <p className="text-gray-500 text-sm italic">
                 Les caractéristiques sont masquées (utile pour accessoires, cartes cadeaux, etc.)
               </p>
             )}
 
-            {isWine && (
+            {hasDetails && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vêtement</label>
                 <select
-                  value={wineType}
-                  onChange={(e) => setWineType(e.target.value)}
+                  value={garmentType}
+                  onChange={(e) => setGarmentType(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -571,18 +578,18 @@ export default function NewProductPage() {
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Collection</label>
                 <input
                   type="text"
-                  value={vintage}
-                  onChange={(e) => setVintage(e.target.value)}
+                  value={collection}
+                  onChange={(e) => setCollection(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Collection 2025"
+                  placeholder="Collection 2026"
                 />
               </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Style</label>
                 <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -605,15 +612,15 @@ export default function NewProductPage() {
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Cote d'Ivoire"
+                  placeholder="Côte d'Ivoire"
                 />
               </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tissu / Matière</label>
                 <select
-                  value={grapeVariety}
-                  onChange={(e) => setGrapeVariety(e.target.value)}
+                  value={fabric}
+                  onChange={(e) => setFabric(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -640,8 +647,8 @@ export default function NewProductPage() {
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tailles disponibles</label>
                 <input
                   type="text"
-                  value={volume}
-                  onChange={(e) => setVolume(e.target.value)}
+                  value={sizes}
+                  onChange={(e) => setSizes(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                   placeholder="S, M, L, XL ou Sur-mesure"
                 />

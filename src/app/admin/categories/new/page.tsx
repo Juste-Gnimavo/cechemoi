@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ArrowLeft,
   Save,
@@ -50,9 +49,13 @@ export default function NewCategoryPage() {
   useEffect(() => {
     if (autoSlug && name) {
       const generatedSlug = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/\s+/g, '-')
-        .replace(/[^\w-]/g, '')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
       setSlug(generatedSlug)
     }
   }, [name, autoSlug])
@@ -369,11 +372,10 @@ export default function NewCategoryPage() {
                 {image && !uploading && (
                   <div className="relative border border-gray-200 dark:border-dark-700 rounded-lg p-4 bg-gray-100 dark:bg-dark-900">
                     <div className="relative w-full h-48 rounded-lg overflow-hidden mb-2">
-                      <Image
+                      <img
                         src={image}
                         alt="Preview"
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                         onError={() => setError("Erreur de chargement de l'image")}
                       />
                     </div>
@@ -408,12 +410,11 @@ export default function NewCategoryPage() {
                 {image && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Aperçu :</p>
-                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
-                      <Image
+                    <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
+                      <img
                         src={image}
                         alt="Preview"
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                         onError={() => setError("URL de l'image invalide")}
                       />
                     </div>

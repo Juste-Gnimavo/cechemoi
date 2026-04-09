@@ -107,13 +107,13 @@ export default function CartPage() {
               Votre panier est vide
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mb-8">
-              Découvrez notre sélection de vins exceptionnels
+              Découvrez notre collection de créations uniques
             </p>
             <Link
-              href="/vins"
+              href="/catalogue"
               className="inline-flex items-center px-8 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
             >
-              Explorer nos vins
+              Explorer notre catalogue
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </div>
@@ -331,7 +331,7 @@ export default function CartPage() {
               )}
 
               <Link
-                href="/vins"
+                href="/catalogue"
                 className="block w-full text-center px-6 py-3 border border-gray-300 dark:border-dark-700 hover:border-primary-500 text-gray-900 dark:text-white font-semibold rounded-lg transition-colors"
               >
                 Continuer mes achats

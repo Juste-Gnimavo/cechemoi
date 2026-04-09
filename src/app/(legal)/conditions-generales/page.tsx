@@ -3,7 +3,7 @@ import { FileText, ShoppingCart, Package, CreditCard, Truck, RotateCcw, Shield, 
 
 export const metadata: Metadata = {
   title: 'Conditions Générales de Vente | CÈCHÉMOI',
-  description: 'Consultez les conditions générales de vente de CÈCHÉMOI. Informations sur les commandes, paiements, livraisons et retours pour vos achats de vins à Abidjan.',
+  description: 'Consultez les conditions générales de vente de CÈCHÉMOI. Informations sur les commandes, paiements, livraisons et retours pour vos achats de mode à Abidjan.',
 }
 
 export default function ConditionsGeneralesPage() {

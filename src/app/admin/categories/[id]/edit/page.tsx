@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   ArrowLeft,
   Save,
@@ -291,12 +290,11 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
             {image && (
               <div className="mt-4">
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Aperçu :</p>
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
-                  <Image
+                <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 dark:border-dark-700">
+                  <img
                     src={image}
                     alt="Preview"
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                     onError={() => setError("URL de l'image invalide")}
                   />
                 </div>

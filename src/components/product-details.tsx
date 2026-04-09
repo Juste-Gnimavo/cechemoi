@@ -20,13 +20,12 @@ interface ProductDetailsProps {
     price: number
     salePrice: number | null
     images: string[]
-    wineType?: string
-    region?: string
+    garmentType?: string
+    style?: string
     country?: string
-    vintage?: string
-    grapeVariety?: string
-    alcoholContent?: number
-    volume?: string
+    collection?: string
+    fabric?: string
+    sizes?: string
     stock: number
     category: { name: string; slug: string }
   }
@@ -66,7 +65,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
       <nav className="mb-8 text-sm text-gray-500 dark:text-gray-400">
         <Link href="/" className="hover:text-gray-900 dark:hover:text-white">Accueil</Link>
         <span className="mx-2">/</span>
-        <Link href={`/vins/${product.category.slug}`} className="hover:text-gray-900 dark:hover:text-white">
+        <Link href={`/categorie/${product.category.slug}`} className="hover:text-gray-900 dark:hover:text-white">
           {product.category.name}
         </Link>
         <span className="mx-2">/</span>
@@ -144,39 +143,41 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             </p>
           )}
 
-          {/* Wine Details */}
+          {/* Caractéristiques */}
+          {(product.garmentType || product.style || product.collection || product.fabric || product.sizes) && (
           <div className="bg-gray-50 dark:bg-dark-900 rounded-lg p-6 mb-6 space-y-3">
-            {product.region && (
+            {product.garmentType && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Région:</span>
-                <span className="text-gray-900 dark:text-white font-semibold">{product.region}</span>
+                <span className="text-gray-500 dark:text-gray-400">Type :</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{product.garmentType}</span>
               </div>
             )}
-            {product.vintage && (
+            {product.style && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Millésime:</span>
-                <span className="text-gray-900 dark:text-white font-semibold">{product.vintage}</span>
+                <span className="text-gray-500 dark:text-gray-400">Style :</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{product.style}</span>
               </div>
             )}
-            {product.grapeVariety && (
+            {product.collection && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Cépage:</span>
-                <span className="text-gray-900 dark:text-white font-semibold">{product.grapeVariety}</span>
+                <span className="text-gray-500 dark:text-gray-400">Collection :</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{product.collection}</span>
               </div>
             )}
-            {product.alcoholContent && (
+            {product.fabric && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Alcool:</span>
-                <span className="text-gray-900 dark:text-white font-semibold">{product.alcoholContent}%</span>
+                <span className="text-gray-500 dark:text-gray-400">Tissu / Matière :</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{product.fabric}</span>
               </div>
             )}
-            {product.volume && (
+            {product.sizes && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Volume:</span>
-                <span className="text-gray-900 dark:text-white font-semibold">{product.volume}</span>
+                <span className="text-gray-500 dark:text-gray-400">Tailles :</span>
+                <span className="text-gray-900 dark:text-white font-semibold">{product.sizes}</span>
               </div>
             )}
           </div>
+          )}
 
           {/* Stock Status */}
           <div className="mb-6">

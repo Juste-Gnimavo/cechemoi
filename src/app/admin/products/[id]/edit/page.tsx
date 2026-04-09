@@ -44,16 +44,16 @@ interface Product {
   taxClassId?: string
   published: boolean
   featured: boolean
-  isWine?: boolean
+  hasDetails?: boolean
   relatedProducts?: string[]
   upsellProducts?: string[]
-  vintage?: string
-  region?: string
+  collection?: string
+  style?: string
   country?: string
-  grapeVariety?: string
-  alcoholContent?: number
-  volume?: string
-  wineType?: string
+  fabric?: string
+
+  sizes?: string
+  garmentType?: string
   weight?: number
   dimensions?: string
   tags: string[]
@@ -86,20 +86,20 @@ export default function EditProductPage() {
   const [taxClassId, setTaxClassId] = useState('')
   const [published, setPublished] = useState(true)
   const [featured, setFeatured] = useState(false)
-  const [isWine, setIsWine] = useState(true) // Has clothing details toggle
+  const [hasDetails, setHasDetails] = useState(true) // Has clothing details toggle
 
   // Marketing - Related and Upsell
   const [relatedProducts, setRelatedProducts] = useState<string[]>([])
   const [upsellProducts, setUpsellProducts] = useState<string[]>([])
 
   // Clothing specific (using same field names for API compatibility)
-  const [vintage, setVintage] = useState('') // Collection
-  const [region, setRegion] = useState('') // Style
+  const [collection, setCollection] = useState('') // Collection
+  const [style, setStyle] = useState('') // Style
   const [country, setCountry] = useState('') // Origine
-  const [grapeVariety, setGrapeVariety] = useState('') // Tissu/Matiere
-  const [alcoholContent, setAlcoholContent] = useState('') // Not used for clothing
-  const [volume, setVolume] = useState('') // Tailles disponibles
-  const [wineType, setWineType] = useState('') // Type de vetement
+  const [fabric, setFabric] = useState('') // Tissu/Matiere
+
+  const [sizes, setSizes] = useState('') // Tailles disponibles
+  const [garmentType, setGarmentType] = useState('') // Type de vetement
 
   // Metadata
   const [weight, setWeight] = useState('')
@@ -172,16 +172,16 @@ export default function EditProductPage() {
         setTaxClassId(p.taxClassId || '')
         setPublished(p.published)
         setFeatured(p.featured)
-        setIsWine(p.isWine !== false) // Default to true for backward compatibility
+        setHasDetails(p.hasDetails !== false) // Default to true for backward compatibility
         setRelatedProducts(p.relatedProducts || [])
         setUpsellProducts(p.upsellProducts || [])
-        setVintage(p.vintage || '')
-        setRegion(p.region || '')
+        setCollection(p.collection || '')
+        setStyle(p.style || '')
         setCountry(p.country || '')
-        setGrapeVariety(p.grapeVariety || '')
-        setAlcoholContent(p.alcoholContent?.toString() || '')
-        setVolume(p.volume || '')
-        setWineType(p.wineType || '')
+        setFabric(p.fabric || '')
+
+        setSizes(p.sizes || '')
+        setGarmentType(p.garmentType || '')
         setWeight(p.weight?.toString() || '')
         setDimensions(p.dimensions || '')
         setTags(p.tags || [])
@@ -339,18 +339,18 @@ export default function EditProductPage() {
           taxClassId: taxClassId || null,
           published,
           featured,
-          isWine, // Product type flag
+          hasDetails, // Product type flag
           // Marketing
           relatedProducts,
           upsellProducts,
-          // Wine fields (only if isWine is true)
-          vintage: isWine ? vintage : null,
-          region: isWine ? region : null,
-          country: isWine ? country : null,
-          grapeVariety: isWine ? grapeVariety : null,
-          alcoholContent: isWine && alcoholContent ? parseFloat(alcoholContent) : null,
-          volume: isWine ? volume : null,
-          wineType: isWine ? wineType : null,
+          // Clothing detail fields
+          collection: hasDetails ? collection : null,
+          style: hasDetails ? style : null,
+          country: hasDetails ? country : null,
+          fabric: hasDetails ? fabric : null,
+
+          sizes: hasDetails ? sizes : null,
+          garmentType: hasDetails ? garmentType : null,
           // Metadata
           weight: weight ? parseFloat(weight) : null,
           dimensions,
@@ -632,9 +632,9 @@ export default function EditProductPage() {
                 <div className="flex rounded-lg overflow-hidden border border-gray-300 dark:border-dark-700">
                   <button
                     type="button"
-                    onClick={() => setIsWine(true)}
+                    onClick={() => setHasDetails(true)}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      isWine
+                      hasDetails
                         ? 'bg-primary-500 text-white'
                         : 'bg-gray-200 dark:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
@@ -643,9 +643,9 @@ export default function EditProductPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsWine(false)}
+                    onClick={() => setHasDetails(false)}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${
-                      !isWine
+                      !hasDetails
                         ? 'bg-primary-500 text-white'
                         : 'bg-gray-200 dark:bg-dark-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     }`}
@@ -656,19 +656,19 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {!isWine && (
+            {!hasDetails && (
               <p className="text-gray-500 text-sm italic">
                 Les caractéristiques sont masquées (utile pour accessoires, cartes cadeaux, etc.)
               </p>
             )}
 
-            {isWine && (
+            {hasDetails && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Type de vêtement</label>
                 <select
-                  value={wineType}
-                  onChange={(e) => setWineType(e.target.value)}
+                  value={garmentType}
+                  onChange={(e) => setGarmentType(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -698,18 +698,18 @@ export default function EditProductPage() {
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Collection</label>
                 <input
                   type="text"
-                  value={vintage}
-                  onChange={(e) => setVintage(e.target.value)}
+                  value={collection}
+                  onChange={(e) => setCollection(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Collection 2025"
+                  placeholder="Collection 2026"
                 />
               </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Style</label>
                 <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
+                  value={style}
+                  onChange={(e) => setStyle(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -732,15 +732,15 @@ export default function EditProductPage() {
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
-                  placeholder="Cote d'Ivoire"
+                  placeholder="Côte d'Ivoire"
                 />
               </div>
 
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tissu / Matière</label>
                 <select
-                  value={grapeVariety}
-                  onChange={(e) => setGrapeVariety(e.target.value)}
+                  value={fabric}
+                  onChange={(e) => setFabric(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                 >
                   <option value="">Sélectionner</option>
@@ -767,8 +767,8 @@ export default function EditProductPage() {
                 <label className="block text-gray-700 dark:text-gray-300 text-sm mb-2">Tailles disponibles</label>
                 <input
                   type="text"
-                  value={volume}
-                  onChange={(e) => setVolume(e.target.value)}
+                  value={sizes}
+                  onChange={(e) => setSizes(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                   placeholder="S, M, L, XL ou Sur-mesure"
                 />

@@ -121,7 +121,7 @@ export default function NewBlogTagPage() {
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
               className="w-full bg-gray-100 dark:bg-dark-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              placeholder="vin-rouge"
+              placeholder="robe-soiree"
             />
             <p className="text-gray-500 text-xs mt-1">
               Généré automatiquement si vide

@@ -132,8 +132,8 @@ export default function BlogPage() {
                 Actualités & Conseils
               </h1>
               <p className="text-gray-600 dark:text-gray-400 text-lg">
-                Découvrez nos articles sur l'univers du vin, les accords mets-vins,
-                les conseils de dégustation et bien plus encore.
+                Découvrez nos articles sur l'univers de la mode, les tendances,
+                les conseils de style et bien plus encore.
               </p>
             </div>
           </div>

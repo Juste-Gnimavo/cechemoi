@@ -10,13 +10,6 @@ import { MiniCart } from '@/components/mini-cart'
 import { useCurrency } from '@/store/currency'
 import { useTheme } from '@/store/theme'
 
-// Static fashion categories for faster page load
-const FASHION_CATEGORIES = [
-  { id: 'robes', name: 'Robes', slug: 'robes' },
-  { id: 'ensembles', name: 'Ensembles', slug: 'ensembles' },
-  { id: 'pret-a-porter', name: 'Prêt-à-Porter', slug: 'pret-a-porter' },
-  { id: 'accessoires', name: 'Accessoires', slug: 'accessoires' },
-]
 
 export function Header() {
   const { data: session } = useSession()
@@ -67,15 +60,12 @@ export function Header() {
             >
               Accueil
             </Link>
-            {FASHION_CATEGORIES.map((category) => (
-              <Link
-                key={category.id}
-                href={`/categorie/${category.slug}`}
-                className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
-              >
-                {category.name}
-              </Link>
-            ))}
+            <Link
+              href="/catalogue"
+              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
+            >
+              Prêt-à-Porter
+            </Link>
             <Link
               href="/showroom"
               className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
@@ -294,16 +284,13 @@ export function Header() {
               >
                 Accueil
               </Link>
-              {FASHION_CATEGORIES.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/categorie/${category.slug}`}
-                  className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {category.name}
-                </Link>
-              ))}
+              <Link
+                href="/catalogue"
+                className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Prêt-à-Porter
+              </Link>
               <Link
                 href="/showroom"
                 className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"

@@ -19,13 +19,12 @@ interface Product {
   sku: string
   stock: number
   images: string[]
-  wineType: string | null
-  vintage: string | null
-  region: string | null
+  garmentType: string | null
+  collection: string | null
+  style: string | null
   country: string | null
-  grapeVariety: string | null
-  alcoholContent: number | null
-  volume: string | null
+  fabric: string | null
+  sizes: string | null
   category: {
     id: string
     name: string
@@ -126,13 +125,12 @@ export default function ProductPage() {
         salePrice: product.salePrice,
         images: product.images,
         stock: product.stock,
-        wineType: product.wineType || undefined,
-        region: product.region || undefined,
+        garmentType: product.garmentType || undefined,
+        style: product.style || undefined,
         country: product.country || undefined,
-        vintage: product.vintage || undefined,
-        grapeVariety: product.grapeVariety || undefined,
-        alcoholContent: product.alcoholContent || undefined,
-        volume: product.volume || undefined,
+        collection: product.collection || undefined,
+        fabric: product.fabric || undefined,
+        sizes: product.sizes || undefined,
         category: product.category ? {
           name: product.category.name,
           slug: product.category.slug,

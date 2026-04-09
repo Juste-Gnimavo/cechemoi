@@ -12,6 +12,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cechemoi.hel1.your-objectstorage.com',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

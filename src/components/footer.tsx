@@ -117,7 +117,7 @@ export function Footer() {
 
           {/* Menu Principal */}
           <div>
-            <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-6">Collections</h3>
+            <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-6">Boutique</h3>
             <ul className="space-y-3">
               <li>
                 <Link href="/" className="text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors">
@@ -125,33 +125,23 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/categorie/robes" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                  Robes
+                <Link href="/catalogue" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                  Catalogue
                 </Link>
               </li>
               <li>
-                <Link href="/categorie/ensembles" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                  Ensembles
-                </Link>
-              </li>
-              <li>
-                <Link href="/categorie/sur-mesure" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                <Link href="/sur-mesure" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
                   Sur-Mesure
                 </Link>
               </li>
               <li>
-                <Link href="/categorie/pret-a-porter" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                  Prêt-à-Porter
+                <Link href="/showroom" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                  Showroom
                 </Link>
               </li>
               <li>
-                <Link href="/categorie/accessoires" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                  Accessoires
-                </Link>
-              </li>
-              <li>
-                <Link href="/catalogue" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
-                  Tout le catalogue
+                <Link href="/consultation" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors">
+                  Rendez-vous
                 </Link>
               </li>
             </ul>

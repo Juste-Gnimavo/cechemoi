@@ -13,9 +13,8 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get('slug') || ''
     const categoryId = searchParams.get('categoryId') || ''
     const categorySlug = searchParams.get('categorySlug') || ''
-    const wineType = searchParams.get('wineType') || ''
+    const garmentType = searchParams.get('garmentType') || ''
     const featured = searchParams.get('featured') || ''
-    const isWine = searchParams.get('isWine') || ''
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
@@ -24,7 +23,7 @@ export async function GET(req: NextRequest) {
     const cacheKey = search
       ? null
       : cacheKeys.products(
-          `${slug}:${categoryId}:${categorySlug}:${wineType}:${featured}:${isWine}:${page}:${limit}`
+          `${slug}:${categoryId}:${categorySlug}:${garmentType}:${featured}:${page}:${limit}`
         )
 
     // Try to get from cache
@@ -79,16 +78,9 @@ export async function GET(req: NextRequest) {
       where.categoryId = categoryId
     }
 
-    // Filter by wine type
-    if (wineType) {
-      where.wineType = wineType
-    }
-
-    // Filter by wine products only
-    if (isWine === 'true') {
-      where.isWine = true
-    } else if (isWine === 'false') {
-      where.isWine = false
+    // Filter by garment type
+    if (garmentType) {
+      where.garmentType = garmentType
     }
 
     // Filter by featured status
@@ -165,13 +157,12 @@ export async function GET(req: NextRequest) {
         stock: product.stock,
         images: product.images,
         featured: product.featured,
-        wineType: product.wineType,
-        vintage: product.vintage,
-        region: product.region,
+        garmentType: product.garmentType,
+        collection: product.collection,
+        style: product.style,
         country: product.country,
-        grapeVariety: product.grapeVariety,
-        alcoholContent: product.alcoholContent,
-        volume: product.volume,
+        fabric: product.fabric,
+        sizes: product.sizes,
         category: product.category,
         mainCategorySlug,
         subCategorySlug,

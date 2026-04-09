@@ -331,7 +331,7 @@ export default function PushNotificationPage() {
                   <textarea
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    placeholder="Ex: Profitez de -20% sur tous les vins ce weekend !"
+                    placeholder="Ex: Profitez de -20% sur toute la collection ce weekend !"
                     maxLength={240}
                     rows={3}
                     className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-700 border border-gray-200 dark:border-dark-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"

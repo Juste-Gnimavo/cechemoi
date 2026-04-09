@@ -74,7 +74,7 @@ export function FashionHero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
               <span className="w-2 h-2 bg-primary-500 rounded-full" />
-              <span className="text-white/90 text-sm font-medium">Nouvelle Collection 2025</span>
+              <span className="text-white/90 text-sm font-medium">Nouvelle Collection 2026</span>
             </div>
 
             {/* Title */}

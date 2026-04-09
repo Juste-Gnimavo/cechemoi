@@ -277,17 +277,16 @@ model Product {
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
 
-  // Product type flag
-  isWine      Boolean  @default(true) // true for wine products, false for accessories/other
+  // Show clothing detail fields
+  hasDetails  Boolean  @default(true) @map("isWine")
 
-  // Wine specific fields (only relevant when isWine = true)
-  vintage     String?
-  region      String?
+  // Clothing detail fields (only relevant when hasDetails = true)
+  collection  String?  @map("vintage")
+  style       String?  @map("region")
   country     String?
-  grapeVariety String?
-  alcoholContent Float?
-  volume      String?  // e.g., "750ml"
-  wineType    String?  // Rouge, Blanc, Rosé, Effervescent, etc.
+  fabric      String?  @map("grapeVariety")
+  sizes       String?  @map("volume")
+  garmentType String?  @map("wineType")
 
   // Product metadata
   weight      Float?   // in kg
@@ -349,7 +348,7 @@ model ProductVariation {
   stock       Int      @default(0)
 
   // Variation-specific attributes
-  attributes  Json?    // e.g., {"size": "750ml", "vintage": "2018"}
+  attributes  Json?    // e.g., {"size": "M", "color": "rouge"}
 
   enabled     Boolean  @default(true)
 

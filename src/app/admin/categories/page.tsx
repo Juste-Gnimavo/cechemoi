@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   FolderTree,
   Plus,
@@ -140,12 +139,12 @@ export default function CategoriesPage() {
 
             {/* Category Image */}
             {category.image ? (
-              <Image
+              <img
                 src={category.image}
                 alt={category.name}
                 width={40}
                 height={40}
-                className="rounded object-cover"
+                className="rounded object-cover w-10 h-10"
               />
             ) : (
               <div className="w-10 h-10 bg-gray-200 dark:bg-dark-700 rounded flex items-center justify-center">

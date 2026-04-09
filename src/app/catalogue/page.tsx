@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Header } from '@/components/header-legacy'
 import { Footer } from '@/components/footer'
 import { ProductCard } from '@/components/product-card'
-import { Loader2, Package, Wine, ChevronRight } from 'lucide-react'
+import { Loader2, Package, ChevronRight } from 'lucide-react'
 
 interface Product {
   id: string
@@ -14,10 +14,9 @@ interface Product {
   price: number
   salePrice: number | null
   images: string[]
-  wineType: string | null
-  region: string | null
-  vintage: string | null
-  isWine: boolean
+  garmentType: string | null
+  style: string | null
+  collection: string | null
   mainCategorySlug: string | null
   subCategorySlug: string | null
   featured?: boolean
@@ -104,7 +103,7 @@ export default function CataloguePage() {
               </h1>
             </div>
             <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl">
-              Explorez l'ensemble de nos produits : vins d'exception, accessoires, fromages et bien plus encore.
+              Explorez l'ensemble de nos créations : robes, ensembles, sur-mesure et bien plus encore.
             </p>
             {!loading && (
               <p className="text-gray-500 mt-4">
@@ -128,14 +127,14 @@ export default function CataloguePage() {
                   {/* Category Header */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <Wine className="w-6 h-6 text-primary-500" />
+                      <Package className="w-6 h-6 text-primary-500" />
                       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{group.name}</h2>
                       <span className="text-gray-500 text-sm">
                         ({group.products.length} produit{group.products.length > 1 ? 's' : ''})
                       </span>
                     </div>
                     <Link
-                      href={`/categorie-vin/${group.slug}`}
+                      href={`/categorie/${group.slug}`}
                       className="flex items-center gap-1 text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors"
                     >
                       Voir tout
@@ -155,9 +154,9 @@ export default function CataloguePage() {
                           price: product.price,
                           salePrice: product.salePrice,
                           image: product.images[0] || '/placeholder.png',
-                          wineType: product.wineType || undefined,
-                          region: product.region || undefined,
-                          vintage: product.vintage || undefined,
+                          garmentType: product.garmentType || undefined,
+                          style: product.style || undefined,
+                          collection: product.collection || undefined,
                           mainCategorySlug: product.mainCategorySlug,
                           subCategorySlug: product.subCategorySlug,
                           featured: product.featured,
@@ -170,7 +169,7 @@ export default function CataloguePage() {
                   {group.products.length > 4 && (
                     <div className="mt-6 text-center">
                       <Link
-                        href={`/categorie-vin/${group.slug}`}
+                        href={`/categorie/${group.slug}`}
                         className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-200 dark:bg-dark-800 hover:bg-gray-300 dark:hover:bg-dark-700 text-gray-900 dark:text-white rounded-lg transition-colors"
                       >
                         Voir les {group.products.length - 4} autres produits
