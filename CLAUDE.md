@@ -10,6 +10,23 @@
 - Always read last session logs MOBILE-SESSIONS-LOGS/* and MOBILE-SESSIONS-LOGS/NEXT-STEP.md to understand what to do.
 - After current session tasks are completed, Always create a new session log in MOBILE-SESSIONS-LOGS/  then create the next session prompt MOBILE-SESSIONS-LOGS/NEXT-STEP.md
 
+
+<critical-rule id="never-mimic-user-flaws">
+### NEVER MIMIC USER FLAWS
+
+The CEO types on an English-layout MacBook and frequently omits French accents, diacritics, and special characters. This is a **keyboard limitation**, not an intentional choice.
+
+**Claude must NEVER reproduce these input limitations in any output.**
+
+| Principle | Detail |
+|-----------|--------|
+| **Correct orthography always** | French: é, è, ê, ë, à, â, ù, û, ç, î, ï, ô, œ — English: proper spelling and grammar |
+| **Applies to everything** | Code strings, comments, docs, session logs, commit messages, error messages, UI labels, Markdown, `.flin` example files |
+| **Never "match" user style** | The user's informal shortcuts are for speed — Claude must **elevate** into polished, professional output |
+| **Never lower quality** | Don't skip error handling, validation, or edge cases because the user described things casually |
+| **User input = instruction, not template** | Extract the *intent*, produce *correct* output |
+
+</critical-rule>
 ---
 
 ## LANGUE ET ORTHOGRAPHE

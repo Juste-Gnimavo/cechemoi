@@ -5,17 +5,10 @@ import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 
-// Fashion photos for the hero
+// Hero slide banners (images contain their own text/branding)
 const HERO_SLIDES = [
-  { id: 1, image: '/photos/0.png', title: 'Collection Élégance', subtitle: 'Robes de soirée sur-mesure' },
-  { id: 2, image: '/photos/01.png', title: 'Style Africain', subtitle: 'Tradition et modernité' },
-  { id: 3, image: '/photos/02.jpg', title: 'Prêt-à-Porter', subtitle: 'Mode accessible et tendance' },
-  { id: 4, image: '/photos/03.jpg', title: 'Sur-Mesure', subtitle: 'Créations uniques pour vous' },
-      { id: 5, image: '/photos/04.jpg', title: 'Sur-Mesure', subtitle: 'Créations uniques pour vous' },
-        { id: 6, image: '/photos/05.jpg', title: 'Sur-Mesure', subtitle: 'Créations uniques pour vous' },
-    { id: 7, image: '/photos/03.jpg', title: 'Sur-Mesure', subtitle: 'Créations uniques pour vous' },
-      { id: 8, image: '/photos/01.jpg', title: 'Style Africain', subtitle: 'Tradition et modernité' },
-
+  { id: 1, image: '/slides/slide1.jpg', alt: 'Bienvenue sur la plateforme CÈCHÉMOI — L\'excellence au service de votre style' },
+  { id: 2, image: '/slides/slide2.jpg', alt: 'Nouvelle Collection 2026 — Élégance, Style Africain, Prêt-à-Porter, Sur-Mesure' },
 ]
 
 const SLIDE_INTERVAL = 5000 // 5 seconds
@@ -51,92 +44,75 @@ export function FashionHero() {
   const slide = HERO_SLIDES[currentSlide]
 
   return (
-    <section className="relative h-[calc(100vh-5rem)] min-h-[600px] bg-gray-900 overflow-hidden">
-      {/* Background Image - Simple fade transition */}
-      <div className="absolute inset-0">
+    <section className="relative w-full bg-gray-900 overflow-hidden">
+      {/* Slide Image — banner-style, natural aspect ratio */}
+      <div className="relative w-full aspect-[21/9] md:aspect-[3/1] lg:aspect-[3.5/1]">
         <Image
           src={slide.image}
-          alt={slide.title}
+          alt={slide.alt}
           fill
           priority
           sizes="100vw"
-          className="object-cover object-top transition-opacity duration-500"
+          className="object-cover object-center transition-opacity duration-700"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {/* Subtle bottom gradient for CTA readability */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/50 to-transparent" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 h-full flex items-center">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-2xl">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
-              <span className="w-2 h-2 bg-primary-500 rounded-full" />
-              <span className="text-white/90 text-sm font-medium">Nouvelle Collection 2026</span>
+      {/* CTA Buttons — overlaid at bottom */}
+      <div className="absolute bottom-6 left-0 right-0 z-10">
+        <div className="container mx-auto px-4 flex flex-wrap items-center justify-between">
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/catalogue"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-full transition-colors duration-200 text-sm md:text-base"
+            >
+              Découvrir la collection
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+            </Link>
+            <Link
+              href="/sur-mesure"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/15 hover:bg-white/25 text-white font-semibold rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20 text-sm md:text-base"
+            >
+              Sur-mesure
+            </Link>
+          </div>
+
+          {/* Navigation Arrows */}
+          <div className="flex items-center gap-2 mt-3 sm:mt-0">
+            <button
+              onClick={() => handleManualChange(prevSlide)}
+              className="w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20"
+              aria-label="Image précédente"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Slide Indicators */}
+            <div className="flex items-center gap-1.5 mx-2">
+              {HERO_SLIDES.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleManualChange(() => setCurrentSlide(index))}
+                  className={`h-2 rounded-full transition-all duration-200 ${
+                    index === currentSlide
+                      ? 'w-6 bg-primary-500'
+                      : 'w-2 bg-white/50 hover:bg-white/70'
+                  }`}
+                  aria-label={`Aller à l'image ${index + 1}`}
+                />
+              ))}
             </div>
 
-            {/* Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-              {slide.title}
-            </h1>
-            <p className="text-xl md:text-2xl text-white/80 mb-8">
-              {slide.subtitle}
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/catalogue"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-full transition-colors duration-200"
-              >
-                Découvrir la collection
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/sur-mesure"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20"
-              >
-                Sur-mesure
-              </Link>
-            </div>
+            <button
+              onClick={() => handleManualChange(nextSlide)}
+              className="w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20"
+              aria-label="Image suivante"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* Navigation Arrows */}
-      <div className="absolute bottom-8 right-8 flex items-center gap-3 z-20">
-        <button
-          onClick={() => handleManualChange(prevSlide)}
-          className="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20"
-          aria-label="Image précédente"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={() => handleManualChange(nextSlide)}
-          className="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm transition-colors duration-200 border border-white/20"
-          aria-label="Image suivante"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-        {HERO_SLIDES.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleManualChange(() => setCurrentSlide(index))}
-            className={`h-2 rounded-full transition-all duration-200 ${
-              index === currentSlide
-                ? 'w-8 bg-primary-500'
-                : 'w-2 bg-white/50 hover:bg-white/70'
-            }`}
-            aria-label={`Aller à l'image ${index + 1}`}
-          />
-        ))}
       </div>
     </section>
   )

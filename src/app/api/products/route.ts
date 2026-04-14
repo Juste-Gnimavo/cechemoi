@@ -60,16 +60,19 @@ export async function GET(req: NextRequest) {
     }
 
     // Filter by category slug - includes both primary and additional categories
+    // For root categories, also include products from all subcategories
     if (categorySlug) {
       const category = await prisma.category.findUnique({
         where: { slug: categorySlug },
-        select: { id: true },
+        select: { id: true, parentId: true, children: { select: { id: true } } },
       })
       if (category) {
-        // Search in both primary category AND additional categories via ProductCategory
+        const categoryIds = category.children.length > 0
+          ? [category.id, ...category.children.map(c => c.id)]
+          : [category.id]
         where.OR = [
-          { categoryId: category.id },
-          { productCategories: { some: { categoryId: category.id } } },
+          { categoryId: { in: categoryIds } },
+          { productCategories: { some: { categoryId: { in: categoryIds } } } },
         ]
       }
     }

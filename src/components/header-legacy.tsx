@@ -3,22 +3,126 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon, CalendarDays } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon, CalendarDays, ChevronDown, ChevronRight } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { SearchModal } from '@/components/search-modal'
 import { MiniCart } from '@/components/mini-cart'
 import { useCurrency } from '@/store/currency'
 import { useTheme } from '@/store/theme'
 
+interface CategoryChild {
+  id: string
+  name: string
+  slug: string
+  image: string | null
+  description: string | null
+}
+
+interface RootCategory {
+  id: string
+  name: string
+  slug: string
+  children: CategoryChild[]
+}
+
+function chunkArray<T>(arr: T[], columns: number): T[][] {
+  const size = Math.ceil(arr.length / columns)
+  return Array.from({ length: columns }, (_, i) => arr.slice(i * size, (i + 1) * size))
+}
+
+function MegaMenuNavItem({ category }: { category: RootCategory }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout>()
+
+  const handleEnter = useCallback(() => {
+    clearTimeout(timeoutRef.current)
+    setIsOpen(true)
+  }, [])
+
+  const handleLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150)
+  }, [])
+
+  useEffect(() => {
+    return () => clearTimeout(timeoutRef.current)
+  }, [])
+
+  const columnCount = Math.min(4, Math.ceil(category.children.length / 6))
+  const columns = chunkArray(category.children, columnCount)
+
+  return (
+    <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+      <Link
+        href={`/categorie/${category.slug}`}
+        className={`text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium flex items-center gap-1 ${isOpen ? 'text-primary-400' : ''}`}
+      >
+        {category.name}
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </Link>
+
+      {/* Mega Dropdown */}
+      <div
+        className={`absolute left-1/2 -translate-x-1/2 top-full mt-3 bg-dark-800 border border-dark-700 shadow-2xl rounded-lg z-50 transition-all duration-200 ${
+          isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
+        }`}
+        style={{ minWidth: `${columnCount * 200}px` }}
+      >
+        {/* Arrow indicator */}
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-dark-800 border-l border-t border-dark-700 rotate-45" />
+
+        <div className="relative p-6">
+          {/* Category title */}
+          <Link
+            href={`/categorie/${category.slug}`}
+            className="block text-primary-400 font-semibold text-sm mb-4 hover:text-primary-300 transition-colors"
+          >
+            Tout voir {category.name}
+          </Link>
+
+          {/* Columns of subcategories */}
+          <div className="flex gap-8">
+            {columns.map((col, colIndex) => (
+              <div key={colIndex} className="min-w-[160px]">
+                {col.map((subcat) => (
+                  <Link
+                    key={subcat.id}
+                    href={`/categorie/${subcat.slug}`}
+                    className="block text-gray-400 hover:text-white text-sm py-1.5 transition-colors whitespace-nowrap"
+                  >
+                    {subcat.name}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function Header() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [categories, setCategories] = useState<RootCategory[]>([])
+  const [expandedMobileCategory, setExpandedMobileCategory] = useState<string | null>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const { currency, toggleCurrency, fetchExchangeRate } = useCurrency()
   const { theme, toggleTheme } = useTheme()
+
+  // Fetch categories for mega menu
+  useEffect(() => {
+    fetch('/api/categories?includeChildren=true')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data?.categories) {
+          setCategories(data.data.categories.filter((c: RootCategory) => c.children?.length > 0))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Fetch exchange rate on mount
   useEffect(() => {
@@ -60,12 +164,9 @@ export function Header() {
             >
               Accueil
             </Link>
-            <Link
-              href="/catalogue"
-              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
-            >
-              Prêt-à-Porter
-            </Link>
+            {categories.map(cat => (
+              <MegaMenuNavItem key={cat.id} category={cat} />
+            ))}
             <Link
               href="/showroom"
               className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
@@ -276,7 +377,7 @@ export function Header() {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <nav className="lg:hidden py-4 border-t border-dark-700">
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-col space-y-1">
               <Link
                 href="/"
                 className="text-gray-300 hover:text-primary-400 transition-colors py-2"
@@ -284,13 +385,45 @@ export function Header() {
               >
                 Accueil
               </Link>
-              <Link
-                href="/catalogue"
-                className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Prêt-à-Porter
-              </Link>
+
+              {/* Mobile Category Accordions */}
+              {categories.map(cat => (
+                <div key={cat.id}>
+                  <button
+                    onClick={() => setExpandedMobileCategory(expandedMobileCategory === cat.id ? null : cat.id)}
+                    className="flex items-center justify-between w-full text-gray-300 hover:text-primary-400 transition-colors py-2"
+                  >
+                    <span>{cat.name}</span>
+                    {expandedMobileCategory === cat.id ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </button>
+                  {expandedMobileCategory === cat.id && (
+                    <div className="pl-4 pb-2 space-y-1">
+                      <Link
+                        href={`/categorie/${cat.slug}`}
+                        className="block text-primary-400 text-sm py-1.5 font-medium"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Tout voir
+                      </Link>
+                      {cat.children.map(subcat => (
+                        <Link
+                          key={subcat.id}
+                          href={`/categorie/${subcat.slug}`}
+                          className="block text-gray-400 hover:text-white text-sm py-1.5 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {subcat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
               <Link
                 href="/showroom"
                 className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"

@@ -410,10 +410,7 @@ export default function NewCustomOrderPage() {
         </svg>
         <div className="text-sm text-blue-700 dark:text-blue-300">
           <p>
-            Après la création de la commande, vous pourrez ajouter les <strong>sorties de matériels</strong> (tissu, fil, boutons...) et leur coût global depuis la page de la commande.
-          </p>
-          <p className="mt-1">
-            Les <strong>acomptes</strong> et paiements pourront également être enregistrés par la suite.
+            Après la création de la commande, vous pourrez ajouter les <strong>sorties de matériels</strong> (tissu, fil, boutons...) et leur coût global depuis la page de la commande. Les <strong>acomptes</strong> et paiements pourront également être enregistrés par la suite.
           </p>
         </div>
       </div>

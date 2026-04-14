@@ -41,9 +41,9 @@ curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=Epfom4Z2vuBFx6lMYTWW
 
 ### Send WhatsApp Business Message with logo, image, doc, etc. (it accepts any message)
 ```bash
-curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=kPFZo3mT8xwiZ1OPBAiACEWWGm2dKqUC&apitoken=1GKu1756165537&type=whatsapp&from=CaveExpress&to=2250709757296&text=Your%20OTP%20is%201289&file=https://cave-express.ci/https://cave-express.ci/api/invoices/cmihus95d0007roqnct93dn9n/pdf"
+curl -X GET "https://panel.smsing.app/smsAPI?sendsms&apikey=zUFFK9QOtS9wxfkj5DDWE8Y1LYDT4XAi&apitoken=rnXm1757099187&type=whatsapp&from=CECHEMOI&to=2250709757296&text=Your%20OTP%20is%201289&file=https://cave-express.ci/https://cave-express.ci/api/invoices/cmihus95d0007roqnct93dn9n/pdf"
 ```
-
+ 
 ### Send WhatsApp Cloud Message with OTP. Replace 01234 with your dynamic otp
 
 ```bash

@@ -69,6 +69,21 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // When querying by slug, return the matched category directly (could be root or subcategory)
+    if (slug) {
+      const formatted = categories.map(cat => ({
+        ...cat,
+        productCount: includeProductCount ? (cat as any)._count?.products || 0 : undefined,
+      }))
+      return NextResponse.json({
+        success: true,
+        data: {
+          categories: formatted,
+          total: formatted.length,
+        },
+      })
+    }
+
     // Build hierarchical structure (root categories with their children)
     const rootCategories = categories.filter(cat => !cat.parentId)
 
@@ -77,7 +92,7 @@ export async function GET(req: NextRequest) {
       return {
         ...rootCat,
         children: includeChildren ? children : undefined,
-        productCount: includeProductCount ? rootCat._count?.products || 0 : undefined,
+        productCount: includeProductCount ? (rootCat as any)._count?.products || 0 : undefined,
       }
     })
 
