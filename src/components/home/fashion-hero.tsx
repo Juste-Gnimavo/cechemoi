@@ -44,9 +44,9 @@ export function FashionHero() {
   const slide = HERO_SLIDES[currentSlide]
 
   return (
-    <section className="relative w-full bg-gray-900 overflow-hidden">
-      {/* Slide Image — banner-style, natural aspect ratio */}
-      <div className="relative w-full aspect-[21/9] md:aspect-[3/1] lg:aspect-[3.5/1]">
+    <section className="relative w-full h-[calc(100vh-5rem)] min-h-[600px] bg-gray-900 overflow-hidden">
+      {/* Slide Image — full viewport height */}
+      <div className="absolute inset-0">
         <Image
           src={slide.image}
           alt={slide.alt}
@@ -56,7 +56,7 @@ export function FashionHero() {
           className="object-cover object-center transition-opacity duration-700"
         />
         {/* Subtle bottom gradient for CTA readability */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" />
       </div>
 
       {/* CTA Buttons — overlaid at bottom */}

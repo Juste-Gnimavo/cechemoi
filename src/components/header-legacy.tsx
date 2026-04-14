@@ -47,11 +47,10 @@ function MegaMenuNavItem({ category }: { category: RootCategory }) {
     return () => clearTimeout(timeoutRef.current)
   }, [])
 
-  const columnCount = Math.min(4, Math.ceil(category.children.length / 6))
-  const columns = chunkArray(category.children, columnCount)
+  const columns = chunkArray(category.children, 3)
 
   return (
-    <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+    <div className="static" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <Link
         href={`/categorie/${category.slug}`}
         className={`text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium flex items-center gap-1 ${isOpen ? 'text-primary-400' : ''}`}
@@ -60,34 +59,30 @@ function MegaMenuNavItem({ category }: { category: RootCategory }) {
         <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </Link>
 
-      {/* Mega Dropdown */}
+      {/* Mega Dropdown — full width, anchored to header container */}
       <div
-        className={`absolute left-1/2 -translate-x-1/2 top-full mt-3 bg-dark-800 border border-dark-700 shadow-2xl rounded-lg z-50 transition-all duration-200 ${
+        className={`absolute left-0 right-0 top-full mt-0 bg-dark-800 border-t border-dark-700 shadow-2xl z-50 transition-all duration-200 ${
           isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
-        style={{ minWidth: `${columnCount * 200}px` }}
       >
-        {/* Arrow indicator */}
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-dark-800 border-l border-t border-dark-700 rotate-45" />
-
-        <div className="relative p-6">
+        <div className="container mx-auto px-4 py-6">
           {/* Category title */}
           <Link
             href={`/categorie/${category.slug}`}
-            className="block text-primary-400 font-semibold text-sm mb-4 hover:text-primary-300 transition-colors"
+            className="inline-block text-primary-400 font-semibold text-sm mb-4 hover:text-primary-300 transition-colors"
           >
             Tout voir {category.name}
           </Link>
 
-          {/* Columns of subcategories */}
-          <div className="flex gap-8">
+          {/* 3 Columns of subcategories */}
+          <div className="grid grid-cols-3 gap-8">
             {columns.map((col, colIndex) => (
-              <div key={colIndex} className="min-w-[160px]">
+              <div key={colIndex}>
                 {col.map((subcat) => (
                   <Link
                     key={subcat.id}
                     href={`/categorie/${subcat.slug}`}
-                    className="block text-gray-400 hover:text-white text-sm py-1.5 transition-colors whitespace-nowrap"
+                    className="block text-gray-400 hover:text-white text-sm py-1.5 transition-colors"
                   >
                     {subcat.name}
                   </Link>
@@ -141,7 +136,7 @@ export function Header() {
   }, [])
 
   return (
-    <header className="bg-[#1a1d24] border-b border-dark-700">
+    <header className="relative bg-[#1a1d24] border-b border-dark-700">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-18">
           {/* Logo - Horizontal */}
