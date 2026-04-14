@@ -136,7 +136,7 @@ export function Header() {
   }, [])
 
   return (
-    <header className="relative bg-[#1a1d24] border-b border-dark-700">
+    <header className="relative z-50 bg-[#1a1d24] border-b border-dark-700">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-18">
           {/* Logo - Horizontal */}
