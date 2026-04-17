@@ -7,12 +7,16 @@ import { ArrowLeft, Save, Upload, X, Plus, ImageIcon, Loader2 } from 'lucide-rea
 import { toast } from 'react-hot-toast'
 import { RichTextEditor } from '@/components/admin/rich-text-editor'
 import { ProductMultiSelect } from '@/components/admin/product-multi-select'
+import { CategoryTreeSelector } from '@/components/admin/category-tree-selector'
 import { useConfetti } from '@/hooks/useConfetti'
 
 interface Category {
   id: string
   name: string
   slug: string
+  parentId: string | null
+  parent?: { id: string; name: string } | null
+  children?: Category[]
 }
 
 interface TaxClass {
@@ -849,66 +853,20 @@ export default function NewProductPage() {
 
           {/* Category */}
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Catégories *</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Categories *</h2>
             <p className="text-gray-500 text-xs mb-3">
-              Sélectionnez une ou plusieurs catégories pour ce produit
+              Selectionnez une ou plusieurs categories pour ce produit
             </p>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {categories.map((category) => {
-                const isSelected = categoryId === category.id || categoryIds.includes(category.id)
-                const isPrimary = categoryId === category.id
-                return (
-                  <label
-                    key={category.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      isSelected
-                        ? 'bg-primary-500/20 border border-primary-500/50'
-                        : 'bg-gray-100 dark:bg-dark-800/50 border border-transparent hover:bg-gray-200 dark:hover:bg-dark-700/50'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          // If no primary category, set this as primary
-                          if (!categoryId) {
-                            setCategoryId(category.id)
-                          } else {
-                            // Add to additional categories
-                            setCategoryIds([...categoryIds, category.id])
-                          }
-                        } else {
-                          // If unchecking the primary category
-                          if (categoryId === category.id) {
-                            // Move first additional category to primary if exists
-                            if (categoryIds.length > 0) {
-                              setCategoryId(categoryIds[0])
-                              setCategoryIds(categoryIds.slice(1))
-                            } else {
-                              setCategoryId('')
-                            }
-                          } else {
-                            // Remove from additional categories
-                            setCategoryIds(categoryIds.filter(id => id !== category.id))
-                          }
-                        }
-                      }}
-                      className="w-5 h-5 text-primary-500 rounded focus:ring-2 focus:ring-primary-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300 flex-1">{category.name}</span>
-                    {isPrimary && (
-                      <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded">
-                        Principale
-                      </span>
-                    )}
-                  </label>
-                )
-              })}
-            </div>
+            <CategoryTreeSelector
+              categories={categories}
+              categoryId={categoryId}
+              categoryIds={categoryIds}
+              setCategoryId={setCategoryId}
+              setCategoryIds={setCategoryIds}
+            />
             {!categoryId && (
               <p className="text-red-400 text-xs mt-2">
-                Veuillez sélectionner au moins une catégorie
+                Veuillez selectionner au moins une categorie
               </p>
             )}
           </div>
