@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon, CalendarDays, ChevronDown, ChevronRight } from 'lucide-react'
+import { User, Heart, Menu, X, Search, LogOut, Package, Settings, LayoutDashboard, Sun, Moon, CalendarDays, ChevronDown, ChevronRight, Sparkles, Store } from 'lucide-react'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { SearchModal } from '@/components/search-modal'
 import { MiniCart } from '@/components/mini-cart'
 import { useCurrency } from '@/store/currency'
@@ -30,76 +31,192 @@ function chunkArray<T>(arr: T[], columns: number): T[][] {
   return Array.from({ length: columns }, (_, i) => arr.slice(i * size, (i + 1) * size))
 }
 
-function MegaMenuNavItem({ category }: { category: RootCategory }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout>()
+// ─── "Toutes les catégories" Sidebar (Amazon-style slide-in) ─────────────────
+function AllCategoriesSidebar({
+  isOpen,
+  onClose,
+  categories,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  categories: RootCategory[]
+}) {
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
-  const handleEnter = useCallback(() => {
-    clearTimeout(timeoutRef.current)
-    setIsOpen(true)
-  }, [])
-
-  const handleLeave = useCallback(() => {
-    timeoutRef.current = setTimeout(() => setIsOpen(false), 150)
-  }, [])
-
+  // Prevent body scroll when open
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current)
-  }, [])
-
-  const columns = chunkArray(category.children, 3)
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
 
   return (
-    <div className="static" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-      <Link
-        href={`/categorie/${category.slug}`}
-        className={`text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium flex items-center gap-1 ${isOpen ? 'text-primary-400' : ''}`}
-      >
-        {category.name}
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </Link>
-
-      {/* Mega Dropdown — full width, anchored to header container */}
+    <>
+      {/* Backdrop */}
       <div
-        className={`absolute left-0 right-0 top-full mt-0 bg-dark-800 border-t border-dark-700 shadow-2xl z-50 transition-all duration-200 ${
-          isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
+        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-      >
-        <div className="container mx-auto px-4 py-6">
-          {/* Category title */}
-          <Link
-            href={`/categorie/${category.slug}`}
-            className="inline-block text-primary-400 font-semibold text-sm mb-4 hover:text-primary-300 transition-colors"
-          >
-            Tout voir {category.name}
-          </Link>
+        onClick={onClose}
+      />
 
-          {/* 3 Columns of subcategories */}
-          <div className="grid grid-cols-3 gap-8">
-            {columns.map((col, colIndex) => (
-              <div key={colIndex}>
-                {col.map((subcat) => (
+      {/* Sidebar panel */}
+      <div
+        className={`fixed top-0 left-0 h-full w-80 bg-white dark:bg-dark-900 z-[101] transform transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } overflow-y-auto shadow-2xl`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 bg-[#1a1d24] text-white">
+          <div className="flex items-center gap-3">
+            <User className="w-5 h-5" />
+            <span className="font-semibold text-base">Toutes les catégories</span>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Category List */}
+        <div className="py-2">
+          {/* Main categories */}
+          {categories.map(cat => (
+            <div key={cat.id} className="border-b border-gray-100 dark:border-dark-700">
+              <button
+                onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
+                className="flex items-center justify-between w-full px-5 py-3 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-left"
+              >
+                <span className="font-medium text-sm">{cat.name}</span>
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                    expandedCategory === cat.id ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {/* Expanded children */}
+              <div className={`overflow-hidden transition-all duration-200 ${
+                expandedCategory === cat.id ? 'max-h-[2000px]' : 'max-h-0'
+              }`}>
+                <Link
+                  href={`/categorie/${cat.slug}`}
+                  onClick={onClose}
+                  className="block px-5 py-2.5 pl-8 text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
+                >
+                  Tout voir {cat.name}
+                </Link>
+                {cat.children.map(subcat => (
                   <Link
                     key={subcat.id}
                     href={`/categorie/${subcat.slug}`}
-                    className="block text-gray-400 hover:text-white text-sm py-1.5 transition-colors"
+                    onClick={onClose}
+                    className="block px-5 py-2.5 pl-8 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
                   >
                     {subcat.name}
                   </Link>
                 ))}
               </div>
-            ))}
+            </div>
+          ))}
+
+          {/* Quick Links */}
+          <div className="border-t border-gray-200 dark:border-dark-700 mt-2 pt-2">
+            <Link
+              href="/catalogue"
+              onClick={onClose}
+              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
+            >
+              <Store className="w-4 h-4" />
+              Catalogue complet
+            </Link>
+            <Link
+              href="/sur-mesure"
+              onClick={onClose}
+              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
+            >
+              <Sparkles className="w-4 h-4" />
+              Sur-Mesure
+            </Link>
+            <Link
+              href="/consultation"
+              onClick={onClose}
+              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
+            >
+              <CalendarDays className="w-4 h-4" />
+              Rendez-vous
+            </Link>
+            <Link
+              href="/showroom"
+              onClick={onClose}
+              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
+            >
+              <Package className="w-4 h-4" />
+              Showroom
+            </Link>
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
+// ─── Inline Search Bar (Amazon-style, always visible) ────────────────────────
+function InlineSearchBar() {
+  const [query, setQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const router = useRouter()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (query.trim()) {
+      router.push(`/catalogue?search=${encodeURIComponent(query.trim())}`)
+    }
+  }
+
+  return (
+    <>
+      {/* Desktop: inline search bar */}
+      <form onSubmit={handleSubmit} className="hidden lg:flex flex-1 max-w-2xl mx-6">
+        <div className="flex w-full rounded-lg overflow-hidden ring-2 ring-primary-500/60 hover:ring-primary-400 focus-within:ring-primary-400 transition-all">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher un produit, une catégorie..."
+            className="flex-1 px-4 py-2.5 bg-white dark:bg-dark-800 text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400"
+          />
+          <button
+            type="submit"
+            className="px-4 bg-primary-500 hover:bg-primary-600 text-white transition-colors flex items-center justify-center"
+            title="Rechercher"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+        </div>
+      </form>
+
+      {/* Mobile: search icon → opens search modal */}
+      <button
+        onClick={() => setIsSearchOpen(true)}
+        className="lg:hidden text-gray-300 hover:text-primary-400 transition-colors"
+        title="Rechercher"
+      >
+        <Search className="w-5 h-5" />
+      </button>
+
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
+  )
+}
+
+// ─── Main Header Export ──────────────────────────────────────────────────────
 export function Header() {
   const { data: session } = useSession()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isCategorySidebarOpen, setIsCategorySidebarOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [categories, setCategories] = useState<RootCategory[]>([])
   const [expandedMobileCategory, setExpandedMobileCategory] = useState<string | null>(null)
@@ -107,7 +224,7 @@ export function Header() {
   const { currency, toggleCurrency, fetchExchangeRate } = useCurrency()
   const { theme, toggleTheme } = useTheme()
 
-  // Fetch categories for mega menu
+  // Fetch categories
   useEffect(() => {
     fetch('/api/categories?includeChildren=true')
       .then(res => res.json())
@@ -119,12 +236,12 @@ export function Header() {
       .catch(() => {})
   }, [])
 
-  // Fetch exchange rate on mount
+  // Fetch exchange rate
   useEffect(() => {
     fetchExchangeRate()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Close user menu when clicking outside
+  // Close user menu on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
@@ -135,258 +252,266 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Navigation bar links
+  const navLinks = [
+    { href: '/categorie/tenue-femme', label: 'Tenues Femmes' },
+    { href: '/categorie/tenue-homme', label: 'Tenues Hommes' },
+    { href: '/catalogue', label: 'Catalogue' },
+    { href: '/categorie/blouson-dame', label: 'Blouson Dame' },
+    { href: '/categorie/chemisier-femme', label: 'Chemisier Dame' },
+    { href: '/categorie/tunique', label: 'Tunique Homme' },
+    { href: '/categorie/veste-femme', label: 'Veste Femme' },
+    { href: '/sur-mesure', label: 'Sur-Mesure' },
+    { href: '/consultation', label: 'Rendez-vous' },
+    { href: '/showroom', label: 'Showroom' },
+  ]
+
   return (
-    <header className="relative z-50 bg-[#1a1d24] border-b border-dark-700">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-18">
-          {/* Logo - Horizontal */}
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
-              alt="CÈCHÉMOI"
-              width={200}
-              height={60}
-              className="h-14 w-auto"
-              priority
-            />
-          </Link>
+    <>
+      <header className="relative z-50 bg-[#1a1d24]">
+        {/* ═══════════════════ ROW 1: Logo + Search + Account/Cart ═══════════════════ */}
+        <div className="border-b border-dark-700/50">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-4 h-16">
+              {/* Logo */}
+              <Link href="/" className="flex-shrink-0">
+                <Image
+                  src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
+                  alt="CÈCHÉMOI"
+                  width={160}
+                  height={48}
+                  className="h-11 w-auto"
+                  priority
+                />
+              </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center">
-            <Link
-              href="/"
-              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
-            >
-              Accueil
-            </Link>
-            {categories.map(cat => (
-              <MegaMenuNavItem key={cat.id} category={cat} />
-            ))}
-            <Link
-              href="/showroom"
-              className="text-gray-300 hover:text-primary-400 transition-colors text-sm font-medium"
-            >
-              Showroom
-            </Link>
-            <Link
-              href="/sur-mesure"
-              className="px-4 py-1.5 bg-primary-500/20 border border-primary-500/30 text-primary-400 hover:bg-primary-500/30 rounded-full transition-colors text-sm font-medium"
-            >
-              Sur-Mesure ✨
-            </Link>
-          </nav>
+              {/* Search Bar (desktop — always visible) */}
+              <InlineSearchBar />
 
-          {/* Right Side Icons */}
-          <div className="flex items-center space-x-4">
-            {/* User Section */}
-            {session ? (
-              <>
-                {/* User Name with Dropdown */}
-                <div className="relative" ref={userMenuRef}>
-                  <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"
-                    title="Mon compte"
-                  >
-                    <User className="w-5 h-5" />
-                    <span className="hidden md:inline text-sm font-medium max-w-[120px] truncate">
-                      {session.user?.name || 'Mon Compte'}
-                    </span>
-                  </button>
+              {/* Right Side: Account + Icons */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {/* User Section */}
+                {session ? (
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                      className="text-gray-300 hover:text-white transition-colors flex flex-col items-start leading-tight"
+                      title="Mon compte"
+                    >
+                      <span className="text-[10px] text-gray-400">Bonjour, {session.user?.name?.split(' ')[0] || 'Client'}</span>
+                      <span className="text-sm font-semibold flex items-center gap-0.5">
+                        Compte & listes
+                        <ChevronDown className="w-3 h-3" />
+                      </span>
+                    </button>
 
-                  {/* Dropdown Menu */}
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-dark-800 border border-dark-700 rounded-lg shadow-xl z-50 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-dark-700">
-                        <p className="text-sm font-medium text-white truncate">
-                          {session.user?.name || 'Mon Compte'}
-                        </p>
-                        <p className="text-xs text-gray-400 truncate">
-                          {(session.user as any)?.phone || session.user?.email || ''}
-                        </p>
-                        {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
-                          <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-primary-500/20 text-primary-400 rounded">
-                            {(session.user as any)?.role}
-                          </span>
-                        )}
-                      </div>
-                      <div className="py-1">
-                        {/* Admin Dashboard - Only for admin roles */}
-                        {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
+                    {/* User Dropdown */}
+                    {isUserMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                        <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {session.user?.name || 'Mon Compte'}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {(session.user as any)?.phone || session.user?.email || ''}
+                          </p>
+                          {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
+                            <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-primary-500/20 text-primary-500 rounded">
+                              {(session.user as any)?.role}
+                            </span>
+                          )}
+                        </div>
+                        <div className="py-1">
+                          {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors font-medium"
+                            >
+                              <LayoutDashboard className="w-4 h-4" />
+                              Administration
+                            </Link>
+                          )}
                           <Link
-                            href="/admin"
+                            href="/account"
                             onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2 text-sm text-primary-400 hover:bg-dark-700 hover:text-primary-300 transition-colors font-medium"
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
                           >
                             <LayoutDashboard className="w-4 h-4" />
-                            Administration
+                            Tableau de bord
                           </Link>
-                        )}
-                        {/* Customer Dashboard */}
-                        <Link
-                          href="/account"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
-                        >
-                          <LayoutDashboard className="w-4 h-4" />
-                          Tableau de bord
-                        </Link>
-                        <Link
-                          href="/account/profile"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          Mon profil
-                        </Link>
-                        <Link
-                          href="/account/orders"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
-                        >
-                          <Package className="w-4 h-4" />
-                          Mes commandes
-                        </Link>
-                        <Link
-                          href="/account/appointments"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
-                        >
-                          <CalendarDays className="w-4 h-4" />
-                          Mes rendez-vous
-                        </Link>
-                        <Link
-                          href="/account/settings"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700 hover:text-white transition-colors"
-                        >
-                          <Settings className="w-4 h-4" />
-                          Paramètres
-                        </Link>
+                          <Link
+                            href="/account/orders"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
+                          >
+                            <Package className="w-4 h-4" />
+                            Mes commandes
+                          </Link>
+                          <Link
+                            href="/account/appointments"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
+                          >
+                            <CalendarDays className="w-4 h-4" />
+                            Mes rendez-vous
+                          </Link>
+                          <Link
+                            href="/account/settings"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Paramètres
+                          </Link>
+                        </div>
+                        <div className="border-t border-gray-200 dark:border-dark-700 py-1">
+                          <button
+                            onClick={() => {
+                              setIsUserMenuOpen(false)
+                              signOut({ callbackUrl: '/' })
+                            }}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors w-full"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Déconnexion
+                          </button>
+                        </div>
                       </div>
-                      <div className="border-t border-dark-700 py-1">
-                        <button
-                          onClick={() => {
-                            setIsUserMenuOpen(false)
-                            signOut({ callbackUrl: '/' })
-                          }}
-                          className="flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-dark-700 hover:text-red-300 transition-colors w-full"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Déconnexion
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href="/auth/login-phone"
+                    className="text-gray-300 hover:text-white transition-colors flex flex-col items-start leading-tight"
+                  >
+                    <span className="text-[10px] text-gray-400">Bonjour</span>
+                    <span className="text-sm font-semibold">Identifiez-vous</span>
+                  </Link>
+                )}
 
-                {/* Tableau de bord - Quick access link */}
-                <Link
-                  href={['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) ? '/admin' : '/account'}
-                  className="hidden md:flex items-center gap-1.5 text-sm text-gray-400 hover:text-primary-400 transition-colors"
+                {/* Theme Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  className="hidden md:flex p-2 text-gray-400 hover:text-white transition-colors"
+                  title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Tableau de bord</span>
+                  {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                </button>
+
+                {/* Currency Toggle */}
+                <button
+                  onClick={toggleCurrency}
+                  className="hidden md:flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-400 hover:text-white transition-colors"
+                  title={currency === 'XOF' ? 'Afficher en Euros' : 'Afficher en CFA'}
+                >
+                  <span className={currency === 'XOF' ? 'text-primary-400' : ''}>CFA</span>
+                  <span className="text-gray-600">/</span>
+                  <span className={currency === 'EUR' ? 'text-primary-400' : ''}>EUR</span>
+                </button>
+
+                {/* Wishlist */}
+                <Link
+                  href="/account/wishlist"
+                  className="relative text-gray-300 hover:text-white transition-colors hidden md:flex"
+                  title="Favoris"
+                >
+                  <Heart className="w-5 h-5" />
+                  <span className="absolute -top-1.5 -right-1.5 bg-primary-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                    0
+                  </span>
                 </Link>
-              </>
-            ) : (
-              <Link
-                href="/auth/login-phone"
-                className="text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"
-                title="Connexion"
-              >
-                <User className="w-5 h-5" />
-                <span className="hidden md:inline text-sm font-medium">Login</span>
-              </Link>
-            )}
 
-            {/* Rendez-vous CTA Button */}
-            <Link
-              href="/consultation"
-              className="hidden md:flex items-center justify-center p-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-full transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
-              title="Prendre rendez-vous"
-            >
-              <CalendarDays className="w-5 h-5" />
-            </Link>
+                {/* Cart */}
+                <MiniCart />
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md bg-theme-bg-tertiary dark:bg-dark-700 hover:bg-theme-border-primary dark:hover:bg-dark-600 text-theme-text-secondary dark:text-gray-300 hover:text-theme-accent-primary dark:hover:text-white transition-colors"
-              title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-              aria-label={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-            </button>
-
-            {/* Currency Toggle */}
-            <button
-              onClick={toggleCurrency}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-theme-bg-tertiary dark:bg-dark-700 hover:bg-theme-border-primary dark:hover:bg-dark-600 text-theme-text-secondary dark:text-gray-300 hover:text-theme-text-primary dark:hover:text-white rounded-md transition-colors"
-              title={currency === 'XOF' ? 'Afficher en Euros' : 'Afficher en CFA'}
-            >
-              <span className={currency === 'XOF' ? 'text-copper-500' : 'text-theme-text-muted dark:text-gray-500'}>CFA</span>
-              <span className="text-theme-text-muted dark:text-gray-500">/</span>
-              <span className={currency === 'EUR' ? 'text-copper-500' : 'text-theme-text-muted dark:text-gray-500'}>EUR</span>
-            </button>
-
-            {/* Search Icon */}
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="text-gray-300 hover:text-primary-400 transition-colors"
-              title="Rechercher"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Wishlist Icon */}
-            <Link
-              href="/account/wishlist"
-              className="relative text-gray-300 hover:text-primary-400 transition-colors"
-              title="Favoris"
-            >
-              <Heart className="w-5 h-5" />
-              <span className="absolute -top-2 -right-2 bg-gray-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                0
-              </span>
-            </Link>
-
-            {/* Cart Icon with Mini Cart Dropdown */}
-            <MiniCart />
-
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden text-gray-300 hover:text-primary-400"
-              aria-label="Menu"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+                {/* Mobile Menu Toggle */}
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="lg:hidden text-gray-300 hover:text-white"
+                  aria-label="Menu"
+                >
+                  {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="lg:hidden py-4 border-t border-dark-700">
-            <div className="flex flex-col space-y-1">
-              <Link
-                href="/"
-                className="text-gray-300 hover:text-primary-400 transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
+        {/* ═══════════════════ ROW 2: Navigation Bar ═══════════════════ */}
+        <div className="bg-[#232f3e] dark:bg-[#232830]">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center h-10 gap-0.5 overflow-x-auto scrollbar-hide">
+              {/* "Toutes" button with hamburger */}
+              <button
+                onClick={() => setIsCategorySidebarOpen(true)}
+                className="flex items-center gap-1.5 px-3 h-full text-white font-semibold text-sm hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all flex-shrink-0 whitespace-nowrap"
               >
-                Accueil
-              </Link>
+                <Menu className="w-4 h-4" />
+                Toutes
+              </button>
 
-              {/* Mobile Category Accordions */}
+              {/* Separator */}
+              <div className="w-px h-5 bg-gray-600 flex-shrink-0 mx-1" />
+
+              {/* Navigation Links */}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-2.5 h-full flex items-center text-gray-200 hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all text-sm whitespace-nowrap flex-shrink-0"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════ MOBILE MENU ═══════════════════ */}
+        {isMenuOpen && (
+          <nav className="lg:hidden bg-[#1a1d24] border-t border-dark-700">
+            <div className="container mx-auto px-4 py-4 flex flex-col space-y-1">
+              {/* Search bar for mobile */}
+              <div className="mb-3">
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false)
+                    // Small delay to let menu close before opening search
+                    setTimeout(() => {
+                      const searchBtn = document.querySelector('[data-mobile-search]') as HTMLButtonElement
+                      searchBtn?.click()
+                    }, 100)
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-lg text-gray-400 text-sm"
+                >
+                  <Search className="w-4 h-4" />
+                  Rechercher un produit...
+                </button>
+              </div>
+
+              {/* Quick nav links */}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-gray-300 hover:text-primary-400 transition-colors py-2 text-sm"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              {/* Divider */}
+              <div className="border-t border-dark-700 my-2" />
+
+              {/* Category Accordions */}
+              <p className="text-xs text-gray-500 uppercase tracking-wider py-1">Toutes les catégories</p>
               {categories.map(cat => (
                 <div key={cat.id}>
                   <button
                     onClick={() => setExpandedMobileCategory(expandedMobileCategory === cat.id ? null : cat.id)}
-                    className="flex items-center justify-between w-full text-gray-300 hover:text-primary-400 transition-colors py-2"
+                    className="flex items-center justify-between w-full text-gray-300 hover:text-primary-400 transition-colors py-2 text-sm"
                   >
                     <span>{cat.name}</span>
                     {expandedMobileCategory === cat.id ? (
@@ -419,46 +544,61 @@ export function Header() {
                 </div>
               ))}
 
+              {/* Divider */}
+              <div className="border-t border-dark-700 my-2" />
+
+              {/* Mobile utility links */}
+              <div className="flex items-center gap-4 py-2">
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center gap-2 text-gray-400 hover:text-white text-sm"
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+                </button>
+                <button
+                  onClick={toggleCurrency}
+                  className="flex items-center gap-1 text-gray-400 hover:text-white text-sm"
+                >
+                  <span className={currency === 'XOF' ? 'text-primary-400' : ''}>CFA</span>
+                  <span>/</span>
+                  <span className={currency === 'EUR' ? 'text-primary-400' : ''}>EUR</span>
+                </button>
+              </div>
+
+              {/* Wishlist mobile */}
               <Link
-                href="/showroom"
-                className="text-gray-300 hover:text-primary-400 transition-colors py-2 block"
+                href="/account/wishlist"
+                className="flex items-center gap-2 text-gray-300 hover:text-primary-400 transition-colors py-2 text-sm"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Showroom
+                <Heart className="w-4 h-4" />
+                Favoris
               </Link>
-              <Link
-                href="/sur-mesure"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/20 border border-primary-500/30 text-primary-400 rounded-lg transition-colors font-medium mt-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sur-Mesure ✨
-              </Link>
-              <Link
-                href="/consultation"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg transition-colors font-medium mt-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <CalendarDays className="w-4 h-4" />
-                Prendre Rendez-vous
-              </Link>
+
               {session && (
                 <button
                   onClick={() => {
                     setIsMenuOpen(false)
                     signOut({ callbackUrl: '/' })
                   }}
-                  className="text-gray-300 hover:text-primary-400 transition-colors py-2 text-left"
+                  className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors py-2 text-sm text-left"
                 >
+                  <LogOut className="w-4 h-4" />
                   Déconnexion
                 </button>
               )}
             </div>
           </nav>
         )}
-      </div>
+      </header>
 
-      {/* Search Modal */}
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-    </header>
+      {/* Categories Sidebar (Amazon "Toutes" menu) */}
+      <AllCategoriesSidebar
+        isOpen={isCategorySidebarOpen}
+        onClose={() => setIsCategorySidebarOpen(false)}
+        categories={categories}
+      />
+    </>
   )
 }
