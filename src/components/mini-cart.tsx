@@ -39,19 +39,20 @@ export function MiniCart() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Cart Icon Button */}
+      {/* Cart Icon Button — Amazon-style large cart with label */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         onMouseEnter={() => setIsOpen(true)}
-        className="relative text-gray-700 dark:text-gray-300 hover:text-copper-500 dark:hover:text-copper-400 transition-colors"
+        className="relative flex items-end gap-0.5 text-gray-700 dark:text-gray-300 hover:text-copper-500 dark:hover:text-copper-400 transition-colors"
         title="Panier"
       >
-        <ShoppingCart className="w-5 h-5" />
-        {itemCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-copper-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-medium">
-            {itemCount > 9 ? '9+' : itemCount}
+        <div className="relative">
+          <ShoppingCart className="w-7 h-7" />
+          <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-primary-500 font-bold text-sm leading-none">
+            {itemCount}
           </span>
-        )}
+        </div>
+        <span className="text-xs font-semibold hidden sm:inline pb-0.5">Panier</span>
       </button>
 
       {/* Dropdown */}

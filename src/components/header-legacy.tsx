@@ -186,7 +186,7 @@ function InlineSearchBar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher un produit, une catégorie..."
-            className="flex-1 px-4 py-2.5 bg-white dark:bg-dark-800 text-gray-900 dark:text-white text-sm outline-none placeholder:text-gray-400"
+            className="flex-1 px-4 py-2.5 bg-white text-gray-900 text-sm outline-none placeholder:text-gray-400"
           />
           <button
             type="submit"
@@ -261,9 +261,9 @@ export function Header() {
     { href: '/categorie/chemisier-femme', label: 'Chemisier Dame' },
     { href: '/categorie/tunique', label: 'Tunique Homme' },
     { href: '/categorie/veste-femme', label: 'Veste Femme' },
-    { href: '/sur-mesure', label: 'Sur-Mesure' },
-    { href: '/consultation', label: 'Rendez-vous' },
-    { href: '/showroom', label: 'Showroom' },
+    { href: '/sur-mesure', label: 'Sur-Mesure', highlight: true },
+    { href: '/consultation', label: 'Rendez-vous', highlight: true },
+    { href: '/showroom', label: 'Showroom', highlight: true },
   ]
 
   return (
@@ -278,11 +278,22 @@ export function Header() {
                 <Image
                   src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
                   alt="CÈCHÉMOI"
-                  width={160}
-                  height={48}
-                  className="h-11 w-auto"
+                  width={180}
+                  height={54}
+                  className="h-14 w-auto"
                   priority
                 />
+              </Link>
+
+              {/* Location / Store address — Amazon-style */}
+              <Link
+                href="/showroom"
+                className="hidden lg:flex flex-col items-start text-gray-300 hover:text-white transition-colors flex-shrink-0 leading-tight"
+              >
+                <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                  📍 Notre boutique
+                </span>
+                <span className="text-sm font-semibold">Abidjan, Côte d&apos;Ivoire</span>
               </Link>
 
               {/* Search Bar (desktop — always visible) */}
@@ -315,23 +326,8 @@ export function Header() {
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {(session.user as any)?.phone || session.user?.email || ''}
                           </p>
-                          {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
-                            <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-primary-500/20 text-primary-500 rounded">
-                              {(session.user as any)?.role}
-                            </span>
-                          )}
                         </div>
                         <div className="py-1">
-                          {['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role) && (
-                            <Link
-                              href="/admin"
-                              onClick={() => setIsUserMenuOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors font-medium"
-                            >
-                              <LayoutDashboard className="w-4 h-4" />
-                              Administration
-                            </Link>
-                          )}
                           <Link
                             href="/account"
                             onClick={() => setIsUserMenuOpen(false)}
@@ -399,27 +395,19 @@ export function Header() {
                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
 
-                {/* Currency Toggle */}
-                <button
-                  onClick={toggleCurrency}
-                  className="hidden md:flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-400 hover:text-white transition-colors"
-                  title={currency === 'XOF' ? 'Afficher en Euros' : 'Afficher en CFA'}
-                >
-                  <span className={currency === 'XOF' ? 'text-primary-400' : ''}>CFA</span>
-                  <span className="text-gray-600">/</span>
-                  <span className={currency === 'EUR' ? 'text-primary-400' : ''}>EUR</span>
-                </button>
-
-                {/* Wishlist */}
+                {/* Wishlist with label */}
                 <Link
                   href="/account/wishlist"
-                  className="relative text-gray-300 hover:text-white transition-colors hidden md:flex"
+                  className="relative text-gray-300 hover:text-white transition-colors hidden md:flex items-end gap-0.5"
                   title="Favoris"
                 >
-                  <Heart className="w-5 h-5" />
-                  <span className="absolute -top-1.5 -right-1.5 bg-primary-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                    0
-                  </span>
+                  <div className="relative">
+                    <Heart className="w-6 h-6" />
+                    <span className="absolute -top-1.5 -right-1.5 bg-primary-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                      0
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold pb-0.5">Favoris</span>
                 </Link>
 
                 {/* Cart */}
@@ -448,7 +436,7 @@ export function Header() {
                 className="flex items-center gap-1.5 px-3 h-full text-white font-semibold text-sm hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all flex-shrink-0 whitespace-nowrap"
               >
                 <Menu className="w-4 h-4" />
-                Toutes
+                Toutes les catégories
               </button>
 
               {/* Separator */}
@@ -459,7 +447,11 @@ export function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-2.5 h-full flex items-center text-gray-200 hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all text-sm whitespace-nowrap flex-shrink-0"
+                  className={`px-2.5 h-full flex items-center rounded-sm transition-all text-sm whitespace-nowrap flex-shrink-0 ${
+                    link.highlight
+                      ? 'text-primary-400 font-semibold hover:bg-primary-500/15'
+                      : 'text-gray-200 hover:outline hover:outline-1 hover:outline-white/40'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -555,14 +547,6 @@ export function Header() {
                 >
                   {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   {theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
-                </button>
-                <button
-                  onClick={toggleCurrency}
-                  className="flex items-center gap-1 text-gray-400 hover:text-white text-sm"
-                >
-                  <span className={currency === 'XOF' ? 'text-primary-400' : ''}>CFA</span>
-                  <span>/</span>
-                  <span className={currency === 'EUR' ? 'text-primary-400' : ''}>EUR</span>
                 </button>
               </div>
 
