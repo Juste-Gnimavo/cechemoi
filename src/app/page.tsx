@@ -5,7 +5,6 @@ import { FashionCategories } from '@/components/home/fashion-categories'
 import { FashionFeatured } from '@/components/home/fashion-featured'
 import { FashionWhyUs } from '@/components/home/fashion-why-us'
 import { FashionGallery } from '@/components/home/fashion-gallery'
-import { AppComingSoonModal } from '@/components/app-coming-soon-modal'
 
 export default function HomePage() {
   return (
@@ -19,9 +18,6 @@ export default function HomePage() {
         <FashionGallery />
       </main>
       <Footer />
-
-      {/* App Coming Soon Modal */}
-      <AppComingSoonModal />
     </div>
   )
 }

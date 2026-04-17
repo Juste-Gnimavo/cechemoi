@@ -193,7 +193,7 @@ export function Footer() {
           <div>
             <h3 className="text-gray-900 dark:text-white font-semibold text-lg mb-4">Téléchargez Nos Apps</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
-              Passez plus rapidement vos commandes et être au courant de nos derniers arrivages
+              Passez plus rapidement vos commandes et soyez au courant de nos derniers arrivages
             </p>
             <div className="space-y-3">
               <a

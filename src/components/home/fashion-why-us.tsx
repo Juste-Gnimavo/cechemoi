@@ -6,7 +6,7 @@ const FEATURES = [
   {
     icon: Scissors,
     title: 'Sur-Mesure',
-    description: 'Chaque pièce est confectionnée selon vos mensurations exactes.',
+    description: 'Chaque pièce est confectionnée selon vos mensurations.',
   },
   {
     icon: Award,
@@ -21,7 +21,7 @@ const FEATURES = [
   {
     icon: HeartHandshake,
     title: 'Service Client',
-    description: 'Accompagnement personnalisé du choix à la livraison.',
+    description: 'Accompagnement personnalisé,  du choix de la tenue ou de l\'accessoire, à la livraison.',
   },
 ]
 
