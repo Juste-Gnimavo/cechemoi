@@ -31,8 +31,8 @@ function chunkArray<T>(arr: T[], columns: number): T[][] {
   return Array.from({ length: columns }, (_, i) => arr.slice(i * size, (i + 1) * size))
 }
 
-// ─── "Toutes les catégories" Sidebar (Amazon-style slide-in) ─────────────────
-function AllCategoriesSidebar({
+// ─── "Toutes les catégories" Flyout Menu (Amazon-style) ──────────────────────
+function AllCategoriesFlyout({
   isOpen,
   onClose,
   categories,
@@ -41,125 +41,150 @@ function AllCategoriesSidebar({
   onClose: () => void
   categories: RootCategory[]
 }) {
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout>()
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  // Prevent body scroll when open
+  // Close on outside click
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!isOpen) return
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose()
+      }
     }
-    return () => { document.body.style.overflow = '' }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [isOpen, onClose])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [isOpen, onClose])
+
+  // Reset hovered category when closing
+  useEffect(() => {
+    if (!isOpen) setHoveredCategory(null)
   }, [isOpen])
 
+  useEffect(() => {
+    return () => clearTimeout(timeoutRef.current)
+  }, [])
+
+  const handleCategoryEnter = useCallback((catId: string) => {
+    clearTimeout(timeoutRef.current)
+    setHoveredCategory(catId)
+  }, [])
+
+  const handleCategoryLeave = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setHoveredCategory(null), 200)
+  }, [])
+
+  const hoveredCat = categories.find(c => c.id === hoveredCategory)
+
+  if (!isOpen) return null
+
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={onClose}
-      />
+    <div ref={menuRef} className="absolute left-0 top-0 z-[100] flex shadow-2xl">
+      {/* Left panel — main categories */}
+      <div className="w-64 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-bl-lg overflow-hidden">
+        {categories.map(cat => (
+          <Link
+            key={cat.id}
+            href={`/categorie/${cat.slug}`}
+            onClick={onClose}
+            onMouseEnter={() => handleCategoryEnter(cat.id)}
+            onMouseLeave={handleCategoryLeave}
+            className={`flex items-center justify-between px-5 py-3 text-sm transition-colors ${
+              hoveredCategory === cat.id
+                ? 'bg-gray-100 dark:bg-dark-800 text-primary-500 font-medium'
+                : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark-800'
+            }`}
+          >
+            <span>{cat.name}</span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </Link>
+        ))}
 
-      {/* Sidebar panel */}
-      <div
-        className={`fixed top-0 left-0 h-full w-80 bg-white dark:bg-dark-900 z-[101] transform transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } overflow-y-auto shadow-2xl`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-[#1a1d24] text-white">
-          <div className="flex items-center gap-3">
-            <User className="w-5 h-5" />
-            <span className="font-semibold text-base">Toutes les catégories</span>
-          </div>
-          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Category List */}
-        <div className="py-2">
-          {/* Main categories */}
-          {categories.map(cat => (
-            <div key={cat.id} className="border-b border-gray-100 dark:border-dark-700">
-              <button
-                onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
-                className="flex items-center justify-between w-full px-5 py-3 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-left"
-              >
-                <span className="font-medium text-sm">{cat.name}</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                    expandedCategory === cat.id ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-
-              {/* Expanded children */}
-              <div className={`overflow-hidden transition-all duration-200 ${
-                expandedCategory === cat.id ? 'max-h-[2000px]' : 'max-h-0'
-              }`}>
-                <Link
-                  href={`/categorie/${cat.slug}`}
-                  onClick={onClose}
-                  className="block px-5 py-2.5 pl-8 text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
-                >
-                  Tout voir {cat.name}
-                </Link>
-                {cat.children.map(subcat => (
-                  <Link
-                    key={subcat.id}
-                    href={`/categorie/${subcat.slug}`}
-                    onClick={onClose}
-                    className="block px-5 py-2.5 pl-8 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors"
-                  >
-                    {subcat.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* Quick Links */}
-          <div className="border-t border-gray-200 dark:border-dark-700 mt-2 pt-2">
-            <Link
-              href="/catalogue"
-              onClick={onClose}
-              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
-            >
-              <Store className="w-4 h-4" />
-              Catalogue complet
-            </Link>
-            <Link
-              href="/sur-mesure"
-              onClick={onClose}
-              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
-            >
-              <Sparkles className="w-4 h-4" />
-              Sur-Mesure
-            </Link>
-            <Link
-              href="/consultation"
-              onClick={onClose}
-              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
-            >
-              <CalendarDays className="w-4 h-4" />
-              Rendez-vous
-            </Link>
-            <Link
-              href="/showroom"
-              onClick={onClose}
-              className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-800 transition-colors text-sm"
-            >
-              <Package className="w-4 h-4" />
-              Showroom
-            </Link>
-          </div>
+        {/* Quick Links */}
+        <div className="border-t border-gray-200 dark:border-dark-700">
+          <Link
+            href="/catalogue"
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-3 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            <Store className="w-4 h-4" />
+            Catalogue complet
+          </Link>
+          <Link
+            href="/sur-mesure"
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-3 text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
+          >
+            <Sparkles className="w-4 h-4" />
+            Sur-Mesure
+          </Link>
+          <Link
+            href="/consultation"
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-3 text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
+          >
+            <CalendarDays className="w-4 h-4" />
+            Rendez-vous
+          </Link>
+          <Link
+            href="/showroom"
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-3 text-sm text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
+          >
+            <Package className="w-4 h-4" />
+            Showroom
+          </Link>
         </div>
       </div>
-    </>
+
+      {/* Right panel — subcategories (appears on hover) */}
+      {hoveredCat && hoveredCat.children.length > 0 && (
+        <div
+          className="w-[600px] bg-white dark:bg-dark-900 border border-l-0 border-gray-200 dark:border-dark-700 rounded-br-lg p-6 max-h-[70vh] overflow-y-auto"
+          onMouseEnter={() => {
+            clearTimeout(timeoutRef.current)
+          }}
+          onMouseLeave={handleCategoryLeave}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200 dark:border-dark-700">
+            <h3 className="text-gray-900 dark:text-white font-bold text-base">{hoveredCat.name}</h3>
+            <Link
+              href={`/categorie/${hoveredCat.slug}`}
+              onClick={onClose}
+              className="text-primary-500 hover:text-primary-400 text-sm font-medium transition-colors"
+            >
+              Tout voir →
+            </Link>
+          </div>
+
+          {/* Subcategories grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {hoveredCat.children.map(subcat => (
+              <Link
+                key={subcat.id}
+                href={`/categorie/${subcat.slug}`}
+                onClick={onClose}
+                className="px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-colors capitalize-first"
+              >
+                {subcat.name.charAt(0).toUpperCase() + subcat.name.slice(1).toLowerCase()}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -427,13 +452,15 @@ export function Header() {
         </div>
 
         {/* ═══════════════════ ROW 2: Navigation Bar ═══════════════════ */}
-        <div className="bg-[#232f3e] dark:bg-[#232830]">
+        <div className="relative bg-[#232f3e] dark:bg-[#232830]">
           <div className="container mx-auto px-4">
             <div className="flex items-center h-10 gap-0.5 overflow-x-auto scrollbar-hide">
-              {/* "Toutes" button with hamburger */}
+              {/* "Toutes les catégories" button */}
               <button
-                onClick={() => setIsCategorySidebarOpen(true)}
-                className="flex items-center gap-1.5 px-3 h-full text-white font-semibold text-sm hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all flex-shrink-0 whitespace-nowrap"
+                onClick={() => setIsCategorySidebarOpen(!isCategorySidebarOpen)}
+                className={`flex items-center gap-1.5 px-3 h-10 text-white font-semibold text-sm hover:outline hover:outline-1 hover:outline-white/40 rounded-sm transition-all whitespace-nowrap flex-shrink-0 ${
+                  isCategorySidebarOpen ? 'outline outline-1 outline-white/40' : ''
+                }`}
               >
                 <Menu className="w-4 h-4" />
                 Toutes les catégories
@@ -457,6 +484,15 @@ export function Header() {
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Flyout Menu — positioned outside overflow container */}
+          <div className="container mx-auto px-4">
+            <AllCategoriesFlyout
+              isOpen={isCategorySidebarOpen}
+              onClose={() => setIsCategorySidebarOpen(false)}
+              categories={categories}
+            />
           </div>
         </div>
 
@@ -577,12 +613,6 @@ export function Header() {
         )}
       </header>
 
-      {/* Categories Sidebar (Amazon "Toutes" menu) */}
-      <AllCategoriesSidebar
-        isOpen={isCategorySidebarOpen}
-        onClose={() => setIsCategorySidebarOpen(false)}
-        categories={categories}
-      />
     </>
   )
 }
