@@ -5,6 +5,7 @@ import { FashionCategories } from '@/components/home/fashion-categories'
 import { FashionFeatured } from '@/components/home/fashion-featured'
 import { FashionWhyUs } from '@/components/home/fashion-why-us'
 import { FashionGallery } from '@/components/home/fashion-gallery'
+import { FashionSubcategories } from '@/components/home/fashion-subcategories'
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
         <FashionCategories />
         <FashionFeatured />
         <FashionWhyUs />
+        <FashionSubcategories />
         <FashionGallery />
       </main>
       <Footer />

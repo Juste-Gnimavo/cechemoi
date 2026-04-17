@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Facebook, Instagram, Youtube, MapPin } from 'lucide-react'
+import { Facebook, Instagram, Youtube, MapPin, Twitter } from 'lucide-react'
 
-// Custom WhatsApp icon component
+// Custom SVG icon components
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -11,7 +11,6 @@ function WhatsAppIcon({ className }: { className?: string }) {
   )
 }
 
-// Custom TikTok icon component
 function TikTokIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -19,6 +18,33 @@ function TikTokIcon({ className }: { className?: string }) {
     </svg>
   )
 }
+
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  )
+}
+
+function SnapchatIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12.917-.217l.076-.028c.167-.06.347-.127.538-.127.236 0 .449.076.609.217.18.153.27.372.27.646 0 .49-.45.873-1.34 1.128-.3.084-.675.168-.96.252-.12.036-.226.072-.3.108-.13.08-.223.182-.275.314-.028.07-.046.15-.046.24.015.3.09.57.18.81a.48.48 0 00.12.15c.63.69 1.44 1.25 2.25 1.56.27.104.57.18.78.21.383.06.53.27.563.36.063.18-.015.39-.135.585-.24.39-.735.69-1.38.87-.21.06-.465.12-.69.168l-.075.015c-.12.03-.21.06-.315.105-.21.09-.39.27-.39.57 0 .12.03.24.075.36.12.3.3.585.45.81.135.21.24.39.27.525.06.255-.06.51-.39.69a2.64 2.64 0 01-.72.24 4.769 4.769 0 01-.84.12c-.21.015-.42.03-.585.06-.165.045-.36.12-.57.21-.39.18-.81.39-1.47.585-.21.06-.45.105-.69.105-.24 0-.48-.045-.72-.135-1.47-.57-2.94-1.71-5.22-1.71s-3.75 1.14-5.22 1.71c-.24.09-.48.135-.72.135-.24 0-.48-.045-.69-.105-.66-.195-1.08-.405-1.47-.585-.21-.09-.405-.165-.57-.21-.165-.03-.375-.045-.585-.06a4.769 4.769 0 01-.84-.12 2.64 2.64 0 01-.72-.24c-.33-.18-.45-.435-.39-.69.03-.135.135-.315.27-.525.15-.225.33-.51.45-.81.045-.12.075-.24.075-.36 0-.3-.18-.48-.39-.57-.105-.045-.195-.075-.315-.105l-.075-.015c-.225-.048-.48-.108-.69-.168-.645-.18-1.14-.48-1.38-.87-.12-.195-.198-.405-.135-.585.033-.09.18-.3.563-.36.21-.03.51-.106.78-.21.81-.31 1.62-.87 2.25-1.56a.48.48 0 00.12-.15c.09-.24.165-.51.18-.81 0-.09-.018-.17-.046-.24a.604.604 0 00-.275-.314c-.074-.036-.18-.072-.3-.108-.285-.084-.66-.168-.96-.252-.89-.255-1.34-.638-1.34-1.128 0-.274.09-.493.27-.646.16-.141.373-.217.609-.217.191 0 .371.067.538.127l.076.028c.258.097.617.201.917.217.198 0 .326-.045.401-.09a11.66 11.66 0 01-.03-.51l-.003-.06c-.104-1.628-.23-3.654.299-4.847C7.859 1.069 11.216.793 12.206.793z"/>
+    </svg>
+  )
+}
+
+const SOCIAL_LINKS = [
+  { href: 'https://web.facebook.com/cechemoi', icon: Facebook, label: 'Facebook', color: 'hover:bg-[#1877F2]' },
+  { href: 'https://www.instagram.com/cechemoi.ci', icon: Instagram, label: 'Instagram', color: 'hover:bg-[#E4405F]' },
+  { href: '#', icon: TikTokIcon, label: 'TikTok', color: 'hover:bg-[#000000]' },
+  { href: 'https://youtube.com/@cechemoi', icon: Youtube, label: 'YouTube', color: 'hover:bg-[#FF0000]' },
+  { href: '#', icon: Twitter, label: 'X (Twitter)', color: 'hover:bg-[#000000]' },
+  { href: 'https://wa.me/2250759545410', icon: WhatsAppIcon, label: 'WhatsApp', color: 'hover:bg-[#25D366]' },
+  { href: '#', icon: LinkedInIcon, label: 'LinkedIn', color: 'hover:bg-[#0A66C2]' },
+  { href: '#', icon: SnapchatIcon, label: 'Snapchat', color: 'hover:bg-[#FFFC00] hover:!text-black' },
+]
 
 export function Footer() {
   return (
@@ -51,66 +77,20 @@ export function Footer() {
 
             {/* Social Icons */}
             <div className="mt-6">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-500 text-sm">Social:</span>
-                <div className="flex items-center gap-2">
+              <span className="text-gray-500 text-sm block mb-3">Suivez-nous :</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {SOCIAL_LINKS.map((social) => (
                   <a
-                    href="https://web.facebook.com/cechemoi"
+                    key={social.label}
+                    href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                    title="Facebook"
+                    className={`w-9 h-9 bg-gray-800 dark:bg-white/10 rounded-full flex items-center justify-center ${social.color} transition-colors group`}
+                    title={social.label}
                   >
-                    <Facebook className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
+                    <social.icon className="h-4 w-4 text-white group-hover:text-white" />
                   </a>
-                  <a
-                    href="https://wa.me/2250759545410"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                    title="WhatsApp"
-                  >
-                    <WhatsAppIcon className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
-                  </a>
-                  <a
-                    href="https://www.tiktok.com/@cechemoi"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                    title="TikTok"
-                  >
-                    <TikTokIcon className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
-                  </a>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-2 ml-[52px]">
-                <a
-                  href="https://www.instagram.com/cechemoi.ci"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                  title="Instagram"
-                >
-                  <Instagram className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
-                </a>
-                <a
-                  href="https://youtube.com/@cechemoi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                  title="YouTube"
-                >
-                  <Youtube className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
-                </a>
-                <a
-                  href="https://maps.google.com/?q=Faya+Cité+Genie+2000+Abidjan"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 bg-gray-800 dark:bg-white rounded-full flex items-center justify-center hover:bg-primary-500 dark:hover:bg-primary-500 transition-colors group"
-                  title="Localisation"
-                >
-                  <MapPin className="h-4 w-4 text-white dark:text-gray-900 group-hover:text-white" />
-                </a>
+                ))}
               </div>
             </div>
           </div>

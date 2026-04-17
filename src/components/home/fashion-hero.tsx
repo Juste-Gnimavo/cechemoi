@@ -7,9 +7,9 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 
 // Hero slide banners (images contain their own text/branding)
 const HERO_SLIDES = [
-  { id: 1, image: '/slides/slide1.jpg', alt: 'Bienvenue sur la plateforme CÈCHÉMOI — L\'excellence au service de votre style' },
-  { id: 2, image: '/slides/slide2.jpg', alt: 'Nouvelle Collection 2026 — Élégance, Style Africain, Prêt-à-Porter, Sur-Mesure' },
-  { id: 3, image: '/slides/slide3.jpg', alt: 'CÈCHÉMOI — Mode Africaine, Élégance et Tradition' },
+  { id: 1, image: '/slides/slide1.jpg?v=2', alt: 'Bienvenue sur la plateforme CÈCHÉMOI — L\'excellence au service de votre style' },
+  { id: 2, image: '/slides/slide2.jpg?v=2', alt: 'Nouvelle Collection 2026 — Élégance, Style Africain, Prêt-à-Porter, Sur-Mesure' },
+  { id: 3, image: '/slides/slide3.jpg?v=2', alt: 'CÈCHÉMOI — Mode Africaine, Élégance et Tradition' },
 ]
 
 const SLIDE_INTERVAL = 5000 // 5 seconds
