@@ -25,6 +25,8 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
 
     const skip = (page - 1) * limit
 
@@ -41,6 +43,18 @@ export async function GET(req: NextRequest) {
         { customerName: { contains: search, mode: 'insensitive' } },
         { customerEmail: { contains: search, mode: 'insensitive' } },
       ]
+    }
+
+    if (startDate || endDate) {
+      where.issueDate = {}
+      if (startDate) {
+        where.issueDate.gte = new Date(startDate)
+      }
+      if (endDate) {
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999)
+        where.issueDate.lte = end
+      }
     }
 
     // Fetch invoices with pagination
@@ -87,6 +101,7 @@ export async function GET(req: NextRequest) {
         page,
         limit,
         total,
+        totalCount: total,
         totalPages: Math.ceil(total / limit),
       },
     })

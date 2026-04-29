@@ -57,6 +57,8 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
@@ -66,7 +68,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     fetchInvoices()
     fetchStats()
-  }, [statusFilter, page, searchTerm, limit])
+  }, [statusFilter, page, searchTerm, limit, startDate, endDate])
 
   const fetchInvoices = async () => {
     try {
@@ -76,6 +78,8 @@ export default function InvoicesPage() {
         limit: limit.toString(),
         ...(statusFilter !== 'ALL' && { status: statusFilter }),
         ...(searchTerm && { search: searchTerm }),
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
       })
 
       const res = await fetch(`/api/admin/invoices?${params}`)
@@ -230,6 +234,50 @@ export default function InvoicesPage() {
             }}
             className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
+        </div>
+
+        {/* Date Range Filter */}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value)
+                setPage(1)
+              }}
+              title="Date de début"
+              className="pl-9 pr-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          <span className="text-gray-400 text-sm">→</span>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value)
+                setPage(1)
+              }}
+              title="Date de fin"
+              className="pl-9 pr-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+          {(startDate || endDate) && (
+            <button
+              onClick={() => {
+                setStartDate('')
+                setEndDate('')
+                setPage(1)
+              }}
+              className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
+              title="Effacer les dates"
+            >
+              Effacer
+            </button>
+          )}
         </div>
 
         {/* Status Filter */}
