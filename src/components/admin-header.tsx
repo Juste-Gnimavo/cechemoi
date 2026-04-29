@@ -260,7 +260,7 @@ export function AdminHeader() {
           label: 'Dépenses',
           allowedRoles: ['ADMIN', 'MANAGER'],
           items: [
-                      { href: '/admin/expenses/categories', label: 'Catégories' },
+            { href: '/admin/expenses/categories', label: 'Catégories' },
             { href: '/admin/expenses', label: 'Toutes les dépenses' },
             { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
             { href: '/admin/transactions', label: 'Transactions' },
@@ -746,7 +746,7 @@ export function AdminHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-gray-200 dark:border-dark-800 bg-white dark:bg-dark-900">
+          <nav className="md:hidden pt-4 pb-[calc(6rem+env(safe-area-inset-bottom))] border-t border-gray-200 dark:border-dark-800 bg-white dark:bg-dark-900 max-h-[calc(100vh-80px)] overflow-y-auto">
             <div className="container mx-auto px-4">
               <ul className="space-y-1">
                 {menuItems.map((item, index) => {
