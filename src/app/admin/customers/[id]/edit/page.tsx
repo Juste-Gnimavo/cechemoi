@@ -7,6 +7,26 @@ import { ArrowLeft, Save, Loader2, User, MapPin, Gift, MessageSquare, Image as I
 import { toast } from 'react-hot-toast'
 import { ImageUpload } from '@/components/image-upload'
 import { MeasurementsForm } from '@/components/admin/measurements-form'
+import { CountrySelector } from '@/components/country-selector'
+import { countries, defaultCountry, formatPhoneWithCountry, type Country } from '@/lib/countries'
+
+// Detect country from a stored international phone number (e.g. "+33612345678")
+function splitInternationalPhone(value: string): { country: Country; local: string } {
+  if (!value) return { country: defaultCountry, local: '' }
+  const digits = value.replace(/[^\d+]/g, '')
+  if (!digits.startsWith('+')) {
+    return { country: defaultCountry, local: digits }
+  }
+  // Find longest matching dial code
+  const match = countries
+    .slice()
+    .sort((a, b) => b.dialCode.length - a.dialCode.length)
+    .find(c => digits.startsWith(c.dialCode))
+  if (match) {
+    return { country: match, local: digits.slice(match.dialCode.length) }
+  }
+  return { country: defaultCountry, local: digits.replace(/^\+/, '') }
+}
 
 interface CustomerData {
   id: string
@@ -105,7 +125,9 @@ export default function EditCustomerPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneCountry, setPhoneCountry] = useState<Country>(defaultCountry)
   const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [whatsappCountry, setWhatsappCountry] = useState<Country>(defaultCountry)
   const [image, setImage] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [howDidYouHearAboutUs, setHowDidYouHearAboutUs] = useState('')
@@ -189,8 +211,12 @@ export default function EditCustomerPage() {
         setLastName(nameParts.slice(1).join(' ') || '')
 
         setEmail(customer.email || '')
-        setPhone(customer.phone || '')
-        setWhatsappNumber(customer.whatsappNumber || '')
+        const phoneSplit = splitInternationalPhone(customer.phone || '')
+        setPhone(phoneSplit.local)
+        setPhoneCountry(phoneSplit.country)
+        const whatsappSplit = splitInternationalPhone(customer.whatsappNumber || '')
+        setWhatsappNumber(whatsappSplit.local)
+        setWhatsappCountry(whatsappSplit.country)
         setImage(customer.image || '')
         setDateOfBirth(formatDateToFrench(customer.dateOfBirth))
         setRawSourceFromDB(customer.howDidYouHearAboutUs || '')
@@ -238,9 +264,16 @@ export default function EditCustomerPage() {
       return
     }
 
-    // Validate phone format
-    if (!phone.startsWith('+')) {
-      toast.error('Le numéro de téléphone doit être au format international (ex: +225...)')
+    // Build full international phone numbers from country + local number
+    const fullPhone = phone.startsWith('+') ? phone : formatPhoneWithCountry(phone, phoneCountry.dialCode)
+    const fullWhatsappNumber = whatsappNumber
+      ? (whatsappNumber.startsWith('+') ? whatsappNumber : formatPhoneWithCountry(whatsappNumber, whatsappCountry.dialCode))
+      : ''
+
+    // Basic validation: must have at least one digit after the dial code
+    const phoneDigits = fullPhone.replace(/\D/g, '')
+    if (phoneDigits.length < 8) {
+      toast.error('Numéro de téléphone trop court')
       return
     }
 
@@ -262,8 +295,8 @@ export default function EditCustomerPage() {
         body: JSON.stringify({
           name: fullName,
           email: email || null,
-          phone,
-          whatsappNumber: whatsappNumber || phone,
+          phone: fullPhone,
+          whatsappNumber: fullWhatsappNumber || fullPhone,
           image: image || null,
           dateOfBirth: formatDateToISO(dateOfBirth),
           howDidYouHearAboutUs: (howDidYouHearAboutUs === 'Autre' && customSource.trim() ? customSource.trim() : howDidYouHearAboutUs) || null,
@@ -385,16 +418,19 @@ export default function EditCustomerPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 Téléphone <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+225XXXXXXXXXX"
-              />
+              <div className="flex gap-2">
+                <CountrySelector value={phoneCountry} onChange={setPhoneCountry} />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="XX XX XX XX XX"
+                />
+              </div>
               <p className="text-xs text-gray-500 mt-1">
-                Format international avec indicatif pays
+                Sélectionnez le pays puis saisissez le numéro local (sans indicatif)
               </p>
             </div>
 
@@ -402,13 +438,16 @@ export default function EditCustomerPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 WhatsApp
               </label>
-              <input
-                type="tel"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+225..."
-              />
+              <div className="flex gap-2">
+                <CountrySelector value={whatsappCountry} onChange={setWhatsappCountry} />
+                <input
+                  type="tel"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="XX XX XX XX XX"
+                />
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Si vide, utilise le numéro de téléphone principal
               </p>

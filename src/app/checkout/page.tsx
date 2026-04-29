@@ -472,7 +472,7 @@ export default function CheckoutPage() {
                       required
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="+225 XX XX XX XX XX"
+                      placeholder="+225 XX XX XX XX XX, +33 X XX XX XX XX..."
                       className="w-full bg-gray-100 dark:bg-transparent border border-gray-200 dark:border-dark-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
                     />
                   </div>

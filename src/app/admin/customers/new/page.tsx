@@ -9,6 +9,8 @@ import { GeolocationCapture } from '@/components/geolocation-capture'
 import { ImageUpload } from '@/components/image-upload'
 import { useConfetti } from '@/hooks/useConfetti'
 import { MeasurementsForm } from '@/components/admin/measurements-form'
+import { CountrySelector } from '@/components/country-selector'
+import { defaultCountry, formatPhoneWithCountry, type Country } from '@/lib/countries'
 
 // Helper function for date format conversion (French format DD-MM-YYYY -> ISO YYYY-MM-DD)
 const formatDateToISO = (frenchDate: string | null | undefined): string | null => {
@@ -33,7 +35,9 @@ export default function NewCustomerPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneCountry, setPhoneCountry] = useState<Country>(defaultCountry)
   const [whatsappNumber, setWhatsappNumber] = useState('')
+  const [whatsappCountry, setWhatsappCountry] = useState<Country>(defaultCountry)
   const [image, setImage] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [howDidYouHearAboutUs, setHowDidYouHearAboutUs] = useState('')
@@ -120,9 +124,16 @@ export default function NewCustomerPage() {
       return
     }
 
-    // Validate phone format - must start with + for international format
-    if (!phone.startsWith('+')) {
-      toast.error('Le numéro de téléphone doit être au format international (ex: +225...)')
+    // Build full international phone numbers from country + local number
+    const fullPhone = phone.startsWith('+') ? phone : formatPhoneWithCountry(phone, phoneCountry.dialCode)
+    const fullWhatsappNumber = whatsappNumber
+      ? (whatsappNumber.startsWith('+') ? whatsappNumber : formatPhoneWithCountry(whatsappNumber, whatsappCountry.dialCode))
+      : ''
+
+    // Basic validation: must have at least one digit after the dial code
+    const phoneDigits = fullPhone.replace(/\D/g, '')
+    if (phoneDigits.length < 8) {
+      toast.error('Numéro de téléphone trop court')
       return
     }
 
@@ -152,7 +163,7 @@ export default function NewCustomerPage() {
 
         addressData = {
           fullName: addressFullName || fullName,
-          phone: addressPhone || phone,
+          phone: addressPhone || fullPhone,
           rue: rue || null,
           quartier: quartier || null,
           cite: cite || null,
@@ -175,8 +186,8 @@ export default function NewCustomerPage() {
         body: JSON.stringify({
           name: fullName,
           email: email || null,
-          phone,
-          whatsappNumber: whatsappNumber || phone,
+          phone: fullPhone,
+          whatsappNumber: fullWhatsappNumber || fullPhone,
           image: image || null,
           dateOfBirth: formatDateToISO(dateOfBirth),
           howDidYouHearAboutUs: (howDidYouHearAboutUs === 'Autre' && customSource.trim() ? customSource.trim() : howDidYouHearAboutUs) || null,
@@ -227,7 +238,9 @@ export default function NewCustomerPage() {
     setLastName('')
     setEmail('')
     setPhone('')
+    setPhoneCountry(defaultCountry)
     setWhatsappNumber('')
+    setWhatsappCountry(defaultCountry)
     setImage('')
     setDateOfBirth('')
     setHowDidYouHearAboutUs('')
@@ -330,16 +343,19 @@ export default function NewCustomerPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 Téléphone <span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+225XXXXXXXXXX ou +33XXXXXXXXX"
-              />
+              <div className="flex gap-2">
+                <CountrySelector value={phoneCountry} onChange={setPhoneCountry} />
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="XX XX XX XX XX"
+                />
+              </div>
               <p className="text-xs text-gray-500 mt-1">
-                Format international avec indicatif pays (ex: +225, +33, +1...)
+                Sélectionnez le pays puis saisissez le numéro local (sans indicatif)
               </p>
             </div>
 
@@ -347,13 +363,16 @@ export default function NewCustomerPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                 WhatsApp
               </label>
-              <input
-                type="tel"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="+225... ou +33..."
-              />
+              <div className="flex gap-2">
+                <CountrySelector value={whatsappCountry} onChange={setWhatsappCountry} />
+                <input
+                  type="tel"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  className="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="XX XX XX XX XX"
+                />
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Si vide, utilise le numéro de téléphone principal
               </p>

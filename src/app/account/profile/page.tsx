@@ -439,7 +439,7 @@ export default function ProfilePage() {
                         value={whatsappNumber}
                         onChange={(e) => setWhatsappNumber(e.target.value)}
                         className="w-full bg-gray-100 dark:bg-dark-800/50 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-dark-700 focus:outline-none focus:border-primary-500 transition-all duration-200"
-                        placeholder="+225 XX XX XX XX XX"
+                        placeholder="+225 XX XX XX XX XX, +33 X XX XX XX XX..."
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
