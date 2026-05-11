@@ -32,19 +32,25 @@ export async function GET(req: NextRequest) {
         role: true,
         createdAt: true,
         lastLoginAt: true,
+        isActive: true,
+        deactivatedAt: true,
       },
       orderBy: [
-        { role: 'asc' }, // ADMIN first, then MANAGER, then STAFF
+        { isActive: 'desc' }, // Active members first
+        { role: 'asc' },      // Then ADMIN, MANAGER, STAFF
         { createdAt: 'desc' },
       ],
     })
 
-    // Calculate stats
+    const activeMembers = members.filter((m) => m.isActive)
+
+    // Calculate stats (active counts only, plus a disabled total)
     const stats = {
-      total: members.length,
-      admins: members.filter((m) => m.role === 'ADMIN').length,
-      managers: members.filter((m) => m.role === 'MANAGER').length,
-      staff: members.filter((m) => m.role === 'STAFF').length,
+      total: activeMembers.length,
+      admins: activeMembers.filter((m) => m.role === 'ADMIN').length,
+      managers: activeMembers.filter((m) => m.role === 'MANAGER').length,
+      staff: activeMembers.filter((m) => m.role === 'STAFF').length,
+      disabled: members.length - activeMembers.length,
     }
 
     // Map lastLoginAt to lastLogin for frontend compatibility

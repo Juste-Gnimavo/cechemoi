@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -17,6 +18,10 @@ import {
   Ruler,
   Loader2,
   ExternalLink,
+  Power,
+  PowerOff,
+  CircleSlash,
+  X,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -29,6 +34,11 @@ interface TeamMember {
   createdAt: string
   lastLoginAt: string | null
   image?: string
+  isActive: boolean
+  deactivatedAt: string | null
+  deactivatedById: string | null
+  deactivatedByName: string | null
+  deactivationReason: string | null
 }
 
 interface Stats {
@@ -83,6 +93,7 @@ interface RecentCustomer {
 export default function TeamMemberProfilePage() {
   const params = useParams()
   const router = useRouter()
+  const { data: session } = useSession()
   const memberId = params.id as string
 
   const [loading, setLoading] = useState(true)
@@ -92,6 +103,33 @@ export default function TeamMemberProfilePage() {
   const [recentPayments, setRecentPayments] = useState<RecentPayment[]>([])
   const [recentCustomers, setRecentCustomers] = useState<RecentCustomer[]>([])
   const [period, setPeriod] = useState<'week' | 'month' | 'all'>('all')
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false)
+  const [deactivationReason, setDeactivationReason] = useState('')
+
+  const currentUserRole = (session?.user as any)?.role
+  const currentUserId = (session?.user as any)?.id
+  const canManage = currentUserRole === 'ADMIN' && currentUserId !== memberId
+
+  const toggleStatus = async (nextActive: boolean, reason?: string) => {
+    try {
+      const res = await fetch(`/api/admin/team/${memberId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: nextActive, reason }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(nextActive ? 'Membre réactivé' : 'Membre désactivé')
+        setShowDeactivateModal(false)
+        setDeactivationReason('')
+        fetchActivity()
+      } else {
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (e) {
+      toast.error('Erreur')
+    }
+  }
 
   useEffect(() => {
     fetchActivity()
@@ -199,7 +237,35 @@ export default function TeamMemberProfilePage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className={`p-6 max-w-7xl mx-auto ${!member.isActive ? 'opacity-90' : ''}`}>
+      {/* Deactivation banner */}
+      {!member.isActive && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-900/40 px-4 py-3 flex items-start gap-3">
+          <CircleSlash className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 text-sm">
+            <p className="font-semibold text-red-800 dark:text-red-300">
+              Compte désactivé
+              {member.deactivatedAt && (
+                <span className="font-normal">
+                  {' '}le {new Date(member.deactivatedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              )}
+              {member.deactivatedByName && (
+                <span className="font-normal"> par {member.deactivatedByName}</span>
+              )}
+            </p>
+            {member.deactivationReason && (
+              <p className="text-red-700 dark:text-red-300/80 mt-1">
+                <span className="font-medium">Motif :</span> {member.deactivationReason}
+              </p>
+            )}
+            <p className="text-red-700 dark:text-red-300/80 mt-1 text-xs">
+              L'accès est révoqué mais l'historique (commandes, clients, paiements) reste intact.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -217,13 +283,101 @@ export default function TeamMemberProfilePage() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {member.name || 'Sans nom'}
               </h1>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
-                {getRoleLabel(member.role)}
-              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
+                  {getRoleLabel(member.role)}
+                </span>
+                {member.isActive ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Actif
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                    <CircleSlash className="h-3 w-3" />
+                    Désactivé
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
+        {canManage && (
+          member.isActive ? (
+            <button
+              onClick={() => setShowDeactivateModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
+            >
+              <PowerOff className="h-4 w-4" />
+              Désactiver
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (confirm(`Réactiver ${member.name || 'ce membre'} ?`)) {
+                  toggleStatus(true)
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium"
+            >
+              <Power className="h-4 w-4" />
+              Réactiver
+            </button>
+          )
+        )}
       </div>
+
+      {/* Deactivate modal */}
+      {showDeactivateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10001] p-4">
+          <div className="bg-white dark:bg-dark-900 rounded-lg max-w-md w-full border border-gray-200 dark:border-dark-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <PowerOff className="h-5 w-5 text-red-600" />
+                  Désactiver {member.name || 'ce membre'}
+                </h2>
+                <button
+                  onClick={() => { setShowDeactivateModal(false); setDeactivationReason('') }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                L'accès sera révoqué immédiatement. Les commandes, clients et paiements créés par ce membre restent visibles dans l'historique. La réactivation est possible à tout moment.
+              </p>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Motif (optionnel)
+              </label>
+              <textarea
+                value={deactivationReason}
+                onChange={(e) => setDeactivationReason(e.target.value)}
+                rows={3}
+                placeholder="Ex: Départ, suspension, fin de contrat..."
+                className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-200 dark:border-transparent"
+              />
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowDeactivateModal(false); setDeactivationReason('') }}
+                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleStatus(false, deactivationReason)}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 inline-flex items-center justify-center gap-2"
+                >
+                  <PowerOff className="h-4 w-4" />
+                  Désactiver
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Period Filter */}
       <div className="mb-6">

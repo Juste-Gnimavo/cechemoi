@@ -47,20 +47,26 @@ class EmailService {
       return false
     }
 
+    // Postmark (and most providers) require the From address to be a verified
+    // sender signature on the account. SMTPFROM is that address; SMTPREPLYTO
+    // is just a reply-to hint and may live on an unrelated domain.
+    const fromAddress = (process.env.SMTPFROM || process.env.SMTPREPLYTO || process.env.SMTPUSERNAME || '').trim()
+    const replyTo = process.env.SMTPREPLYTO?.trim() || undefined
+
     try {
       const info = await this.transporter.sendMail({
-        from: `"CÈCHÉMOI" <${process.env.SMTPREPLYTO || process.env.SMTPUSERNAME}>`,
+        from: `"CÈCHÉMOI" <${fromAddress}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,
         html: options.html,
-        replyTo: process.env.SMTPREPLYTO,
+        replyTo,
       })
 
-      console.log('Email sent:', info.messageId)
+      console.log('Email sent:', info.messageId, '-> from:', fromAddress, 'to:', options.to)
       return true
-    } catch (error) {
-      console.error('Failed to send email:', error)
+    } catch (error: any) {
+      console.error('Failed to send email:', error?.message || error, '| code:', error?.code, '| response:', error?.response)
       return false
     }
   }

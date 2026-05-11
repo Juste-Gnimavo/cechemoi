@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UserPlus, Edit, Trash2, Eye, EyeOff, Shield, Mail, Phone, X, Save, ExternalLink } from 'lucide-react'
+import { UserPlus, Edit, Power, PowerOff, Eye, EyeOff, Shield, Mail, Phone, X, Save, ExternalLink, CircleSlash } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -14,6 +14,8 @@ interface TeamMember {
   role: string
   createdAt: Date
   lastLogin: Date | null
+  isActive: boolean
+  deactivatedAt: Date | null
 }
 
 interface TeamStats {
@@ -21,6 +23,7 @@ interface TeamStats {
   admins: number
   managers: number
   staff: number
+  disabled: number
 }
 
 export default function TeamManagementPage() {
@@ -31,6 +34,9 @@ export default function TeamManagementPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [showDisabled, setShowDisabled] = useState(false)
+  const [deactivating, setDeactivating] = useState<TeamMember | null>(null)
+  const [deactivationReason, setDeactivationReason] = useState('')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -143,24 +149,56 @@ export default function TeamManagementPage() {
     }
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Supprimer ${name} de l'équipe ?`)) return
+  const handleReactivate = async (member: TeamMember) => {
+    if (!confirm(`Réactiver ${member.name || 'ce membre'} ?`)) return
 
     try {
-      const response = await fetch(`/api/admin/team/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/admin/team/${member.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: true }),
       })
 
       const data = await response.json()
 
       if (data.success) {
-        toast.success('Membre supprimé')
+        toast.success('Membre réactivé')
         fetchTeamMembers()
       } else {
-        toast.error(data.error || 'Erreur lors de la suppression')
+        toast.error(data.error || 'Erreur lors de la réactivation')
       }
     } catch (error) {
-      toast.error('Erreur lors de la suppression')
+      toast.error('Erreur lors de la réactivation')
+    }
+  }
+
+  const openDeactivateModal = (member: TeamMember) => {
+    setDeactivating(member)
+    setDeactivationReason('')
+  }
+
+  const confirmDeactivate = async () => {
+    if (!deactivating) return
+
+    try {
+      const response = await fetch(`/api/admin/team/${deactivating.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: false, reason: deactivationReason }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success('Membre désactivé')
+        setDeactivating(null)
+        setDeactivationReason('')
+        fetchTeamMembers()
+      } else {
+        toast.error(data.error || 'Erreur lors de la désactivation')
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la désactivation')
     }
   }
 
@@ -217,9 +255,9 @@ export default function TeamManagementPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg shadow p-4 border border-gray-200 dark:border-transparent">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Total Membres</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Membres Actifs</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
           </div>
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg shadow p-4 border border-gray-200 dark:border-transparent">
@@ -234,8 +272,25 @@ export default function TeamManagementPage() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Personnel</p>
             <p className="text-2xl font-bold text-green-600">{stats.staff}</p>
           </div>
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg shadow p-4 border border-gray-200 dark:border-transparent">
+            <p className="text-sm text-gray-500 dark:text-gray-400">Désactivés</p>
+            <p className="text-2xl font-bold text-gray-500">{stats.disabled}</p>
+          </div>
         </div>
       )}
+
+      {/* Filter: show disabled members */}
+      <div className="mb-4 flex items-center justify-end">
+        <label className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showDisabled}
+            onChange={(e) => setShowDisabled(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Afficher les membres désactivés
+        </label>
+      </div>
 
       {/* Team Members Table */}
       {loading ? (
@@ -267,6 +322,9 @@ export default function TeamManagementPage() {
                     Rôle
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Dernière Connexion
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -275,8 +333,8 @@ export default function TeamManagementPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-dark-700">
-                {members.map((member) => (
-                  <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-dark-800/50">
+                {members.filter((m) => showDisabled || m.isActive).map((member) => (
+                  <tr key={member.id} className={`hover:bg-gray-50 dark:hover:bg-dark-800/50 ${!member.isActive ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
@@ -310,6 +368,19 @@ export default function TeamManagementPage() {
                         {getRoleLabel(member.role)}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {member.isActive ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                          Actif
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                          <CircleSlash className="h-3 w-3" />
+                          Désactivé
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {member.lastLogin
                         ? new Date(member.lastLogin).toLocaleDateString('fr-FR')
@@ -333,13 +404,23 @@ export default function TeamManagementPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </button>
-                            <button
-                              onClick={() => handleDelete(member.id, member.name || 'cet utilisateur')}
-                              className="text-red-600 hover:text-red-900"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            {member.isActive ? (
+                              <button
+                                onClick={() => openDeactivateModal(member)}
+                                className="text-red-600 hover:text-red-900"
+                                title="Désactiver"
+                              >
+                                <PowerOff className="h-4 w-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleReactivate(member)}
+                                className="text-emerald-600 hover:text-emerald-900"
+                                title="Réactiver"
+                              >
+                                <Power className="h-4 w-4" />
+                              </button>
+                            )}
                           </>
                         )}
                       </div>
@@ -348,6 +429,66 @@ export default function TeamManagementPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Deactivation Modal */}
+      {deactivating && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10001] p-4">
+          <div className="bg-white dark:bg-dark-900 backdrop-blur-sm rounded-lg max-w-md w-full border border-gray-200 dark:border-dark-700">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <PowerOff className="h-5 w-5 text-red-600" />
+                  Désactiver le membre
+                </h2>
+                <button
+                  onClick={() => { setDeactivating(null); setDeactivationReason('') }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Vous allez désactiver <strong>{deactivating.name || 'ce membre'}</strong>.
+                  Son accès sera révoqué immédiatement, mais ses données (commandes, clients, factures…) restent intactes pour préserver l'historique d'audit. Vous pouvez le réactiver à tout moment.
+                </p>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Motif (optionnel)
+                  </label>
+                  <textarea
+                    value={deactivationReason}
+                    onChange={(e) => setDeactivationReason(e.target.value)}
+                    rows={3}
+                    placeholder="Ex: Départ, suspension, fin de contrat..."
+                    className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 border border-gray-200 dark:border-transparent"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setDeactivating(null); setDeactivationReason('') }}
+                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-dark-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-dark-700"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmDeactivate}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center justify-center gap-2"
+                  >
+                    <PowerOff className="h-4 w-4" />
+                    Désactiver
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
         password: true,
         phone: true,
         role: true,
+        isActive: true,
       },
     })
 
@@ -75,6 +76,17 @@ export async function POST(request: NextRequest) {
           error: 'Email ou mot de passe incorrect',
         },
         { status: 401 }
+      )
+    }
+
+    // Block deactivated accounts before sending 2FA OTP
+    if (!user.isActive) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Compte désactivé. Contactez un administrateur.',
+        },
+        { status: 403 }
       )
     }
 

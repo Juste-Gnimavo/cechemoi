@@ -42,11 +42,25 @@ export async function GET(
         createdAt: true,
         lastLoginAt: true,
         image: true,
+        isActive: true,
+        deactivatedAt: true,
+        deactivatedById: true,
+        deactivationReason: true,
       },
     })
 
     if (!member || !['ADMIN', 'MANAGER', 'STAFF'].includes(member.role)) {
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
+    }
+
+    // Resolve the name of the admin who deactivated this member (if any)
+    let deactivatedByName: string | null = null
+    if (member.deactivatedById) {
+      const deactivator = await prisma.user.findUnique({
+        where: { id: member.deactivatedById },
+        select: { name: true, email: true },
+      })
+      deactivatedByName = deactivator?.name || deactivator?.email || null
     }
 
     // Build date where clause
@@ -177,7 +191,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      member,
+      member: { ...member, deactivatedByName },
       stats: {
         customOrdersCreated,
         customOrdersValue: customOrdersValue._sum.totalCost || 0,

@@ -61,6 +61,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email ou mot de passe incorrect')
         }
 
+        // Block deactivated accounts (checked after password to avoid leaking account existence)
+        if (!user.isActive) {
+          throw new Error('Compte désactivé. Contactez un administrateur.')
+        }
+
         // Check if 2FA is enabled
         if (user.twoFactorEnabled) {
           // Import smsingService dynamically to avoid circular dependency
@@ -238,6 +243,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Utilisateur non trouvé')
         }
 
+        // Block deactivated accounts at 2FA completion as well (safety net)
+        if (!user.isActive) {
+          throw new Error('Compte désactivé. Contactez un administrateur.')
+        }
+
         return {
           id: user.id,
           email: user.email,
@@ -357,12 +367,17 @@ export const authOptions: NextAuthOptions = {
       if (trigger === 'update' && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { id: true, name: true, email: true, role: true, phone: true, image: true }
+          select: { id: true, name: true, email: true, role: true, phone: true, image: true, isActive: true }
         })
         if (dbUser) {
+          // If the account has been deactivated, strip the role so admin guards reject on next page load
+          if (!dbUser.isActive && ['ADMIN', 'MANAGER', 'STAFF'].includes(dbUser.role)) {
+            token.role = null as any
+          } else {
+            token.role = dbUser.role
+          }
           token.name = dbUser.name
           token.email = dbUser.email
-          token.role = dbUser.role
           token.phone = dbUser.phone
           token.picture = dbUser.image
         }

@@ -30,6 +30,10 @@ export async function GET(
         role: true,
         createdAt: true,
         metadata: true,
+        isActive: true,
+        deactivatedAt: true,
+        deactivatedById: true,
+        deactivationReason: true,
       },
     })
 
@@ -150,49 +154,93 @@ export async function PUT(
   }
 }
 
-// DELETE /api/admin/team/[id] - Delete a team member
-export async function DELETE(
+// PATCH /api/admin/team/[id] - Activate or deactivate a team member (soft delete)
+// Hard delete is intentionally removed: deleting a User row breaks FK references
+// from CustomOrder, BlogPost, PushCampaign (required) and nulls historical staff
+// names on invoices/payments/expenses (audit data). Deactivation preserves all
+// references while immediately revoking access.
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
 
-    // Only ADMIN can delete team members
     if (!session || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ error: 'Non autorisé - Admin uniquement' }, { status: 401 })
     }
 
-    // Check if member exists
+    const body = await req.json()
+    const { isActive, reason } = body as { isActive?: boolean; reason?: string }
+
+    if (typeof isActive !== 'boolean') {
+      return NextResponse.json({ error: 'isActive (boolean) requis' }, { status: 400 })
+    }
+
     const member = await prisma.user.findUnique({
       where: { id: params.id },
     })
 
-    if (!member) {
+    if (!member || !['ADMIN', 'MANAGER', 'STAFF'].includes(member.role)) {
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 
-    // Prevent deleting yourself
     if (member.id === (session.user as any).id) {
       return NextResponse.json(
-        { error: 'Vous ne pouvez pas supprimer votre propre compte' },
+        { error: 'Vous ne pouvez pas modifier le statut de votre propre compte' },
         { status: 400 }
       )
     }
 
-    // Delete member
-    await prisma.user.delete({
+    // Deactivating the last active ADMIN would lock everyone out
+    if (!isActive && member.role === 'ADMIN' && member.isActive) {
+      const remainingAdmins = await prisma.user.count({
+        where: { role: 'ADMIN', isActive: true, id: { not: member.id } },
+      })
+      if (remainingAdmins === 0) {
+        return NextResponse.json(
+          { error: 'Au moins un administrateur actif est requis' },
+          { status: 400 }
+        )
+      }
+    }
+
+    const updated = await prisma.user.update({
       where: { id: params.id },
+      data: isActive
+        ? {
+            isActive: true,
+            deactivatedAt: null,
+            deactivatedById: null,
+            deactivationReason: null,
+          }
+        : {
+            isActive: false,
+            deactivatedAt: new Date(),
+            deactivatedById: (session.user as any).id,
+            deactivationReason: reason?.trim() || null,
+          },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        deactivatedAt: true,
+        deactivationReason: true,
+      },
     })
 
     return NextResponse.json({
       success: true,
-      message: 'Membre supprimé avec succès',
+      member: updated,
+      message: isActive ? 'Membre réactivé' : 'Membre désactivé',
     })
   } catch (error) {
-    console.error('Error deleting team member:', error)
+    console.error('Error toggling team member status:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la suppression du membre' },
+      { error: 'Erreur lors de la mise à jour du statut' },
       { status: 500 }
     )
   }

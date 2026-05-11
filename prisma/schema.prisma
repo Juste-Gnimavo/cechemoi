@@ -90,6 +90,12 @@ model User {
   passwordResetToken    String?   @unique
   passwordResetExpires  DateTime?
 
+  // Soft-delete / deactivation (for ADMIN, MANAGER, STAFF only - keeps FK integrity for audit history)
+  isActive            Boolean   @default(true)
+  deactivatedAt       DateTime?
+  deactivatedById     String?
+  deactivationReason  String?
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -133,6 +139,7 @@ model User {
   @@index([createdAt])
   @@index([role])
   @@index([createdByStaffId])
+  @@index([isActive])
 }
 
 model CustomerNote {

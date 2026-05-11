@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
       where: { email: email.toLowerCase(), role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
     })
 
-    // Don't reveal if user exists (security best practice)
-    if (!user || user.role === 'CUSTOMER') {
+    // Don't reveal if user exists (security best practice). Deactivated accounts also fall through silently.
+    if (!user || user.role === 'CUSTOMER' || !user.isActive) {
       // Still return success to prevent user enumeration
       return NextResponse.json({
         success: true,

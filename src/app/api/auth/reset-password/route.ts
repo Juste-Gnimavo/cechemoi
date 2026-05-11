@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
         role: {
           in: ['ADMIN', 'MANAGER', 'STAFF'],
         },
+        isActive: true,
       },
     })
 
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
         role: {
           in: ['ADMIN', 'MANAGER', 'STAFF'],
         },
+        isActive: true,
       },
     })
 
