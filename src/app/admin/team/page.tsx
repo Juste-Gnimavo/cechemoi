@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UserPlus, Edit, Power, PowerOff, Eye, EyeOff, Shield, Mail, Phone, X, Save, ExternalLink, CircleSlash } from 'lucide-react'
+import { UserPlus, Edit, Power, PowerOff, Eye, EyeOff, Shield, Mail, Phone, X, Save, ExternalLink, CircleSlash, Search } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -35,6 +35,7 @@ export default function TeamManagementPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [showDisabled, setShowDisabled] = useState(false)
+  const [search, setSearch] = useState('')
   const [deactivating, setDeactivating] = useState<TeamMember | null>(null)
   const [deactivationReason, setDeactivationReason] = useState('')
 
@@ -230,6 +231,19 @@ export default function TeamManagementPage() {
 
   const currentUserRole = (session?.user as any)?.role
 
+  const visibleMembers = members.filter((m) => {
+    if (!showDisabled && !m.isActive) return false
+    if (!search.trim()) return true
+    const q = search.trim().toLowerCase()
+    return (
+      (m.name || '').toLowerCase().includes(q) ||
+      (m.email || '').toLowerCase().includes(q) ||
+      (m.phone || '').toLowerCase().includes(q) ||
+      getRoleLabel(m.role).toLowerCase().includes(q) ||
+      m.role.toLowerCase().includes(q)
+    )
+  })
+
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
@@ -279,9 +293,29 @@ export default function TeamManagementPage() {
         </div>
       )}
 
-      {/* Filter: show disabled members */}
-      <div className="mb-4 flex items-center justify-end">
-        <label className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+      {/* Search + filter */}
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Effacer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher par nom, email, téléphone, rôle..."
+            className="w-full pl-9 pr-9 py-2 rounded-lg bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <label className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer whitespace-nowrap">
           <input
             type="checkbox"
             checked={showDisabled}
@@ -298,10 +332,16 @@ export default function TeamManagementPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-gray-500 dark:text-gray-400 mt-4">Chargement...</p>
         </div>
-      ) : members.length === 0 ? (
+      ) : visibleMembers.length === 0 ? (
         <div className="text-center py-12 bg-white/80 dark:bg-dark-900/50 rounded-lg shadow border border-gray-200 dark:border-transparent">
           <UserPlus className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Aucun membre de l'équipe</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            {members.length === 0
+              ? "Aucun membre de l'équipe"
+              : search.trim()
+                ? `Aucun résultat pour « ${search} »`
+                : 'Aucun membre à afficher'}
+          </p>
         </div>
       ) : (
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg shadow overflow-hidden border border-gray-200 dark:border-transparent">
@@ -333,7 +373,7 @@ export default function TeamManagementPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-dark-700">
-                {members.filter((m) => showDisabled || m.isActive).map((member) => (
+                {visibleMembers.map((member) => (
                   <tr key={member.id} className={`hover:bg-gray-50 dark:hover:bg-dark-800/50 ${!member.isActive ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">

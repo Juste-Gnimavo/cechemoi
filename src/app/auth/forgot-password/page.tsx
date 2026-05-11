@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
           message: 'Si un compte administrateur existe avec cette adresse email, vous recevrez un lien de réinitialisation.',
           secondaryMessage: 'Vérifiez votre boîte de réception et vos spams. Le lien expire dans 1 heure.',
           actionLabel: 'Retour à la connexion',
-          onAction: () => window.location.href = '/auth/login',
+          onAction: () => window.location.href = '/auth/admin',
         })
       } else {
         setModal({
@@ -142,7 +142,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/login" className="text-primary-500 hover:text-primary-400 text-sm font-semibold flex items-center justify-center gap-2">
+            <Link href="/auth/admin" className="text-primary-500 hover:text-primary-400 text-sm font-semibold flex items-center justify-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Retour à la connexion
             </Link>

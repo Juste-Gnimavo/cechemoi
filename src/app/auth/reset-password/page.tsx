@@ -145,7 +145,7 @@ function ResetPasswordForm() {
           autoClose: 3000,
         })
         setTimeout(() => {
-          router.push('/auth/login')
+          router.push('/auth/admin')
         }, 3000)
       } else {
         setModal({
@@ -328,7 +328,7 @@ function ResetPasswordForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth/login" className="text-primary-500 hover:text-primary-400 text-sm font-semibold flex items-center justify-center gap-2">
+            <Link href="/auth/admin" className="text-primary-500 hover:text-primary-400 text-sm font-semibold flex items-center justify-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Retour à la connexion
             </Link>
