@@ -263,9 +263,26 @@ export function AdminHeader() {
             { href: '/admin/expenses/categories', label: 'Catégories' },
             { href: '/admin/expenses', label: 'Toutes les dépenses' },
             { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
+            { href: '/admin/expenses/reports', label: 'Rapports', badge: 'NEW' },
             { href: '/admin/transactions', label: 'Transactions' },
           ],
         },
+      ],
+    },
+
+    // 5b. RAPPORTS - Hub financier comptable (ADMIN, MANAGER)
+    {
+      label: 'Rapports',
+      icon: FileBarChart,
+      allowedRoles: ['ADMIN', 'MANAGER'],
+      items: [
+        { href: '/admin/reports', label: 'Tous les rapports financiers', badge: 'NEW' },
+        { href: '/admin/reports?tab=online-sales', label: 'Ventes boutique en ligne' },
+        { href: '/admin/reports?tab=custom-orders', label: 'Commandes sur mesure' },
+        { href: '/admin/reports?tab=invoices', label: 'Factures' },
+        { href: '/admin/reports?tab=transactions', label: 'Transactions' },
+        { href: '/admin/reports?tab=refunds', label: 'Remboursements' },
+        { href: '/admin/reports?tab=expenses', label: 'Dépenses' },
       ],
     },
 

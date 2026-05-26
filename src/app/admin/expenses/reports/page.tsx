@@ -22,6 +22,7 @@ import {
   Package,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { ExportButtons } from '@/components/admin/ExportButtons'
 
 interface ReportData {
   period: {
@@ -182,6 +183,14 @@ export default function ExpenseReportsPage() {
             </p>
           </div>
         </div>
+        <ExportButtons
+          family="expenses"
+          filters={{
+            period,
+            ...(period === 'custom' && startDate ? { startDate } : {}),
+            ...(period === 'custom' && endDate ? { endDate } : {}),
+          }}
+        />
       </div>
 
       {/* Period Selector */}

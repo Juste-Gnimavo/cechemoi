@@ -1,772 +1,554 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { toast } from 'react-hot-toast'
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   BarChart3,
-  TrendingUp,
-  Users,
-  Package,
-  Download,
   Calendar,
-  Save,
-  Play,
-  Trash2,
-  Plus,
   FileText,
-  Clock,
+  Globe,
+  Loader2,
+  Receipt,
+  RefreshCcw,
+  Scissors,
+  Wallet,
 } from 'lucide-react'
+import { toast } from 'react-hot-toast'
+import { ExportButtons, FinancialFamily } from '@/components/admin/ExportButtons'
 
-interface AnalyticsData {
-  sales?: {
-    totalRevenue: number
-    totalOrders: number
-    averageOrderValue: number
-    totalTax: number
-    totalShipping: number
-    revenueByPeriod: Array<{ date: string; revenue: number }>
-    topProducts: Array<{
-      product: { id: string; name: string; images: string[] }
-      quantity: number
-      revenue: number
-    }>
-  }
-  customers?: {
-    newCustomers: number
-    totalCustomers: number
-    repeatCustomers: number
-    repeatCustomerRate: number
-    averageLTV: number
-    topCustomers: Array<{
-      id: string
-      name: string
-      phone: string
-      email: string
-      totalSpent: number
-      orderCount: number
-    }>
-  }
-  products?: {
-    totalProducts: number
-    topSellingProducts: Array<any>
-    topRevenueProducts: Array<any>
-    lowStockProducts: Array<any>
-    categoryPerformance: Array<any>
-  }
-  inventory?: {
-    totalProducts: number
-    lowStockProducts: number
-    outOfStockProducts: number
-    totalInventoryValue: number
-    stockByCategory: Record<string, any>
+const TABS: {
+  id: FinancialFamily
+  label: string
+  icon: any
+}[] = [
+  { id: 'online-sales', label: 'Ventes en ligne', icon: Globe },
+  { id: 'custom-orders', label: 'Sur mesure', icon: Scissors },
+  { id: 'invoices', label: 'Factures', icon: FileText },
+  { id: 'transactions', label: 'Transactions', icon: BarChart3 },
+  { id: 'refunds', label: 'Remboursements', icon: RefreshCcw },
+  { id: 'expenses', label: 'Dépenses', icon: Wallet },
+]
+
+const PERIODS = [
+  { value: 'today', label: "Aujourd'hui" },
+  { value: 'yesterday', label: 'Hier' },
+  { value: 'week', label: '7 derniers jours' },
+  { value: 'month', label: '30 derniers jours' },
+  { value: 'year', label: '12 derniers mois' },
+  { value: 'custom', label: 'Personnalisé' },
+]
+
+function formatXOF(n: number): string {
+  return `${new Intl.NumberFormat('fr-FR').format(Math.round(n || 0))} F CFA`
+}
+
+function formatDate(s: string | Date | null | undefined): string {
+  if (!s) return '—'
+  const d = typeof s === 'string' ? new Date(s) : s
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('fr-FR')
+}
+
+function formatDateTime(s: string | Date | null | undefined): string {
+  if (!s) return '—'
+  const d = typeof s === 'string' ? new Date(s) : s
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleString('fr-FR')
+}
+
+interface Column {
+  key: string
+  label: string
+  type?: 'string' | 'number' | 'currency' | 'date' | 'datetime'
+  align?: 'left' | 'right' | 'center'
+}
+
+interface ReportPayload {
+  family: FinancialFamily
+  title: string
+  period: { type: string; start: string; end: string; label: string }
+  summary: { title: string; entries: { label: string; value: string }[] }[]
+  columns: Column[]
+  rows: Record<string, any>[]
+  pagination?: { total: number; page: number; pageSize: number }
+}
+
+function renderCell(value: any, type?: Column['type']) {
+  if (value == null || value === '') return '—'
+  switch (type) {
+    case 'currency':
+      return formatXOF(Number(value))
+    case 'date':
+      return formatDate(value)
+    case 'datetime':
+      return formatDateTime(value)
+    case 'number':
+      return new Intl.NumberFormat('fr-FR').format(Number(value))
+    default:
+      return String(value)
   }
 }
 
-export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [dateRange, setDateRange] = useState('month')
+// Sub-filters configuration per family
+function getSubFilters(family: FinancialFamily) {
+  switch (family) {
+    case 'online-sales':
+      return [
+        {
+          key: 'status',
+          label: 'Statut',
+          options: [
+            { value: 'all', label: 'Tous' },
+            { value: 'PENDING', label: 'En attente' },
+            { value: 'PROCESSING', label: 'En traitement' },
+            { value: 'SHIPPED', label: 'Expédiée' },
+            { value: 'DELIVERED', label: 'Livrée' },
+            { value: 'CANCELLED', label: 'Annulée' },
+            { value: 'REFUNDED', label: 'Remboursée' },
+          ],
+        },
+        {
+          key: 'paymentMethod',
+          label: 'Méthode',
+          options: [
+            { value: 'all', label: 'Toutes' },
+            { value: 'PAIEMENTPRO', label: 'PaiementPro' },
+            { value: 'CASH_ON_DELIVERY', label: 'Paiement à la livraison' },
+            { value: 'WAVE', label: 'Wave' },
+            { value: 'ORANGE_MONEY', label: 'Orange Money' },
+            { value: 'MTN_MOBILE_MONEY', label: 'MTN Mobile Money' },
+            { value: 'STRIPE', label: 'Stripe' },
+          ],
+        },
+      ]
+    case 'custom-orders':
+      return [
+        {
+          key: 'status',
+          label: 'Statut',
+          options: [
+            { value: 'all', label: 'Tous' },
+            { value: 'PENDING', label: 'En attente' },
+            { value: 'IN_PRODUCTION', label: 'En production' },
+            { value: 'FITTING', label: 'Essayage' },
+            { value: 'ALTERATIONS', label: 'Retouches' },
+            { value: 'READY', label: 'Prêt' },
+            { value: 'DELIVERED', label: 'Livré' },
+            { value: 'CANCELLED', label: 'Annulé' },
+          ],
+        },
+      ]
+    case 'invoices':
+      return [
+        {
+          key: 'status',
+          label: 'Statut',
+          options: [
+            { value: 'all', label: 'Tous' },
+            { value: 'DRAFT', label: 'Brouillon' },
+            { value: 'SENT', label: 'Envoyée' },
+            { value: 'PARTIAL', label: 'Partiellement payée' },
+            { value: 'PAID', label: 'Payée' },
+            { value: 'OVERDUE', label: 'En retard' },
+            { value: 'CANCELLED', label: 'Annulée' },
+          ],
+        },
+        {
+          key: 'source',
+          label: 'Origine',
+          options: [
+            { value: 'all', label: 'Toutes' },
+            { value: 'online', label: 'Ventes en ligne' },
+            { value: 'custom', label: 'Sur mesure' },
+            { value: 'standalone', label: 'Autonome' },
+          ],
+        },
+      ]
+    case 'transactions':
+      return [
+        {
+          key: 'type',
+          label: 'Source',
+          options: [
+            { value: 'all', label: 'Toutes' },
+            { value: 'online', label: 'Ventes en ligne' },
+            { value: 'custom', label: 'Sur mesure' },
+            { value: 'invoice', label: 'Factures' },
+            { value: 'standalone', label: 'Paiements autonomes' },
+          ],
+        },
+      ]
+    case 'refunds':
+      return [
+        {
+          key: 'status',
+          label: 'Statut',
+          options: [
+            { value: 'all', label: 'Tous' },
+            { value: 'pending', label: 'En attente' },
+            { value: 'processed', label: 'Traité' },
+            { value: 'failed', label: 'Échec' },
+          ],
+        },
+      ]
+    case 'expenses':
+      return [
+        {
+          key: 'paymentMethod',
+          label: 'Méthode',
+          options: [
+            { value: 'all', label: 'Toutes' },
+            { value: 'CASH', label: 'Espèces' },
+            { value: 'BANK_TRANSFER', label: 'Virement' },
+            { value: 'ORANGE_MONEY', label: 'Orange Money' },
+            { value: 'MTN_MOMO', label: 'MTN MoMo' },
+            { value: 'WAVE', label: 'Wave' },
+            { value: 'CHECK', label: 'Chèque' },
+            { value: 'CARD', label: 'Carte' },
+          ],
+        },
+      ]
+    default:
+      return []
+  }
+}
+
+function ReportTab({ family }: { family: FinancialFamily }) {
+  const [period, setPeriod] = useState('month')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [subFilters, setSubFilters] = useState<Record<string, string>>({})
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [data, setData] = useState<ReportPayload | null>(null)
   const [loading, setLoading] = useState(false)
-  const [analytics, setAnalytics] = useState<AnalyticsData>({})
-  const [savedReports, setSavedReports] = useState<any[]>([])
-  const [schedules, setSchedules] = useState<any[]>([])
 
-  // Custom report builder state
-  const [reportName, setReportName] = useState('')
-  const [reportType, setReportType] = useState('sales')
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([])
+  const subFilterConfig = useMemo(() => getSubFilters(family), [family])
 
+  // Init defaults for sub-filters
   useEffect(() => {
-    if (activeTab === 'overview') {
-      fetchAnalytics('overview')
-    } else if (activeTab === 'saved') {
-      fetchSavedReports()
-    } else if (activeTab === 'scheduled') {
-      fetchSchedules()
-    }
-  }, [activeTab, dateRange, startDate, endDate])
+    const defaults: Record<string, string> = {}
+    for (const f of subFilterConfig) defaults[f.key] = 'all'
+    setSubFilters(defaults)
+    setPage(1)
+  }, [family, subFilterConfig])
 
-  const fetchAnalytics = async (type: string) => {
+  const fetchData = useCallback(async () => {
+    if (period === 'custom' && (!startDate || !endDate)) return
     setLoading(true)
     try {
       const params = new URLSearchParams({
-        type,
-        dateRange,
-        ...(dateRange === 'custom' && { startDate, endDate }),
+        period,
+        page: String(page),
+        pageSize: String(pageSize),
       })
-
-      const res = await fetch(`/api/admin/reports/analytics?${params}`)
-      const result = await res.json()
-
-      if (result.success) {
-        setAnalytics(result.data)
-      } else {
-        toast.error(result.error || 'Erreur lors du chargement des analyses')
+      if (period === 'custom') {
+        params.set('startDate', startDate)
+        params.set('endDate', endDate)
       }
-    } catch (error) {
-      console.error('Error fetching analytics:', error)
-      toast.error('Erreur lors du chargement des analyses')
+      for (const [k, v] of Object.entries(subFilters)) {
+        if (v && v !== 'all') params.set(k, v)
+      }
+      const res = await fetch(`/api/admin/reports/financial/${family}?${params.toString()}`)
+      const json = await res.json()
+      if (!res.ok || !json.success) throw new Error(json.error || 'Erreur')
+      setData(json as ReportPayload)
+    } catch (e: any) {
+      toast.error(e?.message || 'Erreur de chargement')
+      setData(null)
     } finally {
       setLoading(false)
     }
-  }
+  }, [family, period, startDate, endDate, subFilters, page, pageSize])
 
-  const fetchSavedReports = async () => {
-    try {
-      const res = await fetch('/api/admin/reports/saved')
-      const result = await res.json()
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
-      if (result.success) {
-        setSavedReports(result.reports)
-      }
-    } catch (error) {
-      console.error('Error fetching saved reports:', error)
+  const exportFilters = useMemo(() => {
+    const f: Record<string, string> = { period }
+    if (period === 'custom') {
+      f.startDate = startDate
+      f.endDate = endDate
     }
-  }
-
-  const fetchSchedules = async () => {
-    try {
-      const res = await fetch('/api/admin/reports/schedules')
-      const result = await res.json()
-
-      if (result.success) {
-        setSchedules(result.schedules)
-      }
-    } catch (error) {
-      console.error('Error fetching schedules:', error)
+    for (const [k, v] of Object.entries(subFilters)) {
+      if (v && v !== 'all') f[k] = v
     }
-  }
+    return f
+  }, [period, startDate, endDate, subFilters])
 
-  const saveReport = async () => {
-    if (!reportName || selectedColumns.length === 0) {
-      toast.error('Nom et colonnes requis')
-      return
+  const totalPages = data?.pagination ? Math.max(1, Math.ceil(data.pagination.total / data.pagination.pageSize)) : 1
+
+  return (
+    <div className="space-y-6">
+      {/* Filters */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex flex-wrap gap-3 items-end justify-between">
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Période</label>
+              <select
+                value={period}
+                onChange={(e) => {
+                  setPeriod(e.target.value)
+                  setPage(1)
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                {PERIODS.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {period === 'custom' && (
+              <>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Du</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Au</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+              </>
+            )}
+            {subFilterConfig.map((sf) => (
+              <div key={sf.key}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">{sf.label}</label>
+                <select
+                  value={subFilters[sf.key] || 'all'}
+                  onChange={(e) => {
+                    setSubFilters({ ...subFilters, [sf.key]: e.target.value })
+                    setPage(1)
+                  }}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+                  {sf.options.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <ExportButtons family={family} filters={exportFilters} />
+        </div>
+        {data && (
+          <div className="mt-3 text-xs text-gray-500 flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            <span>{data.period.label}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Summary */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12 bg-white border border-gray-200 rounded-lg">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+        </div>
+      ) : !data ? (
+        <div className="text-center py-12 bg-white border border-gray-200 rounded-lg text-gray-500">
+          Aucune donnée
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {data.summary.map((group, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-xs font-bold text-red-600 uppercase tracking-wide mb-3">
+                  {group.title}
+                </h3>
+                <div className="space-y-2">
+                  {group.entries.map((e, j) => (
+                    <div key={j} className="flex justify-between items-baseline">
+                      <span className="text-sm text-gray-600">{e.label}</span>
+                      <span className="text-sm font-semibold text-gray-900">{e.value}</span>
+                    </div>
+                  ))}
+                  {group.entries.length === 0 && (
+                    <span className="text-xs text-gray-400">—</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table */}
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-gray-900">
+                Détail ({data.pagination?.total ?? data.rows.length} ligne{(data.pagination?.total ?? data.rows.length) > 1 ? 's' : ''})
+              </h3>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-600">Par page</label>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(parseInt(e.target.value, 10))
+                    setPage(1)
+                  }}
+                  className="px-2 py-1 border border-gray-300 rounded text-xs"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {data.columns.map((c) => (
+                      <th
+                        key={c.key}
+                        className={`px-3 py-2 text-xs font-medium text-gray-700 uppercase tracking-wide ${
+                          c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left'
+                        }`}
+                      >
+                        {c.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {data.rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={data.columns.length} className="px-3 py-8 text-center text-gray-400 italic">
+                        Aucune ligne pour la période et les filtres sélectionnés.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.rows.map((row, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        {data.columns.map((c) => (
+                          <td
+                            key={c.key}
+                            className={`px-3 py-2 whitespace-nowrap ${
+                              c.align === 'right' ? 'text-right tabular-nums' : c.align === 'center' ? 'text-center' : 'text-left'
+                            } ${c.type === 'currency' ? 'font-medium text-gray-900' : 'text-gray-700'}`}
+                          >
+                            {renderCell(row[c.key], c.type)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {data.pagination && totalPages > 1 && (
+              <div className="px-4 py-3 border-t border-gray-200 flex justify-between items-center text-sm">
+                <span className="text-gray-600">
+                  Page {data.pagination.page} / {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page <= 1}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+                  >
+                    Précédent
+                  </button>
+                  <button
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
+                    disabled={page >= totalPages}
+                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function ReportsPageInner() {
+  const router = useRouter()
+  const sp = useSearchParams()
+  const initialTab = (sp.get('tab') as FinancialFamily) || 'online-sales'
+  const [activeTab, setActiveTab] = useState<FinancialFamily>(
+    TABS.some((t) => t.id === initialTab) ? initialTab : 'online-sales'
+  )
+
+  useEffect(() => {
+    const t = sp.get('tab') as FinancialFamily
+    if (t && TABS.some((x) => x.id === t) && t !== activeTab) {
+      setActiveTab(t)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sp])
 
-    try {
-      const res = await fetch('/api/admin/reports/saved', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: reportName,
-          reportType,
-          dateRange,
-          startDate: dateRange === 'custom' ? startDate : null,
-          endDate: dateRange === 'custom' ? endDate : null,
-          columns: selectedColumns,
-        }),
-      })
-
-      const result = await res.json()
-
-      if (result.success) {
-        toast.success('Rapport sauvegardé')
-        setReportName('')
-        setSelectedColumns([])
-        fetchSavedReports()
-      } else {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error('Erreur lors de la sauvegarde')
-    }
-  }
-
-  const deleteReport = async (id: string) => {
-    if (!confirm('Supprimer ce rapport ?')) return
-
-    try {
-      const res = await fetch(`/api/admin/reports/saved/${id}`, {
-        method: 'DELETE',
-      })
-
-      const result = await res.json()
-
-      if (result.success) {
-        toast.success('Rapport supprimé')
-        fetchSavedReports()
-      } else {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error('Erreur lors de la suppression')
-    }
-  }
-
-  const deleteSchedule = async (id: string) => {
-    if (!confirm('Supprimer cette planification ?')) return
-
-    try {
-      const res = await fetch(`/api/admin/reports/schedules/${id}`, {
-        method: 'DELETE',
-      })
-
-      const result = await res.json()
-
-      if (result.success) {
-        toast.success('Planification supprimée')
-        fetchSchedules()
-      } else {
-        toast.error(result.error)
-      }
-    } catch (error) {
-      toast.error('Erreur lors de la suppression')
-    }
-  }
-
-  const exportReport = async (format: string) => {
-    try {
-      const res = await fetch('/api/admin/reports/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportType: activeTab === 'overview' ? 'sales' : reportType,
-          dateRange,
-          startDate,
-          endDate,
-          format,
-        }),
-      })
-
-      if (format === 'csv') {
-        const blob = await res.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `report-${Date.now()}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-        toast.success('Rapport exporté')
-      } else {
-        const result = await res.json()
-        toast.success(result.message || 'Export en cours')
-      }
-    } catch (error) {
-      toast.error('Erreur lors de l\'exportation')
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('fr-FR', { minimumFractionDigits: 0 })} CFA`
+  const changeTab = (id: FinancialFamily) => {
+    setActiveTab(id)
+    const params = new URLSearchParams(sp.toString())
+    params.set('tab', id)
+    router.replace(`/admin/reports?${params.toString()}`)
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">Rapports & Analyses</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Analyses avancées et rapports personnalisés</p>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => exportReport('csv')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-gray-900 dark:text-white rounded-lg hover:bg-blue-700"
-          >
-            <Download className="h-4 w-4" />
-            Exporter CSV
-          </button>
-          <button
-            onClick={() => exportReport('pdf')}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-600"
-          >
-            <FileText className="h-4 w-4" />
-            Exporter PDF
-          </button>
-        </div>
+    <div className="p-6 max-w-screen-2xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Rapports financiers</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Exports comptables Excel et PDF par période. Chaque onglet correspond à une famille comptable distincte — ne pas mélanger.
+        </p>
       </div>
 
-      {/* Date Range Selector */}
-      <div className="bg-white/80 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-transparent">
-        <div className="flex gap-4 items-center">
-          <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-transparent"
-          >
-            <option value="today">Aujourd'hui</option>
-            <option value="week">7 derniers jours</option>
-            <option value="month">Ce mois</option>
-            <option value="year">Cette année</option>
-            <option value="custom">Personnalisé</option>
-          </select>
-
-          {dateRange === 'custom' && (
-            <>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-transparent"
-              />
-              <span className="text-gray-500 dark:text-gray-400">à</span>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-900 dark:text-white rounded-lg border border-gray-200 dark:border-transparent"
-              />
-            </>
-          )}
-
-          <button
-            onClick={() => fetchAnalytics(activeTab)}
-            className="px-4 py-2 bg-blue-600 text-gray-900 dark:text-white rounded-lg hover:bg-blue-700"
-          >
-            Actualiser
-          </button>
-        </div>
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="flex flex-wrap gap-1 -mb-px">
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            const active = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => changeTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  active
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            )
+          })}
+        </nav>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <div className="flex gap-6">
-          {[
-            { id: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
-            { id: 'custom', label: 'Rapport personnalisé', icon: Plus },
-            { id: 'saved', label: 'Rapports sauvegardés', icon: Save },
-            { id: 'scheduled', label: 'Rapports planifiés', icon: Clock },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-500'
-                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Overview Tab */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {loading ? (
-            <div className="text-center text-gray-500 dark:text-gray-400 py-12">Chargement...</div>
-          ) : (
-            <>
-              {/* Sales Analytics */}
-              {analytics.sales && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Analyses des Ventes
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Revenu Total</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {formatCurrency(analytics.sales.totalRevenue)}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Commandes</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {analytics.sales.totalOrders}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Valeur Moyenne</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {formatCurrency(analytics.sales.averageOrderValue)}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Taxes Collectées</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {formatCurrency(analytics.sales.totalTax)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Top Products */}
-                  <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-4">
-                      Top 10 Produits
-                    </h3>
-                    <div className="space-y-3">
-                      {analytics.sales.topProducts.slice(0, 10).map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="text-gray-500 dark:text-gray-400 font-mono">#{idx + 1}</div>
-                            {item.product.images?.[0] && (
-                              <img
-                                src={item.product.images[0]}
-                                alt={item.product.name}
-                                className="w-10 h-10 rounded object-cover"
-                              />
-                            )}
-                            <div>
-                              <div className="text-gray-900 dark:text-gray-900 dark:text-white font-medium">
-                                {item.product.name}
-                              </div>
-                              <div className="text-gray-500 dark:text-gray-400 text-sm">
-                                {item.quantity} vendus
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-green-500 font-semibold">
-                            {formatCurrency(item.revenue)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Customer Analytics */}
-              {analytics.customers && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Analyses des Clients
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Nouveaux Clients</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {analytics.customers.newCustomers}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Total Clients</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {analytics.customers.totalCustomers}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">Taux de Fidélité</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {analytics.customers.repeatCustomerRate.toFixed(1)}%
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <div className="text-gray-500 dark:text-gray-500 dark:text-gray-400 text-sm mb-2">LTV Moyenne</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-gray-900 dark:text-white">
-                        {formatCurrency(analytics.customers.averageLTV)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Top Customers */}
-                  <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-4">
-                      Top 10 Clients
-                    </h3>
-                    <div className="space-y-3">
-                      {analytics.customers.topCustomers.slice(0, 10).map((customer, idx) => (
-                        <div
-                          key={customer.id}
-                          className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="text-gray-500 dark:text-gray-400 font-mono">#{idx + 1}</div>
-                            <div>
-                              <div className="text-gray-900 dark:text-gray-900 dark:text-white font-medium">{customer.name}</div>
-                              <div className="text-gray-500 dark:text-gray-400 text-sm">
-                                {customer.orderCount} commandes
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-green-500 font-semibold">
-                            {formatCurrency(customer.totalSpent)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Product Performance */}
-              {analytics.products && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white flex items-center gap-2">
-                    <Package className="h-5 w-5" />
-                    Performance des Produits
-                  </h2>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Top Selling */}
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-4">
-                        Plus Vendus
-                      </h3>
-                      <div className="space-y-2">
-                        {analytics.products.topSellingProducts.slice(0, 5).map((product) => (
-                          <div
-                            key={product.id}
-                            className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded"
-                          >
-                            <span className="text-gray-900 dark:text-white">{product.name}</span>
-                            <span className="text-blue-500 font-semibold">
-                              {product.totalSold} vendus
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Low Stock */}
-                    <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-4">
-                        Stock Faible
-                      </h3>
-                      <div className="space-y-2">
-                        {analytics.products.lowStockProducts.slice(0, 5).map((product) => (
-                          <div
-                            key={product.id}
-                            className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded"
-                          >
-                            <span className="text-gray-900 dark:text-white">{product.name}</span>
-                            <span className="text-red-500 font-semibold">
-                              {product.stock} restants
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Custom Report Builder Tab */}
-      {activeTab === 'custom' && (
-        <div className="space-y-6">
-          <div className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-4">
-              Créer un Rapport Personnalisé
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-400 mb-2">Nom du rapport</label>
-                <input
-                  type="text"
-                  value={reportName}
-                  onChange={(e) => setReportName(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 text-gray-900 dark:text-white rounded-lg"
-                  placeholder="Mon rapport personnalisé"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 dark:text-gray-400 mb-2">Type de rapport</label>
-                <select
-                  value={reportType}
-                  onChange={(e) => setReportType(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-700 text-gray-900 dark:text-white rounded-lg"
-                >
-                  <option value="sales">Ventes</option>
-                  <option value="customers">Clients</option>
-                  <option value="products">Produits</option>
-                  <option value="inventory">Inventaire</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-700 dark:text-gray-400 mb-2">Colonnes à inclure</label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {reportType === 'sales' &&
-                    ['orderId', 'date', 'customer', 'total', 'status'].map((col) => (
-                      <label key={col} className="flex items-center gap-2 text-gray-900 dark:text-white">
-                        <input
-                          type="checkbox"
-                          checked={selectedColumns.includes(col)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedColumns([...selectedColumns, col])
-                            } else {
-                              setSelectedColumns(selectedColumns.filter((c) => c !== col))
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        {col}
-                      </label>
-                    ))}
-
-                  {reportType === 'products' &&
-                    ['name', 'sku', 'category', 'price', 'stock', 'totalSold'].map(
-                      (col) => (
-                        <label key={col} className="flex items-center gap-2 text-gray-900 dark:text-white">
-                          <input
-                            type="checkbox"
-                            checked={selectedColumns.includes(col)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedColumns([...selectedColumns, col])
-                              } else {
-                                setSelectedColumns(selectedColumns.filter((c) => c !== col))
-                              }
-                            }}
-                            className="rounded"
-                          />
-                          {col}
-                        </label>
-                      )
-                    )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={saveReport}
-                  className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-gray-900 dark:text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Save className="h-4 w-4" />
-                  Sauvegarder
-                </button>
-                <button
-                  onClick={() => fetchAnalytics(reportType)}
-                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-gray-900 dark:text-white rounded-lg hover:bg-green-700"
-                >
-                  <Play className="h-4 w-4" />
-                  Exécuter
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Saved Reports Tab */}
-      {activeTab === 'saved' && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white">Rapports Sauvegardés</h2>
-
-          {savedReports.length === 0 ? (
-            <div className="bg-white/80 dark:bg-gray-800 p-12 rounded-lg text-center text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-transparent">
-              Aucun rapport sauvegardé
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {savedReports.map((report) => (
-                <div key={report.id} className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="text-gray-900 dark:text-white font-semibold">{report.name}</h3>
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">{report.reportType}</p>
-                    </div>
-                    <button
-                      onClick={() => deleteReport(report.id)}
-                      className="text-red-500 hover:text-red-400"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <div className="text-gray-500 dark:text-gray-400 text-sm mb-3">
-                    {report.description || 'Aucune description'}
-                  </div>
-
-                  <div className="text-gray-500 text-xs">
-                    Période: {report.dateRange}
-                  </div>
-                  <div className="text-gray-500 text-xs">
-                    Colonnes: {report.columns.join(', ')}
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-gray-700 flex gap-2">
-                    <button
-                      onClick={() => {
-                        setReportName(report.name)
-                        setReportType(report.reportType)
-                        setSelectedColumns(report.columns)
-                        setActiveTab('custom')
-                      }}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-gray-900 dark:text-white rounded hover:bg-blue-700 text-sm"
-                    >
-                      Exécuter
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Scheduled Reports Tab */}
-      {activeTab === 'scheduled' && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white">Rapports Planifiés</h2>
-
-          {schedules.length === 0 ? (
-            <div className="bg-white/80 dark:bg-gray-800 p-12 rounded-lg text-center text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-transparent">
-              Aucun rapport planifié
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {schedules.map((schedule) => (
-                <div
-                  key={schedule.id}
-                  className="bg-white/80 dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-transparent flex items-center justify-between"
-                >
-                  <div className="flex-1">
-                    <h3 className="text-gray-900 dark:text-white font-semibold">
-                      {schedule.report.name}
-                    </h3>
-                    <div className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                      Fréquence: {schedule.frequency} à {schedule.time}
-                    </div>
-                    <div className="text-gray-500 text-xs mt-1">
-                      Destinataires: {schedule.recipients.join(', ')}
-                    </div>
-                    <div className="text-gray-500 text-xs">
-                      Format: {schedule.format.toUpperCase()}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`px-3 py-1 rounded text-sm ${
-                        schedule.enabled
-                          ? 'bg-green-600 text-gray-900 dark:text-white'
-                          : 'bg-gray-600 text-gray-300'
-                      }`}
-                    >
-                      {schedule.enabled ? 'Actif' : 'Inactif'}
-                    </div>
-                    <button
-                      onClick={() => deleteSchedule(schedule.id)}
-                      className="text-red-500 hover:text-red-400"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <ReportTab family={activeTab} />
     </div>
+  )
+}
+
+export default function ReportsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    }>
+      <ReportsPageInner />
+    </Suspense>
   )
 }
