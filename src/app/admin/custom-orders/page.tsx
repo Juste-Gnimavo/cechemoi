@@ -118,6 +118,12 @@ export default function CustomOrdersPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [stats, setStats] = useState<Record<string, number>>({})
+  const [paymentStats, setPaymentStats] = useState<{
+    today: { count: number; total: number }
+    last30: { count: number; total: number }
+    year: { count: number; total: number; label: number }
+    all: { count: number; total: number }
+  } | null>(null)
 
   // Filters
   const [search, setSearch] = useState('')
@@ -128,7 +134,18 @@ export default function CustomOrdersPage() {
 
   useEffect(() => {
     fetchOrders()
+    fetchPaymentStats()
   }, [page, statusFilter, priorityFilter])
+
+  const fetchPaymentStats = async () => {
+    try {
+      const res = await fetch('/api/admin/custom-orders/stats')
+      const data = await res.json()
+      if (data.success) setPaymentStats(data.stats)
+    } catch (e) {
+      console.error('Error fetching custom-orders payment stats:', e)
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -255,6 +272,32 @@ export default function CustomOrdersPage() {
           </Link>
         </div>
       </div>
+
+      {/* Encaissements sur-mesure — Aujourd'hui / 30j / Année / Total */}
+      {paymentStats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Aujourd&apos;hui</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.today.total)}</p>
+            <p className="text-xs text-gray-400 mt-1">{paymentStats.today.count} paiement(s)</p>
+          </div>
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
+            <p className="text-xs text-gray-500 dark:text-gray-400">30 derniers jours</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.last30.total)}</p>
+            <p className="text-xs text-gray-400 mt-1">{paymentStats.last30.count} paiement(s)</p>
+          </div>
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Année {paymentStats.year.label}</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.year.total)}</p>
+            <p className="text-xs text-gray-400 mt-1">{paymentStats.year.count} paiement(s)</p>
+          </div>
+          <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
+            <p className="text-xs text-gray-500 dark:text-gray-400">Toute la période</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.all.total)}</p>
+            <p className="text-xs text-gray-400 mt-1">{paymentStats.all.count} paiement(s)</p>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">

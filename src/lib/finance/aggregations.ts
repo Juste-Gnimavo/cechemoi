@@ -203,12 +203,20 @@ export interface BilledBySource {
 
 export interface Billed {
   total: number          // Total facturé TTC
-  paid: number           // Total encaissé sur ces factures (somme amountPaid)
+  paid: number           // Total encaissé — voir note ci-dessous
   outstanding: number    // Reste dû
   count: number
   byStatus: BilledByStatus[]
   bySource: BilledBySource
 }
+
+// Note sur `paid` : on traite `status=PAID` comme source de vérité (=
+// totalement encaissé). Sommer brutalement `amountPaid` faisait apparaître
+// des incohérences en prod — par exemple "Payée (96) 16 006 000" vs "Total
+// encaissé 14 360 000" : certaines factures héritées étaient marquées PAID
+// sans amountPaid synchronisé. Conséquence : on calcule
+//   paid = sum(total | status=PAID) + sum(amountPaid | status NOT IN PAID)
+// Ça rend "Payée (X)" et "Total encaissé" cohérents par construction.
 
 const BILLED_EXCLUDED_STATUSES = ['DRAFT', 'CANCELLED', 'REFUNDED'] as const
 
@@ -235,7 +243,7 @@ export async function computeBilled({ start, end, source }: BilledOptions): Prom
     prisma.invoice.groupBy({
       by: ['status'],
       where,
-      _sum: { total: true },
+      _sum: { total: true, amountPaid: true },
       _count: true,
     }),
     // Ventilation par origine — toujours calculée même si un filtre source est
@@ -265,12 +273,17 @@ export async function computeBilled({ start, end, source }: BilledOptions): Prom
   }
 
   const total = agg._sum.total || 0
-  const paid = agg._sum.amountPaid || 0
+  // Calcule l'encaissé en traitant PAID comme totalement encaissé (voir note
+  // sur Billed.paid). Les autres statuts utilisent leur amountPaid.
+  const paid = byStatusGroup.reduce((acc, g) => {
+    if (g.status === 'PAID') return acc + (g._sum.total || 0)
+    return acc + (g._sum.amountPaid || 0)
+  }, 0)
 
   return {
     total,
     paid,
-    outstanding: total - paid,
+    outstanding: Math.max(0, total - paid),
     count: agg._count,
     byStatus: byStatusGroup.map((g) => ({
       status: g.status,

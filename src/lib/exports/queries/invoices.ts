@@ -66,10 +66,18 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
     prisma.invoice.groupBy({
       by: ['status'],
       where,
-      _sum: { total: true },
+      _sum: { total: true, amountPaid: true },
       _count: true,
     }),
   ])
+
+  // Encaissé : PAID compté comme totalement encaissé (source de vérité = status,
+  // pas amountPaid, à cause des dérives historiques). Voir Billed.paid.
+  const totalEncaisse = byStatus.reduce((acc, g) => {
+    if (g.status === 'PAID') return acc + (g._sum.total || 0)
+    return acc + (g._sum.amountPaid || 0)
+  }, 0)
+  const totalFacture = agg._sum.total || 0
 
   // Ventilation par origine
   const allForSource = await prisma.invoice.findMany({
@@ -114,11 +122,9 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
         title: 'Totaux',
         entries: [
           { label: 'Nombre de factures', value: String(total) },
-          { label: 'Total facturé TTC', value: formatXOF(agg._sum.total || 0) },
-          { label: 'Sous-total HT', value: formatXOF(agg._sum.subtotal || 0) },
-          { label: 'TVA', value: formatXOF(agg._sum.tax || 0) },
-          { label: 'Total encaissé', value: formatXOF(agg._sum.amountPaid || 0) },
-          { label: 'Reste dû', value: formatXOF((agg._sum.total || 0) - (agg._sum.amountPaid || 0)) },
+          { label: 'Total facturé TTC', value: formatXOF(totalFacture) },
+          { label: 'Total encaissé', value: formatXOF(totalEncaisse) },
+          { label: 'Reste dû', value: formatXOF(Math.max(0, totalFacture - totalEncaisse)) },
         ],
       },
       {
