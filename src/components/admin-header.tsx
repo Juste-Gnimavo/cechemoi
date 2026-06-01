@@ -5,125 +5,24 @@ import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  Users,
-  Ticket,
-  Truck,
   BarChart3,
   Megaphone,
-  Star,
-  Settings,
   LogOut,
   Menu,
   X,
   Store,
-  UserPlus,
-  Bell,
-  Boxes,
   UserCog,
-  Send,
-  FileText,
-  TrendingUp,
-  FolderTree,
-  Tag,
-  Calculator,
-  FileBarChart,
   ChevronDown,
-  MessageSquare,
-  Eye,
-  Plus,
-  Mail,
-  Newspaper,
-  BadgeInfo,
   Sun,
   Moon,
-  CalendarDays,
-  Scissors,
-  UsersRound,
-  Wallet
+  Search,
 } from 'lucide-react'
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useTheme } from '@/store/theme'
 import { UserRole } from '@prisma/client'
 import { getRoleBadgeLabel } from '@/lib/role-permissions'
-
-// Types for menu structure (3 levels support)
-type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR'
-
-interface SubMenuItem {
-  href: string
-  label: string
-  badge?: string
-  allowedRoles?: AllowedRole[]
-}
-
-interface MenuGroup {
-  label: string
-  items: SubMenuItem[]
-  allowedRoles?: AllowedRole[]
-}
-
-interface MenuItem {
-  href?: string
-  label: string
-  icon: any
-  items?: SubMenuItem[]   // For simple dropdowns (2 levels)
-  groups?: MenuGroup[]    // For grouped dropdowns (3 levels)
-  allowedRoles?: AllowedRole[]
-}
-
-// Filter menu items based on user role
-function filterMenuByRole(items: MenuItem[], role: UserRole): MenuItem[] {
-  if (role === 'ADMIN' || role === 'MANAGER') {
-    return items // Full access
-  }
-
-  return items
-    .filter(item => {
-      // If no allowedRoles specified, assume admin-only
-      if (!item.allowedRoles) return false
-      return item.allowedRoles.includes(role as AllowedRole)
-    })
-    .map(item => {
-      // Filter groups if present
-      if (item.groups) {
-        const filteredGroups = item.groups
-          .filter(group => {
-            if (!group.allowedRoles) return true // If no role specified, include
-            return group.allowedRoles.includes(role as AllowedRole)
-          })
-          .map(group => ({
-            ...group,
-            items: group.items.filter(subItem => {
-              if (!subItem.allowedRoles) return true
-              return subItem.allowedRoles.includes(role as AllowedRole)
-            })
-          }))
-          .filter(group => group.items.length > 0)
-
-        return { ...item, groups: filteredGroups }
-      }
-
-      // Filter items if present
-      if (item.items) {
-        const filteredItems = item.items.filter(subItem => {
-          if (!subItem.allowedRoles) return true
-          return subItem.allowedRoles.includes(role as AllowedRole)
-        })
-        return { ...item, items: filteredItems }
-      }
-
-      return item
-    })
-    .filter(item => {
-      // Remove items with empty groups or items
-      if (item.groups && item.groups.length === 0) return false
-      if (item.items && item.items.length === 0) return false
-      return true
-    })
-}
+import { MENU, filterMenuByRole, type MenuItem, type MenuGroup, type SubMenuItem } from '@/lib/admin-search/registry'
+import { AdminSearch } from '@/components/admin/admin-search'
 
 export function AdminHeader() {
   const { data: session, status } = useSession()
@@ -140,263 +39,24 @@ export function AdminHeader() {
   const userRole = ((session?.user as any)?.role as UserRole) || 'CUSTOMER'
   const isAdminOrManager = userRole === 'ADMIN' || userRole === 'MANAGER'
 
-  // Menu structure with dropdowns - Reorganized into 6 main menus with groups
-  const allMenuItems: MenuItem[] = [
-    // 1. TABLEAU DE BORD - Lien direct (tous les rôles admin)
-    {
-      href: '/admin',
-      label: 'Tableau de bord',
-      icon: LayoutDashboard,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
-    },
+  // Cmd+K admin search palette
+  const [searchOpen, setSearchOpen] = useState(false)
+  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const closeSearch = useCallback(() => setSearchOpen(false), [])
 
-    // 2. CLIENTS - Gestion + Contact (ADMIN, MANAGER, STAFF)
-    {
-      label: 'Clients',
-      icon: Users,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-      groups: [
-        {
-          label: 'Gestion des clients',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/customers', label: 'Voir/Chercher des clients' },
-            { href: '/admin/customers/new', label: 'Ajouter un nouveau client', badge: 'NEW' },
-            { href: '/admin/customers/import', label: 'Importer / Exporter' },
-            { href: '/admin/customers/sources', label: 'Sources d\'acquisition', allowedRoles: ['ADMIN'] },
-          ],
-        },
-        {
-          label: 'Contacter les clients',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/customers/send-sms', label: 'Envoyez un SMS à un client' },
-            { href: '/admin/customers/send-whatsapp', label: 'Envoyez un message WhatsApp' },
-          ],
-        },
-      ],
-    },
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
-    // 3. RENDEZ-VOUS - Standalone menu (ADMIN et MANAGER uniquement)
-    {
-      label: 'Rendez-vous',
-      icon: CalendarDays,
-      allowedRoles: ['ADMIN', 'MANAGER'],
-      items: [
-        { href: '/admin/appointments', label: 'Tableau de bord' },
-        { href: '/admin/appointments/list', label: 'Tous les rendez-vous' },
-        { href: '/admin/appointments?status=pending', label: 'En attente', badge: 'NEW' },
-        { href: '/admin/appointments?status=confirmed', label: 'Confirmés' },
-        { href: '/admin/appointments?status=completed', label: 'Terminés' },
-        { href: '/admin/appointments/availability', label: 'Définir disponibilités', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
-        { href: '/admin/appointments/services', label: 'Types de consultation', allowedRoles: ['ADMIN', 'MANAGER'] },
-      ],
-    },
-
-    // 4. SUR-MESURE - Commandes personnalisées, production et stock atelier
-    {
-      label: 'Sur-Mesure',
-      icon: Scissors,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
-      groups: [
-        {
-          label: 'Commandes',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
-          items: [
-            { href: '/admin/custom-orders', label: 'Toutes les commandes' },
-            { href: '/admin/custom-orders/new', label: 'Nouvelle commande', badge: 'NEW', allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'] },
-            { href: '/admin/custom-orders/audit', label: 'Audit & Statistiques', allowedRoles: ['ADMIN'] },
-            { href: '/admin/production', label: 'Suivi Production' },
-          { href: '/admin/custom-orders/fiche-suivi-confection', label: 'Fiche de Suivi Confection' },
-
-          ],
-        },
-        {
-          label: 'Stock Atelier',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/materials', label: 'Matériels' },
-            { href: '/admin/materials/out', label: 'Enregistrer sortie', badge: 'NEW' },
-            { href: '/admin/materials/in', label: 'Enregistrer entrée' },
-            { href: '/admin/materials/movements', label: 'Historique' },
-            { href: '/admin/materials/reports', label: 'Rapports' },
-            { href: '/admin/materials/categories', label: 'Catégories' },
-          ],
-        },
-      ],
-    },
-
-    // 5. CAISSE - Factures + Reçus + Ventes + Dépenses (ADMIN, MANAGER, STAFF)
-    {
-      label: 'Caisse',
-      icon: TrendingUp,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-      groups: [
-        {
-          label: 'Factures',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/invoices', label: 'Toutes les factures' },
-            { href: '/admin/invoices/new', label: 'Créer une facture', badge: 'NEW' },
-            { href: '/admin/invoices/standalone-payments', label: 'Paiements autonomes', badge: 'NEW' },
-          ],
-        },
-        {
-          label: 'Reçus',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/receipts', label: 'Tous les reçus' },
-            { href: '/admin/receipts?today=true', label: "Reçus d'aujourd'hui" },
-          ],
-        },
-        {
-          label: 'Ventes',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/sales', label: 'Toutes les ventes', badge: 'NEW' },
-          ],
-        },
-        {
-          label: 'Dépenses',
-          allowedRoles: ['ADMIN', 'MANAGER'],
-          items: [
-            { href: '/admin/expenses/categories', label: 'Catégories' },
-            { href: '/admin/expenses', label: 'Toutes les dépenses' },
-            { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
-            { href: '/admin/expenses/reports', label: 'Rapports', badge: 'NEW' },
-            { href: '/admin/transactions', label: 'Transactions' },
-          ],
-        },
-      ],
-    },
-
-    // 5b. RAPPORTS - Hub financier comptable (ADMIN, MANAGER)
-    {
-      label: 'Rapports',
-      icon: FileBarChart,
-      allowedRoles: ['ADMIN', 'MANAGER'],
-      items: [
-        { href: '/admin/reports', label: 'Tous les rapports financiers', badge: 'NEW' },
-        { href: '/admin/reports?tab=online-sales', label: 'Ventes boutique en ligne' },
-        { href: '/admin/reports?tab=custom-orders', label: 'Commandes sur mesure' },
-        { href: '/admin/reports?tab=invoices', label: 'Factures' },
-        { href: '/admin/reports?tab=transactions', label: 'Transactions' },
-        { href: '/admin/reports?tab=refunds', label: 'Remboursements' },
-        { href: '/admin/reports?tab=expenses', label: 'Dépenses' },
-      ],
-    },
-
-    // 6. BOUTIQUE - Commandes + Catalogue + Stock + Médias
-    {
-      label: 'Boutique',
-      icon: Package,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-      groups: [
-        {
-          label: 'Commandes',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/orders', label: 'Voir toutes les commandes' },
-            { href: '/admin/orders?status=pending', label: 'Commandes en attente' },
-            { href: '/admin/orders?status=active', label: 'Commandes actives' },
-            { href: '/admin/orders?status=cancelled', label: 'Commandes annulées' },
-            { href: '/admin/orders/new', label: 'Créer une commande', badge: 'NEW' },
-          ],
-        },
-        {
-          label: 'Produits',
-          allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-          items: [
-            { href: '/admin/products', label: 'Tous les produits' },
-            { href: '/admin/products/new', label: 'Ajouter un produit' },
-            { href: '/admin/categories', label: 'Gestion des catégories' },
-            { href: '/admin/categories/new', label: 'Ajouter une catégorie' },
-            { href: '/admin/tags', label: 'Gestion des étiquettes' },
-          ],
-        },
-        {
-          label: 'Stock et Prix',
-          allowedRoles: ['ADMIN', 'MANAGER'],
-          items: [
-            { href: '/admin/inventory', label: 'Gestion du stock' },
-            { href: '/admin/coupons', label: 'Codes promo' },
-          ],
-        },
-        {
-          label: 'Médias',
-          allowedRoles: ['ADMIN', 'MANAGER'],
-          items: [
-            { href: '/admin/media', label: 'Galerie d\'images' },
-          ],
-        },
-      ],
-    },
-
-    // 7. COMMUNICATION - Campagnes + Notifications + Blog
-    {
-      label: 'Communication',
-      icon: Send,
-      allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
-      groups: [
-        {
-          label: 'Campagnes',
-          items: [
-            { href: '/admin/campaigns', label: 'Tableau de bord' },
-            { href: '/admin/campaigns/sms', label: 'SMS' },
-            { href: '/admin/campaigns/whatsapp', label: 'WhatsApp Business' },
-            { href: '/admin/campaigns/whatsapp-cloud', label: 'WhatsApp Cloud' },
-            { href: '/admin/campaigns/push', label: 'Notifications Push', badge: 'NEW' },
-            { href: '/admin/campaigns/reports', label: 'Rapports' },
-          ],
-        },
-        {
-          label: 'Notifications',
-          items: [
-            { href: '/admin/notifications', label: 'Tableau de bord' },
-            { href: '/admin/notifications/logs', label: 'Logs' },
-            { href: '/admin/notifications/templates', label: 'Modèles de message' },
-            { href: '/admin/notifications/follow-up', label: 'Messages de relance' },
-            { href: '/admin/notifications/birthdays', label: 'Anniversaires', badge: 'NEW' },
-            { href: '/admin/notifications/settings', label: 'Paramètres' },
-          ],
-        },
-        {
-          label: 'Blog',
-          items: [
-            { href: '/admin/blog', label: 'Tableau de bord' },
-            { href: '/admin/blog/posts', label: 'Tous les articles' },
-            { href: '/admin/blog/posts/new', label: 'Nouvel article', badge: 'NEW' },
-            { href: '/admin/blog/categories', label: 'Catégories' },
-            { href: '/admin/blog/tags', label: 'Étiquettes' },
-          ],
-        },
-      ],
-    },
-
-    // 8. ÉQUIPE - Gestion du personnel (ADMIN, MANAGER seulement)
-    {
-      label: 'Équipe',
-      icon: UsersRound,
-      allowedRoles: ['ADMIN', 'MANAGER'],
-      items: [
-        { href: '/admin/team', label: 'Gestion du staff' },
-        { href: '/admin/tailors', label: 'Gestion des couturiers' },
-        { href: '/admin/staff-performance', label: 'Performance équipe' },
-      ],
-    },
-
-    // 9. RÉGLAGES - Paramètres boutique (ADMIN, MANAGER seulement)
-    {
-      label: 'Réglages',
-      icon: Settings,
-      allowedRoles: ['ADMIN', 'MANAGER'],
-      items: [
-        { href: '/admin/settings', label: 'Configuration de la boutique' },
-        { href: '/admin/shipping', label: 'Gestion des livraisons' },
-        { href: '/admin/coupons', label: 'Gestion des coupons' },
-      ],
-    },
-  ]
+  // Menu structure imported from shared registry (source of truth shared with admin-search)
+  const allMenuItems: MenuItem[] = MENU
 
   // Filter menu based on user role
   const menuItems = useMemo(() => {
@@ -559,6 +219,28 @@ export function AdminHeader() {
                     <div className="hidden lg:block w-px h-6 bg-white/30" />
                   </>
                 )}
+
+                {/* Admin Search Trigger (desktop only) */}
+                <button
+                  onClick={openSearch}
+                  className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/90 hover:text-white transition-colors text-sm"
+                  title="Rechercher (⌘K)"
+                  aria-label="Ouvrir la recherche admin"
+                >
+                  <Search className="w-4 h-4" />
+                  <span>Rechercher…</span>
+                  <kbd className="ml-2 px-1.5 py-0.5 text-xs font-mono bg-white/10 border border-white/20 rounded">⌘K</kbd>
+                </button>
+
+                {/* Admin Search Trigger (mobile/tablet — icon only) */}
+                <button
+                  onClick={openSearch}
+                  className="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  title="Rechercher"
+                  aria-label="Ouvrir la recherche admin"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
 
                 {/* Theme Toggle */}
                 <button
@@ -902,6 +584,9 @@ export function AdminHeader() {
           </nav>
         )}
       </div>
+
+      {/* Admin Search Palette (Cmd+K) */}
+      <AdminSearch open={searchOpen} onClose={closeSearch} role={userRole} />
     </header>
   )
 }

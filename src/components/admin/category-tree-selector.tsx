@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Search, ChevronRight, ChevronDown, FolderOpen, Folder } from 'lucide-react'
+import { normalize as normalizeSearch } from '@/lib/admin-search/normalize'
 
 interface Category {
   id: string
@@ -18,13 +19,6 @@ interface CategoryTreeSelectorProps {
   categoryIds: string[]
   setCategoryId: (id: string) => void
   setCategoryIds: (ids: string[]) => void
-}
-
-function normalizeSearch(str: string): string {
-  return str
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
 }
 
 export function CategoryTreeSelector({

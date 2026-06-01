@@ -1,87 +1,64 @@
-# Prochaine session — Moteur de recherche intelligent admin
+# Prochaine session — Recherche admin Phase 2 : données métier
 
-## Pourquoi
+## Contexte
 
-L'admin a maintenant **plus de 60 pages** : Tableau de bord, Clients, Rendez-vous, Sur-Mesure, Caisse (Factures, Reçus, Dépenses, Transactions, Ventes), Rapports (6 onglets), Boutique (Produits, Commandes, Catégories, Coupons, Inventaire, Avis), Communication, Équipe, Réglages (6 sous-onglets), Analytics (3 vues)…
+Session 25 a livré le moteur de recherche admin `⌘K` sur **les pages** : un STAFF qui tape `nouvelle facture` arrive sur `/admin/invoices/new`, un MANAGER qui tape `transactions du mois` arrive sur le bon onglet de rapports. La palette indexe ~100 entrées statiques avec scoring tokenisé, filtrage par rôle, support des accents manquants. Code : `src/lib/admin-search/*` + `src/components/admin/admin-search.tsx`.
 
-Conséquence : **la DG, les Managers et le staff perdent du temps à chercher la bonne page.** Exemple typique : "comment voir les transactions encaissées du mois ?" → il faut savoir que c'est `/admin/reports?tab=transactions` ET sélectionner la période. Pareil pour "ajouter une dépense", "voir les avis clients", "lancer une campagne SMS".
-
-Le CEO veut une **barre de recherche style Google sur l'admin** : on tape une intention en langage naturel, on a une liste de liens cliquables avec titre + description, comme un résultat de recherche.
+La V1 est volontairement hors-données. Or la friction réelle de la DG est souvent **"où est la facture FAC-2026-0142"** ou **"je cherche le client Konan Kouassi"** — pas une page abstraite mais une ligne précise dans la base. C'est le scope Phase 2.
 
 ---
 
 ## Objectif fonctionnel
 
-Une barre de recherche placée en haut de chaque page admin (header ou raccourci clavier `Cmd+K`). Quand l'utilisateur tape :
+Étendre la palette `⌘K` pour qu'elle puisse aussi répondre à :
+- `FAC-2026-0142` → ouvrir `/admin/invoices/<id>`
+- `Konan` → liste des clients matchant (top 5) + bouton "voir tous"
+- `ORD-...` → ouvrir la commande boutique
+- `CMD-SUR-...` ou nom de client suivi de "sur-mesure" → commandes sur-mesure du client
+- Numéro de téléphone (avec ou sans indicatif) → fiche client
 
-- `transactions` → propose `/admin/reports?tab=transactions` ("Voir toutes les transactions encaissées")
-- `comment voir les transactions du mois` → idem, plus éventuellement `/admin/transactions` et `/admin/receipts`
-- `nouvelle facture` → propose `/admin/invoices/new` en premier
-- `dépense électricité` → propose `/admin/expenses/new` puis `/admin/expenses?category=electricite`
-- `pourcentage de réduction` → propose `/admin/coupons/new`
-- `stock matières premières` → propose `/admin/materials` et `/admin/materials/reports`
-
-Chaque résultat : **icône + titre + URL + description courte + rôle requis** (greyed-out si l'utilisateur n'a pas le rôle).
+Deux mondes coexistent dans les résultats : entrées **Pages** (V1) et entrées **Données** (V2). Séparer visuellement par un header de section dans la liste.
 
 ---
 
-## Investigation à mener au démarrage
+## Investigation à mener
 
-1. **Inventaire exhaustif des URLs admin**. Source de vérité primaire : `src/components/admin-header.tsx` (menu déjà structuré avec labels + `allowedRoles`). À compléter en scannant `src/app/admin/**/page.tsx`. Penser aux pages sous-jacentes (ex : `/admin/orders/[id]`) qui ne sont pas dans le menu mais accessibles.
+1. **Quels modèles indexer ?** Au minimum : `Customer`, `Invoice`, `Order` (boutique), `CustomOrder`. À confirmer : `Receipt`, `Expense` (par numéro ou intitulé), `Appointment`. Pas `Material` (trop granulaire). Lister ce que la DG cherche vraiment — j'irai poser la question avant de coder.
+2. **Architecture côté serveur** : endpoint unique `/api/admin/search/data?q=...&types=customer,invoice` qui renvoie un payload typé `{ customers: [...], invoices: [...], orders: [...], customOrders: [...] }`. Limiter à 5 par type, 250ms max de query côté DB.
+3. **Recherche full-text en Postgres** : `pg_trgm` est-il déjà activé sur la base prod ? Sinon, démarrer en `ILIKE %...%` sur les colonnes pertinentes (`name`, `phone`, `invoiceNumber`, `orderNumber`). Migration `pg_trgm` peut venir plus tard si la latence devient un sujet.
+4. **UX dans la modale** :
+   - Quand l'utilisateur tape, on lance EN PARALLÈLE le scoring local (instantané) + un fetch debouncé 200ms vers `/api/admin/search/data`
+   - Affichage progressif : résultats Pages d'abord, puis section "Données" qui apparaît dès que le fetch revient
+   - Indicateur de chargement subtil dans la section Données
+5. **Permissions côté API** : l'endpoint doit re-filtrer par rôle. Un STAFF ne doit pas pouvoir lister les factures réservées ADMIN. Réutiliser `hasPermission` de `src/lib/role-permissions.ts`.
 
-2. **Statut du menu actuel**. Le menu admin est déjà bien organisé hiérarchiquement et porte des `allowedRoles`. Question : on ré-utilise les labels existants (canonique) ou on enrichit avec des tags / synonymes / descriptions ?
+---
 
-3. **Choix d'architecture** :
-   - **(A) Index statique TS** dans le repo (`src/lib/admin-search/index.ts`) — chaque entrée = `{ path, title, description, keywords, icon, allowedRoles, query? }`. Recherche client-side avec `fuse.js` ou similaire. Avantages : zéro infra, instantané, marche offline. Inconvénient : maintenance manuelle quand on ajoute une page.
-   - **(B) Génération automatique** depuis la structure de `src/app/admin/**/page.tsx` + des annotations `export const adminSearchMeta = {...}` dans chaque page. Avantage : pas d'oubli. Inconvénient : convention à imposer + script de build.
-   - **(C) Recherche LLM côté serveur** — endpoint `/api/admin/search?q=...` qui balance la query à un modèle Claude avec la liste des URLs en prompt système. Avantage : compréhension naturelle (synonymes, fautes, paraphrases). Inconvénient : latence (~1s), coût API, dépendance externe.
-   - **(D) Hybride A + C** : fuzzy local en premier (rapide), fallback Claude quand pas de match (~0 résultats). Le meilleur des deux mondes mais plus complexe.
+## Hors scope (à garder pour Phase 3)
 
-   **Recommandation a priori** (à challenger en session) : **(A) avec champ `keywords` synonymes**, suffisamment rapide pour un admin de 60 pages. Si la DG trouve toujours pas, on passe en (D) plus tard.
-
-4. **UX** : modale `Cmd+K` style Linear / Vercel, vs barre inline en header. Le `Cmd+K` est devenu standard et plus puissant (peut hoster d'autres actions comme "créer une facture", "voir mon profil") — recommandé.
-
-5. **Permissions** : afficher les pages auxquelles l'utilisateur connecté n'a pas accès (en greyed-out avec le badge du rôle requis) ou les filtrer entièrement ? Argument pour les afficher : la DG saura qu'il peut demander accès. Argument contre : pollution. À trancher.
-
-6. **Recherche par data** : on commence simple (juste URLs / actions statiques). Phase 2 éventuelle : la barre peut aussi chercher un client, une commande, une facture par numéro. Hors scope de cette session.
+- Historique de recherche, favoris
+- Analytics des queries
+- Recherche dans Materials, Notifications logs, blog posts
+- Autocomplete inline en dehors de la palette
 
 ---
 
 ## Livrables attendus
 
-1. **Plan d'implémentation** validé avant code (utiliser `ExitPlanMode`).
-2. **Index des URLs admin** structuré dans `src/lib/admin-search/index.ts` (ou fichier équivalent) — exhaustif sur le primary menu + Rapports + Réglages + actions fréquentes (`new`, exports, etc.). Format minimum :
-   ```ts
-   {
-     path: '/admin/reports?tab=transactions',
-     title: 'Toutes les transactions encaissées',
-     description: 'Union de tous les paiements reçus, par période',
-     keywords: ['transactions', 'encaissé', 'cash flow', 'paiements reçus', 'trésorerie'],
-     icon: 'TrendingUp',
-     allowedRoles: ['ADMIN', 'MANAGER'],
-     section: 'Rapports',
-   }
-   ```
-3. **Composant `AdminSearch`** (`src/components/admin/admin-search.tsx`) — modale Cmd+K + raccourci clavier + état contrôlé.
-4. **Intégration dans `admin-header.tsx`** ou layout — déclenchable depuis n'importe quelle page admin.
-5. **Tests manuels** sur 10-15 intentions concrètes (voir la liste plus haut dans ce doc), documentés dans le log de session.
-
----
-
-## Hors scope explicite
-
-- Pas de recherche full-text dans les données (clients, factures par numéro, etc.) — Phase 2.
-- Pas d'historique de recherche, pas de favoris — Phase 2.
-- Pas de tracking analytics des requêtes — pourrait venir plus tard pour identifier les pages que la DG cherche le plus souvent et les promouvoir.
-- Pas d'i18n — admin reste FR.
+1. Endpoint `GET /api/admin/search/data` typé + tests
+2. Extension de `admin-search.tsx` : double section (Pages / Données), debounce, loading state, navigation clavier qui traverse les deux blocs
+3. Log de session `SESSIONS-LOGS/26-ADMIN-SEARCH-DATA.md`
+4. `NEXT-STEP.md` mis à jour
 
 ---
 
 ## Pré-requis avant la session
 
-Le CEO doit pousser tous les fix de la session 24 actuellement en local (orphelins custom-order, retrait "En retard 0") **avant** que la prochaine session démarre. Sinon l'inventaire des URLs sera fait sur une base désynchronisée du déploiement prod.
+- Tester en prod la session 25 (10 intentions + 2 rôles), remonter les manques au registre (entrées `EXTRA_ENTRIES` à ajouter dans `src/lib/admin-search/registry.ts`)
+- Décider si on veut activer `pg_trgm` dès la session 26 ou rester sur ILIKE pour V1.5
 
-## État final de la session 24 (référence)
+## État final de la session 25 (référence)
 
-Voir `SESSIONS-LOGS/24-FINANCIAL-FINETUNING-AND-DEDUP-FIXES.md`.
-Push pending : `src/lib/finance/aggregations.ts`, `src/lib/exports/queries/transactions.ts`, `src/lib/exports/queries/invoices.ts`, `src/app/api/admin/custom-orders/stats/route.ts`.
+Voir `SESSIONS-LOGS/25-ADMIN-SEARCH-ENGINE.md`.
+
+Push pending : l'intégralité de `src/lib/admin-search/`, `src/components/admin/admin-search.tsx`, refactor `src/components/admin-header.tsx`, migration `src/components/admin/category-tree-selector.tsx`.
