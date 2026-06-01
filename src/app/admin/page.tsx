@@ -196,6 +196,12 @@ const statusLabels: Record<string, string> = {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [revenueSummary, setRevenueSummary] = useState<{
+    allTime: number
+    year: number
+    last30: number
+    yearLabel: number
+  } | null>(null)
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null)
   const [appointmentStats, setAppointmentStats] = useState<AppointmentStats | null>(null)
@@ -243,6 +249,7 @@ export default function AdminDashboard() {
       // Fetch all data in parallel
       const [
         analyticsRes,
+        revenueSummaryRes,
         ordersRes,
         profileRes,
         appointmentsRes,
@@ -251,6 +258,7 @@ export default function AdminDashboard() {
         customOrdersRes
       ] = await Promise.all([
         fetch('/api/admin/analytics/overview'),
+        fetch('/api/admin/analytics/revenue-summary'),
         fetch('/api/admin/orders?limit=5&sortBy=createdAt&sortOrder=desc'),
         fetch('/api/admin/profile'),
         fetch('/api/admin/appointments?limit=1000'),
@@ -261,6 +269,7 @@ export default function AdminDashboard() {
 
       const [
         analyticsData,
+        revenueSummaryData,
         ordersData,
         profileData,
         appointmentsData,
@@ -269,6 +278,7 @@ export default function AdminDashboard() {
         customOrdersData
       ] = await Promise.all([
         analyticsRes.json(),
+        revenueSummaryRes.json(),
         ordersRes.json(),
         profileRes.json(),
         appointmentsRes.json(),
@@ -279,6 +289,15 @@ export default function AdminDashboard() {
 
       if (analyticsData.success) {
         setStats(analyticsData.analytics)
+      }
+
+      if (revenueSummaryData.success) {
+        setRevenueSummary({
+          allTime: revenueSummaryData.summary.allTime.total,
+          year: revenueSummaryData.summary.year.total,
+          last30: revenueSummaryData.summary.last30.total,
+          yearLabel: revenueSummaryData.summary.year.year,
+        })
       }
 
       if (ordersData.success) {
@@ -464,7 +483,39 @@ export default function AdminDashboard() {
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
-        {/* Revenue net of all paid invoices - Only for STAFF+ */}
+        {/* Encaissements — Total / Année / 30 jours.
+            Trois cards alimentées par /api/admin/analytics/revenue-summary,
+            même règle de dé-duplication que le reste du système financier. */}
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Total</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(revenueSummary?.allTime ?? 0)}
+            </p>
+            <p className="text-xs text-gray-500">depuis le début</p>
+          </div>
+        )}
+
+        {canSeeRevenue && (
+          <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+            </div>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Année</h3>
+            <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+              {formatCurrency(revenueSummary?.year ?? 0)}
+            </p>
+            <p className="text-xs text-gray-500">{revenueSummary?.yearLabel ?? new Date().getFullYear()}</p>
+          </div>
+        )}
+
         {canSeeRevenue && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 hover:border-primary-500/30 transition-all">
             <div className="flex items-center justify-between mb-3">
@@ -478,13 +529,11 @@ export default function AdminDashboard() {
                 {revenueChange.value.toFixed(1)}%
               </div>
             </div>
-            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Encaissements (30j)</h3>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">30 jours</h3>
             <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-              {formatCurrency(stats.revenue.total)}
+              {formatCurrency(revenueSummary?.last30 ?? stats.revenue.total)}
             </p>
-            <p className="text-xs text-gray-500">
-              30 derniers jours
-            </p>
+            <p className="text-xs text-gray-500">30 derniers jours</p>
           </div>
         )}
 
