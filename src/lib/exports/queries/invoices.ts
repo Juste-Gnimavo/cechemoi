@@ -29,7 +29,15 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
   const where: any = {
     issueDate: { gte: start, lte: end },
   }
-  if (filters.status && filters.status !== 'all') where.status = filters.status
+  // Par défaut, on ne considère facturé QUE les factures émises et non annulées.
+  // Une DRAFT n'a juridiquement pas été envoyée, une CANCELLED/REFUNDED ne
+  // représente plus un montant dû. Si le user sélectionne explicitement un
+  // de ces statuts, on respecte son choix (override volontaire pour audit).
+  if (filters.status && filters.status !== 'all') {
+    where.status = filters.status
+  } else {
+    where.status = { notIn: ['DRAFT', 'CANCELLED', 'REFUNDED'] }
+  }
 
   // Filtre par origine
   if (filters.source === 'online') where.orderId = { not: null }

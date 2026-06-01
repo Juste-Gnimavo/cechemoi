@@ -185,7 +185,7 @@ export default function RevenueAnalyticsPage() {
               </div>
             )}
           </div>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Revenu Total</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Encaissements (période)</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
             {formatCurrency(analytics.revenue.total)}
           </p>

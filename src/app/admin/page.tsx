@@ -478,12 +478,12 @@ export default function AdminDashboard() {
                 {revenueChange.value.toFixed(1)}%
               </div>
             </div>
-            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Revenu Net</h3>
+            <h3 className="text-gray-500 dark:text-gray-400 text-xs mb-1">Encaissements (30j)</h3>
             <p className="text-xl font-bold text-gray-900 dark:text-white mb-1">
               {formatCurrency(stats.revenue.total)}
             </p>
             <p className="text-xs text-gray-500">
-              {stats.orders.paid} facture{stats.orders.paid > 1 ? 's' : ''} payée{stats.orders.paid > 1 ? 's' : ''}
+              30 derniers jours
             </p>
           </div>
         )}

@@ -52,11 +52,17 @@ export async function fetchTransactionsReport(filters: ReportFilters): Promise<F
         })
       : Promise.resolve([] as any[])
 
-  // 3. InvoicePayment
+  // 3. InvoicePayment — uniquement sur factures AUTONOMES.
+  // Les paiements de factures liées à un Order sont déjà dans (1) via Payment,
+  // ceux liés à un CustomOrder dans (2) via CustomOrderPayment. Sans ce filtre
+  // on double-compterait le même flux d'argent.
   const invoicePaymentsPromise =
     !wantedType || wantedType === 'invoice'
       ? prisma.invoicePayment.findMany({
-          where: { paidAt: { gte: start, lte: end } },
+          where: {
+            paidAt: { gte: start, lte: end },
+            invoice: { orderId: null, customOrderId: null },
+          },
           include: {
             invoice: { select: { invoiceNumber: true, customerName: true, customerPhone: true } },
           },

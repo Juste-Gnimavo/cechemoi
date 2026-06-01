@@ -420,7 +420,7 @@ export default function TransactionsPage() {
             <FileText className="h-4 w-4" />
             Détail des sources de revenus
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
               <p className="text-xs text-gray-500 dark:text-gray-400">Commandes</p>
               <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromOrders)}</p>
@@ -436,10 +436,6 @@ export default function TransactionsPage() {
             <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
               <p className="text-xs text-gray-500 dark:text-gray-400">Paiements auto.</p>
               <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromStandalonePayments)}</p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Acomptes fact.</p>
-              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(analytics.revenue.fromInvoicePayments)}</p>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
               <p className="text-xs text-gray-500 dark:text-gray-400">RDV</p>

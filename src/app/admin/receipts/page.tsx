@@ -35,8 +35,9 @@ interface ReceiptData {
 
 interface Stats {
   today: { count: number; total: number }
-  week: { count: number; total: number }
   month: { count: number; total: number }
+  year: { count: number; total: number }
+  all: { count: number; total: number }
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -158,7 +159,7 @@ export default function ReceiptsPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -174,11 +175,11 @@ export default function ReceiptsPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Cette semaine</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Ce mois</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(stats.week.total)}
+                  {formatCurrency(stats.month.total)}
                 </p>
-                <p className="text-xs text-gray-400">{stats.week.count} reçu(s)</p>
+                <p className="text-xs text-gray-400">{stats.month.count} reçu(s)</p>
               </div>
               <TrendingUp className="w-8 h-8 text-blue-500" />
             </div>
@@ -186,13 +187,25 @@ export default function ReceiptsPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Ce mois</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Cette année</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(stats.month.total)}
+                  {formatCurrency(stats.year.total)}
                 </p>
-                <p className="text-xs text-gray-400">{stats.month.count} reçu(s)</p>
+                <p className="text-xs text-gray-400">{stats.year.count} reçu(s)</p>
               </div>
               <TrendingUp className="w-8 h-8 text-purple-500" />
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Toute la période</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatCurrency(stats.all.total)}
+                </p>
+                <p className="text-xs text-gray-400">{stats.all.count} reçu(s)</p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-amber-500" />
             </div>
           </div>
         </div>

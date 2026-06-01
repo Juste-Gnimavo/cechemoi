@@ -46,9 +46,28 @@ interface Stats {
     CANCELLED: number
     REFUNDED: number
   }
+  // Période sélectionnée
+  billedTotal: number
+  billedCount: number
+  cashReceipts: number
+  outstanding: number
+  // Back-compat
   totalRevenue: number
   overdueAmount: number
   pendingAmount: number
+}
+
+const PERIOD_OPTIONS: { value: string; label: string }[] = [
+  { value: 'today', label: 'Aujourd\'hui' },
+  { value: 'yesterday', label: 'Hier' },
+  { value: 'week', label: '7 derniers jours' },
+  { value: 'month', label: '30 derniers jours' },
+  { value: 'year', label: '12 derniers mois' },
+  { value: 'custom', label: 'Personnalisée' },
+]
+
+function periodLabel(period: string): string {
+  return PERIOD_OPTIONS.find(p => p.value === period)?.label || '30 derniers jours'
 }
 
 export default function InvoicesPage() {
@@ -57,6 +76,7 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('ALL')
+  const [period, setPeriod] = useState<string>('month')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [page, setPage] = useState(1)
@@ -68,7 +88,7 @@ export default function InvoicesPage() {
   useEffect(() => {
     fetchInvoices()
     fetchStats()
-  }, [statusFilter, page, searchTerm, limit, startDate, endDate])
+  }, [statusFilter, page, searchTerm, limit, period, startDate, endDate])
 
   const fetchInvoices = async () => {
     try {
@@ -108,7 +128,12 @@ export default function InvoicesPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/admin/invoices/stats')
+      const params = new URLSearchParams({ period })
+      if (period === 'custom') {
+        if (startDate) params.set('startDate', startDate)
+        if (endDate) params.set('endDate', endDate)
+      }
+      const res = await fetch(`/api/admin/invoices/stats?${params.toString()}`)
       const data = await res.json()
       if (data.success) {
         setStats(data.stats)
@@ -195,28 +220,53 @@ export default function InvoicesPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Facturation</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Gérez vos factures et suivez les paiements</p>
         </div>
-        <Link
-          href="/admin/invoices/new"
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Nouvelle Facture</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <select
+            value={period}
+            onChange={(e) => {
+              setPeriod(e.target.value)
+              if (e.target.value !== 'custom') {
+                setStartDate('')
+                setEndDate('')
+              }
+              setPage(1)
+            }}
+            className="px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            title="Période d'analyse"
+          >
+            {PERIOD_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <Link
+            href="/admin/invoices/new"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Nouvelle Facture</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards — compteurs (lifetime) + montants (période) */}
       {stats && (
-        <AdminStatsHeader
-          stats={[
-            { label: 'Total', value: stats.totalInvoices, icon: FileText, color: 'primary' },
-            { label: 'Payées', value: stats.byStatus.PAID, icon: CheckCircle, color: 'green' },
-            { label: 'Envoyées', value: stats.byStatus.SENT, icon: Mail, color: 'blue' },
-            { label: 'En retard', value: stats.byStatus.OVERDUE, icon: AlertCircle, color: 'red' },
-            { label: 'Brouillons', value: stats.byStatus.DRAFT, icon: FileText, color: 'default' },
-            { label: 'Revenu', value: formatCurrency(stats.totalRevenue), icon: TrendingUp, color: 'green' },
-            { label: 'En attente', value: formatCurrency(stats.pendingAmount), icon: Clock, color: 'yellow' },
-          ]}
-        />
+        <>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Compteurs en bleu : depuis le début. Montants en vert : <span className="font-medium">{periodLabel(period)}</span>.
+          </p>
+          <AdminStatsHeader
+            stats={[
+              { label: 'Total', value: stats.totalInvoices, icon: FileText, color: 'primary' },
+              { label: 'Payées', value: stats.byStatus.PAID, icon: CheckCircle, color: 'green' },
+              { label: 'Envoyées', value: stats.byStatus.SENT, icon: Mail, color: 'blue' },
+              { label: 'En retard', value: stats.byStatus.OVERDUE, icon: AlertCircle, color: 'red' },
+              { label: 'Brouillons', value: stats.byStatus.DRAFT, icon: FileText, color: 'default' },
+              { label: `Facturé (${periodLabel(period)})`, value: formatCurrency(stats.billedTotal || 0), icon: FileText, color: 'blue' },
+              { label: `Encaissé (${periodLabel(period)})`, value: formatCurrency(stats.cashReceipts || 0), icon: TrendingUp, color: 'green' },
+              { label: `Reste dû (${periodLabel(period)})`, value: formatCurrency(stats.outstanding || 0), icon: Clock, color: 'yellow' },
+            ]}
+          />
+        </>
       )}
 
       {/* Filters */}

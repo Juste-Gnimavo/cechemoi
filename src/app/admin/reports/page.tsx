@@ -95,6 +95,15 @@ function getSubFilters(family: FinancialFamily) {
     case 'online-sales':
       return [
         {
+          key: 'paymentStatus',
+          label: 'Paiement',
+          options: [
+            { value: 'paid', label: 'Payées (par défaut)' },
+            { value: 'pending', label: 'En attente / échouées' },
+            { value: 'all', label: 'Toutes' },
+          ],
+        },
+        {
           key: 'status',
           label: 'Statut',
           options: [
@@ -225,10 +234,14 @@ function ReportTab({ family }: { family: FinancialFamily }) {
 
   const subFilterConfig = useMemo(() => getSubFilters(family), [family])
 
-  // Init defaults for sub-filters
+  // Init defaults for sub-filters. Pour 'paymentStatus' (online-sales), le
+  // défaut est 'paid' — le rapport doit montrer le CA réalisé, pas les
+  // commandes en attente. Le CEO peut basculer sur 'all' si besoin d'audit.
   useEffect(() => {
     const defaults: Record<string, string> = {}
-    for (const f of subFilterConfig) defaults[f.key] = 'all'
+    for (const f of subFilterConfig) {
+      defaults[f.key] = f.key === 'paymentStatus' ? 'paid' : 'all'
+    }
     setSubFilters(defaults)
     setPage(1)
   }, [family, subFilterConfig])

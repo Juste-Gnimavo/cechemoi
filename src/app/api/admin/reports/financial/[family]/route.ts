@@ -36,6 +36,7 @@ export async function GET(
       startDate: sp.get('startDate') || undefined,
       endDate: sp.get('endDate') || undefined,
       status: sp.get('status') || undefined,
+      paymentStatus: sp.get('paymentStatus') || undefined,
       paymentMethod: sp.get('paymentMethod') || undefined,
       source: sp.get('source') || undefined,
       type: sp.get('type') || undefined,

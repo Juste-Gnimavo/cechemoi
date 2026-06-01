@@ -89,46 +89,33 @@ export async function GET(req: NextRequest) {
       prisma.receipt.count({ where }),
     ])
 
-    // Calculate stats
+    // Calculate stats — cards demandées par le CEO :
+    //   Aujourd'hui, Ce mois (mois calendaire courant), Cette année, Toute la période
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
     const todayEnd = new Date()
     todayEnd.setHours(23, 59, 59, 999)
 
-    const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-    weekStart.setHours(0, 0, 0, 0)
+    const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1)
+    const yearStart = new Date(todayStart.getFullYear(), 0, 1)
 
-    const monthStart = new Date()
-    monthStart.setDate(1)
-    monthStart.setHours(0, 0, 0, 0)
-
-    const [todayStats, weekStats, monthStats] = await Promise.all([
+    const [todayStats, monthStats, yearStats, allStats] = await Promise.all([
       prisma.receipt.aggregate({
-        where: {
-          paymentDate: {
-            gte: todayStart,
-            lte: todayEnd,
-          },
-        },
+        where: { paymentDate: { gte: todayStart, lte: todayEnd } },
         _sum: { amount: true },
         _count: true,
       }),
       prisma.receipt.aggregate({
-        where: {
-          paymentDate: {
-            gte: weekStart,
-          },
-        },
+        where: { paymentDate: { gte: monthStart } },
         _sum: { amount: true },
         _count: true,
       }),
       prisma.receipt.aggregate({
-        where: {
-          paymentDate: {
-            gte: monthStart,
-          },
-        },
+        where: { paymentDate: { gte: yearStart } },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      prisma.receipt.aggregate({
         _sum: { amount: true },
         _count: true,
       }),
@@ -144,18 +131,10 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
       stats: {
-        today: {
-          count: todayStats._count,
-          total: todayStats._sum.amount || 0,
-        },
-        week: {
-          count: weekStats._count,
-          total: weekStats._sum.amount || 0,
-        },
-        month: {
-          count: monthStats._count,
-          total: monthStats._sum.amount || 0,
-        },
+        today: { count: todayStats._count, total: todayStats._sum.amount || 0 },
+        month: { count: monthStats._count, total: monthStats._sum.amount || 0 },
+        year: { count: yearStats._count, total: yearStats._sum.amount || 0 },
+        all: { count: allStats._count, total: allStats._sum.amount || 0 },
       },
     })
   } catch (error) {

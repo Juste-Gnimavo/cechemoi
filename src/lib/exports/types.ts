@@ -13,6 +13,7 @@ export interface ReportFilters {
   startDate?: string
   endDate?: string
   status?: string
+  paymentStatus?: string // pour online-sales: 'paid' | 'pending' | 'all' (défaut: paid)
   paymentMethod?: string
   source?: string // pour invoices: 'online' | 'custom' | 'standalone' | 'all'
   type?: string   // pour transactions: 'online' | 'custom' | 'invoice' | 'standalone' | 'all'

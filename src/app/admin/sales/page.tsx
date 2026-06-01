@@ -135,9 +135,15 @@ export default function SalesReportsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Rapports de Ventes</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Analyse complète des ventes</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Commandes en ligne payées uniquement</p>
         </div>
         <div className="flex gap-3">
+          <Link
+            href="/admin/reports?tab=online-sales"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-all duration-200"
+          >
+            Voir dans Rapports
+          </Link>
           <button
             onClick={exportToCSV}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200"
@@ -147,6 +153,19 @@ export default function SalesReportsPage() {
           </button>
         </div>
       </div>
+
+      {/* Empty state notice */}
+      {data.summary.totalOrders === 0 && (
+        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            <strong>Aucune commande payée sur la période sélectionnée.</strong> Ce rapport ne compte que les commandes en ligne avec paiement encaissé (statut paiement = Payé) et exclut les annulées/remboursées.
+            Pour voir toutes les commandes (y compris en attente), consultez{' '}
+            <Link href="/admin/orders" className="underline font-medium">la liste des commandes</Link>.
+            Pour les autres flux comptables (sur-mesure, factures, dépenses…), utilisez le{' '}
+            <Link href="/admin/reports" className="underline font-medium">hub Rapports</Link>.
+          </p>
+        </div>
+      )}
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">

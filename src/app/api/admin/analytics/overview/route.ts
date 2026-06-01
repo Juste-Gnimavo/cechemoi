@@ -2,12 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { prisma } from '@/lib/prisma'
+import { computeCashReceipts } from '@/lib/finance/aggregations'
 
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
 
 // GET /api/admin/analytics/overview - Get overall analytics
+//
+// La valeur `revenue.total` exposée par cet endpoint correspond aux
+// ENCAISSEMENTS sur la période (argent réellement reçu, dé-dupliqué entre flux).
+// Voir src/lib/finance/aggregations.ts pour la définition canonique.
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,156 +24,80 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url)
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
+    const startDateParam = searchParams.get('startDate')
+    const endDateParam = searchParams.get('endDate')
 
-    // Build date filter
-    const dateFilter: any = {}
-    if (startDate) {
-      dateFilter.gte = new Date(startDate)
-    }
-    if (endDate) {
-      // Set to end of day to include all items from that day
-      const endDateTime = new Date(endDate)
-      endDateTime.setHours(23, 59, 59, 999)
-      dateFilter.lte = endDateTime
-    }
+    // Période d'agrégation : la même borne s'applique à toutes les requêtes
+    // (paid orders, factures, receipts, paiements autonomes, RDV…) pour éviter
+    // les incohérences temporelles.
+    const now = new Date()
+    const defaultStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    defaultStart.setHours(0, 0, 0, 0)
 
-    const hasDateFilter = Object.keys(dateFilter).length > 0
+    const start = startDateParam ? new Date(startDateParam) : defaultStart
+    if (startDateParam) start.setHours(0, 0, 0, 0)
+    const end = endDateParam ? new Date(endDateParam) : new Date(now)
+    end.setHours(23, 59, 59, 999)
 
-    // Get orders with optional date filtering
-    const orders = await prisma.order.findMany({
-      where: hasDateFilter ? { createdAt: dateFilter } : {},
-      include: {
-        items: {
-          select: {
-            productId: true,
-            quantity: true,
-            total: true,
+    const dateFilter = { gte: start, lte: end }
+
+    // ─── Encaissements via le helper canonique ──────────────────────────────
+    // Plus de double comptage : sum standalone invoice.total + sum standalone
+    // InvoicePayment.amount n'existe plus. Voir aggregations.ts.
+    const cashReceipts = await computeCashReceipts({ start, end })
+
+    // ─── Données complémentaires (orders, products, items, customers) ───────
+    const [orders, paidStandaloneInvoices, customerCount, productCount] = await Promise.all([
+      prisma.order.findMany({
+        where: { createdAt: dateFilter },
+        include: {
+          items: {
+            select: {
+              productId: true,
+              quantity: true,
+              total: true,
+            },
           },
         },
-      },
-    })
-
-    // Get PAID standalone invoices (invoices without orderId AND without customOrderId)
-    const paidStandaloneInvoices = await prisma.invoice.findMany({
-      where: {
-        orderId: null, // Not linked to regular order
-        customOrderId: null, // Not linked to custom order
-        status: 'PAID',
-        ...(hasDateFilter && { createdAt: dateFilter }),
-      },
-      select: {
-        id: true,
-        total: true,
-        subtotal: true,
-        tax: true,
-        shippingCost: true,
-        discount: true,
-        createdAt: true,
-      },
-    })
-
-    // Get all receipts (represents actual money received from custom orders)
-    const receipts = await prisma.receipt.findMany({
-      where: hasDateFilter ? { paymentDate: dateFilter } : {},
-      select: {
-        id: true,
-        amount: true,
-        paymentDate: true,
-        customOrderId: true,
-      },
-    })
-
-    // Get standalone payments (from /payer/ flow) - COMPLETED only
-    const standalonePayments = await prisma.standalonePayment.findMany({
-      where: {
-        status: 'COMPLETED',
-        ...(hasDateFilter && { paidAt: dateFilter }),
-      },
-      select: {
-        id: true,
-        amount: true,
-        paidAt: true,
-      },
-    })
-
-    // Get invoice payments (for partial payments tracking)
-    const invoicePayments = await prisma.invoicePayment.findMany({
-      where: hasDateFilter ? { paidAt: dateFilter } : {},
-      include: {
-        invoice: {
-          select: {
-            orderId: true,
-            customOrderId: true,
-          },
+      }),
+      // Conservé pour exposer le compte de factures autonomes payées dans la
+      // période et alimenter les sous-totaux HT/taxe/livraison.
+      prisma.invoice.findMany({
+        where: {
+          orderId: null,
+          customOrderId: null,
+          status: 'PAID',
+          issueDate: dateFilter,
         },
-      },
-    })
+        select: {
+          id: true,
+          total: true,
+          subtotal: true,
+          tax: true,
+          shippingCost: true,
+          discount: true,
+          createdAt: true,
+          issueDate: true,
+        },
+      }),
+      prisma.user.count({
+        where: { role: 'CUSTOMER', createdAt: dateFilter },
+      }),
+      prisma.product.count({ where: { published: true } }),
+    ])
 
-    // Filter invoice payments to only include those NOT linked to orders or custom orders
-    // (those are already tracked via receipts or order payments)
-    const standaloneInvoicePayments = invoicePayments.filter(
-      (ip) => !ip.invoice?.orderId && !ip.invoice?.customOrderId
-    )
-
-    // Get paid appointments
-    const paidAppointments = await prisma.appointment.findMany({
-      where: {
-        paymentStatus: 'PAID',
-        paidAmount: { gt: 0 },
-        ...(hasDateFilter && { createdAt: dateFilter }),
-      },
-      select: {
-        id: true,
-        paidAmount: true,
-        createdAt: true,
-      },
-    })
-
-    // Calculate revenue metrics - ONLY from PAID orders (paymentStatus = COMPLETED)
     const paidOrders = orders.filter(order => order.paymentStatus === 'COMPLETED')
-    const orderRevenue = paidOrders.reduce((sum, order) => sum + order.total, 0)
-
-    // Add standalone invoice revenue (fully paid invoices)
-    const standaloneInvoiceRevenue = paidStandaloneInvoices.reduce((sum, inv) => sum + inv.total, 0)
-
-    // Add receipts revenue (actual payments from custom orders)
-    const receiptsRevenue = receipts.reduce((sum, r) => sum + r.amount, 0)
-
-    // Add standalone payments revenue (from /payer/ flow)
-    const standalonePaymentsRevenue = standalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
-
-    // Add standalone invoice payments (partial payments not yet fully paid)
-    const standaloneInvoicePaymentsRevenue = standaloneInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
-
-    // Add appointment payments
-    const appointmentRevenue = paidAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
-
-    const totalRevenue = orderRevenue + standaloneInvoiceRevenue + receiptsRevenue + standalonePaymentsRevenue + standaloneInvoicePaymentsRevenue + appointmentRevenue
     const totalOrders = orders.length
     const paidOrdersCount = paidOrders.length
-    const averageOrderValue = paidOrdersCount > 0 ? totalRevenue / paidOrdersCount : 0
 
-    // Orders by status
-    const ordersByStatus = orders.reduce((acc: any, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1
-      return acc
-    }, {})
+    // ─── Sous-totaux comptables (HT, taxe, livraison, remise) ───────────────
+    // Basés sur les commandes payées + les factures autonomes payées. C'est ce
+    // que /admin et /admin/analytics affichent dans le détail.
+    const orderSubtotal = paidOrders.reduce((sum, o) => sum + o.subtotal, 0)
+    const orderTax = paidOrders.reduce((sum, o) => sum + o.tax, 0)
+    const orderShipping = paidOrders.reduce((sum, o) => sum + o.shippingCost, 0)
+    const orderDiscount = paidOrders.reduce((sum, o) => sum + o.discount, 0)
 
-    // Payment status breakdown
-    const ordersByPaymentStatus = orders.reduce((acc: any, order) => {
-      acc[order.paymentStatus] = (acc[order.paymentStatus] || 0) + 1
-      return acc
-    }, {})
-
-    // Calculate totals - ONLY from PAID orders + standalone invoices
-    const orderSubtotal = paidOrders.reduce((sum, order) => sum + order.subtotal, 0)
-    const orderTax = paidOrders.reduce((sum, order) => sum + order.tax, 0)
-    const orderShipping = paidOrders.reduce((sum, order) => sum + order.shippingCost, 0)
-    const orderDiscount = paidOrders.reduce((sum, order) => sum + order.discount, 0)
-
-    // Add standalone invoice totals
     const invoiceSubtotal = paidStandaloneInvoices.reduce((sum, inv) => sum + inv.subtotal, 0)
     const invoiceTax = paidStandaloneInvoices.reduce((sum, inv) => sum + (inv.tax || 0), 0)
     const invoiceShipping = paidStandaloneInvoices.reduce((sum, inv) => sum + (inv.shippingCost || 0), 0)
@@ -179,334 +108,161 @@ export async function GET(req: NextRequest) {
     const totalShipping = orderShipping + invoiceShipping
     const totalDiscount = orderDiscount + invoiceDiscount
 
-    // Total items sold - ONLY from PAID orders
+    // Panier moyen : revenue ORDERS / count ORDERS (et non revenue total)
+    const averageOrderValue = paidOrdersCount > 0 ? cashReceipts.breakdown.orders / paidOrdersCount : 0
+
+    // Items vendus
     const totalItemsSold = paidOrders.reduce((sum, order) => {
       return sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0)
     }, 0)
 
-    // Get customer count (all time or filtered)
-    const customerCount = await prisma.user.count({
-      where: {
-        role: 'CUSTOMER',
-        ...(hasDateFilter && { createdAt: dateFilter }),
-      },
-    })
+    // Répartitions orders
+    const ordersByStatus = orders.reduce((acc: any, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1
+      return acc
+    }, {})
+    const ordersByPaymentStatus = orders.reduce((acc: any, order) => {
+      acc[order.paymentStatus] = (acc[order.paymentStatus] || 0) + 1
+      return acc
+    }, {})
+    const ordersByPaymentMethod = orders.reduce((acc: any, order) => {
+      acc[order.paymentMethod] = (acc[order.paymentMethod] || 0) + 1
+      return acc
+    }, {})
 
-    // Get product count
-    const productCount = await prisma.product.count({
-      where: {
-        published: true,
-      },
-    })
+    // ─── Revenue par jour ────────────────────────────────────────────────────
+    // Pour chaque jour de la période, on calcule l'encaissement via les mêmes
+    // règles que computeCashReceipts (sans le helper, pour ne pas faire 30
+    // appels Prisma — on charge tout en mémoire et on filtre par jour).
 
-    // Revenue by day (last 30 days or custom range)
-    const now = new Date()
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    const revenueStartDate = startDate ? new Date(startDate) : thirtyDaysAgo
-    const revenueEndDate = endDate ? new Date(endDate) : now
+    const [
+      dayOrders,
+      dayCustomPayments,
+      dayStandaloneInvoicePayments,
+      dayStandalonePayments,
+      dayAppointments,
+    ] = await Promise.all([
+      prisma.order.findMany({
+        where: { paymentStatus: 'COMPLETED', createdAt: dateFilter },
+        select: { total: true, createdAt: true },
+      }),
+      prisma.customOrderPayment.findMany({
+        where: { paidAt: dateFilter },
+        select: { amount: true, paidAt: true },
+      }),
+      prisma.invoicePayment.findMany({
+        where: {
+          paidAt: dateFilter,
+          invoice: { orderId: null, customOrderId: null },
+        },
+        select: { amount: true, paidAt: true },
+      }),
+      prisma.standalonePayment.findMany({
+        where: { status: 'COMPLETED', paidAt: dateFilter },
+        select: { amount: true, paidAt: true },
+      }),
+      prisma.appointment.findMany({
+        where: {
+          paymentStatus: 'PAID',
+          paidAmount: { gt: 0 },
+          createdAt: dateFilter,
+        },
+        select: { paidAmount: true, createdAt: true },
+      }),
+    ])
 
-    const revenueByDay = []
-    const currentDate = new Date(revenueStartDate)
+    const revenueByDay: { date: string; revenue: number; orders: number; invoices: number }[] = []
+    const currentDate = new Date(start)
+    currentDate.setHours(0, 0, 0, 0)
 
-    while (currentDate <= revenueEndDate) {
+    while (currentDate <= end) {
       const dayStart = new Date(currentDate)
-      dayStart.setHours(0, 0, 0, 0)
       const dayEnd = new Date(currentDate)
       dayEnd.setHours(23, 59, 59, 999)
 
-      // Only count PAID orders for revenue
-      const dayPaidOrders = paidOrders.filter((order) => {
-        const orderDate = new Date(order.createdAt)
-        return orderDate >= dayStart && orderDate <= dayEnd
-      })
+      const dayKey = dayStart.toISOString().split('T')[0]
+      const within = (d: Date | null | undefined) => {
+        if (!d) return false
+        const dt = new Date(d)
+        return dt >= dayStart && dt <= dayEnd
+      }
 
-      const dayOrderRevenue = dayPaidOrders.reduce((sum, order) => sum + order.total, 0)
+      const dayOrdersRev = dayOrders.filter(o => within(o.createdAt)).reduce((s, o) => s + o.total, 0)
+      const dayCustomRev = dayCustomPayments.filter(p => within(p.paidAt)).reduce((s, p) => s + p.amount, 0)
+      const dayStandaloneInvRev = dayStandaloneInvoicePayments.filter(p => within(p.paidAt)).reduce((s, p) => s + p.amount, 0)
+      const dayStandaloneRev = dayStandalonePayments.filter(p => within(p.paidAt)).reduce((s, p) => s + p.amount, 0)
+      const dayApptRev = dayAppointments.filter(a => within(a.createdAt)).reduce((s, a) => s + a.paidAmount, 0)
 
-      // Add standalone invoice revenue for the day
-      const dayPaidInvoices = paidStandaloneInvoices.filter((inv) => {
-        const invDate = new Date(inv.createdAt)
-        return invDate >= dayStart && invDate <= dayEnd
-      })
-
-      const dayInvoiceRevenue = dayPaidInvoices.reduce((sum, inv) => sum + inv.total, 0)
-
-      // Add receipts revenue for the day (custom orders)
-      const dayReceipts = receipts.filter((r) => {
-        const rDate = new Date(r.paymentDate)
-        return rDate >= dayStart && rDate <= dayEnd
-      })
-      const dayReceiptsRevenue = dayReceipts.reduce((sum, r) => sum + r.amount, 0)
-
-      // Add standalone payments for the day
-      const dayStandalonePayments = standalonePayments.filter((sp) => {
-        if (!sp.paidAt) return false
-        const spDate = new Date(sp.paidAt)
-        return spDate >= dayStart && spDate <= dayEnd
-      })
-      const dayStandalonePaymentsRevenue = dayStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
-
-      // Add standalone invoice payments for the day
-      const dayInvoicePayments = standaloneInvoicePayments.filter((ip) => {
-        const ipDate = new Date(ip.paidAt)
-        return ipDate >= dayStart && ipDate <= dayEnd
-      })
-      const dayInvoicePaymentsRevenue = dayInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
-
-      // Add appointment payments for the day
-      const dayAppointments = paidAppointments.filter((a) => {
-        const aDate = new Date(a.createdAt)
-        return aDate >= dayStart && aDate <= dayEnd
-      })
-      const dayAppointmentRevenue = dayAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
-
-      const dayRevenue = dayOrderRevenue + dayInvoiceRevenue + dayReceiptsRevenue + dayStandalonePaymentsRevenue + dayInvoicePaymentsRevenue + dayAppointmentRevenue
-
-      // Count all orders for the day (regardless of payment status)
-      const dayAllOrders = orders.filter((order) => {
-        const orderDate = new Date(order.createdAt)
-        return orderDate >= dayStart && orderDate <= dayEnd
-      })
+      const dayAllOrders = orders.filter(o => within(o.createdAt))
+      const dayPaidInvoices = paidStandaloneInvoices.filter(inv => within(inv.issueDate))
 
       revenueByDay.push({
-        date: dayStart.toISOString().split('T')[0],
-        revenue: dayRevenue,
+        date: dayKey,
+        revenue: dayOrdersRev + dayCustomRev + dayStandaloneInvRev + dayStandaloneRev + dayApptRev,
         orders: dayAllOrders.length,
-        invoices: dayPaidInvoices.length, // Track standalone invoices separately
+        invoices: dayPaidInvoices.length,
       })
 
       currentDate.setDate(currentDate.getDate() + 1)
     }
 
-    // Top selling products - ONLY from PAID orders
+    // ─── Top products (depuis les commandes payées) ─────────────────────────
     const productSales = new Map<string, { name: string; quantity: number; revenue: number }>()
-
     for (const order of paidOrders) {
       for (const item of order.items) {
         const product = await prisma.product.findUnique({
           where: { id: item.productId },
           select: { name: true },
         })
-
         if (product) {
-          const existing = productSales.get(item.productId) || {
-            name: product.name,
-            quantity: 0,
-            revenue: 0,
-          }
+          const existing = productSales.get(item.productId) || { name: product.name, quantity: 0, revenue: 0 }
           existing.quantity += item.quantity
           existing.revenue += item.total
           productSales.set(item.productId, existing)
         }
       }
     }
-
     const topProducts = Array.from(productSales.entries())
       .map(([id, data]) => ({ id, ...data }))
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10)
 
-    // Orders by payment method
-    const ordersByPaymentMethod = orders.reduce((acc: any, order) => {
-      acc[order.paymentMethod] = (acc[order.paymentMethod] || 0) + 1
-      return acc
-    }, {})
+    // ─── Comparaison avec la période précédente ─────────────────────────────
+    const periodLengthMs = end.getTime() - start.getTime()
+    const previousEnd = new Date(start.getTime() - 1)
+    const previousStart = new Date(previousEnd.getTime() - periodLengthMs)
 
-    // ====== PREVIOUS PERIOD COMPARISON ======
-    // Compare last 30 days with previous 30 days
-    const currentPeriodEnd = now
-    const currentPeriodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    const previousPeriodEnd = new Date(currentPeriodStart.getTime() - 1) // Day before current period
-    const previousPeriodStart = new Date(previousPeriodEnd.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const [previousCashReceipts, previousOrdersCount, previousCustomerCount, previousProductCount] = await Promise.all([
+      computeCashReceipts({ start: previousStart, end: previousEnd }),
+      prisma.order.count({ where: { createdAt: { gte: previousStart, lte: previousEnd } } }),
+      prisma.user.count({
+        where: { role: 'CUSTOMER', createdAt: { gte: previousStart, lte: previousEnd } },
+      }),
+      prisma.product.count({
+        where: { published: true, createdAt: { lte: previousEnd } },
+      }),
+    ])
 
-    // Get previous period orders
-    const previousPeriodOrders = await prisma.order.findMany({
-      where: {
-        createdAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Get previous period standalone invoices
-    const previousPeriodInvoices = await prisma.invoice.findMany({
-      where: {
-        orderId: null,
-        customOrderId: null,
-        status: 'PAID',
-        createdAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Get previous period receipts
-    const previousPeriodReceipts = await prisma.receipt.findMany({
-      where: {
-        paymentDate: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Get previous period standalone payments
-    const previousPeriodStandalonePayments = await prisma.standalonePayment.findMany({
-      where: {
-        status: 'COMPLETED',
-        paidAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Get previous period invoice payments (for standalone invoices only)
-    const previousPeriodInvoicePayments = await prisma.invoicePayment.findMany({
-      where: {
-        paidAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-      include: {
-        invoice: {
-          select: {
-            orderId: true,
-            customOrderId: true,
-          },
-        },
-      },
-    })
-    const previousStandaloneInvoicePayments = previousPeriodInvoicePayments.filter(
-      (ip) => !ip.invoice?.orderId && !ip.invoice?.customOrderId
-    )
-
-    // Get previous period appointments
-    const previousPeriodAppointments = await prisma.appointment.findMany({
-      where: {
-        paymentStatus: 'PAID',
-        paidAmount: { gt: 0 },
-        createdAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Previous period revenue (PAID orders only)
-    const previousPaidOrders = previousPeriodOrders.filter(o => o.paymentStatus === 'COMPLETED')
-    const previousOrderRevenue = previousPaidOrders.reduce((sum, o) => sum + o.total, 0)
-    const previousInvoiceRevenue = previousPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0)
-    const previousReceiptsRevenue = previousPeriodReceipts.reduce((sum, r) => sum + r.amount, 0)
-    const previousStandalonePaymentsRevenue = previousPeriodStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0)
-    const previousInvoicePaymentsRevenue = previousStandaloneInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0)
-    const previousAppointmentRevenue = previousPeriodAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
-    const previousTotalRevenue = previousOrderRevenue + previousInvoiceRevenue + previousReceiptsRevenue + previousStandalonePaymentsRevenue + previousInvoicePaymentsRevenue + previousAppointmentRevenue
-
-    // Previous period orders count
-    const previousOrdersCount = previousPeriodOrders.length
-
-    // Current period stats (last 30 days)
-    const currentPeriodPaidOrders = paidOrders.filter(o => {
-      const orderDate = new Date(o.createdAt)
-      return orderDate >= currentPeriodStart && orderDate <= currentPeriodEnd
-    })
-    const currentPeriodAllOrders = orders.filter(o => {
-      const orderDate = new Date(o.createdAt)
-      return orderDate >= currentPeriodStart && orderDate <= currentPeriodEnd
-    })
-    const currentPeriodInvoices = paidStandaloneInvoices.filter(inv => {
-      const invDate = new Date(inv.createdAt)
-      return invDate >= currentPeriodStart && invDate <= currentPeriodEnd
-    })
-
-    const currentPeriodReceipts = receipts.filter(r => {
-      const rDate = new Date(r.paymentDate)
-      return rDate >= currentPeriodStart && rDate <= currentPeriodEnd
-    })
-
-    const currentPeriodStandalonePayments = standalonePayments.filter(sp => {
-      if (!sp.paidAt) return false
-      const spDate = new Date(sp.paidAt)
-      return spDate >= currentPeriodStart && spDate <= currentPeriodEnd
-    })
-
-    const currentPeriodInvoicePayments = standaloneInvoicePayments.filter(ip => {
-      const ipDate = new Date(ip.paidAt)
-      return ipDate >= currentPeriodStart && ipDate <= currentPeriodEnd
-    })
-
-    const currentPeriodAppointments = paidAppointments.filter(a => {
-      const aDate = new Date(a.createdAt)
-      return aDate >= currentPeriodStart && aDate <= currentPeriodEnd
-    })
-
-    const currentPeriodRevenue =
-      currentPeriodPaidOrders.reduce((sum, o) => sum + o.total, 0) +
-      currentPeriodInvoices.reduce((sum, inv) => sum + inv.total, 0) +
-      currentPeriodReceipts.reduce((sum, r) => sum + r.amount, 0) +
-      currentPeriodStandalonePayments.reduce((sum, sp) => sum + sp.amount, 0) +
-      currentPeriodInvoicePayments.reduce((sum, ip) => sum + ip.amount, 0) +
-      currentPeriodAppointments.reduce((sum, a) => sum + a.paidAmount, 0)
-    const currentPeriodOrdersCount = currentPeriodAllOrders.length
-
-    // Previous period customers (new customers registered)
-    const previousCustomerCount = await prisma.user.count({
-      where: {
-        role: 'CUSTOMER',
-        createdAt: {
-          gte: previousPeriodStart,
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Current period new customers
-    const currentCustomerCount = await prisma.user.count({
-      where: {
-        role: 'CUSTOMER',
-        createdAt: {
-          gte: currentPeriodStart,
-          lte: currentPeriodEnd,
-        },
-      },
-    })
-
-    // Previous period products count
-    const previousProductCount = await prisma.product.count({
-      where: {
-        published: true,
-        createdAt: {
-          lte: previousPeriodEnd,
-        },
-      },
-    })
-
-    // Calculate percentage changes
     const calculateChange = (current: number, previous: number) => {
-      if (previous === 0) {
-        return current > 0 ? 100 : 0
-      }
+      if (previous === 0) return current > 0 ? 100 : 0
       return ((current - previous) / previous) * 100
     }
 
     const comparison = {
       revenue: {
-        current: currentPeriodRevenue,
-        previous: previousTotalRevenue,
-        change: calculateChange(currentPeriodRevenue, previousTotalRevenue),
+        current: cashReceipts.total,
+        previous: previousCashReceipts.total,
+        change: calculateChange(cashReceipts.total, previousCashReceipts.total),
       },
       orders: {
-        current: currentPeriodOrdersCount,
+        current: totalOrders,
         previous: previousOrdersCount,
-        change: calculateChange(currentPeriodOrdersCount, previousOrdersCount),
+        change: calculateChange(totalOrders, previousOrdersCount),
       },
       customers: {
-        current: currentCustomerCount,
+        current: customerCount,
         previous: previousCustomerCount,
-        change: calculateChange(currentCustomerCount, previousCustomerCount),
+        change: calculateChange(customerCount, previousCustomerCount),
       },
       products: {
         current: productCount,
@@ -515,17 +271,22 @@ export async function GET(req: NextRequest) {
       },
     }
 
+    // ─── Réponse ────────────────────────────────────────────────────────────
+    // Forme préservée pour back-compat avec les consumers existants
+    // (/admin, /admin/analytics, /admin/analytics/revenue, /admin/transactions).
+    // `fromInvoicePayments` est conservé pour back-compat mais vaut 0 — sa
+    // valeur est désormais incluse dans `fromStandaloneInvoices`.
     return NextResponse.json({
       success: true,
       analytics: {
         revenue: {
-          total: totalRevenue,
-          fromOrders: orderRevenue,
-          fromStandaloneInvoices: standaloneInvoiceRevenue,
-          fromCustomOrders: receiptsRevenue,
-          fromStandalonePayments: standalonePaymentsRevenue,
-          fromInvoicePayments: standaloneInvoicePaymentsRevenue,
-          fromAppointments: appointmentRevenue,
+          total: cashReceipts.total,
+          fromOrders: cashReceipts.breakdown.orders,
+          fromStandaloneInvoices: cashReceipts.breakdown.standaloneInvoices,
+          fromCustomOrders: cashReceipts.breakdown.customOrders,
+          fromStandalonePayments: cashReceipts.breakdown.standalone,
+          fromInvoicePayments: 0,
+          fromAppointments: cashReceipts.breakdown.appointments,
           subtotal: totalSubtotal,
           tax: totalTax,
           shipping: totalShipping,
@@ -541,11 +302,11 @@ export async function GET(req: NextRequest) {
         },
         standaloneInvoices: {
           total: paidStandaloneInvoices.length,
-          revenue: standaloneInvoiceRevenue,
+          revenue: cashReceipts.breakdown.standaloneInvoices,
         },
         customOrders: {
-          receiptsCount: receipts.length,
-          revenue: receiptsRevenue,
+          receiptsCount: dayCustomPayments.length,
+          revenue: cashReceipts.breakdown.customOrders,
         },
         items: {
           totalSold: totalItemsSold,
@@ -558,7 +319,7 @@ export async function GET(req: NextRequest) {
         },
         revenueByDay,
         topProducts,
-        comparison, // 30 days vs previous 30 days
+        comparison,
       },
     })
   } catch (error) {
