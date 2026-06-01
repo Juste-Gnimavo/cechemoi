@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { prisma } from '@/lib/prisma'
 import { InvoiceStatus } from '@prisma/client'
-import { computeBilled, computeCashReceipts } from '@/lib/finance/aggregations'
+import { computeBilled } from '@/lib/finance/aggregations'
 import { resolveDateRange } from '@/lib/exports/formatters'
 
 
@@ -67,11 +67,14 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // ─── Période : facturé & encaissé via les helpers ───────────────────────
-    const [billed, cashReceipts] = await Promise.all([
-      computeBilled({ start, end }),
-      computeCashReceipts({ start, end }),
-    ])
+    // ─── Période : facturé & encaissé via le helper ─────────────────────────
+    // On utilise computeBilled pour les 3 montants (facturé / encaissé / reste
+    // dû) pour garantir Facturé ≥ Encaissé : tous portent sur les factures
+    // émises dans la période. La vue "trésorerie" (paiements reçus dans la
+    // période, peu importe la date de la facture) est intentionnellement
+    // écartée ici — elle vivait dans computeCashReceipts mais générait des
+    // incohérences avec le rapport Factures.
+    const billed = await computeBilled({ start, end })
 
     // Bloc historique "ce mois-ci" — conservé pour back-compat (consommé par
     // d'éventuels widgets historiques de la page invoices). Reste lifetime sur
@@ -99,7 +102,7 @@ export async function GET(req: NextRequest) {
         },
         billedTotal: billed.total,
         billedCount: billed.count,
-        cashReceipts: cashReceipts.breakdown.standaloneInvoices,
+        cashReceipts: billed.paid,
         // Reste dû sur les factures émises dans la période
         outstanding: billed.outstanding,
         // Back-compat : valeurs historiques affichées par certains widgets

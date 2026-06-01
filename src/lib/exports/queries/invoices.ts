@@ -113,6 +113,19 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
     balance: i.total - i.amountPaid,
   }))
 
+  // Détail des encaissements pour le bloc "Détail" — aide le CEO à comprendre
+  // d'où sortent le Total encaissé et le Reste dû, en décomposant par statut.
+  const paidStatus = byStatus.find(s => s.status === 'PAID')
+  const partialStatus = byStatus.find(s => s.status === 'PARTIAL')
+  const sentStatus = byStatus.find(s => s.status === 'SENT')
+  const overdueStatus = byStatus.find(s => s.status === 'OVERDUE')
+
+  const encaissePaid = paidStatus?._sum.total || 0
+  const encaissePartialAcomptes = partialStatus?._sum.amountPaid || 0
+  const restePartialSolde = (partialStatus?._sum.total || 0) - encaissePartialAcomptes
+  const resteSent = sentStatus?._sum.total || 0
+  const resteOverdue = overdueStatus?._sum.total || 0
+
   return {
     family: 'invoices',
     title: FAMILY_TITLES['invoices'],
@@ -125,6 +138,16 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
           { label: 'Total facturé TTC', value: formatXOF(totalFacture) },
           { label: 'Total encaissé', value: formatXOF(totalEncaisse) },
           { label: 'Reste dû', value: formatXOF(Math.max(0, totalFacture - totalEncaisse)) },
+        ],
+      },
+      {
+        title: 'Détail encaissement / reste dû',
+        entries: [
+          { label: `Factures totalement payées (${paidStatus?._count || 0})`, value: formatXOF(encaissePaid) },
+          { label: `Acomptes reçus sur partielles (${partialStatus?._count || 0})`, value: formatXOF(encaissePartialAcomptes) },
+          { label: `Solde restant sur partielles`, value: formatXOF(Math.max(0, restePartialSolde)) },
+          { label: `Factures envoyées non payées (${sentStatus?._count || 0})`, value: formatXOF(resteSent) },
+          { label: `Factures en retard (${overdueStatus?._count || 0})`, value: formatXOF(resteOverdue) },
         ],
       },
       {
