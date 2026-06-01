@@ -37,7 +37,15 @@ export interface CashReceipts {
 export async function computeCashReceipts({ start, end }: DateWindow): Promise<CashReceipts> {
   const window = { gte: start, lte: end }
 
-  const [ordersAgg, customAgg, standaloneInvoicePayments, standaloneAgg, apptAgg] = await Promise.all([
+  const [
+    ordersAgg,
+    customAgg,
+    customInvoicePayments,
+    syncedInvoicePaymentIds,
+    standaloneInvoicePayments,
+    standaloneAgg,
+    apptAgg,
+  ] = await Promise.all([
     // 1. Commandes en ligne payées — Order.total sur paymentStatus=COMPLETED.
     // Order.Payment n'est pas systématique (paiement à la livraison, etc.) donc
     // on s'appuie sur paymentStatus côté Order.
@@ -46,13 +54,30 @@ export async function computeCashReceipts({ start, end }: DateWindow): Promise<C
       _sum: { total: true },
     }),
 
-    // 2. Paiements sur-mesure — somme directe des CustomOrderPayment.
-    // Note : certains CustomOrderPayment sont synchronisés avec un InvoicePayment
-    // d'une facture custom (invoiceId / customOrderId non null) ; le filtre étape
-    // 3 exclut ces InvoicePayments pour éviter le double comptage.
+    // 2a. Paiements sur-mesure — somme directe des CustomOrderPayment.
     prisma.customOrderPayment.aggregate({
       where: { paidAt: window },
       _sum: { amount: true },
+    }),
+
+    // 2b. InvoicePayments sur factures custom-order. On en garde les
+    // orphelins (ceux sans CustomOrderPayment associé) — sans ça on perdait
+    // ces paiements : ils étaient filtrés par le standalone-only de l'étape 3
+    // ET absents de l'étape 2a. 85k CFA fantômes constatés en prod sur
+    // FAC-270326-0002.
+    prisma.invoicePayment.findMany({
+      where: {
+        paidAt: window,
+        invoice: { customOrderId: { not: null } },
+      },
+      select: { id: true, amount: true },
+    }),
+
+    // 2c. Tous les invoicePaymentId déjà sync via CustomOrderPayment, pour
+    // pouvoir filtrer les orphelins de 2b.
+    prisma.customOrderPayment.findMany({
+      where: { invoicePaymentId: { not: null } },
+      select: { invoicePaymentId: true },
     }),
 
     // 3. Factures autonomes encaissées — InvoicePayment uniquement pour les
@@ -84,9 +109,14 @@ export async function computeCashReceipts({ start, end }: DateWindow): Promise<C
     }),
   ])
 
+  const syncedIdsSet = new Set(syncedInvoicePaymentIds.map(c => c.invoicePaymentId).filter(Boolean))
+  const customOrphanTotal = customInvoicePayments
+    .filter(ip => !syncedIdsSet.has(ip.id))
+    .reduce((s, ip) => s + ip.amount, 0)
+
   const breakdown: CashReceiptsBreakdown = {
     orders: ordersAgg._sum.total || 0,
-    customOrders: customAgg._sum.amount || 0,
+    customOrders: (customAgg._sum.amount || 0) + customOrphanTotal,
     standaloneInvoices: standaloneInvoicePayments.reduce((s, p) => s + p.amount, 0),
     standalone: standaloneAgg._sum.amount || 0,
     appointments: apptAgg._sum.paidAmount || 0,

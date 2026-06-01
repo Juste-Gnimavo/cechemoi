@@ -69,6 +69,39 @@ export async function fetchTransactionsReport(filters: ReportFilters): Promise<F
         })
       : Promise.resolve([] as any[])
 
+  // 3b. InvoicePayments orphelins liés à un CustomOrder — ceux saisis
+  // directement sur la facture sans passer par le flow CustomOrderPayment.
+  // Pattern de saisie connu côté DG. On les remonte sous la source "Sur
+  // mesure" en filtrant a posteriori contre les CustomOrderPayment déjà sync.
+  const customInvoiceOrphansPromise =
+    !wantedType || wantedType === 'custom'
+      ? prisma.invoicePayment.findMany({
+          where: {
+            paidAt: { gte: start, lte: end },
+            invoice: { customOrderId: { not: null } },
+          },
+          include: {
+            invoice: {
+              select: {
+                invoiceNumber: true,
+                customerName: true,
+                customerPhone: true,
+                customOrder: { select: { orderNumber: true } },
+              },
+            },
+          },
+        })
+      : Promise.resolve([] as any[])
+
+  // 3c. invoicePaymentId déjà sync via CustomOrderPayment — pour filtrer 3b
+  const syncedInvoicePaymentIdsPromise =
+    !wantedType || wantedType === 'custom'
+      ? prisma.customOrderPayment.findMany({
+          where: { invoicePaymentId: { not: null } },
+          select: { invoicePaymentId: true },
+        })
+      : Promise.resolve([] as any[])
+
   // 4. StandalonePayment
   const standalonePaymentsPromise =
     !wantedType || wantedType === 'standalone'
@@ -80,12 +113,26 @@ export async function fetchTransactionsReport(filters: ReportFilters): Promise<F
         })
       : Promise.resolve([] as any[])
 
-  const [orderPayments, customPayments, invoicePayments, standalonePayments] = await Promise.all([
+  const [
+    orderPayments,
+    customPayments,
+    invoicePayments,
+    customInvoiceCandidates,
+    syncedInvoicePaymentIds,
+    standalonePayments,
+  ] = await Promise.all([
     orderPaymentsPromise,
     customPaymentsPromise,
     invoicePaymentsPromise,
+    customInvoiceOrphansPromise,
+    syncedInvoicePaymentIdsPromise,
     standalonePaymentsPromise,
   ])
+
+  const syncedIdsSet = new Set(
+    syncedInvoicePaymentIds.map((c: any) => c.invoicePaymentId).filter(Boolean),
+  )
+  const customInvoiceOrphans = customInvoiceCandidates.filter((ip: any) => !syncedIdsSet.has(ip.id))
 
   type Row = {
     paidAt: Date
@@ -121,6 +168,22 @@ export async function fetchTransactionsReport(filters: ReportFilters): Promise<F
       linkedTo: p.customOrder?.orderNumber || '—',
       customer: p.customOrder?.customer?.name || '—',
       method: labelPaymentMethod(p.paymentMethod || ''),
+      type: labelCustomPaymentType(p.paymentType),
+      amount: p.amount,
+    })
+  }
+
+  // Paiements saisis directement sur la facture custom-order (bypass du
+  // flow CustomOrderPayment). Mêmes infos client/commande que les rows
+  // "Sur mesure" classiques, distincts juste par la référence.
+  for (const p of customInvoiceOrphans) {
+    allRows.push({
+      paidAt: p.paidAt,
+      reference: p.reference || p.id.slice(0, 12),
+      source: labelTransactionSource('custom'),
+      linkedTo: p.invoice?.customOrder?.orderNumber || p.invoice?.invoiceNumber || '—',
+      customer: p.invoice?.customerName || '—',
+      method: labelPaymentMethod(p.paymentMethod),
       type: labelCustomPaymentType(p.paymentType),
       amount: p.amount,
     })

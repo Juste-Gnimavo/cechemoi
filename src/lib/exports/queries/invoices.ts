@@ -147,7 +147,9 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
           { label: `Acomptes reçus sur partielles (${partialStatus?._count || 0})`, value: formatXOF(encaissePartialAcomptes) },
           { label: `Solde restant sur partielles`, value: formatXOF(Math.max(0, restePartialSolde)) },
           { label: `Factures envoyées non payées (${sentStatus?._count || 0})`, value: formatXOF(resteSent) },
-          { label: `Factures en retard (${overdueStatus?._count || 0})`, value: formatXOF(resteOverdue) },
+          ...(overdueStatus && overdueStatus._count > 0
+            ? [{ label: `Factures en retard (${overdueStatus._count})`, value: formatXOF(resteOverdue) }]
+            : []),
         ],
       },
       {
