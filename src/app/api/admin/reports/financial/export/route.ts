@@ -17,6 +17,7 @@ const ALLOWED: FinancialFamily[] = [
   'transactions',
   'refunds',
   'expenses',
+  'clients',
 ]
 
 export async function POST(req: NextRequest) {
@@ -45,6 +46,8 @@ export async function POST(req: NextRequest) {
       paymentMethod: body.paymentMethod,
       source: body.source,
       type: body.type,
+      dateBasis: body.dateBasis,
+      segment: body.segment,
       exportMode: true,
     })
 

@@ -11,6 +11,7 @@ import {
   Receipt,
   RefreshCcw,
   Scissors,
+  Users,
   Wallet,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
@@ -27,6 +28,7 @@ const TABS: {
   { id: 'transactions', label: 'Transactions', icon: BarChart3 },
   { id: 'refunds', label: 'Remboursements', icon: RefreshCcw },
   { id: 'expenses', label: 'Dépenses', icon: Wallet },
+  { id: 'clients', label: 'Clients', icon: Users },
 ]
 
 const PERIODS = [
@@ -217,6 +219,29 @@ function getSubFilters(family: FinancialFamily) {
           ],
         },
       ]
+    case 'clients':
+      return [
+        {
+          key: 'dateBasis',
+          label: 'Base période',
+          options: [
+            { value: 'registered', label: 'Inscrits sur la période' },
+            { value: 'active', label: 'Actifs (ont payé) sur la période' },
+          ],
+        },
+        {
+          key: 'segment',
+          label: 'Segment',
+          options: [
+            { value: 'all', label: 'Tous' },
+            { value: 'vip', label: 'VIP (5+ cmd ou 100k+)' },
+            { value: 'loyal', label: 'Fidèles (2+ cmd)' },
+            { value: 'one-time', label: 'Une seule commande' },
+            { value: 'no-orders', label: 'Sans achat' },
+            { value: 'inactive', label: 'Inactifs (90j+)' },
+          ],
+        },
+      ]
     default:
       return []
   }
@@ -240,7 +265,8 @@ function ReportTab({ family }: { family: FinancialFamily }) {
   useEffect(() => {
     const defaults: Record<string, string> = {}
     for (const f of subFilterConfig) {
-      defaults[f.key] = f.key === 'paymentStatus' ? 'paid' : 'all'
+      defaults[f.key] =
+        f.key === 'paymentStatus' ? 'paid' : f.key === 'dateBasis' ? 'registered' : 'all'
     }
     setSubFilters(defaults)
     setPage(1)

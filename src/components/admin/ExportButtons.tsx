@@ -11,6 +11,7 @@ export type FinancialFamily =
   | 'transactions'
   | 'refunds'
   | 'expenses'
+  | 'clients'
 
 export interface ExportButtonsProps {
   family: FinancialFamily
@@ -22,6 +23,8 @@ export interface ExportButtonsProps {
     paymentMethod?: string
     source?: string
     type?: string
+    dateBasis?: string
+    segment?: string
   }
   label?: string
 }

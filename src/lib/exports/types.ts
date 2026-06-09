@@ -7,6 +7,7 @@ export type FinancialFamily =
   | 'transactions'
   | 'refunds'
   | 'expenses'
+  | 'clients'
 
 export interface ReportFilters {
   period?: string
@@ -17,6 +18,8 @@ export interface ReportFilters {
   paymentMethod?: string
   source?: string // pour invoices: 'online' | 'custom' | 'standalone' | 'all'
   type?: string   // pour transactions: 'online' | 'custom' | 'invoice' | 'standalone' | 'all'
+  dateBasis?: string // pour clients: 'registered' (défaut) | 'active'
+  segment?: string   // pour clients: 'vip' | 'loyal' | 'one-time' | 'no-orders' | 'inactive' | 'all'
   page?: number
   pageSize?: number
   exportMode?: boolean
@@ -57,4 +60,5 @@ export const FAMILY_TITLES: Record<FinancialFamily, string> = {
   transactions: 'Rapport — Transactions encaissées',
   refunds: 'Rapport — Remboursements',
   expenses: 'Rapport — Dépenses',
+  clients: 'Rapport — Clients',
 }

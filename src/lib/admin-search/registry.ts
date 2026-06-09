@@ -194,6 +194,7 @@ export const MENU: MenuItem[] = [
       { href: '/admin/reports?tab=transactions', label: 'Transactions' },
       { href: '/admin/reports?tab=refunds', label: 'Remboursements' },
       { href: '/admin/reports?tab=expenses', label: 'Dépenses' },
+      { href: '/admin/reports?tab=clients', label: 'Clients', badge: 'NEW' },
     ],
   },
   {
@@ -558,6 +559,10 @@ const ENRICHMENTS: Record<string, Enrichment> = {
   '/admin/reports?tab=expenses': {
     description: 'Rapport des dépenses (vue comptable)',
     keywords: ['rapport depenses', 'charges', 'sorties'],
+  },
+  '/admin/reports?tab=clients': {
+    description: 'Rapport clients — métriques, segments, LTV, panier moyen, par période',
+    keywords: ['clients', 'crm', 'customers', 'ltv', 'fideles', 'vip', 'segments', 'acquisition', 'inactifs', 'panier moyen'],
   },
 
   // ----- Boutique / Commandes -----

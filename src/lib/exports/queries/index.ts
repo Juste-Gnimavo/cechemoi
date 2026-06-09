@@ -5,6 +5,7 @@ import { fetchInvoicesReport } from './invoices'
 import { fetchTransactionsReport } from './transactions'
 import { fetchRefundsReport } from './refunds'
 import { fetchExpensesReport } from './expenses'
+import { fetchClientsReport } from './clients'
 
 export async function fetchReport(
   family: FinancialFamily,
@@ -23,6 +24,8 @@ export async function fetchReport(
       return fetchRefundsReport(filters)
     case 'expenses':
       return fetchExpensesReport(filters)
+    case 'clients':
+      return fetchClientsReport(filters)
     default:
       throw new Error(`Famille de rapport inconnue: ${family}`)
   }
@@ -35,4 +38,5 @@ export {
   fetchTransactionsReport,
   fetchRefundsReport,
   fetchExpensesReport,
+  fetchClientsReport,
 }

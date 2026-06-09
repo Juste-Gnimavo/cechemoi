@@ -13,6 +13,7 @@ const ALLOWED: FinancialFamily[] = [
   'transactions',
   'refunds',
   'expenses',
+  'clients',
 ]
 
 export async function GET(
@@ -40,6 +41,8 @@ export async function GET(
       paymentMethod: sp.get('paymentMethod') || undefined,
       source: sp.get('source') || undefined,
       type: sp.get('type') || undefined,
+      dateBasis: sp.get('dateBasis') || undefined,
+      segment: sp.get('segment') || undefined,
       page: sp.get('page') ? parseInt(sp.get('page')!, 10) : undefined,
       pageSize: sp.get('pageSize') ? parseInt(sp.get('pageSize')!, 10) : undefined,
       exportMode: false,
