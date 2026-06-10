@@ -8,43 +8,38 @@ const COLUMNS: ReportColumn[] = [
   { key: 'email', label: 'Email', width: 130 },
   { key: 'city', label: 'Ville', width: 75 },
   { key: 'createdAt', label: 'Inscription', type: 'date', width: 65 },
-  { key: 'ordersCount', label: 'Cmd. payées', type: 'number', width: 60, align: 'right' },
+  { key: 'ordersCount', label: 'Achats payés', type: 'number', width: 60, align: 'right' },
   { key: 'totalSpent', label: 'Total dépensé', type: 'currency', width: 90, align: 'right' },
   { key: 'avgOrderValue', label: 'Panier moyen', type: 'currency', width: 85, align: 'right' },
-  { key: 'lastOrderAt', label: 'Dernière cmd.', type: 'date', width: 70 },
-  { key: 'loyaltyTier', label: 'Fidélité', width: 60 },
+  { key: 'lastOrderAt', label: 'Dernier achat', type: 'date', width: 70 },
   { key: 'segment', label: 'Segment', width: 75 },
 ]
 
 const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000
-
-function labelTier(tier: string | null | undefined): string {
-  if (!tier) return '—'
-  const map: Record<string, string> = {
-    bronze: 'Bronze',
-    silver: 'Argent',
-    gold: 'Or',
-    platinum: 'Platine',
-  }
-  return map[tier] || tier
-}
+const EXCLUDED_INVOICE_STATUSES = ['DRAFT', 'CANCELLED', 'REFUNDED']
 
 /**
  * Rapport CRM — Clients.
  *
  * Deux lectures possibles via le filtre `dateBasis` :
  *  - 'registered' (défaut) : clients INSCRITS sur la période (cohorte d'acquisition).
- *  - 'active'              : clients ayant PAYÉ au moins une commande sur la période.
+ *  - 'active'              : clients ayant PAYÉ quelque chose sur la période
+ *                            (commande en ligne encaissée OU versement facture).
  *
- * Les métriques par client sont TOUJOURS calculées sur la vie entière (LTV,
- * nombre de commandes payées, panier moyen, dernière commande) — la période ne
- * fait que sélectionner quels clients apparaissent. Le revenu est strictement
- * basé sur les commandes encaissées (paymentStatus = COMPLETED), cohérent avec
- * les autres rapports financiers (CA réalisé, pas le pipeline).
+ * Les métriques par client sont TOUJOURS calculées sur la vie entière — la
+ * période ne fait que sélectionner quels clients apparaissent.
  *
- * Calcul en mémoire sur la cohorte sélectionnée (clients inscrits OU actifs sur
- * la période), pas sur l'ensemble de la base — même approche que
- * /api/admin/customers/stats, mais bornée à la cohorte pour rester efficace.
+ * Le revenu par client est basé sur les FACTURES (source de vérité du CA :
+ * les commandes en ligne, le sur-mesure et les ventes autonomes génèrent
+ * toutes une facture). Sémantique identique au rapport Factures :
+ * PAID → total TTC encaissé, sinon amountPaid (acomptes). Les commandes en
+ * ligne COMPLETED sans facture (historique) sont ajoutées en complément.
+ *
+ * Rattachement facture → client :
+ *  - facture de commande en ligne : order.userId
+ *  - facture sur-mesure           : customOrder.customerId
+ *  - facture autonome             : customerPhone == user.phone (même
+ *    approche que /api/admin/customers)
  */
 export async function fetchClientsReport(filters: ReportFilters): Promise<FinancialReportData> {
   const { start, end, period } = resolveDateRange(filters.period, filters.startDate, filters.endDate)
@@ -56,17 +51,42 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
   if (dateBasis === 'registered') {
     userWhere.createdAt = { gte: start, lte: end }
   } else {
-    // Mode 'active' : on récupère d'abord les clients ayant une commande payée
-    // sur la période, puis on charge ces clients-là.
-    const activeGroups = await prisma.order.groupBy({
-      by: ['userId'],
-      where: { paymentStatus: 'COMPLETED', createdAt: { gte: start, lte: end } },
-    })
-    const activeUserIds = activeGroups.map((g) => g.userId)
-    if (activeUserIds.length === 0) {
+    // Mode 'active' : clients ayant encaissé une commande en ligne sur la
+    // période OU dont une facture a reçu un paiement sur la période.
+    const [activeGroups, activeInvoices] = await Promise.all([
+      prisma.order.groupBy({
+        by: ['userId'],
+        where: { paymentStatus: 'COMPLETED', createdAt: { gte: start, lte: end } },
+      }),
+      prisma.invoice.findMany({
+        where: {
+          status: { notIn: EXCLUDED_INVOICE_STATUSES as any },
+          OR: [
+            { paidDate: { gte: start, lte: end } },
+            { payments: { some: { paidAt: { gte: start, lte: end } } } },
+          ],
+        },
+        select: {
+          customerPhone: true,
+          order: { select: { userId: true } },
+          customOrder: { select: { customerId: true } },
+        },
+      }),
+    ])
+    const activeIds = new Set<string>(activeGroups.map((g) => g.userId))
+    const activePhones = new Set<string>()
+    for (const inv of activeInvoices) {
+      const uid = inv.order?.userId ?? inv.customOrder?.customerId
+      if (uid) activeIds.add(uid)
+      else if (inv.customerPhone) activePhones.add(inv.customerPhone)
+    }
+    if (activeIds.size === 0 && activePhones.size === 0) {
       return emptyReport(start, end, period)
     }
-    userWhere.id = { in: activeUserIds }
+    userWhere.OR = [
+      ...(activeIds.size ? [{ id: { in: Array.from(activeIds) } }] : []),
+      ...(activePhones.size ? [{ phone: { in: Array.from(activePhones) } }] : []),
+    ]
   }
 
   const users = await prisma.user.findMany({
@@ -79,29 +99,101 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
       city: true,
       howDidYouHearAboutUs: true,
       createdAt: true,
-      loyaltyPoints: { select: { points: true, tier: true } },
-      orders: { select: { total: true, createdAt: true, paymentStatus: true } },
+      orders: {
+        select: {
+          total: true,
+          createdAt: true,
+          paymentStatus: true,
+          invoice: { select: { id: true } },
+        },
+      },
     },
   })
+
+  // Factures rattachées à la cohorte (vie entière, hors brouillons/annulées)
+  const userIds = users.map((u) => u.id)
+  const phones = users.map((u) => u.phone).filter(Boolean) as string[]
+  const phoneToUserId = new Map<string, string>()
+  for (const u of users) {
+    if (u.phone && !phoneToUserId.has(u.phone)) phoneToUserId.set(u.phone, u.id)
+  }
+
+  const invoices = userIds.length
+    ? await prisma.invoice.findMany({
+        where: {
+          status: { notIn: EXCLUDED_INVOICE_STATUSES as any },
+          OR: [
+            { order: { userId: { in: userIds } } },
+            { customOrder: { customerId: { in: userIds } } },
+            ...(phones.length
+              ? [{ orderId: null, customOrderId: null, customerPhone: { in: phones } }]
+              : []),
+          ],
+        },
+        select: {
+          status: true,
+          total: true,
+          amountPaid: true,
+          issueDate: true,
+          paidDate: true,
+          customerPhone: true,
+          order: { select: { userId: true, paymentStatus: true } },
+          customOrder: { select: { customerId: true } },
+        },
+      })
+    : []
+
+  // Agrégats par client à partir des factures
+  type Spend = { purchases: number; totalSpent: number; lastPurchaseAt: Date | null }
+  const spendByUser = new Map<string, Spend>()
+  const bump = (userId: string, amount: number, at: Date | null) => {
+    const s = spendByUser.get(userId) || { purchases: 0, totalSpent: 0, lastPurchaseAt: null }
+    if (amount > 0) {
+      s.purchases += 1
+      s.totalSpent += amount
+      if (at && (!s.lastPurchaseAt || at > s.lastPurchaseAt)) s.lastPurchaseAt = at
+    }
+    spendByUser.set(userId, s)
+  }
+
+  for (const inv of invoices) {
+    const userId =
+      inv.order?.userId ??
+      inv.customOrder?.customerId ??
+      (inv.customerPhone ? phoneToUserId.get(inv.customerPhone) : undefined)
+    if (!userId) continue
+    // Encaissé : PAID → total TTC (source de vérité = status, comme le rapport
+    // Factures). Une facture de commande en ligne dont la commande est
+    // COMPLETED est considérée payée même si le statut facture a dérivé.
+    const fullyPaid = inv.status === 'PAID' || inv.order?.paymentStatus === 'COMPLETED'
+    const collected = fullyPaid ? inv.total : inv.amountPaid || 0
+    bump(userId, collected, inv.paidDate ?? inv.issueDate)
+  }
+
+  // Complément : commandes en ligne encaissées SANS facture (historique).
+  // Les commandes avec facture sont déjà comptées via la facture.
+  for (const u of users) {
+    for (const o of u.orders) {
+      if (o.paymentStatus === 'COMPLETED' && !o.invoice) {
+        bump(u.id, o.total, o.createdAt)
+      }
+    }
+  }
 
   const now = new Date()
 
   const records = users.map((u) => {
-    const paid = u.orders.filter((o) => o.paymentStatus === 'COMPLETED')
-    const paidOrders = paid.length
-    const totalSpent = paid.reduce((s, o) => s + o.total, 0)
-    const lastOrderAt = paid.length
-      ? paid.reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt
-      : null
-    const avgOrderValue = paidOrders > 0 ? totalSpent / paidOrders : 0
-    const isVip = paidOrders >= 5 || totalSpent >= 100000
+    const spend = spendByUser.get(u.id) || { purchases: 0, totalSpent: 0, lastPurchaseAt: null }
+    const { purchases, totalSpent, lastPurchaseAt } = spend
+    const avgOrderValue = purchases > 0 ? totalSpent / purchases : 0
+    const isVip = purchases >= 5 || totalSpent >= 100000
     const isInactive =
-      paidOrders >= 1 && !!lastOrderAt && now.getTime() - lastOrderAt.getTime() > NINETY_DAYS_MS
+      purchases >= 1 && !!lastPurchaseAt && now.getTime() - lastPurchaseAt.getTime() > NINETY_DAYS_MS
     const seg = isVip
       ? 'VIP'
-      : paidOrders >= 2
+      : purchases >= 2
         ? 'Fidèle'
-        : paidOrders === 1
+        : purchases === 1
           ? 'Acheteur'
           : 'Sans achat'
 
@@ -114,16 +206,14 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
       source: u.howDidYouHearAboutUs || null,
       registeredAt: u.createdAt,
       createdAt: u.createdAt,
-      ordersCount: paidOrders,
+      ordersCount: purchases,
       totalSpent,
       avgOrderValue,
-      lastOrderAt,
-      loyaltyTier: labelTier(u.loyaltyPoints?.tier),
-      loyaltyPoints: u.loyaltyPoints?.points ?? 0,
+      lastOrderAt: lastPurchaseAt,
       segment: isInactive ? `${seg} (inactif)` : seg,
       isVip,
       isInactive,
-      paidOrders,
+      paidOrders: purchases,
     }
   })
 
@@ -180,7 +270,7 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
 
   const basisLabel =
     dateBasis === 'active'
-      ? 'Clients ayant payé une commande sur la période'
+      ? 'Clients ayant payé sur la période'
       : 'Clients inscrits sur la période'
 
   // Pagination en mémoire
@@ -200,11 +290,11 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
         entries: [
           { label: basisLabel, value: String(totalClients) },
           { label: 'Dont nouveaux (inscrits sur la période)', value: String(newInPeriod) },
-          { label: 'Commandes payées (cumul)', value: String(totalPaidOrders) },
+          { label: 'Achats payés (cumul)', value: String(totalPaidOrders) },
         ],
       },
       {
-        title: 'Valeur (CA réalisé, vie entière)',
+        title: 'Valeur (CA encaissé, vie entière)',
         entries: [
           { label: 'Total dépensé par ces clients', value: formatXOF(totalRevenue) },
           { label: 'Valeur moyenne par client (LTV)', value: formatXOF(avgLtv) },
@@ -214,9 +304,9 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
       {
         title: 'Segments',
         entries: [
-          { label: 'VIP (5+ cmd ou 100k+)', value: String(vipCount) },
-          { label: 'Fidèles (2+ commandes)', value: String(loyalCount) },
-          { label: 'Une seule commande', value: String(oneTimeCount) },
+          { label: 'VIP (5+ achats ou 100k+)', value: String(vipCount) },
+          { label: 'Fidèles (2+ achats)', value: String(loyalCount) },
+          { label: 'Un seul achat', value: String(oneTimeCount) },
           { label: 'Sans achat', value: String(noOrderCount) },
           { label: 'Inactifs (aucun achat 90j+)', value: String(inactiveCount) },
         ],
@@ -244,12 +334,12 @@ function emptyReport(start: Date, end: Date, period: string): FinancialReportDat
       {
         title: "Vue d'ensemble",
         entries: [
-          { label: 'Clients ayant payé une commande sur la période', value: '0' },
+          { label: 'Clients ayant payé sur la période', value: '0' },
           { label: 'Dont nouveaux (inscrits sur la période)', value: '0' },
-          { label: 'Commandes payées (cumul)', value: '0' },
+          { label: 'Achats payés (cumul)', value: '0' },
         ],
       },
-      { title: 'Valeur (CA réalisé, vie entière)', entries: [] },
+      { title: 'Valeur (CA encaissé, vie entière)', entries: [] },
       { title: 'Segments', entries: [] },
       { title: 'Acquisition (source déclarée)', entries: [] },
     ],
