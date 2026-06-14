@@ -910,6 +910,39 @@ export default function CustomOrderDetailPage() {
             </select>
           </div>
 
+          {/* Invoice Section */}
+          {order.invoice && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary-400" />
+                Facture liée
+              </h3>
+              <Link
+                href={`/admin/invoices?search=${order.invoice.invoiceNumber}`}
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-900 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
+              >
+                <div>
+                  <p className="font-mono text-blue-600 dark:text-blue-400 font-medium">
+                    {order.invoice.invoiceNumber}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                    <span className={`px-2 py-0.5 rounded-full ${
+                      order.invoice.status === 'PAID' ? 'bg-green-100 text-green-700' :
+                      order.invoice.status === 'PARTIAL' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {order.invoice.status === 'PAID' ? 'Payée' :
+                       order.invoice.status === 'PARTIAL' ? 'Partielle' :
+                       order.invoice.status === 'SENT' ? 'Envoyée' : order.invoice.status}
+                    </span>
+                    <span>{order.invoice.amountPaid.toLocaleString()} / {order.invoice.total.toLocaleString()} FCFA</span>
+                  </div>
+                </div>
+                <ExternalLink className="h-4 w-4 text-gray-400" />
+              </Link>
+            </div>
+          )}
+
           {/* Dates */}
           <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -1304,39 +1337,6 @@ export default function CustomOrderDetailPage() {
               </div>
             )}
           </div>
-
-          {/* Invoice Section */}
-          {order.invoice && (
-            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-primary-400" />
-                Facture liée
-              </h3>
-              <Link
-                href={`/admin/invoices?search=${order.invoice.invoiceNumber}`}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-900 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
-              >
-                <div>
-                  <p className="font-mono text-blue-600 dark:text-blue-400 font-medium">
-                    {order.invoice.invoiceNumber}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                    <span className={`px-2 py-0.5 rounded-full ${
-                      order.invoice.status === 'PAID' ? 'bg-green-100 text-green-700' :
-                      order.invoice.status === 'PARTIAL' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {order.invoice.status === 'PAID' ? 'Payée' :
-                       order.invoice.status === 'PARTIAL' ? 'Partielle' :
-                       order.invoice.status === 'SENT' ? 'Envoyée' : order.invoice.status}
-                    </span>
-                    <span>{order.invoice.amountPaid.toLocaleString()} / {order.invoice.total.toLocaleString()} FCFA</span>
-                  </div>
-                </div>
-                <ExternalLink className="h-4 w-4 text-gray-400" />
-              </Link>
-            </div>
-          )}
         </div>
       </div>
 
