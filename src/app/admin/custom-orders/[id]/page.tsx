@@ -918,7 +918,7 @@ export default function CustomOrderDetailPage() {
                 Facture liée
               </h3>
               <Link
-                href={`/admin/invoices?search=${order.invoice.invoiceNumber}`}
+                href={`/admin/invoices/${order.invoice.id}`}
                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-900 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors"
               >
                 <div>
