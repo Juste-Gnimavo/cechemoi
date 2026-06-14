@@ -20,6 +20,7 @@ import {
   BarChart3,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { ConfirmationModal, useConfirmationModal } from '@/components/admin/confirmation-modal'
 
 interface CustomOrder {
   id: string
@@ -112,6 +113,7 @@ const getPriorityColor = (priority: string) => {
 }
 
 export default function CustomOrdersPage() {
+  const { modal, hideModal, showWarning } = useConfirmationModal()
   const [orders, setOrders] = useState<CustomOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -180,24 +182,29 @@ export default function CustomOrdersPage() {
     fetchOrders()
   }
 
-  const handleDelete = async (id: string, orderNumber: string) => {
-    if (!confirm(`Supprimer la commande ${orderNumber}?`)) return
+  const handleDelete = (id: string, orderNumber: string) => {
+    showWarning(
+      'Supprimer la commande',
+      `Voulez-vous vraiment supprimer la commande ${orderNumber} ? Cette action est irréversible.`,
+      async () => {
+        try {
+          const response = await fetch(`/api/admin/custom-orders/${id}`, {
+            method: 'DELETE',
+          })
+          const data = await response.json()
 
-    try {
-      const response = await fetch(`/api/admin/custom-orders/${id}`, {
-        method: 'DELETE',
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success('Commande supprimée')
-        fetchOrders()
-      } else {
-        toast.error(data.error || 'Erreur')
-      }
-    } catch (error) {
-      toast.error('Erreur lors de la suppression')
-    }
+          if (data.success) {
+            toast.success('Commande supprimée')
+            fetchOrders()
+          } else {
+            toast.error(data.error || 'Erreur')
+          }
+        } catch (error) {
+          toast.error('Erreur lors de la suppression')
+        }
+      },
+      { confirmText: 'Supprimer', type: 'error' }
+    )
   }
 
   const handleDownloadPdf = async (id: string, orderNumber: string) => {
@@ -604,6 +611,8 @@ export default function CustomOrdersPage() {
           )}
         </div>
       )}
+
+      <ConfirmationModal {...modal} onClose={hideModal} />
     </div>
   )
 }

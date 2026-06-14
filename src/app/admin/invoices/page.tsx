@@ -21,6 +21,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { ConfirmationModal, useConfirmationModal } from '@/components/admin/confirmation-modal'
 
 interface Invoice {
   id: string
@@ -71,6 +72,7 @@ function periodLabel(period: string): string {
 }
 
 export default function InvoicesPage() {
+  const { modal, hideModal, showWarning } = useConfirmationModal()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -143,32 +145,35 @@ export default function InvoicesPage() {
     }
   }
 
-  const handleDeleteInvoice = async (invoiceId: string, invoiceNumber: string) => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer la facture ${invoiceNumber} ?\n\nCette action supprimera également les articles et paiements associés. Cette action est irréversible.`)) {
-      return
-    }
+  const handleDeleteInvoice = (invoiceId: string, invoiceNumber: string) => {
+    showWarning(
+      'Supprimer la facture',
+      `Voulez-vous vraiment supprimer la facture ${invoiceNumber} ? Cette action supprimera également les articles et paiements associés. Elle est irréversible.`,
+      async () => {
+        try {
+          setDeletingId(invoiceId)
+          const response = await fetch(`/api/admin/invoices/${invoiceId}`, {
+            method: 'DELETE',
+          })
 
-    try {
-      setDeletingId(invoiceId)
-      const response = await fetch(`/api/admin/invoices/${invoiceId}`, {
-        method: 'DELETE',
-      })
+          const data = await response.json()
 
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success('Facture supprimée avec succès')
-        fetchInvoices()
-        fetchStats()
-      } else {
-        toast.error(data.error || 'Erreur lors de la suppression')
-      }
-    } catch (error) {
-      console.error('Error deleting invoice:', error)
-      toast.error('Erreur lors de la suppression')
-    } finally {
-      setDeletingId(null)
-    }
+          if (data.success) {
+            toast.success('Facture supprimée avec succès')
+            fetchInvoices()
+            fetchStats()
+          } else {
+            toast.error(data.error || 'Erreur lors de la suppression')
+          }
+        } catch (error) {
+          console.error('Error deleting invoice:', error)
+          toast.error('Erreur lors de la suppression')
+        } finally {
+          setDeletingId(null)
+        }
+      },
+      { confirmText: 'Supprimer', type: 'error' }
+    )
   }
 
   const getStatusBadge = (status: string) => {
@@ -501,6 +506,8 @@ export default function InvoicesPage() {
           itemName="factures"
         />
       )}
+
+      <ConfirmationModal {...modal} onClose={hideModal} />
     </div>
   )
 }

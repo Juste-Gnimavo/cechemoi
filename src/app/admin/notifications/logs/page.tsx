@@ -499,8 +499,8 @@ export default function NotificationLogsPage() {
 
       {/* Log Detail Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-24 md:pt-28">
-          <div className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg max-w-xl w-full max-h-[calc(100vh-8rem)] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000] p-4">
+          <div className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg max-w-xl w-full max-h-[85vh] overflow-y-auto">
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-gray-900 dark:text-white">Détails du Log</h2>
