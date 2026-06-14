@@ -6,6 +6,8 @@ import {
   createInvoiceFromCustomOrder,
   syncPaymentToInvoice,
 } from '@/lib/custom-order-invoice-sync'
+import { notificationService } from '@/lib/notification-service'
+import { smsingService } from '@/lib/smsing-service'
 
 export const dynamic = 'force-dynamic'
 
@@ -210,6 +212,8 @@ export async function POST(req: NextRequest) {
       materialCost = 0,
       deposit = 0,
       notes,
+      sendSMS = false,
+      sendWhatsApp = false,
     } = body
 
     // Validate required fields
@@ -386,6 +390,49 @@ export async function POST(req: NextRequest) {
           },
         },
       })
+
+      // Send notification to customer (SMS / WhatsApp) with the invoice link
+      const customerPhone = updatedOrder?.customer?.phone
+      if ((sendSMS || sendWhatsApp) && customerPhone) {
+        try {
+          const baseUrl =
+            process.env.NEXTAUTH_URL ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            'https://cechemoi.com'
+          const invoiceUrl = `${baseUrl}/api/invoices/${invoiceId}/pdf`
+          const invoiceNumber = updatedOrder?.invoice?.invoiceNumber || order.orderNumber
+
+          await notificationService.sendNotification({
+            trigger: 'INVOICE_CREATED',
+            recipientType: 'customer',
+            data: {
+              customer_name: updatedOrder?.customer?.name || customer.name || '',
+              order_number: order.orderNumber,
+              invoice_number: invoiceNumber,
+              order_total: `${Math.round(totalCost + materialCost)} CFA`,
+              order_date: new Date().toLocaleDateString('fr-FR'),
+              invoice_url: invoiceUrl,
+              recipientPhone: customerPhone,
+            },
+            sendBoth: sendSMS && sendWhatsApp,
+          })
+
+          // Send PDF attachment via WhatsApp
+          if (sendWhatsApp) {
+            try {
+              await smsingService.sendWhatsAppBusiness({
+                to: customerPhone,
+                message: `Facture #${invoiceNumber} - CÈCHÉMOI`,
+                mediaUrl: invoiceUrl,
+              })
+            } catch (pdfError) {
+              console.error('Error sending custom-order PDF attachment:', pdfError)
+            }
+          }
+        } catch (notifError) {
+          console.error('Error sending custom-order notification:', notifError)
+        }
+      }
 
       return NextResponse.json({
         success: true,

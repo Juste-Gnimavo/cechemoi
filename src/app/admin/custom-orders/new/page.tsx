@@ -16,6 +16,9 @@ import {
   CheckCircle,
   X,
   Ruler,
+  Bell,
+  Send,
+  MessageSquare,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -123,6 +126,8 @@ export default function NewCustomOrderPage() {
   const [materialCost, setMaterialCost] = useState(0)
   const [deposit, setDeposit] = useState(0)
   const [notes, setNotes] = useState('')
+  const [sendSMS, setSendSMS] = useState(true)
+  const [sendWhatsApp, setSendWhatsApp] = useState(true)
 
   // Success modal
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -331,6 +336,8 @@ export default function NewCustomOrderPage() {
           materialCost,
           deposit,
           notes,
+          sendSMS,
+          sendWhatsApp,
         }),
       })
 
@@ -769,6 +776,52 @@ export default function NewCustomOrderPage() {
             placeholder="Notes internes sur la commande..."
             className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
+        </div>
+
+        {/* Notifications */}
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Bell className="w-5 h-5 text-primary-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
+          </div>
+
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={sendSMS}
+                onChange={(e) => setSendSMS(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
+              />
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <Send className="h-4 w-4 text-blue-400" />
+                  <span className="text-gray-900 dark:text-white font-medium">Envoyer SMS</span>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Le client recevra un SMS avec le lien de la facture
+                </p>
+              </div>
+            </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={sendWhatsApp}
+                onChange={(e) => setSendWhatsApp(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 dark:border-dark-600 bg-gray-100 dark:bg-dark-900 text-primary-500 focus:ring-2 focus:ring-primary-500"
+              />
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4 text-green-400" />
+                  <span className="text-gray-900 dark:text-white font-medium">Envoyer WhatsApp</span>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Le client recevra un message WhatsApp avec la facture PDF
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
 
         {/* Actions */}
