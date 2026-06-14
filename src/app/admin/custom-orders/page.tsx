@@ -434,9 +434,12 @@ export default function CustomOrdersPage() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900 dark:text-white">
+                        <Link
+                          href={`/admin/custom-orders/${order.id}`}
+                          className="font-medium text-gray-900 dark:text-white hover:text-primary-500 hover:underline transition-colors"
+                        >
                           {order.orderNumber}
-                        </span>
+                        </Link>
                         {order.priority !== 'NORMAL' && (
                           <span
                             className={`px-1.5 py-0.5 text-xs rounded ${getPriorityColor(order.priority)}`}
