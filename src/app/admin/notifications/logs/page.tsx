@@ -39,6 +39,47 @@ interface LogStats {
   byTrigger: Record<string, number>
 }
 
+// Libellés français pour chaque déclencheur de notification
+const TRIGGER_LABELS: Record<string, string> = {
+  ORDER_PLACED: 'Commande placée',
+  ORDER_PROCESSING: 'Commande en préparation',
+  ORDER_SHIPPED: 'Commande expédiée',
+  ORDER_DELIVERED: 'Commande livrée',
+  ORDER_CANCELLED: 'Commande annulée',
+  ORDER_REFUNDED: 'Commande remboursée',
+  PAYMENT_RECEIVED: 'Paiement reçu',
+  PAYMENT_FAILED: 'Paiement échoué',
+  CUSTOMER_NOTE: 'Note client',
+  NEW_ACCOUNT: 'Nouveau compte',
+  PASSWORD_RESET: 'Réinitialisation du mot de passe',
+  LOYALTY_POINTS_EARNED: 'Points de fidélité gagnés',
+  ABANDONED_CART: 'Panier abandonné',
+  BACK_IN_STOCK: 'Retour en stock',
+  NEW_ORDER_ADMIN: 'Nouvelle commande (admin)',
+  PAYMENT_RECEIVED_ADMIN: 'Paiement reçu (admin)',
+  LOW_STOCK_ADMIN: 'Stock faible (admin)',
+  OUT_OF_STOCK_ADMIN: 'Rupture de stock (admin)',
+  NEW_CUSTOMER_ADMIN: 'Nouveau client (admin)',
+  NEW_REVIEW_ADMIN: 'Nouvel avis (admin)',
+  DAILY_REPORT_ADMIN: 'Rapport quotidien (admin)',
+  INVOICE_CREATED: 'Facture créée',
+  INVOICE_PAID: 'Facture payée',
+  REVIEW_REQUEST: 'Demande d’avis',
+  PAYMENT_REMINDER_1: 'Rappel de paiement (1)',
+  PAYMENT_REMINDER_2: 'Rappel de paiement (2)',
+  PAYMENT_REMINDER_3: 'Rappel de paiement (3)',
+  STANDALONE_PAYMENT_RECEIVED: 'Paiement reçu (lien)',
+  STANDALONE_PAYMENT_FAILED: 'Paiement échoué (lien)',
+  APPOINTMENT_BOOKED: 'Rendez-vous réservé',
+  APPOINTMENT_CONFIRMED: 'Rendez-vous confirmé',
+  APPOINTMENT_REMINDER: 'Rappel de rendez-vous',
+  APPOINTMENT_CANCELLED: 'Rendez-vous annulé',
+  APPOINTMENT_BOOKED_ADMIN: 'Rendez-vous réservé (admin)',
+  BIRTHDAY_GREETING: 'Vœux d’anniversaire',
+}
+
+const triggerLabel = (trigger: string) => TRIGGER_LABELS[trigger] || trigger
+
 export default function NotificationLogsPage() {
   const [logs, setLogs] = useState<NotificationLog[]>([])
   const [stats, setStats] = useState<LogStats | null>(null)
@@ -111,7 +152,7 @@ export default function NotificationLogsPage() {
     const headers = ['Date', 'Trigger', 'Canal', 'Destinataire', 'Statut', 'Erreur']
     const rows = filteredLogs.map((log) => [
       new Date(log.sentAt || log.createdAt).toLocaleString('fr-FR'),
-      log.trigger,
+      triggerLabel(log.trigger),
       log.channel,
       log.recipientPhone || log.recipientEmail || '',
       log.status,
@@ -138,7 +179,8 @@ export default function NotificationLogsPage() {
       const recipient = log.recipientPhone || log.recipientEmail || log.recipientName || ''
       return (
         recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.trigger.toLowerCase().includes(searchQuery.toLowerCase())
+        log.trigger.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        triggerLabel(log.trigger).toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
     return true
@@ -285,11 +327,11 @@ export default function NotificationLogsPage() {
               className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="all">Tous</option>
-              <option value="ORDER_PLACED">Commande placée</option>
-              <option value="PAYMENT_RECEIVED">Paiement reçu</option>
-              <option value="ORDER_SHIPPED">Commande expédiée</option>
-              <option value="ORDER_DELIVERED">Commande livrée</option>
-              <option value="LOW_STOCK_ADMIN">Stock faible</option>
+              {Object.entries(TRIGGER_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -379,9 +421,14 @@ export default function NotificationLogsPage() {
                         {new Date(log.sentAt || log.createdAt).toLocaleString('fr-FR')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-xs font-mono bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">
-                          {log.trigger}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            {triggerLabel(log.trigger)}
+                          </span>
+                          <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
+                            {log.trigger}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -452,11 +499,11 @@ export default function NotificationLogsPage() {
 
       {/* Log Detail Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Détails du Log</h2>
+        <div className="fixed inset-0 bg-black/70 flex items-start justify-center z-50 p-4 pt-24 md:pt-28">
+          <div className="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg max-w-xl w-full max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Détails du Log</h2>
                 <button
                   onClick={() => setSelectedLog(null)}
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -465,8 +512,8 @@ export default function NotificationLogsPage() {
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                       Date d'envoi
@@ -486,7 +533,10 @@ export default function NotificationLogsPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Trigger</label>
-                    <p className="text-sm font-mono bg-gray-100 dark:bg-dark-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded inline-block">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {triggerLabel(selectedLog.trigger)}
+                    </p>
+                    <p className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
                       {selectedLog.trigger}
                     </p>
                   </div>
@@ -513,7 +563,7 @@ export default function NotificationLogsPage() {
                   <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
                     Contenu du Message
                   </label>
-                  <div className="bg-gray-100 dark:bg-dark-800 p-3 rounded border border-gray-200 dark:border-dark-700">
+                  <div className="bg-gray-100 dark:bg-dark-800 p-3 rounded border border-gray-200 dark:border-dark-700 max-h-48 overflow-y-auto">
                     <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                       {selectedLog.content}
                     </p>
@@ -545,7 +595,7 @@ export default function NotificationLogsPage() {
                 )}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <button
                   onClick={() => setSelectedLog(null)}
                   className="w-full px-4 py-2 bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700"
