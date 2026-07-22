@@ -1,67 +1,77 @@
-# Session 27 — Shell propriétaire sur crm.cechemoi.com
+# Session 27 — Shell propriétaire sur gestion.cechemoi.com
 
 **Date** : 2026-07-22
-**Objectif** : Créer une interface propriétaire aérée sur crm.cechemoi.com (grille de tuiles), sans toucher à l'admin complet existant sur cechemoi.com/admin.
+**Objectif** : Créer une interface propriétaire aérée (grille de tuiles + hubs intermédiaires) sur un sous-domaine dédié, sans toucher à l'admin complet existant sur cechemoi.com/admin.
+**Statut** : Déployé et validé en production sur gestion.cechemoi.com.
 
 ---
 
 ## Contexte
 
-L'admin compte 81 liens / ~108 entrées de menu (`src/lib/admin-search/registry.ts`). La propriétaire ne s'y retrouve pas malgré la barre de recherche ⌘K (session précédente) et appelle le CEO à chaque action. Décision : la recherche est une UX de rappel, la propriétaire fonctionne par reconnaissance → grille de tuiles style launcher, activation progressive des tuiles à la demande (via WhatsApp → commit d'une ligne).
+L'admin compte 81 liens / ~108 entrées de menu (`src/lib/admin-search/registry.ts`). La propriétaire ne s'y retrouve pas malgré la barre de recherche ⌘K et appelle le CEO à chaque action. Décision : la recherche est une UX de rappel, la propriétaire fonctionne par reconnaissance → grille de tuiles style launcher, activation progressive des tuiles à la demande (via WhatsApp → commit d'une ligne).
 
-Problème métier identifié : elle crée des factures directement puis revient créer la commande, alors que le flow commande génère la facture automatiquement. Le shell la guide donc vers « Commandes » et le hub Caisse contient un rappel explicite.
+Problème métier identifié : elle crée des factures directement puis revient créer la commande, alors que le flow commande génère la facture automatiquement. Le shell la guide vers « Commandes » et les hubs Caisse/Commandes contiennent un rappel explicite.
 
 ## Architecture
 
-**Un seul déploiement Next.js, deux shells selon le host** :
+**Un seul déploiement Next.js, deux shells selon le host** (`src/lib/owner/host.ts` : sous-domaines `gestion` et `crm`) :
 
 - `cechemoi.com` → boutique + `/admin` complet, strictement inchangés.
-- `crm.cechemoi.com` → shell propriétaire (rewrite middleware, pas de redirect) :
+- `gestion.cechemoi.com` (et alias `crm.`) → shell propriétaire via rewrites middleware :
   - `/` → accueil tuiles (`/owner`)
-  - `/owner/*`, `/admin/*`, `/auth/*`, `/api/*` → passent tels quels
-  - tout autre chemin sans extension → alias `/admin/*` (ex. `crm.cechemoi.com/customers`)
-  - chemins avec extension (logos, images) → passent tels quels
-- Sur `crm.`, le layout admin (`headers()` côté serveur) remplace le header dense par le header minimal et masque la bottom bar d'actions rapides.
+  - `/admin` exact → redirect vers `/` (la page de login 2FA renvoie en dur vers `/admin`)
+  - `/owner/*`, `/admin/*`, `/auth/*`, `/api/*`, fichiers statiques → passent tels quels
+  - tout autre chemin → alias `/admin/*` (ex. `gestion.cechemoi.com/customers`)
+- Sur un host owner, `src/app/admin/layout.tsx` (server component, lit `headers().host`) remplace le header dense par `OwnerHeader` et masque la bottom bar (`src/app/admin/layout-client.tsx`, prop `shell`).
 
-**Auth** : aucune modification. Cookie NextAuth host-only ; la propriétaire se connecte directement sur crm.cechemoi.com (les pages `/auth/*` y sont servies), donc le cookie vit sur ce host. Pas besoin de domaine `.cechemoi.com`.
+**Pourquoi `gestion.` en principal** : l'ancien redirect crm → cechemoi.com était un 301 permanent, potentiellement en cache dans les navigateurs. Un sous-domaine vierge garantit un premier chargement propre. Vérifié en prod : premier essai OK.
 
-## Fichiers créés
+## Navigation propriétaire (état de fin de session)
 
-| Fichier | Rôle |
-|---------|------|
-| `src/lib/owner/tiles.ts` | Config des tuiles (`enabled` par tuile — activation en un commit) |
-| `src/components/owner/owner-header.tsx` | Header minimal : logo, Accueil, recherche (⌘K, réutilise `AdminSearch`), thème, déconnexion |
-| `src/app/owner/layout.tsx` | Layout du shell propriétaire (même garde de session que l'admin) |
-| `src/app/owner/page.tsx` | Accueil tuiles (« Bonjour {prénom} — Que souhaitez-vous faire aujourd'hui ? ») |
-| `src/app/owner/caisse/page.tsx` | Hub Caisse : Ajouter une dépense (action principale), Toutes les dépenses, Reçus d'aujourd'hui, Toutes les factures + encart « la facture est générée automatiquement avec la commande » |
-| `src/app/admin/layout-client.tsx` | Ancien contenu du layout admin, paramétré par `shell: 'owner' \| 'full'` |
+Accueil (`/owner`) → 6 tuiles (`src/lib/owner/tiles.ts`, flag `enabled` par tuile) :
 
-## Fichiers modifiés
+1. **Clients** → hub `/owner/clients` : Ajouter un client (principale), Tous les clients, Envoyer un WhatsApp, Envoyer un SMS
+2. **Commandes** → hub `/owner/commandes` : Nouvelle commande (principale, « facture générée automatiquement »), Toutes les commandes, Fiche de suivi confection, Commandes boutique + encart anti-confusion facture
+3. **Stock matériels** → hub `/owner/stock` : Sortie de stock (principale), Entrée de stock, Tous les matériels, Nouveau matériel, Mouvements
+4. **Caisse** → hub `/owner/caisse` : Ajouter une dépense (principale), Toutes les dépenses, Reçus d'aujourd'hui, Toutes les factures + encart anti-confusion facture
+5. **Rapports** → hub `/owner/rapports` : 7 cartes, une par famille comptable, deep links `?tab=` (déjà supportés par la page reports) ; pas de carte principale (consultation, pas d'action dominante)
+6. **Anniversaires** → lien direct `/admin/notifications/birthdays` (2 onglets clairs, un hub serait un clic inutile)
 
-- `src/middleware.ts` : suppression du redirect 301 `crm.` → `cechemoi.com/auth/admin`, remplacé par les rewrites host-based ci-dessus.
-- `src/app/admin/layout.tsx` : devenu server component qui lit `headers().host` et choisit le shell.
+Les hubs partagent le composant `src/components/owner/owner-hub.tsx` (action principale pleine largeur + cartes secondaires + encart optionnel).
 
-## Tuiles v1 (6, toutes activées — validées par le CEO comme quotidien de la propriétaire)
+**Mobile** : grille 2 colonnes compacte sur iPhone (3 colonnes desktop pour l'accueil), icônes/paddings/typo réduits, logo header 40px. La propriétaire utilise surtout iPhone/iPad.
 
-1. **Clients** → `/admin/customers`
-2. **Commandes** (sur mesure, « la facture est créée automatiquement ») → `/admin/custom-orders`
-3. **Stock matériels** → `/admin/materials`
-4. **Caisse** → `/owner/caisse` (hub simplifié)
-5. **Rapports** → `/admin/reports`
-6. **Anniversaires** → `/admin/notifications/birthdays`
+## Authentification
 
-## Vérification
+- **Bug corrigé** : les gardes admin et owner redirigeaient les non-connectés vers `/auth/login` (= login client par téléphone). Corrigé vers `/auth/admin`. Bug préexistant, jamais visible car les admins étaient toujours déjà connectés.
+- **OTP admin désactivé** : la page `/auth/admin` forçait le flow OTP SMS pour tous (gateway peu fiable → admins bloqués dehors). Elle utilise maintenant le provider `credentials` (session directe email + mot de passe). Le flow OTP est conservé en fallback uniquement pour les comptes avec `twoFactorEnabled = true` en base — le 2FA devient opt-in par compte. **Si un second facteur est souhaité plus tard : TOTP (Google Authenticator), jamais le gateway SMS.**
+- Cookie NextAuth host-only, aucun changement : la propriétaire se connecte directement sur gestion.cechemoi.com.
 
-- `npx tsc --noEmit` : aucun diagnostic.
-- Aucun conflit de route (`src/app/owner` était libre).
+## Commits de la session
 
-## Actions hors code (CEO)
+| Commit | Contenu |
+|--------|---------|
+| `7033b12` | Shell owner : middleware rewrites, tuiles, hub Caisse, header minimal, layout admin host-aware |
+| `4a3a9b3` | Fix redirections auth (`/auth/admin`) + redirect `/admin` exact → tuiles sur host owner |
+| `647e927` | Sous-domaine `gestion.` en principal, `crm.` en alias (`src/lib/owner/host.ts`) |
+| `d1c3fba` | Hubs Clients, Commandes, Stock + composant partagé `OwnerHub` |
+| `2739a08` | Hub Rapports (deep links `?tab=`) |
+| `ca604ad` | Connexion admin directe sans OTP forcé (fallback 2FA par compte) |
+| `414caa5` | Layout mobile compact (grille 2 colonnes, tailles réduites) |
 
-1. **Easypanel** : supprimer la redirection crm.cechemoi.com → cechemoi.com/admin et pointer le domaine crm.cechemoi.com directement sur le service Next.js (même service, pas de nouveau déploiement).
-2. **Cache 301** : l'ancien redirect était un 301 permanent — le navigateur de la propriétaire peut l'avoir mis en cache. Si crm.cechemoi.com redirige encore chez elle après la mise en prod, vider le cache du navigateur (ou navigation privée une fois).
+## Infra (fait par le CEO en cours de session)
 
-## Suites possibles
+- Redirection Easypanel crm → cechemoi.com/admin supprimée.
+- `gestion.cechemoi.com` ajouté (DNS + domaine Easypanel sur le même service Next.js). Validé en prod.
 
+## Workflow d'évolution convenu
+
+La propriétaire remonte ses besoins au CEO sur WhatsApp → le CEO revient en session → on active/ajoute une tuile ou une carte de hub (`src/lib/owner/tiles.ts` ou la page hub concernée). Ne jamais tout exposer d'un coup : le strict minimum, à la demande.
+
+## Reste à faire / points ouverts
+
+- Vérifier qu'aucun compte admin n'a `twoFactorEnabled = true` en base (sinon ce compte reçoit encore un OTP).
+- Audit responsive des formulaires métier les plus utilisés sur iPhone (nouvelle dépense, nouveau client, nouvelle commande) — le shell est mobile-friendly, les pages `/admin/*` derrière n'ont pas été auditées écran par écran.
 - Compteurs sur les tuiles (« 3 rendez-vous aujourd'hui ») via petites APIs de comptage.
-- Brancher les tuiles sur le registre (`ownerTile: true` dans `registry.ts`) pour une source de vérité unique.
-- Activer de nouvelles tuiles à la demande de la propriétaire (rendez-vous, campagnes…).
+- Éventuel branchement des tuiles sur `registry.ts` (flag `ownerTile`) pour une source de vérité unique.
+- Fichiers de la session 26 toujours non commités (package.json, scripts/md-to-html.mjs, doc-web/*, RECRUTEMENT/, log 26).
