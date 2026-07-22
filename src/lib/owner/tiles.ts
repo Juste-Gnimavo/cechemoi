@@ -61,8 +61,8 @@ export const OWNER_TILES: OwnerTile[] = [
   {
     key: 'reports',
     label: 'Rapports',
-    sublabel: 'Chiffres et rapports centralisés',
-    href: '/admin/reports',
+    sublabel: 'Chiffres et rapports, exports Excel et PDF',
+    href: '/owner/rapports',
     icon: FileBarChart,
     enabled: true,
   },
