@@ -80,6 +80,41 @@ function AdminLoginContent() {
     }
   }
 
+  // Flow OTP, utilisé uniquement pour les comptes ayant activé le 2FA
+  const startOtpFlow = async () => {
+    const response = await fetch('/api/auth/admin-2fa/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+
+    const data = await response.json()
+
+    if (!data.success) {
+      setModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Erreur de connexion',
+        message: data.error || 'Échec de l\'envoi du code de vérification',
+      })
+      return
+    }
+
+    setTempToken(data.tempToken)
+    setMaskedPhone(data.phone)
+    setOtp('')
+    setShow2FAModal(true)
+
+    setModal({
+      isOpen: true,
+      type: 'success',
+      title: 'Code envoyé !',
+      message: `Code de vérification envoyé au ${data.phone}`,
+      secondaryMessage: 'Vérifiez vos SMS ou WhatsApp',
+      autoClose: 2000,
+    })
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -96,38 +131,39 @@ function AdminLoginContent() {
     setIsLoading(true)
 
     try {
-      // Step 1: Validate credentials and send 2FA OTP
-      const response = await fetch('/api/auth/admin-2fa/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      // Connexion directe email + mot de passe. L'OTP n'est demandé que si
+      // le compte a explicitement activé le 2FA (twoFactorEnabled en base).
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       })
 
-      const data = await response.json()
-
-      if (!data.success) {
+      if (result?.ok) {
         setModal({
           isOpen: true,
-          type: 'error',
-          title: 'Erreur de connexion',
-          message: data.error || 'Email ou mot de passe incorrect',
+          type: 'success',
+          title: 'Connexion réussie !',
+          message: 'Bienvenue dans l\'espace administration',
+          secondaryMessage: 'Redirection en cours...',
+          autoClose: 1500,
         })
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        window.location.href = callbackUrl
         return
       }
 
-      // Store temp token and show 2FA modal
-      setTempToken(data.tempToken)
-      setMaskedPhone(data.phone)
-      setOtp('')
-      setShow2FAModal(true)
+      if (result?.error?.startsWith('2FA_REQUIRED')) {
+        // Compte avec 2FA activé : bascule sur le flow OTP existant
+        await startOtpFlow()
+        return
+      }
 
       setModal({
         isOpen: true,
-        type: 'success',
-        title: 'Code envoyé !',
-        message: `Code de vérification envoyé au ${data.phone}`,
-        secondaryMessage: 'Vérifiez vos SMS ou WhatsApp',
-        autoClose: 2000,
+        type: 'error',
+        title: 'Erreur de connexion',
+        message: result?.error || 'Email ou mot de passe incorrect',
       })
     } catch (error) {
       setModal({
@@ -392,9 +428,9 @@ function AdminLoginContent() {
           <div className="flex items-start gap-3">
             <ShieldCheck className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">Accès sécurisé avec 2FA</p>
+              <p className="text-gray-700 dark:text-gray-300 text-sm font-medium mb-1">Accès sécurisé</p>
               <p className="text-gray-500 dark:text-gray-400 text-xs">
-                Un code de vérification sera envoyé à votre téléphone après la saisie de vos identifiants.
+                Espace réservé à l&apos;équipe CÈCHÉMOI. Vos identifiants sont personnels — ne les partagez pas.
               </p>
             </div>
           </div>
