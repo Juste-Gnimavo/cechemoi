@@ -1,38 +1,9 @@
-'use client'
-
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { AdminHeader } from '@/components/admin-header'
-import { AdminBottomBar } from '@/components/admin-bottom-bar'
-import { useLoginTracking } from '@/hooks/useLoginTracking'
+import { headers } from 'next/headers'
+import { AdminLayoutClient } from './layout-client'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const host = headers().get('host') || ''
+  const shell = host.startsWith('crm.') ? 'owner' : 'full'
 
-  // Track login info (IP, browser)
-  useLoginTracking()
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-dark-950 flex items-center justify-center">
-        <div className="text-gray-900 dark:text-white">Chargement...</div>
-      </div>
-    )
-  }
-
-  if (!session || (session.user as any)?.role === 'CUSTOMER') {
-    router.push('/auth/login')
-    return null
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
-      <AdminHeader />
-      <main className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-        {children}
-      </main>
-      <AdminBottomBar />
-    </div>
-  )
+  return <AdminLayoutClient shell={shell}>{children}</AdminLayoutClient>
 }
