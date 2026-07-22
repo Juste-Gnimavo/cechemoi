@@ -31,7 +31,7 @@ export function AdminLayoutClient({
   }
 
   if (!session || (session.user as any)?.role === 'CUSTOMER') {
-    router.push('/auth/login')
+    router.push('/auth/admin')
     return null
   }
 

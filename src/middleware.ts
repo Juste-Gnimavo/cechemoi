@@ -23,6 +23,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(new URL('/owner', request.url))
   }
 
+  // La page de login admin renvoie en dur vers /admin après connexion :
+  // sur crm, on ramène ce cas vers l'accueil tuiles.
+  if (pathname === '/admin') {
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   if (
     pathname.startsWith('/owner') ||
     pathname.startsWith('/admin') ||

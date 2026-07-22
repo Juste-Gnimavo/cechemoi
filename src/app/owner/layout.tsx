@@ -20,7 +20,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   }
 
   if (!session || (session.user as any)?.role === 'CUSTOMER') {
-    router.push('/auth/login')
+    router.push('/auth/admin')
     return null
   }
 
