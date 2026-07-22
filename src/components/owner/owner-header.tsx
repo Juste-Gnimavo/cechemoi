@@ -40,16 +40,15 @@ export function OwnerHeader() {
               alt="CÈCHÉMOI"
               width={220}
               height={60}
+              className="h-10 sm:h-[52px] w-auto"
               style={{
-                height: '52px',
-                width: 'auto',
                 filter: theme === 'dark' ? 'none' : 'drop-shadow(1px 0 0 white)',
               }}
               priority
             />
           </Link>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <Link
               href="/"
               className="flex items-center space-x-1.5 text-sm px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"

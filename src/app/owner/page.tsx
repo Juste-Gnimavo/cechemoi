@@ -20,22 +20,22 @@ export default function OwnerHomePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
         {tiles.map((tile) => {
           const Icon = tile.icon
           return (
             <Link
               key={tile.key}
               href={tile.href}
-              className="group flex flex-col items-center text-center bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-2xl px-6 py-8 shadow-sm hover:shadow-md hover:border-primary-300 dark:hover:border-primary-700 transition-all"
+              className="group flex flex-col items-center text-center bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-800 rounded-2xl px-3 py-6 sm:px-6 sm:py-8 shadow-sm hover:shadow-md hover:border-primary-300 dark:hover:border-primary-700 transition-all"
             >
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 transition-colors">
-                <Icon className="w-8 h-8" />
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 transition-colors">
+                <Icon className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <span className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+              <span className="mt-3 sm:mt-4 text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                 {tile.label}
               </span>
-              <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <span className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 {tile.sublabel}
               </span>
             </Link>
