@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { isOwnerHost } from '@/lib/owner/host'
 
-// crm.cechemoi.com sert le shell propriétaire :
+// gestion.cechemoi.com (et l'alias crm.) servent le shell propriétaire :
 //   /            → accueil tuiles (/owner)
 //   /owner, /admin, /auth, /api → inchangés
 //   /customers, /reports, …     → alias propres vers /admin/*
@@ -10,7 +11,7 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || ''
   const { pathname, search } = request.nextUrl
 
-  if (!host.startsWith('crm.')) {
+  if (!isOwnerHost(host)) {
     return NextResponse.next()
   }
 
