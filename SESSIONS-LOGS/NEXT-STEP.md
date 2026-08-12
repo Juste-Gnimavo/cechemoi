@@ -6,14 +6,20 @@ Les sessions 28 et 29 (même journée, 12/08/2026) ont traité **l'intégralité
 
 ## À faire au déploiement (CEO — si pas déjà fait)
 
-- [ ] Variables Easypanel : `OWNER_NAME`, `OWNER_EMAIL`, `OWNER_PHONE` (valeurs dans le `.env` local). Sans elles, pas de copie de suivi à la propriétaire.
-- [ ] Factures manquantes : `npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/backfill-missing-invoices.ts` (rapport), puis avec `--apply`.
-- [ ] Test réel : changer le statut d'une commande sur mesure → la cliente reçoit SMS + WhatsApp, la propriétaire reçoit la copie WhatsApp.
-- [ ] Envoyer les messages `messages/01` à `17` à la propriétaire, par paquets de 3-4, avec captures.
+- [x] Variables Easypanel : `OWNER_NAME`, `OWNER_EMAIL`, `OWNER_PHONE` (valeurs dans le `.env` local). Sans elles, pas de copie de suivi à la propriétaire.
+- [x] Factures manquantes : `npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/backfill-missing-invoices.ts` (rapport), puis avec `--apply`.
+- [x] Test réel : changement de statut → SMS + WhatsApp reçus (validé par le CEO le 12/08).
+- [x] Backfill factures : 33/33 créées en prod le 12/08.
+- [ ] Envoyer les messages `messages/01` à `17` à la propriétaire, par paquets de 3-4, avec captures (en cours côté CEO).
+
+## Anomalie résiduelle à corriger (petite, prioritaire en début de session)
+
+**SM-040326-0002** (415 000 CFA, 2 paiements) : lors du backfill, ses 2 paiements n'ont pas pu être reportés sur la facture créée — leurs **reçus existaient déjà** (contrainte unique `customOrderPaymentId` dans `syncPaymentToInvoice`, `src/lib/custom-order-invoice-sync.ts:222`). Résultat : la facture existe mais son « encaissé » n'inclut pas ces 2 paiements.
+Correctif : dans `syncPaymentToInvoice`, si un reçu existe déjà pour le paiement, réutiliser ce reçu (ou sauter sa création) mais créer quand même l'`InvoicePayment` et mettre à jour `amountPaid`. Puis relancer la synchronisation pour cette commande (le script backfill est rejouable).
 
 ## Prochaine session (au choix selon les retours)
 
-1. **Corrections du lot 1** remontées par la propriétaire après vérification (le plus probable).
+1. **Corrections du lot 1** remontées par la propriétaire après vérification (le plus probable) + l'anomalie SM-040326-0002 ci-dessus.
 2. **Lot 2** : la suite de ses ~20 signalements (le CEO reprendra la liste — chaque nouveau problème = fichier `messages/18+`).
 3. Si elle demande des groupes de diffusion nommés pour les campagnes (« groupe » du problème 13) : tags clients + ciblage par tag.
 
