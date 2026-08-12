@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}} — CÈCHÉMOI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+{{CSS}}
+  </style>
+</head>
+<body>
+  <section class="cover">
+    <div class="cover-frame"></div>
+    <header class="cover-header">
+      <img src="{{LOGO_DATA_URI}}" alt="CÈCHÉMOI" class="cover-logo">
+      <div class="cover-brand">Cèchémoi</div>
+    </header>
+    <main class="cover-center">
+      <h1 class="cover-title">{{TITLE}}</h1>
+      {{SUBTITLE_BLOCK}}
+    </main>
+    <footer class="cover-footer">
+      {{RECIPIENT_BLOCK}}
+      <div class="cover-date">{{DATE}}</div>
+      <div class="cover-version">Version {{VERSION}}</div>
+    </footer>
+  </section>
+  <section class="content">
+{{CONTENT}}
+  </section>
+</body>
+</html>

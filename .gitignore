@@ -39,3 +39,9 @@ next-env.d.ts
 # Prisma
 prisma/*.db
 prisma/*.db-journal
+
+# Recrutement (app quiz autonome + réponses candidats — jamais dans l'historique git)
+/RECRUTEMENT
+
+# HTML généré par scripts/md-to-html.mjs (régénérable depuis doc-web/*.md)
+/doc-web/print-output

@@ -1,0 +1,443 @@
+/* =========================================================================
+   CÈCHÉMOI — Print stylesheet (sobre & corporate)
+   ---
+   Cible : Markdown converti en HTML, imprimé en PDF via Safari/Chrome.
+   Esprit : noir + ardoise + filets, brand orange/vert en accents discrets
+   uniquement (couverture, filets de section, blockquote).
+   ========================================================================= */
+
+/* -------------------- Brand variables -------------------- */
+:root {
+  --color-ink: #1a1a1a;
+  --color-slate: #4a5462;
+  --color-slate-light: #8b95a3;
+  --color-rule: #d5d9de;
+  --color-rule-light: #ebeef2;
+
+  --color-brand-orange: #e88a1a;
+  --color-brand-green: #2d8659;
+
+  --color-bg: #ffffff;
+  --color-bg-soft: #f8f9fa;
+
+  --font-serif: "EB Garamond", "Cardo", "Adobe Garamond Pro", Garamond, "Times New Roman", Times, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* -------------------- Page setup (A4) -------------------- */
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+}
+
+@page :first {
+  margin: 0;
+}
+
+/* -------------------- Reset & base -------------------- */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+body {
+  font-family: var(--font-serif);
+  font-size: 11pt;
+  line-height: 1.55;
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* -------------------- Cover page -------------------- */
+.cover {
+  page: cover;
+  width: 210mm;
+  height: 297mm;
+  padding: 35mm 28mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  page-break-after: always;
+  break-after: page;
+  position: relative;
+}
+
+.cover-frame {
+  position: absolute;
+  top: 12mm;
+  left: 12mm;
+  right: 12mm;
+  bottom: 12mm;
+  border: 0.4pt solid var(--color-rule);
+  pointer-events: none;
+}
+
+.cover-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6mm;
+  margin-top: 8mm;
+}
+
+.cover-logo {
+  width: 38mm;
+  height: 38mm;
+  object-fit: contain;
+}
+
+.cover-brand {
+  font-family: var(--font-sans);
+  font-size: 9pt;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  font-weight: 500;
+}
+
+.cover-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8mm;
+  margin-top: -10mm;
+}
+
+.cover-title {
+  font-family: var(--font-serif);
+  font-size: 34pt;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--color-ink);
+  margin: 0;
+  max-width: 145mm;
+}
+
+.cover-rule {
+  width: 60mm;
+  height: 1.6pt;
+  background: var(--color-brand-orange);
+  border: none;
+  margin: 0;
+}
+
+.cover-subtitle {
+  font-family: var(--font-serif);
+  font-size: 14pt;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-slate);
+  margin: 0;
+  max-width: 130mm;
+}
+
+.cover-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3mm;
+  margin-bottom: 4mm;
+  font-family: var(--font-sans);
+  color: var(--color-slate);
+}
+
+.cover-recipient {
+  font-size: 10pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.cover-date {
+  font-size: 9.5pt;
+  letter-spacing: 0.1em;
+  color: var(--color-slate);
+}
+
+.cover-version {
+  font-size: 8pt;
+  color: var(--color-slate-light);
+  letter-spacing: 0.08em;
+  margin-top: 1mm;
+}
+
+/* -------------------- Content area -------------------- */
+.content {
+  font-family: var(--font-serif);
+}
+
+/* Running header/footer on content pages — Chrome supports better than Safari */
+@page :left {
+  @top-left {
+    content: "CÈCHÉMOI";
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    letter-spacing: 0.2em;
+    color: #8b95a3;
+  }
+  @top-right {
+    content: string(doc-title);
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    color: #8b95a3;
+  }
+  @bottom-right {
+    content: counter(page);
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    color: #8b95a3;
+  }
+}
+
+@page :right {
+  @top-left {
+    content: "CÈCHÉMOI";
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    letter-spacing: 0.2em;
+    color: #8b95a3;
+  }
+  @top-right {
+    content: string(doc-title);
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    color: #8b95a3;
+  }
+  @bottom-right {
+    content: counter(page);
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    color: #8b95a3;
+  }
+}
+
+/* -------------------- Headings -------------------- */
+.content h1 {
+  string-set: doc-title content();
+  font-family: var(--font-serif);
+  font-size: 22pt;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-ink);
+  margin: 0 0 4mm 0;
+  padding-bottom: 3mm;
+  border-bottom: 0.6pt solid var(--color-ink);
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.content h2 {
+  font-family: var(--font-serif);
+  font-size: 16pt;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: 10mm 0 4mm 0;
+  padding-left: 3mm;
+  border-left: 2.5pt solid var(--color-brand-green);
+  page-break-after: avoid;
+  break-after: avoid;
+  page-break-before: auto;
+}
+
+.content h3 {
+  font-family: var(--font-serif);
+  font-size: 13pt;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+  margin: 7mm 0 2.5mm 0;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+.content h4 {
+  font-family: var(--font-sans);
+  font-size: 10.5pt;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-slate);
+  letter-spacing: 0.04em;
+  margin: 5mm 0 2mm 0;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* -------------------- Paragraphs & text -------------------- */
+.content p {
+  margin: 0 0 3.5mm 0;
+  orphans: 3;
+  widows: 3;
+}
+
+.content strong {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.content em {
+  font-style: italic;
+}
+
+.content a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-brand-orange);
+  text-decoration-thickness: 0.5pt;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+/* -------------------- Lists -------------------- */
+.content ul, .content ol {
+  margin: 0 0 4mm 0;
+  padding-left: 7mm;
+}
+
+.content li {
+  margin-bottom: 1.5mm;
+  line-height: 1.55;
+}
+
+.content li > strong:first-child {
+  color: var(--color-ink);
+}
+
+/* -------------------- Tables -------------------- */
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4mm 0 6mm 0;
+  font-size: 10pt;
+  page-break-inside: auto;
+}
+
+.content thead {
+  display: table-header-group;
+}
+
+.content tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.content th {
+  text-align: left;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 9pt;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  padding: 2.5mm 3mm;
+  border-bottom: 0.6pt solid var(--color-ink);
+  background: var(--color-bg-soft);
+}
+
+.content td {
+  padding: 2.2mm 3mm;
+  border-bottom: 0.3pt solid var(--color-rule);
+  vertical-align: top;
+  color: var(--color-ink);
+}
+
+.content tbody tr:last-child td {
+  border-bottom: 0.6pt solid var(--color-rule);
+}
+
+/* -------------------- Code -------------------- */
+.content code {
+  font-family: var(--font-mono);
+  font-size: 9.5pt;
+  background: var(--color-bg-soft);
+  padding: 0.5mm 1.5mm;
+  border-radius: 1.5pt;
+  color: var(--color-ink);
+}
+
+.content pre {
+  background: var(--color-bg-soft);
+  border-left: 2pt solid var(--color-rule);
+  padding: 4mm 5mm;
+  margin: 4mm 0;
+  font-family: var(--font-mono);
+  font-size: 9pt;
+  line-height: 1.5;
+  overflow-x: hidden;
+  white-space: pre-wrap;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.content pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* -------------------- Blockquote -------------------- */
+.content blockquote {
+  margin: 5mm 0 5mm 0;
+  padding: 3mm 5mm 3mm 6mm;
+  border-left: 2.5pt solid var(--color-brand-orange);
+  background: var(--color-bg-soft);
+  font-style: italic;
+  color: var(--color-slate);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.content blockquote p {
+  margin: 0 0 2mm 0;
+}
+
+.content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.content blockquote strong {
+  font-style: normal;
+  color: var(--color-ink);
+}
+
+/* -------------------- Horizontal rules -------------------- */
+.content hr {
+  border: none;
+  border-top: 0.4pt solid var(--color-rule);
+  margin: 7mm 0;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* -------------------- Page break helpers -------------------- */
+.content h1, .content h2 {
+  page-break-before: auto;
+}
+
+.content h1 + *, .content h2 + *, .content h3 + * {
+  page-break-before: avoid;
+  break-before: avoid;
+}
+
+/* First H1 of content shouldn't have huge top margin since it follows cover */
+.content > h1:first-child {
+  margin-top: 0;
+}
+
+/* -------------------- Print color preservation -------------------- */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
