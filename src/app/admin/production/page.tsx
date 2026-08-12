@@ -16,15 +16,19 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
-// Column definitions
-const COLUMNS = [
-  { id: 'PENDING', label: 'En attente', color: 'bg-gray-500', icon: Clock },
-  { id: 'CUTTING', label: 'Coupe', color: 'bg-yellow-500', icon: Scissors },
-  { id: 'SEWING', label: 'Couture', color: 'bg-blue-500', icon: Package },
-  { id: 'FITTING', label: 'Essayage', color: 'bg-purple-500', icon: User },
-  { id: 'ALTERATIONS', label: 'Retouches', color: 'bg-orange-500', icon: Scissors },
-  { id: 'FINISHING', label: 'Finitions', color: 'bg-cyan-500', icon: CheckCircle },
-  { id: 'COMPLETED', label: 'Terminé', color: 'bg-green-500', icon: CheckCircle },
+// Suivi de production (voir messages/04) : étapes en menu latéral, contenu de
+// l'étape à droite. Les changements d'étape et l'assignation couturier se font
+// par sélecteurs — utilisable au doigt sur iPhone/iPad, contrairement à
+// l'ancien kanban drag & drop.
+
+const STAGES = [
+  { id: 'PENDING', label: 'En attente', dot: 'bg-gray-500', icon: Clock },
+  { id: 'CUTTING', label: 'Coupe', dot: 'bg-yellow-500', icon: Scissors },
+  { id: 'SEWING', label: 'Couture', dot: 'bg-blue-500', icon: Package },
+  { id: 'FITTING', label: 'Essayage', dot: 'bg-purple-500', icon: User },
+  { id: 'ALTERATIONS', label: 'Retouches', dot: 'bg-orange-500', icon: Scissors },
+  { id: 'FINISHING', label: 'Finitions', dot: 'bg-cyan-500', icon: CheckCircle },
+  { id: 'COMPLETED', label: 'Terminé', dot: 'bg-green-500', icon: CheckCircle },
 ]
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -64,13 +68,13 @@ interface Tailor {
   activeItems: number
 }
 
-export default function ProductionKanbanPage() {
+export default function ProductionPage() {
   const [loading, setLoading] = useState(true)
   const [columns, setColumns] = useState<Record<string, KanbanItem[]>>({})
   const [tailors, setTailors] = useState<Tailor[]>([])
   const [stats, setStats] = useState<any>(null)
   const [selectedTailor, setSelectedTailor] = useState('')
-  const [draggedItem, setDraggedItem] = useState<KanbanItem | null>(null)
+  const [selectedStage, setSelectedStage] = useState('PENDING')
   const [updating, setUpdating] = useState<string | null>(null)
 
   useEffect(() => {
@@ -97,37 +101,21 @@ export default function ProductionKanbanPage() {
     }
   }
 
-  const handleDragStart = (e: React.DragEvent, item: KanbanItem) => {
-    setDraggedItem(item)
-    e.dataTransfer.effectAllowed = 'move'
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
-
-  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
-    e.preventDefault()
-    if (!draggedItem || draggedItem.status === newStatus) {
-      setDraggedItem(null)
-      return
-    }
-
-    setUpdating(draggedItem.id)
-
+  const updateItem = async (
+    item: KanbanItem,
+    payload: { status?: string; tailorId?: string | null },
+    successMessage: string
+  ) => {
+    setUpdating(item.id)
     try {
-      const res = await fetch(`/api/admin/custom-orders/${draggedItem.customOrder.id}/items`, {
+      const res = await fetch(`/api/admin/custom-orders/${item.customOrder.id}/items`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          itemId: draggedItem.id,
-          status: newStatus,
-        }),
+        body: JSON.stringify({ itemId: item.id, ...payload }),
       })
       const data = await res.json()
       if (data.success) {
-        toast.success('Statut mis à jour')
+        toast.success(successMessage)
         fetchData()
       } else {
         toast.error(data.error || 'Erreur')
@@ -135,7 +123,6 @@ export default function ProductionKanbanPage() {
     } catch (error) {
       toast.error('Erreur lors de la mise à jour')
     } finally {
-      setDraggedItem(null)
       setUpdating(null)
     }
   }
@@ -152,6 +139,9 @@ export default function ProductionKanbanPage() {
     )
   }
 
+  const currentStage = STAGES.find((s) => s.id === selectedStage) || STAGES[0]
+  const items = columns[selectedStage] || []
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -159,7 +149,9 @@ export default function ProductionKanbanPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Production</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Tableau de suivi de la production - Glissez-déposez pour changer le statut
+            Choisissez une étape à gauche — changez l&apos;étape ou le couturier
+            directement sur chaque article. La cliente est notifiée
+            automatiquement aux étapes clés de sa commande.
           </p>
         </div>
         <button
@@ -193,7 +185,7 @@ export default function ProductionKanbanPage() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Filtre couturier */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-gray-400" />
@@ -213,106 +205,169 @@ export default function ProductionKanbanPage() {
         </select>
       </div>
 
-      {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {COLUMNS.map((column) => {
-          const Icon = column.icon
-          const items = columns[column.id] || []
+      {/* Étapes (sidebar) + contenu */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Menu des étapes — vertical sur desktop, chips horizontales sur mobile */}
+        <nav className="lg:w-56 shrink-0">
+          <div className="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0">
+            {STAGES.map((stage) => {
+              const count = (columns[stage.id] || []).length
+              const active = selectedStage === stage.id
+              return (
+                <button
+                  key={stage.id}
+                  onClick={() => setSelectedStage(stage.id)}
+                  className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap lg:w-full ${
+                    active
+                      ? 'bg-primary-500 text-white font-semibold shadow-sm'
+                      : 'bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 text-gray-700 dark:text-gray-300 hover:border-primary-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${stage.dot}`} />
+                    {stage.label}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      active
+                        ? 'bg-white/20 text-white'
+                        : count > 0
+                          ? 'bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300'
+                          : 'text-gray-400'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </nav>
 
-          return (
-            <div
-              key={column.id}
-              className="flex-shrink-0 w-72"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, column.id)}
-            >
-              {/* Column Header */}
-              <div className={`${column.color} rounded-t-lg px-4 py-2 flex items-center justify-between`}>
-                <div className="flex items-center gap-2 text-white">
-                  <Icon className="h-4 w-4" />
-                  <span className="font-medium">{column.label}</span>
-                </div>
-                <span className="bg-white/20 px-2 py-0.5 rounded text-white text-sm">{items.length}</span>
-              </div>
+        {/* Contenu de l'étape sélectionnée */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-3">
+            <span className={`w-3 h-3 rounded-full ${currentStage.dot}`} />
+            <h2 className="font-semibold text-gray-900 dark:text-white">
+              {currentStage.label}
+            </h2>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              — {items.length} article{items.length > 1 ? 's' : ''}
+            </span>
+          </div>
 
-              {/* Column Body */}
-              <div className="bg-gray-100 dark:bg-dark-900 rounded-b-lg min-h-[400px] p-2 space-y-2">
-                {items.map((item) => {
-                  const daysUntil = getDaysUntilPickup(item.customOrder.pickupDate)
-                  const isUrgent = daysUntil <= 3
-                  const isLate = daysUntil <= 0
+          {items.length === 0 ? (
+            <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-12 text-center text-gray-400">
+              Aucun article à cette étape.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {items.map((item) => {
+                const daysUntil = getDaysUntilPickup(item.customOrder.pickupDate)
+                const isUrgent = daysUntil <= 3
+                const isLate = daysUntil <= 0
 
-                  return (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, item)}
-                      className={`bg-white dark:bg-dark-800 rounded-lg p-3 shadow-sm cursor-move hover:shadow-md transition-shadow ${PRIORITY_COLORS[item.customOrder.priority]} ${updating === item.id ? 'opacity-50' : ''}`}
-                    >
-                      {/* Order info */}
-                      <div className="flex items-start justify-between mb-2">
-                        <Link
-                          href={`/admin/custom-orders/${item.customOrder.id}`}
-                          className="text-xs font-medium text-primary-500 hover:text-primary-400"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {item.customOrder.orderNumber}
-                        </Link>
-                        {item.customOrder.priority !== 'NORMAL' && (
-                          <span
-                            className={`text-xs px-1.5 py-0.5 rounded ${item.customOrder.priority === 'VIP' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}
-                          >
-                            {item.customOrder.priority}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Garment type */}
-                      <p className="font-medium text-gray-900 dark:text-white text-sm">
-                        {item.garmentType}
-                        {item.customType && ` (${item.customType})`}
-                        {item.quantity > 1 && ` x${item.quantity}`}
-                      </p>
-
-                      {/* Customer */}
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {item.customOrder.customer.name}
-                      </p>
-
-                      {/* Tailor */}
-                      {item.tailor ? (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                          <Scissors className="h-3 w-3" />
-                          {item.tailor.name}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          Non assigné
-                        </p>
-                      )}
-
-                      {/* Pickup date */}
-                      <div
-                        className={`text-xs mt-2 flex items-center gap-1 ${isLate ? 'text-red-500' : isUrgent ? 'text-orange-500' : 'text-gray-400'}`}
+                return (
+                  <div
+                    key={item.id}
+                    className={`bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-3 shadow-sm ${PRIORITY_COLORS[item.customOrder.priority]} ${
+                      updating === item.id ? 'opacity-50 pointer-events-none' : ''
+                    }`}
+                  >
+                    {/* Order info */}
+                    <div className="flex items-start justify-between mb-2">
+                      <Link
+                        href={`/admin/custom-orders/${item.customOrder.id}`}
+                        className="text-xs font-medium text-primary-500 hover:text-primary-400"
                       >
-                        <Calendar className="h-3 w-3" />
-                        {new Date(item.customOrder.pickupDate).toLocaleDateString('fr-FR')}
-                        {isLate && ' (EN RETARD)'}
-                        {!isLate && isUrgent && ` (J-${daysUntil})`}
+                        {item.customOrder.orderNumber}
+                      </Link>
+                      {item.customOrder.priority !== 'NORMAL' && (
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded ${item.customOrder.priority === 'VIP' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}
+                        >
+                          {item.customOrder.priority}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Garment type */}
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      {item.garmentType}
+                      {item.customType && ` (${item.customType})`}
+                      {item.quantity > 1 && ` x${item.quantity}`}
+                    </p>
+
+                    {/* Customer */}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      {item.customOrder.customer.name}
+                    </p>
+
+                    {/* Pickup date */}
+                    <div
+                      className={`text-xs mt-1.5 flex items-center gap-1 ${isLate ? 'text-red-500 font-medium' : isUrgent ? 'text-orange-500' : 'text-gray-400'}`}
+                    >
+                      <Calendar className="h-3 w-3" />
+                      Retrait : {new Date(item.customOrder.pickupDate).toLocaleDateString('fr-FR')}
+                      {isLate && ' (EN RETARD)'}
+                      {!isLate && isUrgent && ` (J-${daysUntil})`}
+                    </div>
+
+                    {/* Actions : couturier + étape */}
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-dark-700 space-y-2">
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wide text-gray-400 mb-0.5">
+                          Couturier
+                        </label>
+                        <select
+                          value={item.tailorId || ''}
+                          onChange={(e) =>
+                            updateItem(
+                              item,
+                              { tailorId: e.target.value || null },
+                              e.target.value ? 'Couturier assigné' : 'Couturier retiré'
+                            )
+                          }
+                          className={`w-full px-2 py-1.5 text-xs rounded-lg border ${
+                            item.tailorId
+                              ? 'bg-gray-50 dark:bg-dark-900 border-gray-200 dark:border-dark-700 text-gray-900 dark:text-white'
+                              : 'bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400'
+                          }`}
+                        >
+                          <option value="">Non assigné</option>
+                          {tailors.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] uppercase tracking-wide text-gray-400 mb-0.5">
+                          Étape
+                        </label>
+                        <select
+                          value={item.status}
+                          onChange={(e) =>
+                            updateItem(item, { status: e.target.value }, 'Étape mise à jour')
+                          }
+                          className="w-full px-2 py-1.5 text-xs rounded-lg border bg-gray-50 dark:bg-dark-900 border-gray-200 dark:border-dark-700 text-gray-900 dark:text-white"
+                        >
+                          {STAGES.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
-                  )
-                })}
-
-                {items.length === 0 && (
-                  <div className="flex items-center justify-center h-32 text-gray-400 text-sm">Aucun article</div>
-                )}
-              </div>
+                  </div>
+                )
+              })}
             </div>
-          )
-        })}
+          )}
+        </div>
       </div>
 
       {/* Legend */}

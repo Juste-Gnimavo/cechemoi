@@ -13,21 +13,20 @@
 | 09 | Commande sans prix des articles | ✅ Déjà disponible | Message à envoyer, rien à coder |
 | 10 | Fiche de sortie matériels par couturier | ⏳ À traiter | Page + PDF (données déjà en base) |
 | 11 | Entrées de stock, unités de mesure | ✅ Déjà disponible | Demander 2 exemples concrets avant de conclure |
-| 12 | Corriger une erreur d'entrée de stock | ⏳ À traiter | Mouvement d'ajustement avec motif |
-| 13 | Campagnes SMS/WhatsApp depuis gestion | ⏳ À traiter | Tuile Messages + hub (⚠ jamais WhatsApp Cloud — proxy Baileys) |
-| 14 | Recherche client cassée (send-sms/whatsapp) | ⏳ À traiter | Fix « undefined undefined » + recherche à la frappe |
-| 15 | Fiche matériel + recherche mouvements | ⏳ À traiter | Barre de recherche + page synthèse par matériel |
-| 16 | Gestion des couturiers visible | ⏳ À traiter | Carte dans la tuile Personnel |
+| 12 | Corriger une erreur d'entrée de stock | ✅ Résolu | Bouton Corriger → ajustement avec motif |
+| 13 | Campagnes SMS/WhatsApp depuis gestion | ✅ Résolu | Tuile Messages + hub (⚠ jamais WhatsApp Cloud — proxy Baileys) |
+| 14 | Recherche client cassée (send-sms/whatsapp) | ✅ Résolu | Fix « undefined undefined » + recherche dès 1 lettre |
+| 15 | Fiche matériel + recherche mouvements | ✅ Résolu | Barre de recherche + fiche /admin/materials/[id] |
+| 16 | Gestion des couturiers visible | ✅ Résolu | Carte dans la tuile Personnel |
 | 17 | Vente boutique au comptoir | ✅ Déjà disponible | Message + rappel du circuit, rien à coder |
 
-## LOT 1 — décision CEO du 12/08/2026
+## LOT 1 — TERMINÉ (implémenté le 12/08/2026, sessions 28-29)
 
-**La liste s'arrête à 17. Tout le lot est à implémenter et livrer d'un bloc**, puis la propriétaire vérifie avant qu'on prenne la suite de ses signalements. Ordre d'implémentation :
+Les 17 problèmes sont ✅. Statuts par colonne : 01-02 (session 28), 03-08 + 10 + 12-16 (session 29), 09/11/17 (déjà disponibles — messages d'explication à envoyer).
 
-1. Correctifs rapides : 05, 14
-2. Shell propriétaire : 03+16 (tuile Personnel), 13 (tuile Messages), 08 (séparation Commandes atelier / Boutique)
-3. Commandes/factures : 06 (boutons croisés), 07 (enquête + verrou)
-4. Stock : 15 (recherche + fiche matériel), 10 (fiche sortie par couturier), 12 (correction d'erreur)
-5. Production + notifications clientes : 04
+**Après déploiement, le CEO doit :**
+1. Ajouter dans Easypanel les variables : `OWNER_NAME`, `OWNER_EMAIL`, `OWNER_PHONE` (valeurs dans `.env` local).
+2. Lancer le recensement des commandes sans facture : `npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/backfill-missing-invoices.ts` puis `--apply`.
+3. Envoyer les messages 01-17 à la propriétaire, par petits paquets, avec captures.
 
-Messages à envoyer sans coder : **09**, **11**, **17** (+ 01, 02 déjà prêts).
+**Prochain lot** : attendre les retours de la propriétaire après vérification du lot 1.

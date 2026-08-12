@@ -1,7 +1,7 @@
 # Boutons de navigation entre commande, facture et fiche de suivi
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter
+**Statut** : ✅ Résolu
 
 ---
 

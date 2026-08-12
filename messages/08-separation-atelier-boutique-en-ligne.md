@@ -1,7 +1,7 @@
 # Séparer les commandes de l'atelier et celles de la boutique en ligne
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (décision d'architecture à valider avec le CEO)
+**Statut** : ✅ Résolu (étape 1 — navigation séparée) ; sous-domaine boutique. seulement si le besoin persiste
 
 ---
 

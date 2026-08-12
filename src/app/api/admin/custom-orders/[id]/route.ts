@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { prisma } from '@/lib/prisma'
+import { notifyCustomOrderStatusChange } from '@/lib/custom-order-status-notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -191,6 +192,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           userName: (session.user as any).name,
         },
       })
+
+      // Notifications automatiques (cliente + copie propriétaire) — ne doit
+      // jamais bloquer la mise à jour du statut
+      try {
+        await notifyCustomOrderStatusChange({
+          customOrderId: params.id,
+          previousStatus: existingOrder.status,
+          newStatus: status,
+          changedByName: (session.user as any).name,
+        })
+      } catch (notifError) {
+        console.error('Status notification failed:', notifError)
+      }
     }
 
     return NextResponse.json({

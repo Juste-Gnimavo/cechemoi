@@ -1,7 +1,7 @@
 # Certaines commandes n'ont pas de facture
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (enquête nécessaire)
+**Statut** : ✅ Résolu — verrou posé, script de recensement/réparation livré
 
 ---
 

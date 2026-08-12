@@ -1,7 +1,7 @@
 # Fiche de sortie de matériels par couturier
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter
+**Statut** : ✅ Résolu
 
 ---
 

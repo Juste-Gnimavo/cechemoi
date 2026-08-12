@@ -1,7 +1,7 @@
 # Recherche de client cassée sur l'envoi de SMS / WhatsApp individuel
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (lot 1)
+**Statut** : ✅ Résolu
 
 ---
 

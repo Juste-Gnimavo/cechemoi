@@ -1,7 +1,7 @@
 # Campagnes SMS et WhatsApp accessibles depuis gestion.cechemoi.com
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (lot 1)
+**Statut** : ✅ Résolu
 
 ---
 

@@ -1,7 +1,7 @@
 # Création et désactivation des comptes employés depuis gestion.cechemoi.com
 
 **Date du signalement** : 12/08/2026
-**Statut** : 🔧 En cours (prévu à la prochaine session de développement)
+**Statut** : ✅ Résolu — tuile Personnel en ligne
 
 ---
 

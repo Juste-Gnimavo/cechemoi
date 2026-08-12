@@ -1,7 +1,7 @@
 # Fiche de matériel (tous les mouvements d'un matériel) + barre de recherche
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (lot 1)
+**Statut** : ✅ Résolu
 
 ---
 

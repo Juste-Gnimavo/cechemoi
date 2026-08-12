@@ -1,7 +1,7 @@
 # Suivi des étapes de confection et notifications automatiques aux clientes
 
 **Date du signalement** : 12/08/2026
-**Statut** : 🔧 En cours (le flux existe déjà — à mettre en valeur + notifications à brancher)
+**Statut** : ✅ Résolu — page refondue + notifications automatiques branchées
 
 ---
 

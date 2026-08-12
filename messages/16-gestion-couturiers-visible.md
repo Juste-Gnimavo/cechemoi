@@ -1,7 +1,7 @@
 # Rendre visible la gestion des couturiers
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (lot 1 — intégré à la tuile Personnel)
+**Statut** : ✅ Résolu — carte dans la tuile Personnel
 
 ---
 

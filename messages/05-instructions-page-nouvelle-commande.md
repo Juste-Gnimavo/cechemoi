@@ -1,7 +1,7 @@
 # Instructions claires sur la page de création de commande
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter (petit correctif)
+**Statut** : ✅ Résolu
 
 ---
 

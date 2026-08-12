@@ -1,7 +1,7 @@
 # Corriger une erreur de saisie dans les entrées de stock
 
 **Date du signalement** : 12/08/2026
-**Statut** : ⏳ À traiter
+**Statut** : ✅ Résolu
 
 ---
 
