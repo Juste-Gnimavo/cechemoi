@@ -14,6 +14,7 @@ import {
   Trash2,
   Filter,
   RefreshCw,
+  User,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -194,6 +195,13 @@ export default function MaterialsPage() {
             <Package className="h-3.5 w-3.5" />
             Rapports
           </Link>
+          <Link
+            href="/admin/materials/fiche-sortie-couturier"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 hover:border-primary-500 dark:hover:border-primary-500 rounded-lg transition-colors text-gray-700 dark:text-gray-300"
+          >
+            <User className="h-3.5 w-3.5" />
+            Fiche par couturier
+          </Link>
         </div>
       </div>
 
@@ -356,7 +364,13 @@ export default function MaterialsPage() {
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                          {material.name}
+                          <Link
+                            href={`/admin/materials/${material.id}`}
+                            className="hover:text-primary-500 hover:underline underline-offset-2"
+                            title="Ouvrir la fiche du matériel (historique complet)"
+                          >
+                            {material.name}
+                          </Link>
                           {material.isLowStock && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">
                               <AlertTriangle className="h-3 w-3" />

@@ -16,6 +16,9 @@ import {
   Calendar,
   Filter,
   RefreshCw,
+  Search,
+  Wrench,
+  X,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -34,6 +37,7 @@ interface Movement {
     id: string
     name: string
     unit: string
+    stock: number
     category: { name: string }
   }
   tailor: { id: string; name: string; phone: string } | null
@@ -90,6 +94,15 @@ function MovementsContent() {
   const [type, setType] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  // Correction d'un mouvement erroné (crée un ajustement, ne modifie jamais
+  // l'historique — voir messages/12)
+  const [correctingMovement, setCorrectingMovement] = useState<Movement | null>(null)
+  const [correctQty, setCorrectQty] = useState('')
+  const [correctReason, setCorrectReason] = useState('')
+  const [savingCorrection, setSavingCorrection] = useState(false)
 
   // Filter options
   const [materials, setMaterials] = useState<any[]>([])
@@ -100,8 +113,13 @@ function MovementsContent() {
   }, [])
 
   useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(t)
+  }, [search])
+
+  useEffect(() => {
     fetchMovements()
-  }, [materialId, tailorId, customOrderId, type, startDate, endDate])
+  }, [materialId, tailorId, customOrderId, type, startDate, endDate, debouncedSearch])
 
   const fetchFilterOptions = async () => {
     try {
@@ -129,6 +147,7 @@ function MovementsContent() {
       if (type) params.set('type', type)
       if (startDate) params.set('startDate', startDate)
       if (endDate) params.set('endDate', endDate)
+      if (debouncedSearch) params.set('search', debouncedSearch)
       params.set('limit', '100')
 
       const res = await fetch(`/api/admin/materials/movements?${params.toString()}`)
@@ -152,6 +171,70 @@ function MovementsContent() {
     setType('')
     setStartDate('')
     setEndDate('')
+    setSearch('')
+  }
+
+  const openCorrection = (movement: Movement) => {
+    setCorrectingMovement(movement)
+    setCorrectQty(String(movement.quantity))
+    setCorrectReason('')
+  }
+
+  const submitCorrection = async () => {
+    if (!correctingMovement) return
+    const correct = parseFloat(correctQty)
+    if (isNaN(correct) || correct < 0) {
+      toast.error('Quantité invalide')
+      return
+    }
+    if (!correctReason.trim()) {
+      toast.error('Le motif est obligatoire')
+      return
+    }
+    // Delta sur le stock : pour une entrée surestimée (10 saisi, 7 reçu),
+    // le stock doit baisser de 3 ; pour une sortie surestimée, il doit
+    // remonter d'autant.
+    const recorded = correctingMovement.quantity
+    const delta =
+      correctingMovement.type === 'IN' ? correct - recorded : recorded - correct
+    if (delta === 0) {
+      toast.error('La quantité corrigée est identique à la quantité saisie')
+      return
+    }
+    const newAbsoluteStock = correctingMovement.material.stock + delta
+    if (newAbsoluteStock < 0) {
+      toast.error(
+        `Impossible : le stock deviendrait négatif (${newAbsoluteStock} ${correctingMovement.material.unit})`
+      )
+      return
+    }
+
+    setSavingCorrection(true)
+    try {
+      const res = await fetch('/api/admin/materials/movements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          materialId: correctingMovement.material.id,
+          type: 'ADJUST',
+          quantity: newAbsoluteStock,
+          notes: `Correction du mouvement ${TYPE_CONFIG[correctingMovement.type].label.toLowerCase()} du ${formatDate(correctingMovement.createdAt)} : ${recorded} → ${correct} ${correctingMovement.material.unit}. Motif : ${correctReason.trim()}`,
+          reference: correctingMovement.id,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success('Correction enregistrée — le stock est rectifié')
+        setCorrectingMovement(null)
+        fetchMovements()
+      } else {
+        toast.error(data.error || 'Erreur lors de la correction')
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la correction')
+    } finally {
+      setSavingCorrection(false)
+    }
   }
 
   const formatPrice = (price: number) => {
@@ -218,6 +301,17 @@ function MovementsContent() {
         <div className="flex items-center gap-2 mb-4">
           <Filter className="h-4 w-4 text-gray-500" />
           <span className="font-medium text-gray-700 dark:text-gray-300">Filtres</span>
+        </div>
+        {/* Recherche par nom de matériel */}
+        <div className="relative mb-4">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un matériel par son nom (ex : Tissu spandesh)…"
+            className="w-full pl-9 pr-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <select
@@ -341,6 +435,16 @@ function MovementsContent() {
                         <p className="text-gray-400 dark:text-gray-500">
                           Stock: {movement.previousStock} → {movement.newStock}
                         </p>
+                        {(movement.type === 'IN' || movement.type === 'OUT') && (
+                          <button
+                            onClick={() => openCorrection(movement)}
+                            className="mt-1 inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            title="Erreur de saisie ? Créer un ajustement correctif"
+                          >
+                            <Wrench className="h-3 w-3" />
+                            Corriger
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -383,6 +487,90 @@ function MovementsContent() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Modal de correction */}
+      {correctingMovement && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-800 rounded-lg max-w-md w-full">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Corriger un mouvement
+              </h2>
+              <button
+                onClick={() => setCorrectingMovement(null)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg text-sm">
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {correctingMovement.material.name}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  {TYPE_CONFIG[correctingMovement.type].label} du{' '}
+                  {formatDate(correctingMovement.createdAt)} —{' '}
+                  <span className="font-medium">
+                    {correctingMovement.quantity} {correctingMovement.material.unit}
+                  </span>{' '}
+                  saisi(e)s
+                </p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Stock actuel : {correctingMovement.material.stock}{' '}
+                  {correctingMovement.material.unit}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+                  Quantité réelle du mouvement <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={correctQty}
+                  onChange={(e) => setCorrectQty(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Ex : 10 saisi au lieu de 7 → entrez 7. Le stock sera rectifié
+                  par un mouvement d&apos;ajustement — l&apos;historique n&apos;est
+                  jamais effacé.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+                  Motif de la correction <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={correctReason}
+                  onChange={(e) => setCorrectReason(e.target.value)}
+                  rows={2}
+                  placeholder="Ex : erreur de saisie, 7 rouleaux reçus et non 10"
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setCorrectingMovement(null)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={submitCorrection}
+                  disabled={savingCorrection}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {savingCorrection && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Rectifier le stock
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

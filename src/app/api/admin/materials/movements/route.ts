@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type') // IN, OUT, ADJUST, RETURN
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
+    const search = searchParams.get('search') // recherche par nom de matériel
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const skip = (page - 1) * limit
@@ -30,6 +31,10 @@ export async function GET(req: NextRequest) {
 
     if (materialId) {
       where.materialId = materialId
+    }
+
+    if (search) {
+      where.material = { name: { contains: search, mode: 'insensitive' } }
     }
 
     if (tailorId) {
@@ -65,6 +70,7 @@ export async function GET(req: NextRequest) {
               id: true,
               name: true,
               unit: true,
+              stock: true,
               category: {
                 select: { id: true, name: true },
               },
@@ -156,7 +162,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Type de mouvement invalide' }, { status: 400 })
     }
 
-    if (quantity <= 0) {
+    // ADJUST : quantity = nouveau stock absolu, zéro autorisé (inventaire à 0)
+    if (type === 'ADJUST' ? quantity < 0 : quantity <= 0) {
       return NextResponse.json({ error: 'La quantité doit être positive' }, { status: 400 })
     }
 

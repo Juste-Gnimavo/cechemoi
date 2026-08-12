@@ -305,8 +305,10 @@ function MaterialOutForm() {
             Action irréversible
           </p>
           <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-            La sortie de stock est irréversible et ne peut pas être modifiée par la suite.
-            Veuillez vérifier soigneusement les quantités avant de valider.
+            Un mouvement de stock ne se modifie pas après validation — vérifiez les
+            quantités. En cas d'erreur de saisie, utilisez le bouton « Corriger »
+            dans l'historique des mouvements : le stock sera rectifié par un
+            ajustement, sans effacer l'historique.
           </p>
         </div>
       </div>

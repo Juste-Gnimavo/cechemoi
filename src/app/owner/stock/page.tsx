@@ -6,6 +6,7 @@ import {
   PackageMinus,
   PackagePlus,
   Plus,
+  Scissors,
 } from 'lucide-react'
 import { OwnerHub } from '@/components/owner/owner-hub'
 
@@ -50,6 +51,13 @@ export default function OwnerStockPage() {
           sublabel: 'Historique des entrées et sorties',
           href: '/admin/materials/movements',
           icon: ArrowLeftRight,
+        },
+        {
+          key: 'fiche-couturier',
+          label: 'Fiche de sortie par couturier',
+          sublabel: 'Qui a pris quoi, sur quelle période — imprimable',
+          href: '/admin/materials/fiche-sortie-couturier',
+          icon: Scissors,
         },
       ]}
     />

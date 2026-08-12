@@ -146,8 +146,10 @@ function MaterialInForm() {
             Action irréversible
           </p>
           <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-            L'ajout de stock est irréversible et ne peut pas être modifié par la suite.
-            Veuillez vérifier soigneusement la quantité et le prix unitaire avant de valider.
+            Un mouvement de stock ne se modifie pas après validation — vérifiez la
+            quantité et le prix unitaire. En cas d'erreur de saisie, utilisez le
+            bouton « Corriger » dans l'historique des mouvements : le stock sera
+            rectifié par un ajustement, sans effacer l'historique.
           </p>
         </div>
       </div>

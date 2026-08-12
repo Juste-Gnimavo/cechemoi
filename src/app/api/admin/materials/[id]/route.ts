@@ -59,10 +59,57 @@ export async function GET(
         movementsCount: material._count.movements,
         isLowStock: material.lowStockThreshold > 0 && material.stock <= material.lowStockThreshold,
       },
+      // Statistiques pour la fiche matériel (?stats=true)
+      ...(searchParams.get('stats') === 'true'
+        ? { stats: await buildMaterialStats(id) }
+        : {}),
     })
   } catch (error) {
     console.error('Error fetching material:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
+  }
+}
+
+// Agrégats de la fiche matériel : totaux par type de mouvement + utilisation
+// par couturier (sorties uniquement)
+async function buildMaterialStats(materialId: string) {
+  const [byType, byTailorRaw] = await Promise.all([
+    prisma.materialMovement.groupBy({
+      by: ['type'],
+      where: { materialId },
+      _sum: { quantity: true, totalCost: true },
+      _count: true,
+    }),
+    prisma.materialMovement.groupBy({
+      by: ['tailorId'],
+      where: { materialId, type: 'OUT', tailorId: { not: null } },
+      _sum: { quantity: true, totalCost: true },
+      _count: true,
+      orderBy: { _sum: { quantity: 'desc' } },
+    }),
+  ])
+
+  const tailorIds = byTailorRaw.map((t) => t.tailorId).filter(Boolean) as string[]
+  const tailors = await prisma.user.findMany({
+    where: { id: { in: tailorIds } },
+    select: { id: true, name: true },
+  })
+  const tailorMap = new Map(tailors.map((t) => [t.id, t.name]))
+
+  return {
+    byType: byType.map((t) => ({
+      type: t.type,
+      count: t._count,
+      totalQuantity: t._sum.quantity || 0,
+      totalCost: t._sum.totalCost || 0,
+    })),
+    byTailor: byTailorRaw.map((t) => ({
+      tailorId: t.tailorId,
+      tailorName: tailorMap.get(t.tailorId!) || '—',
+      count: t._count,
+      totalQuantity: t._sum.quantity || 0,
+      totalCost: t._sum.totalCost || 0,
+    })),
   }
 }
 
