@@ -161,7 +161,10 @@ function mapPaymentMethod(method: string | null): PaymentMethod {
 
 /**
  * Sync a CustomOrderPayment to InvoicePayment
- * Called when a payment is added to a custom order
+ * Called when a payment is added to a custom order.
+ * Idempotent : un InvoicePayment ou un reçu déjà existants sont réutilisés
+ * (et leurs liens réparés), jamais dupliqués — un rejeu recalcule simplement
+ * le montant encaissé de la facture.
  */
 export async function syncPaymentToInvoice(
   customOrderPaymentId: string,
@@ -183,6 +186,7 @@ export async function syncPaymentToInvoice(
           name: true,
         },
       },
+      receipt: true,
     },
   })
 
@@ -197,50 +201,82 @@ export async function syncPaymentToInvoice(
     invoiceId = await createInvoiceFromCustomOrder(customOrderId, createdById)
   }
 
-  // Create InvoicePayment
-  const invoicePayment = await prisma.invoicePayment.create({
-    data: {
-      invoiceId,
-      amount: payment.amount,
-      paymentMethod: mapPaymentMethod(payment.paymentMethod),
-      reference: `CP-${customOrderPaymentId.slice(-8)}`,
-      paidAt: payment.paidAt,
-      notes: payment.notes,
-      createdById,
-    },
-  })
+  // Reuse the InvoicePayment if this payment was already synced; the link can
+  // point to a deleted row (onDelete: SetNull ne couvre pas ce champ), so verify it.
+  let invoicePaymentId: string | null = payment.invoicePaymentId
+  if (invoicePaymentId) {
+    const existing = await prisma.invoicePayment.findUnique({
+      where: { id: invoicePaymentId },
+      select: { id: true },
+    })
+    if (!existing) invoicePaymentId = null
+  }
 
-  // Link the invoice payment to custom order payment
-  await prisma.customOrderPayment.update({
-    where: { id: customOrderPaymentId },
-    data: { invoicePaymentId: invoicePayment.id },
-  })
+  if (!invoicePaymentId) {
+    const invoicePayment = await prisma.invoicePayment.create({
+      data: {
+        invoiceId,
+        amount: payment.amount,
+        paymentMethod: mapPaymentMethod(payment.paymentMethod),
+        reference: `CP-${customOrderPaymentId.slice(-8)}`,
+        paidAt: payment.paidAt,
+        notes: payment.notes,
+        createdById,
+      },
+    })
+    invoicePaymentId = invoicePayment.id
 
-  // Generate receipt
-  const receiptNumber = await generateReceiptNumber()
+    // Link the invoice payment to custom order payment
+    await prisma.customOrderPayment.update({
+      where: { id: customOrderPaymentId },
+      data: { invoicePaymentId },
+    })
+  }
 
-  const receipt = await prisma.receipt.create({
-    data: {
-      receiptNumber,
-      customOrderPaymentId,
-      invoicePaymentId: invoicePayment.id,
-      customerName: payment.customOrder.customer.name || 'Client',
-      customerPhone: payment.customOrder.customer.phone,
-      customerEmail: payment.customOrder.customer.email,
-      amount: payment.amount,
-      paymentMethod: payment.paymentMethod || 'CASH',
-      paymentDate: payment.paidAt,
-      invoiceId,
-      customOrderId,
-      createdById,
-      createdByName: payment.receivedBy?.name || null,
-    },
-  })
+  // Reuse the existing receipt (customOrderPaymentId is unique) or create one
+  let receiptId: string
+
+  if (payment.receipt) {
+    receiptId = payment.receipt.id
+
+    // Repair stale links (e.g. ancienne facture supprimée → SetNull)
+    if (
+      payment.receipt.invoicePaymentId !== invoicePaymentId ||
+      payment.receipt.invoiceId !== invoiceId ||
+      payment.receipt.customOrderId !== customOrderId
+    ) {
+      await prisma.receipt.update({
+        where: { id: receiptId },
+        data: { invoicePaymentId, invoiceId, customOrderId },
+      })
+    }
+  } else {
+    const receiptNumber = await generateReceiptNumber()
+
+    const receipt = await prisma.receipt.create({
+      data: {
+        receiptNumber,
+        customOrderPaymentId,
+        invoicePaymentId,
+        customerName: payment.customOrder.customer.name || 'Client',
+        customerPhone: payment.customOrder.customer.phone,
+        customerEmail: payment.customOrder.customer.email,
+        amount: payment.amount,
+        paymentMethod: payment.paymentMethod || 'CASH',
+        paymentDate: payment.paidAt,
+        invoiceId,
+        customOrderId,
+        createdById,
+        createdByName: payment.receivedBy?.name || null,
+      },
+    })
+    receiptId = receipt.id
+  }
 
   // Update invoice amountPaid and status
   await updateInvoiceAmountAndStatus(invoiceId)
 
-  return { invoicePaymentId: invoicePayment.id, receiptId: receipt.id }
+  return { invoicePaymentId, receiptId }
 }
 
 /**
