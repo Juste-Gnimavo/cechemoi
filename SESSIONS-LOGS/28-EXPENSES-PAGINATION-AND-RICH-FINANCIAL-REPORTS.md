@@ -83,10 +83,15 @@ La route `/api/admin/reports/financial/[family]` expose les nouveaux champs.
 - **Roll-up** : filtrer une catégorie principale dans la liste inclut ses enfants (`/api/admin/expenses`) ; les deux rapports (Caisse + `/admin/reports`) totalisent par parent avec détail par sous-catégorie (sous-lignes indentées cliquables) ; exports Excel/PDF : lignes « dont X (n) » sous le parent (pas de double comptage à la somme).
 - **Script** : `scripts/merge-expense-category.ts "<source>" "<cible>"` — réaffecte les dépenses, rattache les enfants, supprime la source (transactionnel).
 
-### Opérations prod à faire après déploiement (CEO, ~10 min)
-1. `npx prisma db push` (colonne additive, sans risque).
-2. Fusionner les doublons de casse avec le script (`LIVRAISON PAR CAMARA` → `Livraison par CAMARA`, `Livraison par YANGO` → `Livraison par yango`).
-3. Dans Caisse → Catégories, rattacher : « Salaires des couturiers », « Salaire Assistant(e) », « Salaire fille de ménage » → **Salaires** ; créer « **Achats** » et y rattacher les « ACHAT DE… » ; créer « **Livraison** » et y rattacher les « Livraison par… ». « Perleuse Rosette » / « Perleuse Marie chantale » : demander à la propriétaire (Salaires ou prestataires ?).
+### Opérations prod — TOUTES EXÉCUTÉES en fin de session
+1. ✅ `npx prisma db push` (CEO).
+2. ✅ Doublons fusionnés via `scripts/merge-expense-category.ts` (CAMARA, YANGO).
+3. ✅ Rattachements faits par le CEO dans l'UI : Salaires (3 sous-cat), Transport (1), ACHATS PAGNES ET TISSUS (5), Livraison (2).
+4. ✅ `scripts/organize-expense-categories.ts` exécuté : renommages (« LVRAISON » → « Livraison », « TRANSPORT » → « Transport », accents É/è), Wifi facture + Crédit d'appel → Communication, ordre d'affichage logique par famille.
+5. ⏳ Décisions propriétaire en attente : Perleuse Rosette / Perleuse Marie chantale (Salaires ou Prestataires ?), CHEZ BRODY'S (achats tissus ?).
+
+### Correctif complémentaire (3e partie de session)
+La page catégories affichait « 0 dépense(s) » partout : bug de mapping — l'API renvoie `expensesCount`/`childrenCount` mais la page lisait `_count.expenses`. Corrigé (+ gardes suppression et verrou du select parent rebranchés) ; le compte ne s'affiche que s'il est > 0.
 
 ---
 

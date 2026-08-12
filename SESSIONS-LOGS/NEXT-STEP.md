@@ -1,43 +1,52 @@
-# Prochaine session — Suite des retours de la propriétaire
+# Prochaine session — Volet Personnel sur le shell propriétaire (gestion.cechemoi.com)
 
-## Contexte
+## Tâche principale
 
-La session 28 a traité les deux premières remontées de la propriétaire (voir `SESSIONS-LOGS/28-EXPENSES-PAGINATION-AND-RICH-FINANCIAL-REPORTS.md`) :
+Ajouter un encart **Personnel** au shell propriétaire (`gestion.cechemoi.com`, capture : accueil à 6 tuiles) pour que la propriétaire gère son équipe : **voir la liste, ajouter, désactiver/réactiver, supprimer, voir les logs** — sur la base de l'existant, sans réécrire les pages métier.
 
-1. **« Salaires des couturiers » élucidé** : c'est une catégorie de dépense distincte de « Salaires », pas un doublon ni une erreur de calcul. Le vrai bug était la liste `/admin/expenses` tronquée silencieusement à 100 lignes — corrigé (pagination + deep-links depuis les rapports : cliquer sur une catégorie ouvre la liste des dépenses correspondantes).
-2. **`/admin/reports` enrichi** : les 7 onglets ont maintenant cartes KPI + barres de progression avec %, au niveau du rapport Caisse. Exports Excel/PDF intacts. Dark mode ajouté.
+### L'existant à réutiliser (vérifié en fin de session 28)
 
-Le CEO a indiqué : « on fera les autres après » — d'autres demandes de la propriétaire arrivent.
+- **Page** `/admin/team` (`src/app/admin/team/page.tsx`, 657 lignes) : liste des membres ADMIN/MANAGER/STAFF, stats, création (POST `/api/admin/team`), branchée sur l'API réelle.
+- **Page détail** `/admin/team/[id]`.
+- **API** `/api/admin/team` (GET liste + stats, POST création) et `/api/admin/team/[id]` (PATCH activation/désactivation soft-delete avec motif, garde-fou « impossible de désactiver le dernier ADMIN actif », `deactivatedAt/ById/Reason` en base). `lastLoginAt` est tracké et renvoyé (`lastLogin`).
+- **Session 21** : le système de désactivation vient de là (`SESSIONS-LOGS/21-TEAM-MEMBER-DEACTIVATION-AND-SMTP-FIX.md`).
 
-**Ajout 2e partie de session** : sous-catégories de dépenses implémentées (`ExpenseCategory.parentId`, 1 niveau, roll-up dans liste + rapports + exports, selects en optgroup, script de fusion). Voir section 4 du log 28.
+### Travail attendu
 
-## À faire au déploiement (CEO)
+1. **Tuile « Personnel »** dans `src/lib/owner/tiles.ts` (flag `enabled: true`, une ligne — pattern session 27).
+2. **Hub** `src/app/owner/personnel/page.tsx` sur le modèle des hubs existants (composant partagé `src/components/owner/owner-hub.tsx`, ~60 lignes) :
+   - Action principale : Ajouter un membre (`/admin/team` ouvre le modal ? vérifier — sinon pointer la liste).
+   - Cartes : Toute l'équipe (`/admin/team`), et ce qui a du sens après audit de la page.
+3. **Audit de `/admin/team` pour l'usage propriétaire** :
+   - Responsive iPhone (elle utilise iPhone/iPad — le shell est compact, la page métier n'a pas été auditée).
+   - Vérifier que la suppression existe (session 21 a préféré la désactivation ; « supprimer » demandé par le CEO = probablement garder le soft-delete et l'exposer clairement — trancher en session et l'expliquer).
+4. **« Voir logs »** : aujourd'hui seul `lastLoginAt` existe. Clarifier avec le CEO ce qu'il attend :
+   - Option minimale : colonne « Dernière connexion » déjà disponible — l'exposer proprement suffit peut-être.
+   - Option lourde : journal d'activité par membre (qui a saisi quelle dépense/commande — `createdById` existe déjà sur Expense, `createdByName` sur d'autres modèles). Ne construire un audit log complet QUE si demandé explicitement.
+5. Toujours le principe session 27 : strict minimum visible, pages `/admin/*` réutilisées, pas de réécriture.
 
-- [ ] **`npx prisma db push`** en prod (colonne additive `ExpenseCategory.parentId` + index — sans risque).
-- [ ] Fusionner les doublons de casse : `npx ts-node --compiler-options '{"module":"CommonJS"}' scripts/merge-expense-category.ts "LIVRAISON PAR CAMARA" "Livraison par CAMARA"` (idem YANGO).
-- [ ] Dans Caisse → Catégories, rattacher les sous-catégories : « Salaires des couturiers », « Salaire Assistant(e) », « Salaire fille de ménage » → **Salaires** ; créer « **Achats** » (parents des « ACHAT DE… ») ; créer « **Livraison** » (parents des « Livraison par… »). Pour « Perleuse Rosette » / « Perleuse Marie chantale » : demander à la propriétaire où les ranger.
+## Fait en session 28 (tout déployé, db push exécuté, scripts passés en prod)
 
-## À vérifier au déploiement
+- Mystère « Salaires des couturiers » élucidé (catégorie distincte + liste tronquée à 100) → pagination réelle + deep-links rapport → liste filtrée.
+- `/admin/reports` : 7 onglets enrichis (KPI, barres %, dark mode), exports intacts.
+- **Sous-catégories de dépenses** (`ExpenseCategory.parentId`, 1 niveau, roll-up liste + rapports + exports, selects optgroup).
+- Rangement prod exécuté : doublons CAMARA/YANGO fusionnés, renommages (Livraison, Transport, accents), Wifi + Crédit d'appel → Communication, ordre logique appliqué. Salaires (3), Transport (1), Achats (5), Livraison (2) rattachés par le CEO.
+- Fix affichage « 0 dépense(s) » (bug de mapping `_count` → `expensesCount`) ; compte réel affiché seulement si > 0.
 
-- [ ] `/admin/reports?tab=expenses` sur la période « 12 derniers mois » : les totaux doivent correspondre au rapport Caisse (20 858 725 CFA / 291 dépenses sur la capture du 12/08).
-- [ ] Cliquer « Salaires des couturiers » dans le rapport Caisse → la liste doit afficher exactement 7 dépenses.
-- [ ] Après rattachement : le rapport doit afficher « Salaires » avec le total global et les sous-lignes « Salaires des couturiers », « Salaire Assistant(e) »… cliquables.
-- [ ] Montrer à la propriétaire le clic catégorie → liste filtrée (c'est la réponse à sa question).
+## En attente (décisions propriétaire — à relancer)
 
-## Candidats proposés (non engagés)
+- **Perleuse Rosette / Perleuse Marie chantale** : sous « Salaires » ou créer « Prestataires » ? (rattachement = 2 clics dans Caisse → Catégories)
+- **CHEZ BRODY'S** : fournisseur de tissus ? → sous « ACHATS PAGNES ET TISSUS » ?
 
-- Bouton « Fusionner » directement dans `/admin/expenses/categories` si le script en ligne de commande s'avère pénible.
-
-## Vérifications en attente (héritées de la session 27)
+## Vérifications en attente (héritées)
 
 - [ ] Aucun compte admin avec `twoFactorEnabled = true` en base.
-- [ ] Responsive iPhone des formulaires métier : `/admin/expenses/new`, `/admin/customers/new`, `/admin/custom-orders/new`.
-- [ ] Committer ou écarter les fichiers de la session 26 restés en attente (package.json, package-lock.json, scripts/md-to-html.mjs, doc-web/*, RECRUTEMENT/, log 26).
+- [ ] Responsive iPhone : `/admin/expenses/new`, `/admin/customers/new`, `/admin/custom-orders/new`.
+- [ ] Fichiers session 26 non commités (package.json, package-lock.json, scripts/md-to-html.mjs, doc-web/*, RECRUTEMENT/, log 26) — committer ou écarter.
 
 ## Ensuite (file d'attente inchangée)
 
-- Itérations shell propriétaire gestion.cechemoi.com à la demande (voir workflow session 27 : tuiles `src/lib/owner/tiles.ts`, hubs `src/app/owner/*`).
 - Session UI polish (demander au CEO les 3-8 cibles visuelles précises avant de toucher quoi que ce soit).
-- Phase 2 du moteur de recherche admin (recherche dans les données : factures, clients, commandes par numéro / nom / téléphone).
+- Phase 2 du moteur de recherche admin (recherche dans les données : factures, clients, commandes).
 - Système de notifications (templates seed, triggers).
-- Page de gestion d'équipe + connexion des données mock aux APIs.
+- Bouton « Fusionner » dans `/admin/expenses/categories` si le script CLI s'avère pénible.
