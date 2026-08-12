@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, ArrowLeft, DollarSign, Calendar, CreditCard, User, FileText } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { ExpenseCategoryOptions } from '@/components/admin/ExpenseCategoryOptions'
 
 interface ExpenseCategory {
   id: string
   name: string
   icon: string
   color: string
+  parentId?: string | null
 }
 
 interface StaffMember {
@@ -170,11 +172,7 @@ export default function NewExpensePage() {
               className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Sélectionner une catégorie</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
+              <ExpenseCategoryOptions categories={categories} />
             </select>
           </div>
 

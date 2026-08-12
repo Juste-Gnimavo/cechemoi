@@ -38,12 +38,12 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Fetch all categories with expense count
+    // Fetch all categories with expense count (parentId inclus pour la hiérarchie)
     const categories = await prisma.expenseCategory.findMany({
       orderBy: { sortOrder: 'asc' },
       include: {
         _count: {
-          select: { expenses: true },
+          select: { expenses: true, children: true },
         },
       },
     })
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { name, description, icon, color } = body
+    const { name, description, icon, color, parentId } = body
 
     if (!name) {
       return NextResponse.json({ error: 'Le nom est requis' }, { status: 400 })
@@ -87,6 +87,24 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       return NextResponse.json({ error: 'Une catégorie avec ce nom existe déjà' }, { status: 400 })
+    }
+
+    // Validation du parent : il doit exister et être une catégorie principale
+    // (hiérarchie limitée à un niveau : pas de sous-sous-catégorie)
+    if (parentId) {
+      const parent = await prisma.expenseCategory.findUnique({
+        where: { id: parentId },
+        select: { id: true, parentId: true },
+      })
+      if (!parent) {
+        return NextResponse.json({ error: 'Catégorie principale introuvable' }, { status: 400 })
+      }
+      if (parent.parentId) {
+        return NextResponse.json(
+          { error: 'Une sous-catégorie ne peut pas servir de catégorie principale' },
+          { status: 400 }
+        )
+      }
     }
 
     // Get max sortOrder
@@ -103,6 +121,7 @@ export async function POST(req: NextRequest) {
         color: color || '#64748b',
         sortOrder: newSortOrder,
         isDefault: false,
+        parentId: parentId || null,
       },
     })
 

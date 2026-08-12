@@ -60,11 +60,14 @@ export async function PUT(
 
     const { id } = await params
     const body = await req.json()
-    const { name, description, icon, color, sortOrder } = body
+    const { name, description, icon, color, sortOrder, parentId } = body
 
     // Check if category exists
     const existing = await prisma.expenseCategory.findUnique({
       where: { id },
+      include: {
+        _count: { select: { children: true } },
+      },
     })
 
     if (!existing) {
@@ -81,6 +84,38 @@ export async function PUT(
       }
     }
 
+    // Validation du rattachement à une catégorie principale (1 niveau max)
+    if (parentId !== undefined && parentId !== null && parentId !== '') {
+      if (parentId === id) {
+        return NextResponse.json(
+          { error: 'Une catégorie ne peut pas être sa propre catégorie principale' },
+          { status: 400 }
+        )
+      }
+      if (existing._count.children > 0) {
+        return NextResponse.json(
+          {
+            error:
+              'Cette catégorie a des sous-catégories : détachez-les avant de la rattacher à une autre',
+          },
+          { status: 400 }
+        )
+      }
+      const parent = await prisma.expenseCategory.findUnique({
+        where: { id: parentId },
+        select: { id: true, parentId: true },
+      })
+      if (!parent) {
+        return NextResponse.json({ error: 'Catégorie principale introuvable' }, { status: 400 })
+      }
+      if (parent.parentId) {
+        return NextResponse.json(
+          { error: 'Une sous-catégorie ne peut pas servir de catégorie principale' },
+          { status: 400 }
+        )
+      }
+    }
+
     const category = await prisma.expenseCategory.update({
       where: { id },
       data: {
@@ -89,6 +124,8 @@ export async function PUT(
         icon: icon || existing.icon,
         color: color || existing.color,
         sortOrder: sortOrder !== undefined ? sortOrder : existing.sortOrder,
+        // parentId absent du body → inchangé ; null/'' → détaché ; sinon rattaché
+        ...(parentId !== undefined ? { parentId: parentId || null } : {}),
       },
     })
 
@@ -122,7 +159,7 @@ export async function DELETE(
       where: { id },
       include: {
         _count: {
-          select: { expenses: true },
+          select: { expenses: true, children: true },
         },
       },
     })
@@ -135,6 +172,16 @@ export async function DELETE(
     if (category._count.expenses > 0) {
       return NextResponse.json(
         { error: `Impossible de supprimer: cette catégorie contient ${category._count.expenses} dépense(s)` },
+        { status: 400 }
+      )
+    }
+
+    // Une catégorie principale avec des sous-catégories ne peut pas être supprimée
+    if (category._count.children > 0) {
+      return NextResponse.json(
+        {
+          error: `Impossible de supprimer: cette catégorie a ${category._count.children} sous-catégorie(s)`,
+        },
         { status: 400 }
       )
     }

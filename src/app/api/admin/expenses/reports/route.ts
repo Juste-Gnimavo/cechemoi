@@ -188,13 +188,54 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
-    // Get category details
-    const categoryIds = byCategory.map((c) => c.categoryId)
+    // Get category details — toutes les catégories (table courte), car un
+    // parent sans dépense directe doit quand même apparaître si ses
+    // sous-catégories en ont
     const categories = await prisma.expenseCategory.findMany({
-      where: { id: { in: categoryIds } },
-      select: { id: true, name: true, icon: true, color: true },
+      select: { id: true, name: true, icon: true, color: true, parentId: true },
     })
     const categoryMap = new Map(categories.map((c) => [c.id, c]))
+
+    // Roll-up hiérarchique : les montants des sous-catégories remontent dans
+    // leur catégorie principale, avec le détail par enfant conservé
+    type CategoryAgg = {
+      category: { id: string; name: string; icon: string | null; color: string | null }
+      count: number
+      totalAmount: number
+      children: { category: { id: string; name: string; icon: string | null; color: string | null }; count: number; totalAmount: number }[]
+    }
+    const rollup = new Map<string, CategoryAgg>()
+    for (const c of byCategory) {
+      const cat = categoryMap.get(c.categoryId)
+      if (!cat) continue
+      const parent = cat.parentId ? categoryMap.get(cat.parentId) : undefined
+      const root = parent || cat
+      let agg = rollup.get(root.id)
+      if (!agg) {
+        agg = {
+          category: { id: root.id, name: root.name, icon: root.icon, color: root.color },
+          count: 0,
+          totalAmount: 0,
+          children: [],
+        }
+        rollup.set(root.id, agg)
+      }
+      agg.count += c._count
+      agg.totalAmount += c._sum.amount || 0
+      if (parent) {
+        agg.children.push({
+          category: { id: cat.id, name: cat.name, icon: cat.icon, color: cat.color },
+          count: c._count,
+          totalAmount: c._sum.amount || 0,
+        })
+      }
+    }
+    const byCategoryRolled = Array.from(rollup.values()).sort(
+      (a, b) => b.totalAmount - a.totalAmount
+    )
+    for (const agg of byCategoryRolled) {
+      agg.children.sort((a, b) => b.totalAmount - a.totalAmount)
+    }
 
     // Get staff details for salary expenses
     const staffIds = byStaff.map((s) => s.staffId).filter(Boolean) as string[]
@@ -234,11 +275,7 @@ export async function GET(req: NextRequest) {
         totalAmount: totalExpenses._sum.amount || 0,
         count: totalExpenses._count,
       },
-      byCategory: byCategory.map((c) => ({
-        category: categoryMap.get(c.categoryId),
-        count: c._count,
-        totalAmount: c._sum.amount || 0,
-      })),
+      byCategory: byCategoryRolled,
       byPaymentMethod: byPaymentMethod.map((p) => ({
         method: p.paymentMethod,
         label: paymentMethodLabels[p.paymentMethod] || p.paymentMethod,

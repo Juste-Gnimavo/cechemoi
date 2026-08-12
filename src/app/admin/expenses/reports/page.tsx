@@ -43,6 +43,16 @@ interface ReportData {
     }
     count: number
     totalAmount: number
+    children?: {
+      category: {
+        id: string
+        name: string
+        icon: string | null
+        color: string | null
+      }
+      count: number
+      totalAmount: number
+    }[]
   }[]
   byPaymentMethod: {
     method: string
@@ -82,7 +92,7 @@ const PERIODS = [
   { value: 'yesterday', label: 'Hier' },
   { value: 'week', label: '7 derniers jours' },
   { value: 'month', label: '30 derniers jours' },
-  { value: 'year', label: 'Cette année' },
+  { value: 'year', label: '12 derniers mois' },
   { value: 'custom', label: 'Personnalisé' },
 ]
 
@@ -153,6 +163,16 @@ export default function ExpenseReportsPage() {
 
   const getIcon = (iconName: string | null) => {
     return ICONS[iconName || 'MoreHorizontal'] || MoreHorizontal
+  }
+
+  // Deep-link vers la liste des dépenses filtrée sur la période du rapport
+  const expensesLink = (extra: Record<string, string>) => {
+    const params = new URLSearchParams(extra)
+    if (data?.period) {
+      params.set('startDate', data.period.start.slice(0, 10))
+      params.set('endDate', data.period.end.slice(0, 10))
+    }
+    return `/admin/expenses?${params.toString()}`
   }
 
   if (loading && !data) {
@@ -302,6 +322,9 @@ export default function ExpenseReportsPage() {
                 <h2 className="font-semibold text-gray-900 dark:text-white">
                   Par Catégorie
                 </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Cliquez sur une catégorie pour voir la liste des dépenses correspondantes
+                </p>
               </div>
               <div className="p-4">
                 {data.byCategory.length === 0 ? (
@@ -316,34 +339,61 @@ export default function ExpenseReportsPage() {
                         ? Math.round((item.totalAmount / data.summary.totalAmount) * 100)
                         : 0
                       return (
-                        <div key={item.category?.id} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Icon
-                                className="h-4 w-4"
-                                style={{ color: item.category?.color || '#64748b' }}
-                              />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {item.category?.name || 'Inconnu'}
+                        <div key={item.category?.id}>
+                          <Link
+                            href={expensesLink(item.category?.id ? { categoryId: item.category.id } : {})}
+                            className="block space-y-1 rounded-lg -mx-2 px-2 py-1 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+                            title="Voir le détail des dépenses de cette catégorie (sous-catégories incluses)"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Icon
+                                  className="h-4 w-4"
+                                  style={{ color: item.category?.color || '#64748b' }}
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                  {item.category?.name || 'Inconnu'}
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {formatCurrency(item.totalAmount)}
                               </span>
                             </div>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {formatCurrency(item.totalAmount)}
-                            </span>
-                          </div>
-                          <div className="h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${percentage}%`,
-                                backgroundColor: item.category?.color || '#64748b',
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <span>{item.count} dépense(s)</span>
-                            <span>{percentage}%</span>
-                          </div>
+                            <div className="h-2 bg-gray-100 dark:bg-dark-700 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${percentage}%`,
+                                  backgroundColor: item.category?.color || '#64748b',
+                                }}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>{item.count} dépense(s)</span>
+                              <span>{percentage}%</span>
+                            </div>
+                          </Link>
+                          {/* Détail par sous-catégorie */}
+                          {item.children && item.children.length > 0 && (
+                            <div className="mt-1 ml-6 border-l-2 border-gray-100 dark:border-dark-700 pl-3 space-y-0.5">
+                              {item.children.map((child) => (
+                                <Link
+                                  key={child.category.id}
+                                  href={expensesLink({ categoryId: child.category.id })}
+                                  className="flex items-center justify-between gap-2 rounded px-2 py-0.5 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+                                  title="Voir les dépenses de cette sous-catégorie"
+                                >
+                                  <span className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                    {child.category.name}
+                                    <span className="text-gray-400 dark:text-gray-500"> · {child.count} dépense(s)</span>
+                                  </span>
+                                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                    {formatCurrency(child.totalAmount)}
+                                  </span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )
                     })}
@@ -372,7 +422,12 @@ export default function ExpenseReportsPage() {
                         ? Math.round((item.totalAmount / data.summary.totalAmount) * 100)
                         : 0
                       return (
-                        <div key={item.method} className="space-y-1">
+                        <Link
+                          key={item.method}
+                          href={expensesLink({ paymentMethod: item.method })}
+                          className="block space-y-1 rounded-lg -mx-2 px-2 py-1 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors"
+                          title="Voir le détail des dépenses payées par ce mode"
+                        >
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                               {item.label}
@@ -391,7 +446,7 @@ export default function ExpenseReportsPage() {
                             <span>{item.count} dépense(s)</span>
                             <span>{percentage}%</span>
                           </div>
-                        </div>
+                        </Link>
                       )
                     })}
                   </div>

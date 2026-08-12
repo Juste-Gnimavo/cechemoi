@@ -21,6 +21,7 @@ import {
   MoreHorizontal,
   DollarSign,
   Package,
+  CornerDownRight,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -32,8 +33,10 @@ interface ExpenseCategory {
   color: string | null
   isDefault: boolean
   sortOrder: number
+  parentId: string | null
   _count?: {
     expenses: number
+    children: number
   }
 }
 
@@ -95,6 +98,7 @@ export default function ExpenseCategoriesPage() {
   const [icon, setIcon] = useState('MoreHorizontal')
   const [color, setColor] = useState('#64748b')
   const [sortOrder, setSortOrder] = useState(0)
+  const [parentId, setParentId] = useState('')
 
   useEffect(() => {
     fetchCategories()
@@ -123,6 +127,7 @@ export default function ExpenseCategoriesPage() {
     setIcon('MoreHorizontal')
     setColor('#64748b')
     setSortOrder(categories.length + 1)
+    setParentId('')
     setShowModal(true)
   }
 
@@ -133,6 +138,7 @@ export default function ExpenseCategoriesPage() {
     setIcon(category.icon || 'MoreHorizontal')
     setColor(category.color || '#64748b')
     setSortOrder(category.sortOrder)
+    setParentId(category.parentId || '')
     setShowModal(true)
   }
 
@@ -164,6 +170,7 @@ export default function ExpenseCategoriesPage() {
           icon,
           color,
           sortOrder,
+          parentId: parentId || null,
         }),
       })
 
@@ -216,6 +223,28 @@ export default function ExpenseCategoriesPage() {
     return Icon
   }
 
+  // Liste hiérarchisée : catégories principales dans l'ordre, chacune suivie
+  // de ses sous-catégories. Une sous-catégorie dont le parent a disparu
+  // redevient principale (défensif).
+  const childrenByParent = new Map<string, ExpenseCategory[]>()
+  const rootCategories: ExpenseCategory[] = []
+  for (const c of categories) {
+    if (c.parentId && categories.some((p) => p.id === c.parentId)) {
+      const arr = childrenByParent.get(c.parentId) || []
+      arr.push(c)
+      childrenByParent.set(c.parentId, arr)
+    } else {
+      rootCategories.push(c)
+    }
+  }
+  const displayList = rootCategories.flatMap((root) => [
+    { category: root, isChild: false },
+    ...(childrenByParent.get(root.id) || []).map((child) => ({
+      category: child,
+      isChild: true,
+    })),
+  ])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -261,20 +290,28 @@ export default function ExpenseCategoriesPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-dark-700">
-            {categories.map((category) => {
+            {displayList.map(({ category, isChild }) => {
               const Icon = getIcon(category.icon)
+              const childCount = childrenByParent.get(category.id)?.length || 0
               return (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-dark-700/50"
+                  className={`flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-dark-700/50 ${
+                    isChild ? 'pl-10 bg-gray-50/50 dark:bg-dark-900/30' : ''
+                  }`}
                 >
                   <div className="flex items-center gap-4">
+                    {isChild && (
+                      <CornerDownRight className="h-4 w-4 text-gray-400 shrink-0" />
+                    )}
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      className={`rounded-lg flex items-center justify-center ${
+                        isChild ? 'w-8 h-8' : 'w-10 h-10'
+                      }`}
                       style={{ backgroundColor: `${category.color}20` }}
                     >
                       <Icon
-                        className="h-5 w-5"
+                        className={isChild ? 'h-4 w-4' : 'h-5 w-5'}
                         style={{ color: category.color || '#64748b' }}
                       />
                     </div>
@@ -286,6 +323,11 @@ export default function ExpenseCategoriesPage() {
                         {category.isDefault && (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-gray-400 rounded">
                             Par défaut
+                          </span>
+                        )}
+                        {childCount > 0 && (
+                          <span className="text-xs px-2 py-0.5 bg-primary-500/10 text-primary-600 dark:text-primary-400 rounded">
+                            {childCount} sous-catégorie{childCount > 1 ? 's' : ''}
                           </span>
                         )}
                       </div>
@@ -365,6 +407,33 @@ export default function ExpenseCategoriesPage() {
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="Description de la catégorie"
                 />
+              </div>
+
+              {/* Catégorie principale (hiérarchie à un niveau) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
+                  Catégorie principale (optionnel)
+                </label>
+                <select
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value)}
+                  disabled={!!editingCategory && (editingCategory._count?.children || 0) > 0}
+                  className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                >
+                  <option value="">Aucune — c'est une catégorie principale</option>
+                  {categories
+                    .filter((c) => !c.parentId && c.id !== editingCategory?.id)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {editingCategory && (editingCategory._count?.children || 0) > 0
+                    ? 'Cette catégorie a des sous-catégories : elle doit rester principale.'
+                    : 'Ex. rattacher « Salaires des couturiers » à « Salaires » : les rapports totaliseront par catégorie principale avec le détail par sous-catégorie.'}
+                </p>
               </div>
 
               {/* Icon */}

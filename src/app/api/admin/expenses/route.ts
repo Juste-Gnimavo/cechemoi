@@ -29,7 +29,15 @@ export async function GET(req: NextRequest) {
     const where: any = {}
 
     if (categoryId) {
-      where.categoryId = categoryId
+      // Roll-up hiérarchique : filtrer une catégorie principale inclut ses
+      // sous-catégories (ex. « Salaires » ⊇ « Salaires des couturiers »)
+      const children = await prisma.expenseCategory.findMany({
+        where: { parentId: categoryId },
+        select: { id: true },
+      })
+      where.categoryId = children.length
+        ? { in: [categoryId, ...children.map((c) => c.id)] }
+        : categoryId
     }
 
     if (staffId) {

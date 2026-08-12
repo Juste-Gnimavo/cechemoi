@@ -2381,11 +2381,20 @@ model ExpenseCategory {
   color       String?   // Couleur hex pour l'UI
   isDefault   Boolean   @default(false)
   sortOrder   Int       @default(0)
+
+  // Hiérarchie à UN niveau : sous-catégorie → catégorie principale.
+  // Ex. « Salaires des couturiers » (enfant) → « Salaires » (parent).
+  // Les rapports totalisent par parent avec détail des enfants.
+  parentId    String?
+  parent      ExpenseCategory?  @relation("ExpenseCategoryChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children    ExpenseCategory[] @relation("ExpenseCategoryChildren")
+
   expenses    Expense[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([sortOrder])
+  @@index([parentId])
 }
 
 // Modes de paiement pour les dépenses

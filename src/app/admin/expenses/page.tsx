@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   Loader2,
   Plus,
@@ -17,14 +18,18 @@ import {
   User,
   BarChart3,
   FolderOpen,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { ExpenseCategoryOptions } from '@/components/admin/ExpenseCategoryOptions'
 
 interface ExpenseCategory {
   id: string
   name: string
   icon: string
   color: string
+  parentId?: string | null
 }
 
 interface Expense {
@@ -52,27 +57,40 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   CARD: 'Carte',
 }
 
-export default function ExpensesPage() {
+const PAGE_SIZE = 50
+
+function ExpensesPageInner() {
+  // Deep-links depuis les rapports : /admin/expenses?categoryId=…&startDate=…&endDate=…
+  const searchParams = useSearchParams()
+
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [categories, setCategories] = useState<ExpenseCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [totals, setTotals] = useState({ totalAmount: 0, count: 0 })
 
+  // Pagination — la liste était auparavant tronquée silencieusement à 100 lignes
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
   // Filters
   const [search, setSearch] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+  const [categoryId, setCategoryId] = useState(searchParams.get('categoryId') || '')
+  const [paymentMethod, setPaymentMethod] = useState(searchParams.get('paymentMethod') || '')
+  const [startDate, setStartDate] = useState(searchParams.get('startDate') || '')
+  const [endDate, setEndDate] = useState(searchParams.get('endDate') || '')
 
   useEffect(() => {
     fetchCategories()
   }, [])
 
   useEffect(() => {
-    fetchExpenses()
+    setPage(1)
   }, [categoryId, paymentMethod, startDate, endDate])
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [categoryId, paymentMethod, startDate, endDate, page])
 
   const fetchCategories = async () => {
     try {
@@ -86,7 +104,12 @@ export default function ExpensesPage() {
     }
   }
 
+  // Garde anti-réponses obsolètes : un changement de filtre en page > 1
+  // déclenche deux fetchs (ancien page + reset page 1) — seul le dernier compte
+  const fetchIdRef = useRef(0)
+
   const fetchExpenses = async () => {
+    const fetchId = ++fetchIdRef.current
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -95,25 +118,33 @@ export default function ExpensesPage() {
       if (startDate) params.set('startDate', startDate)
       if (endDate) params.set('endDate', endDate)
       if (search) params.set('search', search)
-      params.set('limit', '100')
+      params.set('page', String(page))
+      params.set('limit', String(PAGE_SIZE))
 
       const res = await fetch(`/api/admin/expenses?${params.toString()}`)
       const data = await res.json()
+      if (fetchId !== fetchIdRef.current) return
       if (data.success) {
         setExpenses(data.expenses)
         setTotals(data.totals)
+        setTotalPages(data.pagination?.pages || 1)
       }
     } catch (error) {
+      if (fetchId !== fetchIdRef.current) return
       console.error('Error fetching expenses:', error)
       toast.error('Erreur lors du chargement')
     } finally {
-      setLoading(false)
+      if (fetchId === fetchIdRef.current) setLoading(false)
     }
   }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    fetchExpenses()
+    if (page !== 1) {
+      setPage(1) // le changement de page déclenche le fetch
+    } else {
+      fetchExpenses()
+    }
   }
 
   const clearFilters = () => {
@@ -246,12 +277,8 @@ export default function ExpensesPage() {
             onChange={(e) => setCategoryId(e.target.value)}
             className="px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm"
           >
-            <option value="">Toutes categories</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
+            <option value="">Toutes catégories</option>
+            <ExpenseCategoryOptions categories={categories} />
           </select>
           <select
             value={paymentMethod}
@@ -421,8 +448,48 @@ export default function ExpensesPage() {
               ))}
             </tbody>
           </table>
+          {/* Pagination */}
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-dark-700 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {totals.count} dépense{totals.count > 1 ? 's' : ''} au total — page {page} / {totalPages}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(Math.max(1, page - 1))}
+                  disabled={page <= 1 || loading}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Précédent
+                </button>
+                <button
+                  onClick={() => setPage(Math.min(totalPages, page + 1))}
+                  disabled={page >= totalPages || loading}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
+  )
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[300px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-400" />
+        </div>
+      }
+    >
+      <ExpensesPageInner />
+    </Suspense>
   )
 }
