@@ -1,5 +1,7 @@
 # Prochaine session — Volet Personnel sur le shell propriétaire (gestion.cechemoi.com)
 
+> **Backlog général** : la propriétaire a signalé 20+ problèmes. Les 12 premiers sont catalogués dans `messages/` (un fichier par problème : PROBLÈME / CAUSES / SOLUTIONS + note interne d'implémentation). Voir `messages/00-INDEX.md` pour les statuts et l'ordre d'implémentation proposé. La tâche ci-dessous = problème 03 de l'index.
+
 ## Tâche principale
 
 Ajouter un encart **Personnel** au shell propriétaire (`gestion.cechemoi.com`, capture : accueil à 6 tuiles) pour que la propriétaire gère son équipe : **voir la liste, ajouter, désactiver/réactiver, supprimer, voir les logs** — sur la base de l'existant, sans réécrire les pages métier.
