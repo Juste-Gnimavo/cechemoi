@@ -6,6 +6,9 @@ import {
   Wallet,
   FileBarChart,
   Cake,
+  ShoppingBag,
+  UserCog,
+  MessagesSquare,
 } from 'lucide-react'
 
 // =====================================================================
@@ -36,10 +39,18 @@ export const OWNER_TILES: OwnerTile[] = [
   },
   {
     key: 'custom-orders',
-    label: 'Commandes',
-    sublabel: 'Commandes sur mesure — la facture est créée automatiquement',
+    label: 'Commandes atelier',
+    sublabel: 'Sur mesure — suivi de confection, facture automatique',
     href: '/owner/commandes',
     icon: Scissors,
+    enabled: true,
+  },
+  {
+    key: 'online-shop',
+    label: 'Boutique en ligne',
+    sublabel: 'Commandes du site, produits, ventes au comptoir',
+    href: '/owner/boutique',
+    icon: ShoppingBag,
     enabled: true,
   },
   {
@@ -64,6 +75,22 @@ export const OWNER_TILES: OwnerTile[] = [
     sublabel: 'Chiffres et rapports, exports Excel et PDF',
     href: '/owner/rapports',
     icon: FileBarChart,
+    enabled: true,
+  },
+  {
+    key: 'personnel',
+    label: 'Personnel',
+    sublabel: 'Équipe, couturiers, performances, comptes',
+    href: '/owner/personnel',
+    icon: UserCog,
+    enabled: true,
+  },
+  {
+    key: 'messages',
+    label: 'Messages',
+    sublabel: 'SMS et WhatsApp — à un client ou à tous',
+    href: '/owner/messages',
+    icon: MessagesSquare,
     enabled: true,
   },
   {

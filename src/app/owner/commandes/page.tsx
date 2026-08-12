@@ -3,18 +3,18 @@
 import Link from 'next/link'
 import {
   ClipboardList,
+  Factory,
   Info,
   PlusCircle,
   Scissors,
-  ShoppingBag,
 } from 'lucide-react'
 import { OwnerHub } from '@/components/owner/owner-hub'
 
 export default function OwnerCommandesPage() {
   return (
     <OwnerHub
-      title="Commandes"
-      subtitle="Commandes sur mesure et commandes de la boutique en ligne"
+      title="Commandes atelier"
+      subtitle="Commandes sur mesure — les commandes du site sont dans Boutique en ligne"
       actions={[
         {
           key: 'new',
@@ -32,18 +32,18 @@ export default function OwnerCommandesPage() {
           icon: Scissors,
         },
         {
+          key: 'production',
+          label: 'Suivi de production',
+          sublabel: 'Les commandes par étape de confection',
+          href: '/admin/production',
+          icon: Factory,
+        },
+        {
           key: 'fiche-suivi',
           label: 'Fiche de suivi confection',
           sublabel: 'Fiche de suivi pour l’atelier',
           href: '/admin/custom-orders/fiche-suivi-confection',
           icon: ClipboardList,
-        },
-        {
-          key: 'shop-orders',
-          label: 'Commandes boutique',
-          sublabel: 'Commandes passées sur le site cechemoi.com',
-          href: '/admin/orders',
-          icon: ShoppingBag,
         },
       ]}
       notice={

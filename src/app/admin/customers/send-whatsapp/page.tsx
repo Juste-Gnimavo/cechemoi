@@ -80,7 +80,7 @@ export default function SendWhatsAppPage() {
 
       const customer: Customer = {
         id: customerData.customer.id,
-        name: `${customerData.customer.firstName} ${customerData.customer.lastName}`,
+        name: customerData.customer.name || customerData.customer.phone || 'Client',
         phone: customerData.customer.phone,
         whatsappNumber: customerData.customer.whatsappNumber || customerData.customer.phone,
         email: customerData.customer.email,
@@ -103,7 +103,7 @@ export default function SendWhatsAppPage() {
   // Search customers
   const handleSearch = async (query: string) => {
     setSearchQuery(query)
-    if (query.length < 2) {
+    if (query.length < 1) {
       setSearchResults([])
       return
     }
@@ -116,7 +116,7 @@ export default function SendWhatsAppPage() {
 
       const results: Customer[] = data.customers.map((c: any) => ({
         id: c.id,
-        name: `${c.firstName} ${c.lastName}`,
+        name: c.name || c.phone || 'Client',
         phone: c.phone,
         whatsappNumber: c.whatsappNumber || c.phone,
         email: c.email,

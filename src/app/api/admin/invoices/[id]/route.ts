@@ -48,6 +48,13 @@ export async function GET(
             shippingAddress: true,
           },
         },
+        customOrder: {
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+          },
+        },
         items: {
           include: {
             product: {

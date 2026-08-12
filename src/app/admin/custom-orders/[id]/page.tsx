@@ -184,6 +184,8 @@ export default function CustomOrderDetailPage() {
   const [showTimelineModal, setShowTimelineModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [downloadingPdf, setDownloadingPdf] = useState(false)
+  const [downloadingFicheSuivi, setDownloadingFicheSuivi] = useState(false)
+  const [generatingInvoice, setGeneratingInvoice] = useState(false)
 
   // Collapsed states
   const [itemsExpanded, setItemsExpanded] = useState(true)
@@ -534,6 +536,61 @@ export default function CustomOrderDetailPage() {
     setShowDeleteModal(false)
   }
 
+  const generateInvoice = async () => {
+    if (!order) return
+
+    try {
+      setGeneratingInvoice(true)
+      const response = await fetch(`/api/admin/custom-orders/${orderId}/generate-invoice`, {
+        method: 'POST',
+      })
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Erreur')
+      }
+
+      toast.success('Facture générée')
+      fetchOrder()
+    } catch (error) {
+      console.error('Generate invoice error:', error)
+      toast.error('Erreur lors de la génération de la facture')
+    } finally {
+      setGeneratingInvoice(false)
+    }
+  }
+
+  const downloadFicheSuivi = async () => {
+    if (!order) return
+
+    try {
+      setDownloadingFicheSuivi(true)
+      const response = await fetch(`/api/admin/custom-orders/${orderId}/fiche-suivi-confection`)
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Erreur')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `fiche_suivi_confection_${order.orderNumber.replace(/[^a-zA-Z0-9-]/g, '_')}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Fiche de suivi téléchargée')
+    } catch (error) {
+      console.error('Fiche de suivi download error:', error)
+      toast.error('Erreur lors du téléchargement de la fiche de suivi')
+    } finally {
+      setDownloadingFicheSuivi(false)
+    }
+  }
+
   const downloadPdf = async () => {
     if (!order) return
 
@@ -607,7 +664,30 @@ export default function CustomOrderDetailPage() {
             {order.createdBy && ` par ${order.createdBy.name}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {order.invoice && (
+            <Link
+              href={`/admin/invoices/${order.invoice.id}`}
+              className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors font-semibold"
+              title="Ouvrir la facture générée pour cette commande"
+            >
+              <Receipt className="h-4 w-4" />
+              <span>Voir la facture</span>
+            </Link>
+          )}
+          <button
+            onClick={downloadFicheSuivi}
+            disabled={downloadingFicheSuivi}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50"
+            title="Télécharger la fiche de suivi confection"
+          >
+            {downloadingFicheSuivi ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            <span>Fiche de suivi</span>
+          </button>
           <button
             onClick={downloadPdf}
             disabled={downloadingPdf}
@@ -909,6 +989,32 @@ export default function CustomOrderDetailPage() {
               ))}
             </select>
           </div>
+
+          {/* Facture manquante — réparation en un clic (voir messages/07) */}
+          {!order.invoice && order.status !== 'CANCELLED' && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Facture manquante
+              </h3>
+              <p className="text-sm text-amber-700 dark:text-amber-400 mb-3">
+                Cette commande n&apos;a pas de facture. Générez-la maintenant —
+                les acomptes déjà enregistrés y seront reportés.
+              </p>
+              <button
+                onClick={generateInvoice}
+                disabled={generatingInvoice}
+                className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors disabled:opacity-50 text-sm font-semibold"
+              >
+                {generatingInvoice ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Receipt className="h-4 w-4" />
+                )}
+                Générer la facture
+              </button>
+            </div>
+          )}
 
           {/* Invoice Section */}
           {order.invoice && (

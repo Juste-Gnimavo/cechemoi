@@ -33,6 +33,8 @@ import {
   Receipt,
   ExternalLink,
   Pencil,
+  Scissors,
+  ShoppingBag,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
@@ -126,6 +128,11 @@ interface InvoiceDetail {
     }
     items: any[]
     shippingAddress: any
+  } | null
+  customOrder: {
+    id: string
+    orderNumber: string
+    status: string
   } | null
   items: InvoiceItem[]
   createdBy: {
@@ -572,6 +579,26 @@ export default function InvoiceDetailPage() {
         <div className="flex items-center justify-between bg-white/50 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 p-3">
           {/* Left: Edit Actions */}
           <div className="flex items-center gap-2">
+            {invoice.customOrder && (
+              <Link
+                href={`/admin/custom-orders/${invoice.customOrder.id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200 text-sm font-semibold"
+                title={`Ouvrir la commande ${invoice.customOrder.orderNumber}`}
+              >
+                <Scissors className="h-4 w-4" />
+                Voir la commande associée
+              </Link>
+            )}
+            {invoice.order && (
+              <Link
+                href={`/admin/orders/${invoice.order.id}`}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-all duration-200 text-sm font-semibold"
+                title={`Ouvrir la commande ${invoice.order.orderNumber}`}
+              >
+                <ShoppingBag className="h-4 w-4" />
+                Voir la commande associée
+              </Link>
+            )}
             <Link
               href={`/admin/invoices/${params.id}/edit`}
               className="flex items-center gap-2 px-3 py-2 bg-primary-500/10 hover:bg-primary-500/20 text-primary-400 border border-primary-500/30 rounded-lg transition-all duration-200 text-sm font-medium"

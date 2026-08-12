@@ -416,9 +416,20 @@ export default function NewCustomOrderPage() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div className="text-sm text-blue-700 dark:text-blue-300">
-          <p>
-            Après la création de la commande, vous pourrez ajouter les <strong>sorties de matériels</strong> (tissu, fil, boutons...) et leur coût global depuis la page de la commande. Les <strong>acomptes</strong> et paiements pourront également être enregistrés par la suite.
-          </p>
+          <p className="font-semibold mb-1">Ce qui est automatique dès la création :</p>
+          <ul className="list-disc pl-5 space-y-0.5">
+            <li>
+              <strong>La facture est générée automatiquement</strong> — inutile d'en créer une à part.
+            </li>
+            <li>
+              Le <strong>suivi des étapes de confection</strong> (en production, essayage, prêt, livré) se fait
+              directement sur la commande, avec <strong>notification au client</strong> à chaque étape.
+            </li>
+            <li>
+              Les <strong>sorties de matériels</strong> (tissu, fil, boutons...) et les <strong>acomptes</strong>/paiements
+              s'enregistrent ensuite depuis la page de la commande.
+            </li>
+          </ul>
         </div>
       </div>
 

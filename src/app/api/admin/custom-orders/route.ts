@@ -442,11 +442,30 @@ export async function POST(req: NextRequest) {
       })
     } catch (invoiceError) {
       console.error('Error creating invoice:', invoiceError)
-      // Return the order even if invoice creation fails
+      // Nouvelle tentative — la génération est idempotente
+      try {
+        const retryInvoiceId = await createInvoiceFromCustomOrder(
+          order.id,
+          (session.user as any).id
+        )
+        return NextResponse.json({
+          success: true,
+          order,
+          invoiceId: retryInvoiceId,
+          message: 'Commande sur-mesure créée avec succès',
+        })
+      } catch (retryError) {
+        console.error('Invoice retry failed:', retryError)
+      }
+      // Échec définitif : la commande existe mais PAS la facture — le dire
+      // clairement au lieu de l'avaler (cause historique des commandes sans
+      // facture, voir messages/07)
       return NextResponse.json({
         success: true,
         order,
-        message: 'Commande créée (erreur facture)',
+        invoiceMissing: true,
+        message:
+          "Commande créée, mais la facture n'a PAS pu être générée. Ouvrez la commande et cliquez sur « Générer la facture ».",
       })
     }
   } catch (error) {

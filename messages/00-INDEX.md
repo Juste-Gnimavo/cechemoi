@@ -14,13 +14,20 @@
 | 10 | Fiche de sortie matériels par couturier | ⏳ À traiter | Page + PDF (données déjà en base) |
 | 11 | Entrées de stock, unités de mesure | ✅ Déjà disponible | Demander 2 exemples concrets avant de conclure |
 | 12 | Corriger une erreur d'entrée de stock | ⏳ À traiter | Mouvement d'ajustement avec motif |
+| 13 | Campagnes SMS/WhatsApp depuis gestion | ⏳ À traiter | Tuile Messages + hub (⚠ jamais WhatsApp Cloud — proxy Baileys) |
+| 14 | Recherche client cassée (send-sms/whatsapp) | ⏳ À traiter | Fix « undefined undefined » + recherche à la frappe |
+| 15 | Fiche matériel + recherche mouvements | ⏳ À traiter | Barre de recherche + page synthèse par matériel |
+| 16 | Gestion des couturiers visible | ⏳ À traiter | Carte dans la tuile Personnel |
+| 17 | Vente boutique au comptoir | ✅ Déjà disponible | Message + rappel du circuit, rien à coder |
 
-## Ordre d'implémentation proposé
+## LOT 1 — décision CEO du 12/08/2026
 
-1. **Session Personnel** (03) — déjà planifiée dans NEXT-STEP.
-2. **Lot correctifs rapides** (05, 06, 07) — une session : boutons, encart, enquête factures manquantes.
-3. **Stock** (10, 12) — une session : fiche par couturier + mouvements de correction.
-4. **Gros chantier production/notifications** (04) — une à deux sessions dédiées.
-5. **Séparation atelier/boutique** (08) — après décision du CEO sur l'approche.
+**La liste s'arrête à 17. Tout le lot est à implémenter et livrer d'un bloc**, puis la propriétaire vérifie avant qu'on prenne la suite de ses signalements. Ordre d'implémentation :
 
-Messages à envoyer sans attendre (rien à coder) : **09**, **11** (+ 01, 02 déjà prêts).
+1. Correctifs rapides : 05, 14
+2. Shell propriétaire : 03+16 (tuile Personnel), 13 (tuile Messages), 08 (séparation Commandes atelier / Boutique)
+3. Commandes/factures : 06 (boutons croisés), 07 (enquête + verrou)
+4. Stock : 15 (recherche + fiche matériel), 10 (fiche sortie par couturier), 12 (correction d'erreur)
+5. Production + notifications clientes : 04
+
+Messages à envoyer sans coder : **09**, **11**, **17** (+ 01, 02 déjà prêts).
