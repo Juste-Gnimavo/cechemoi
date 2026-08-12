@@ -1,22 +1,23 @@
 # [Titre court du problème]
 
-**Date du signalement** : JJ/MM/AAAA
-**Statut** : ✅ Résolu / 🔧 En cours / ⏳ À traiter
+Date : JJ/MM/AAAA — Statut : ✅ Résolu / 🔧 En cours / ⏳ À traiter
+
+## Message WhatsApp (à copier tel quel)
+
+*[TITRE COURT]* ✅
+
+*Problème :* [une ligne, ses mots à elle]
+
+*Cause :* [une ligne]
+
+*Solution :*
+• [point essentiel]
+• [point essentiel]
+• [3-4 points maximum]
+
+👉 [le geste concret qu'elle peut faire maintenant]
+
+[lien(s) d'accès]
 
 ---
-
-**PROBLÈME SOUMIS :**
-
-[Ce qu'elle a constaté, avec ses mots.]
-
-**CAUSES :**
-
-[Pourquoi ça se produisait — 2-3 phrases maximum, langage simple.]
-
-**SOLUTIONS IMPLÉMENTÉES :**
-
-[Ce qui a changé pour elle, concrètement. Finir par le geste qu'elle peut faire maintenant.]
-
-**CAPTURES / LIENS :**
-
-- [à compléter par le CEO avant envoi]
+NOTE INTERNE (ne pas envoyer) : [pointeurs techniques]

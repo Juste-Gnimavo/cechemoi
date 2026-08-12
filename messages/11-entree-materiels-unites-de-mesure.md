@@ -1,30 +1,16 @@
-# Entrée de matériels : toutes les unités de mesure
+# Entrée de matériels : unités de mesure
 
-**Date du signalement** : 12/08/2026
-**Statut** : ✅ Déjà disponible — exemple précis à nous donner si un cas bloque encore
+Date : 12/08/2026 — Statut : ✅ Déjà disponible — attendre ses 2 exemples si un cas bloque
 
----
+## Message WhatsApp (à copier tel quel)
 
-**PROBLÈME SOUMIS :**
+*UNITÉS DE MESURE — DÉJÀ GÉRÉ* ✅
 
-Pouvoir enregistrer les entrées de matériels quelle que soit l'unité de mesure : rouleau, mètre, centimètre, bobine, etc.
+Chaque matériel a son unité (rouleau, mètre, bobine, kg…), choisie à sa création. L'entrée de stock se fait automatiquement dans cette unité.
 
-**CAUSES :**
+👉 Si un article précis vous bloque encore, envoyez-moi *2 exemples concrets* (nom + unité voulue) et je regarde — c'est peut-être juste l'unité à corriger sur le matériel.
 
-Ce n'est pas un manque : chaque matériel a déjà son unité de mesure (bobine, rouleau, mètre…), définie à la création du matériel, et l'entrée de stock utilise automatiquement cette unité.
-
-**SOLUTIONS IMPLÉMENTÉES :**
-
-Rien à développer a priori — le système gère déjà toutes les unités. Exemple réel : « Fils grosse bobine rouge foncé » est suivi en **bobines**, et la quantité reçue se saisit dans cette unité.
-
-👉 Concrètement : si un type d'article précis vous pose encore problème, **donnez-nous deux exemples concrets** (nom de l'article + unité voulue) et nous vérifierons ensemble — il s'agit peut-être juste de créer le matériel avec la bonne unité.
-
-**CAPTURES / LIENS :**
-
-- Entrée de matériels : https://cechemoi.com/admin/materials/in
-- Créer un matériel (choix de l'unité) : https://cechemoi.com/admin/materials/new
-- [captures à joindre par le CEO]
+https://cechemoi.com/admin/materials/in
 
 ---
-
-*NOTE INTERNE (ne pas envoyer) : attendre ses 2 exemples avant de conclure. Hypothèse probable : elle veut saisir une entrée dans une unité différente de celle du matériel (ex. acheter un rouleau d'un tissu suivi en mètres) → ça, ce serait une conversion d'unités à l'entrée, pas encore supporté. À trancher avec ses exemples.*
+NOTE INTERNE (ne pas envoyer) : si ses exemples = saisir dans une unité différente de celle du matériel (rouleau acheté, stock suivi en mètres), c'est une conversion d'unités à l'entrée — pas encore supporté, à chiffrer.

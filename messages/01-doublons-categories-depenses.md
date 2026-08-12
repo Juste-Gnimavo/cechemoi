@@ -1,32 +1,21 @@
-# Doublons de catégories dans les rapports de dépenses (Salaires, Achats…)
+# Doublons de catégories dans les rapports de dépenses
 
-**Date du signalement** : 12/08/2026
-**Statut** : ✅ Résolu
+Date : 12/08/2026 — Statut : ✅ Résolu
 
----
+## Message WhatsApp (à copier tel quel)
 
-**PROBLÈME SOUMIS :**
+*DOUBLONS SALAIRES / ACHATS — RÉGLÉ* ✅
 
-Dans le rapport de la caisse, « Salaires » (7 587 000 CFA) et « Salaires des couturiers » (1 465 000 CFA) apparaissaient comme deux lignes séparées. Impossible de retrouver les 7 dépenses « Salaires des couturiers » dans la liste des dépenses. Même chose pour les achats (plusieurs lignes « ACHAT DE… ») et les livraisons en double.
+*Problème :* « Salaires » et « Salaires des couturiers » comptés séparément, et les 7 dépenses introuvables dans la liste.
 
-**CAUSES :**
+*Cause :* c'étaient des catégories séparées, et la liste n'affichait que les 100 dernières dépenses. Rien n'a jamais été perdu.
 
-1. « Salaires des couturiers », « Salaire Assistant(e) », « ACHAT DE TISSUS CHEZ… » etc. avaient été créées comme des catégories complètement séparées — le rapport les comptait donc chacune de leur côté, sans total commun.
-2. La liste des dépenses n'affichait que les 100 plus récentes, sans le dire : les dépenses plus anciennes étaient invisibles. C'est pour ça que les 7 dépenses restaient introuvables — elles existent bien, rien n'a jamais été perdu.
+*Solution :*
+• Catégories regroupées : *Salaires*, *Achats pagnes et tissus*, *Livraison*, *Communication*, *Prestataires*
+• Un seul total par grande catégorie, le détail en dessous
+• Doublons fusionnés (ex : 2 fois « Livraison par CAMARA »)
+• La liste affiche maintenant toutes les pages
 
-**SOLUTIONS IMPLÉMENTÉES :**
+👉 Cliquez sur une catégorie dans le rapport : la liste exacte des dépenses s'ouvre.
 
-1. Les catégories qui vont ensemble sont maintenant regroupées sous des catégories principales : **Salaires** (couturiers, assistante, fille de ménage), **Achats pagnes et tissus**, **Livraison**, **Communication**, **Prestataires** (perleuses, Brody's).
-2. Les vrais doublons ont été fusionnés (ex. « Livraison par CAMARA » existait en double).
-3. Le rapport affiche désormais **un seul total par grande catégorie**, avec le détail par sous-catégorie juste en dessous.
-4. **En cliquant sur une catégorie dans le rapport, la liste exacte des dépenses qui composent le montant s'ouvre directement.**
-5. La liste des dépenses affiche maintenant toutes les pages (boutons Précédent / Suivant), plus seulement les 100 dernières.
-
-👉 Concrètement : pour savoir d'où vient un montant, cliquez dessus dans le rapport — la liste détaillée s'affiche.
-
-**CAPTURES / LIENS :**
-
-- Rapport de caisse : https://cechemoi.com/admin/expenses/reports
-- Liste des dépenses : https://cechemoi.com/admin/expenses
-- Catégories rangées : https://cechemoi.com/admin/expenses/categories
-- [captures à joindre par le CEO]
+Rapport : https://cechemoi.com/admin/expenses/reports

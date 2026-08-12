@@ -1,28 +1,24 @@
-# Création et désactivation des comptes employés depuis gestion.cechemoi.com
+# Comptes employés depuis gestion.cechemoi.com
 
-**Date du signalement** : 12/08/2026
-**Statut** : ✅ Résolu — tuile Personnel en ligne
+Date : 12/08/2026 — Statut : ✅ Résolu — tuile Personnel en ligne
 
----
+## Message WhatsApp (à copier tel quel)
 
-**PROBLÈME SOUMIS :**
+*COMPTES EMPLOYÉS — NOUVELLE TUILE PERSONNEL* ✅
 
-Impossible de créer de nouveaux comptes employés ou de désactiver un compte depuis la nouvelle interface gestion.cechemoi.com.
+*Problème :* impossible de gérer les comptes employés depuis la nouvelle interface.
 
-**CAUSES :**
+*Solution :* nouvelle tuile *Personnel* sur l'accueil :
+• Ajouter un membre
+• Toute l'équipe (modifier, désactiver)
+• Performance de l'équipe
+• Gestion des couturiers
 
-La gestion de l'équipe existe déjà dans l'administration complète, mais aucune tuile ne la rend accessible depuis l'accueil simplifié de gestion.cechemoi.com.
+À savoir : on *désactive* un compte, on ne le supprime pas — comme à la banque. La personne ne peut plus se connecter, mais tout ce qu'elle a enregistré reste vérifiable.
 
-**SOLUTIONS IMPLÉMENTÉES :**
+👉 Accueil → Personnel
 
-Une tuile **Personnel** sera ajoutée à l'accueil : ajouter un membre, voir toute l'équipe, désactiver un compte, consulter les performances de chacun (clients créés, mensurations prises).
-
-Important : on ne **supprime** jamais un compte employé, on le **désactive** — comme à la banque, on ne supprime pas le compte d'une caissière après son départ, sinon tout ce qu'elle a enregistré perd son auteur et on ne peut plus vérifier. Un compte désactivé ne peut plus se connecter, mais tout son historique reste consultable.
-
-**CAPTURES / LIENS :**
-
-- [à compléter après implémentation]
+https://gestion.cechemoi.com
 
 ---
-
-*NOTE INTERNE (ne pas envoyer) : c'est la tâche principale du NEXT-STEP — hub Personnel sur `/admin/team`, `/admin/staff-performance`, `/admin/tailors`. Encart pédagogique désactivation vs suppression.*
+NOTE INTERNE (ne pas envoyer) : hub `/owner/personnel` → `/admin/team`, `/admin/staff-performance`, `/admin/tailors`.

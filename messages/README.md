@@ -2,16 +2,10 @@
 
 Un fichier par problème signalé, numéroté dans l'ordre d'arrivée (`01-`, `02-`…).
 
-**Format** (court, langage simple, zéro jargon technique) :
+Chaque fichier contient un bloc « Message WhatsApp » **à copier-coller tel quel** :
 
-```
-PROBLÈME SOUMIS : ce qu'elle a constaté, avec ses mots.
-CAUSES : pourquoi ça se produisait, en 2-3 phrases maximum.
-SOLUTIONS IMPLÉMENTÉES : ce qui a changé pour elle, concrètement.
-CAPTURES / LIENS : rempli par le CEO avant envoi WhatsApp.
-```
-
-Règles :
-- Chaque section tient en quelques lignes — si c'est long, c'est raté.
-- Toujours finir par ce qu'elle peut faire maintenant (le geste concret).
-- Le CEO joint les captures d'écran et les liens d'accès avant envoi.
+- Court : elle survole, elle ne lit pas les pavés. Listes à puces, l'essentiel, rien de plus — le CEO complète en note vocale.
+- Gras WhatsApp : `*texte*` (un seul astérisque), jamais `**texte**`.
+- Structure : *Problème* / *Cause* / *Solution* (3-4 puces max) / 👉 le geste concret / lien(s).
+- Le CEO joint les captures d'écran avant envoi.
+- La section « NOTE INTERNE » ne s'envoie jamais — pointeurs techniques pour les sessions de dev.
