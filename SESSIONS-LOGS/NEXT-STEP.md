@@ -11,19 +11,21 @@ Ajouter un encart **Personnel** au shell propriétaire (`gestion.cechemoi.com`, 
 - **API** `/api/admin/team` (GET liste + stats, POST création) et `/api/admin/team/[id]` (PATCH activation/désactivation soft-delete avec motif, garde-fou « impossible de désactiver le dernier ADMIN actif », `deactivatedAt/ById/Reason` en base). `lastLoginAt` est tracké et renvoyé (`lastLogin`).
 - **Session 21** : le système de désactivation vient de là (`SESSIONS-LOGS/21-TEAM-MEMBER-DEACTIVATION-AND-SMTP-FIX.md`).
 
+### Clarifications du CEO (fin de session 28 — décisions prises, ne pas re-demander)
+
+- **« Voir logs » = performances** : il s'agit de `/admin/staff-performance` (« Performance de l'Équipe » : clients créés, mensurations prises, dernière activité par membre — page existante, menu Équipe → Performance équipe).
+- **« Supprimer » = DÉSACTIVER (soft delete), jamais de suppression physique.** Analogie du CEO à reprendre telle quelle dans l'UI : comme à la banque, on ne supprime pas le compte d'une caissière après son départ, on le désactive — sinon les enregistrements qu'elle a saisis perdent leur propriétaire et l'audit devient impossible. Désactivé = ne peut plus se connecter, mais tout son historique reste attribué.
+- **À faire dans le CRM** : clarifier cette politique pour la propriétaire — encart d'information sur `/admin/team` (et/ou dans le hub Personnel) expliquant pourquoi « supprimer » s'appelle « désactiver », avec cette analogie. Vérifier le wording des boutons dans ce sens.
+
 ### Travail attendu
 
 1. **Tuile « Personnel »** dans `src/lib/owner/tiles.ts` (flag `enabled: true`, une ligne — pattern session 27).
 2. **Hub** `src/app/owner/personnel/page.tsx` sur le modèle des hubs existants (composant partagé `src/components/owner/owner-hub.tsx`, ~60 lignes) :
-   - Action principale : Ajouter un membre (`/admin/team` ouvre le modal ? vérifier — sinon pointer la liste).
-   - Cartes : Toute l'équipe (`/admin/team`), et ce qui a du sens après audit de la page.
-3. **Audit de `/admin/team` pour l'usage propriétaire** :
-   - Responsive iPhone (elle utilise iPhone/iPad — le shell est compact, la page métier n'a pas été auditée).
-   - Vérifier que la suppression existe (session 21 a préféré la désactivation ; « supprimer » demandé par le CEO = probablement garder le soft-delete et l'exposer clairement — trancher en session et l'expliquer).
-4. **« Voir logs »** : aujourd'hui seul `lastLoginAt` existe. Clarifier avec le CEO ce qu'il attend :
-   - Option minimale : colonne « Dernière connexion » déjà disponible — l'exposer proprement suffit peut-être.
-   - Option lourde : journal d'activité par membre (qui a saisi quelle dépense/commande — `createdById` existe déjà sur Expense, `createdByName` sur d'autres modèles). Ne construire un audit log complet QUE si demandé explicitement.
-5. Toujours le principe session 27 : strict minimum visible, pages `/admin/*` réutilisées, pas de réécriture.
+   - Action principale : Ajouter un membre (`/admin/team` — vérifier si le modal peut s'ouvrir en deep-link, sinon pointer la liste).
+   - Cartes : Toute l'équipe (`/admin/team`), Performance de l'équipe (`/admin/staff-performance`), Gestion des couturiers (`/admin/tailors`) si pertinent pour elle.
+   - Encart optionnel du hub : l'explication désactivation vs suppression (le composant `OwnerHub` supporte déjà un encart).
+3. **Audit de `/admin/team` pour l'usage propriétaire** : responsive iPhone (elle utilise iPhone/iPad — le shell est compact, la page métier n'a pas été auditée), wording des actions (« Désactiver » + explication, pas « Supprimer »).
+4. Toujours le principe session 27 : strict minimum visible, pages `/admin/*` réutilisées, pas de réécriture.
 
 ## Fait en session 28 (tout déployé, db push exécuté, scripts passés en prod)
 
