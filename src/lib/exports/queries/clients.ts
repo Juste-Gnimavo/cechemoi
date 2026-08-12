@@ -319,6 +319,40 @@ export async function fetchClientsReport(filters: ReportFilters): Promise<Financ
         })),
       },
     ],
+    kpis: [
+      { label: basisLabel, value: String(totalClients) },
+      { label: 'Dont nouveaux inscrits', value: String(newInPeriod) },
+      {
+        label: 'CA encaissé (vie entière)',
+        value: formatXOF(totalRevenue),
+        tone: 'positive',
+      },
+      {
+        label: 'Valeur moyenne par client (LTV)',
+        value: formatXOF(Math.round(avgLtv)),
+        sub: `Panier moyen : ${formatXOF(Math.round(avgBasket))}`,
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Segments',
+        format: 'number',
+        total: totalClients,
+        items: [
+          { label: 'VIP (5+ achats ou 100k+)', value: vipCount },
+          { label: 'Fidèles (2+ achats)', value: loyalCount },
+          { label: 'Un seul achat', value: oneTimeCount },
+          { label: 'Sans achat', value: noOrderCount },
+          { label: 'Inactifs (aucun achat 90j+)', value: inactiveCount },
+        ],
+      },
+      {
+        title: 'Acquisition (source déclarée)',
+        format: 'number',
+        total: totalClients,
+        items: topSources.map(([label, count]) => ({ label, value: count })),
+      },
+    ],
     columns: COLUMNS,
     rows,
     pagination: filters.exportMode ? undefined : { total: totalClients, page, pageSize },

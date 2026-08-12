@@ -55,13 +55,51 @@ export async function fetchExpensesReport(filters: ReportFilters): Promise<Finan
     }),
   ])
 
-  // Charger noms de catégories
-  const categoryIds = byCategoryRaw.map((c) => c.categoryId)
+  // Charger toutes les catégories (table courte) : un parent sans dépense
+  // directe doit apparaître si ses sous-catégories en ont
   const categories = await prisma.expenseCategory.findMany({
-    where: { id: { in: categoryIds } },
-    select: { id: true, name: true },
+    select: { id: true, name: true, color: true, parentId: true },
   })
-  const categoryMap = new Map(categories.map((c) => [c.id, c.name]))
+  const categoryMap = new Map(categories.map((c) => [c.id, c]))
+
+  // Roll-up hiérarchique : sous-catégories agrégées dans leur catégorie
+  // principale, détail par enfant conservé
+  type CategoryAgg = {
+    id: string
+    name: string
+    color: string | null
+    count: number
+    totalAmount: number
+    children: { id: string; name: string; count: number; totalAmount: number }[]
+  }
+  const rollup = new Map<string, CategoryAgg>()
+  for (const c of byCategoryRaw) {
+    const cat = categoryMap.get(c.categoryId)
+    if (!cat) continue
+    const parent = cat.parentId ? categoryMap.get(cat.parentId) : undefined
+    const root = parent || cat
+    let agg = rollup.get(root.id)
+    if (!agg) {
+      agg = { id: root.id, name: root.name, color: root.color, count: 0, totalAmount: 0, children: [] }
+      rollup.set(root.id, agg)
+    }
+    agg.count += c._count
+    agg.totalAmount += c._sum.amount || 0
+    if (parent) {
+      agg.children.push({
+        id: cat.id,
+        name: cat.name,
+        count: c._count,
+        totalAmount: c._sum.amount || 0,
+      })
+    }
+  }
+  const rolledCategories = Array.from(rollup.values()).sort(
+    (a, b) => b.totalAmount - a.totalAmount
+  )
+  for (const agg of rolledCategories) {
+    agg.children.sort((a, b) => b.totalAmount - a.totalAmount)
+  }
 
   const rows = expenses.map((e) => ({
     paymentDate: e.paymentDate,
@@ -74,6 +112,10 @@ export async function fetchExpensesReport(filters: ReportFilters): Promise<Finan
     amount: e.amount,
   }))
 
+  const totalAmount = agg._sum.amount || 0
+  const sortedByMethod = [...byMethod].sort((a, b) => (b._sum.amount || 0) - (a._sum.amount || 0))
+  const dateParams = `startDate=${start.toISOString().slice(0, 10)}&endDate=${end.toISOString().slice(0, 10)}`
+
   return {
     family: 'expenses',
     title: FAMILY_TITLES['expenses'],
@@ -83,21 +125,64 @@ export async function fetchExpensesReport(filters: ReportFilters): Promise<Finan
         title: 'Totaux',
         entries: [
           { label: 'Nombre de dépenses', value: String(total) },
-          { label: 'Montant total dépensé', value: formatXOF(agg._sum.amount || 0) },
+          { label: 'Montant total dépensé', value: formatXOF(totalAmount) },
         ],
       },
       {
         title: 'Par catégorie',
-        entries: byCategoryRaw.map((c) => ({
-          label: `${categoryMap.get(c.categoryId) || '—'} (${c._count})`,
-          value: formatXOF(c._sum.amount || 0),
-        })),
+        // Parent puis sous-catégories indentées. « dont » explicite que le
+        // montant enfant est déjà inclus dans le total parent (pas de double
+        // comptage à la somme de la colonne dans Excel).
+        entries: rolledCategories.flatMap((c) => [
+          { label: `${c.name} (${c.count})`, value: formatXOF(c.totalAmount) },
+          ...c.children.map((child) => ({
+            label: `    dont ${child.name} (${child.count})`,
+            value: formatXOF(child.totalAmount),
+          })),
+        ]),
       },
       {
         title: 'Par méthode',
-        entries: byMethod.map((m) => ({
+        entries: sortedByMethod.map((m) => ({
           label: `${labelPaymentMethod(m.paymentMethod)} (${m._count})`,
           value: formatXOF(m._sum.amount || 0),
+        })),
+      },
+    ],
+    kpis: [
+      { label: 'Total dépenses', value: formatXOF(totalAmount), tone: 'negative' },
+      { label: 'Nombre de dépenses', value: String(total) },
+      {
+        label: 'Moyenne par dépense',
+        value: total > 0 ? formatXOF(Math.round(totalAmount / total)) : formatXOF(0),
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par catégorie',
+        total: totalAmount,
+        items: rolledCategories.map((c) => ({
+          label: c.name,
+          value: c.totalAmount,
+          count: c.count,
+          color: c.color || undefined,
+          href: `/admin/expenses?categoryId=${c.id}&${dateParams}`,
+          children: c.children.map((child) => ({
+            label: child.name,
+            value: child.totalAmount,
+            count: child.count,
+            href: `/admin/expenses?categoryId=${child.id}&${dateParams}`,
+          })),
+        })),
+      },
+      {
+        title: 'Par mode de paiement',
+        total: totalAmount,
+        items: sortedByMethod.map((m) => ({
+          label: labelPaymentMethod(m.paymentMethod),
+          value: m._sum.amount || 0,
+          count: m._count,
+          href: `/admin/expenses?paymentMethod=${m.paymentMethod}&${dateParams}`,
         })),
       },
     ],

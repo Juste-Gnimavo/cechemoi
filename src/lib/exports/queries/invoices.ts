@@ -168,6 +168,71 @@ export async function fetchInvoicesReport(filters: ReportFilters): Promise<Finan
         })),
       },
     ],
+    kpis: [
+      { label: 'Factures', value: String(total) },
+      { label: 'Total facturé TTC', value: formatXOF(totalFacture) },
+      { label: 'Total encaissé', value: formatXOF(totalEncaisse), tone: 'positive' },
+      {
+        label: 'Reste dû',
+        value: formatXOF(Math.max(0, totalFacture - totalEncaisse)),
+        tone: 'warning',
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par origine',
+        total: totalFacture,
+        items: [
+          { label: 'En ligne', value: bySource.online.total, count: bySource.online.count },
+          { label: 'Sur mesure', value: bySource.custom.total, count: bySource.custom.count },
+          {
+            label: 'Autonome',
+            value: bySource.standalone.total,
+            count: bySource.standalone.count,
+          },
+        ],
+      },
+      {
+        title: 'Par statut',
+        total: totalFacture,
+        items: byStatus.map((s) => ({
+          label: labelInvoiceStatus(s.status),
+          value: s._sum.total || 0,
+          count: s._count,
+        })),
+      },
+    ],
+    details: [
+      {
+        title: 'Détail encaissement / reste dû',
+        entries: [
+          {
+            label: `Factures totalement payées (${paidStatus?._count || 0})`,
+            value: formatXOF(encaissePaid),
+          },
+          {
+            label: `Acomptes reçus sur partielles (${partialStatus?._count || 0})`,
+            value: formatXOF(encaissePartialAcomptes),
+          },
+          {
+            label: 'Solde restant sur partielles',
+            value: formatXOF(Math.max(0, restePartialSolde)),
+          },
+          {
+            label: `Factures envoyées non payées (${sentStatus?._count || 0})`,
+            value: formatXOF(resteSent),
+          },
+          ...(overdueStatus && overdueStatus._count > 0
+            ? [
+                {
+                  label: `Factures en retard (${overdueStatus._count})`,
+                  value: formatXOF(resteOverdue),
+                },
+              ]
+            : []),
+        ],
+      },
+    ],
     columns: COLUMNS,
     rows,
     pagination: filters.exportMode ? undefined : { total, page, pageSize },

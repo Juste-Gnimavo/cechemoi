@@ -98,6 +98,45 @@ export async function fetchRefundsReport(filters: ReportFilters): Promise<Financ
         })),
       },
     ],
+    kpis: [
+      { label: 'Remboursements', value: String(total) },
+      {
+        label: 'Montant total remboursé',
+        value: formatXOF(agg._sum.amount || 0),
+        tone: 'negative',
+      },
+      {
+        label: 'Traités',
+        value: String(byStatus.find((s) => s.status === 'processed')?._count || 0),
+        sub: formatXOF(byStatus.find((s) => s.status === 'processed')?._sum.amount || 0),
+      },
+      {
+        label: 'En attente',
+        value: String(byStatus.find((s) => s.status === 'pending')?._count || 0),
+        sub: formatXOF(byStatus.find((s) => s.status === 'pending')?._sum.amount || 0),
+        tone: 'warning',
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par statut',
+        total: agg._sum.amount || 0,
+        items: byStatus.map((s) => ({
+          label: STATUS_LABELS[s.status] || s.status,
+          value: s._sum.amount || 0,
+          count: s._count,
+        })),
+      },
+      {
+        title: 'Par type',
+        total: agg._sum.amount || 0,
+        items: byType.map((t) => ({
+          label: t.refundType === 'full' ? 'Total' : 'Partiel',
+          value: t._sum.amount || 0,
+          count: t._count,
+        })),
+      },
+    ],
     columns: COLUMNS,
     rows,
     pagination: filters.exportMode ? undefined : { total, page, pageSize },

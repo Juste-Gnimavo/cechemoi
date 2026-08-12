@@ -106,6 +106,45 @@ export async function fetchCustomOrdersReport(filters: ReportFilters): Promise<F
         })),
       },
     ],
+    kpis: [
+      { label: 'Commandes sur mesure', value: String(total) },
+      {
+        label: 'Coût total cumulé',
+        value: formatXOF(agg._sum.totalCost || 0),
+        sub: `dont matériel : ${formatXOF(agg._sum.materialCost || 0)}`,
+      },
+      {
+        label: 'Total encaissé (période)',
+        value: formatXOF(paymentAgg._sum.amount || 0),
+        tone: 'positive',
+      },
+      {
+        label: 'Reliquat estimé',
+        value: formatXOF(Math.max(0, (agg._sum.totalCost || 0) - (paymentAgg._sum.amount || 0))),
+        tone: 'warning',
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par statut',
+        items: byStatus.map((s) => ({
+          label: labelCustomOrderStatus(s.status),
+          value: s._sum.totalCost || 0,
+          count: s._count,
+        })),
+      },
+      {
+        title: 'Encaissement',
+        total: agg._sum.totalCost || 0,
+        items: [
+          { label: 'Encaissé', value: paymentAgg._sum.amount || 0 },
+          {
+            label: 'Reliquat',
+            value: Math.max(0, (agg._sum.totalCost || 0) - (paymentAgg._sum.amount || 0)),
+          },
+        ],
+      },
+    ],
     columns: COLUMNS,
     rows,
     pagination: filters.exportMode ? undefined : { total, page, pageSize },

@@ -156,6 +156,54 @@ export async function fetchOnlineSalesReport(filters: ReportFilters): Promise<Fi
         })),
       },
     ],
+    kpis: [
+      {
+        label: "Chiffre d'affaires TTC (payées)",
+        value: formatXOF(paidAgg._sum.total || 0),
+        tone: 'positive',
+      },
+      { label: 'Commandes payées', value: String(paidCount) },
+      {
+        label: 'Panier moyen',
+        value: paidCount > 0 ? formatXOF(Math.round((paidAgg._sum.total || 0) / paidCount)) : formatXOF(0),
+      },
+      {
+        label: 'Commandes en attente',
+        value: String(pendingCount),
+        sub: formatXOF(pendingAgg._sum.total || 0),
+        tone: 'warning',
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par méthode de paiement (payées)',
+        total: paidAgg._sum.total || 0,
+        items: byPaymentMethod.map((m) => ({
+          label: labelPaymentMethod(m.paymentMethod),
+          value: m._sum.total || 0,
+          count: m._count,
+        })),
+      },
+      {
+        title: 'Par statut de commande',
+        items: byStatus.map((s) => ({
+          label: labelOrderStatus(s.status),
+          value: s._sum.total || 0,
+          count: s._count,
+        })),
+      },
+    ],
+    details: [
+      {
+        title: 'Composition du CA (payées)',
+        entries: [
+          { label: 'Sous-total HT', value: formatXOF(paidAgg._sum.subtotal || 0) },
+          { label: 'Taxes', value: formatXOF(paidAgg._sum.tax || 0) },
+          { label: 'Livraison', value: formatXOF(paidAgg._sum.shippingCost || 0) },
+          { label: 'Remises accordées', value: formatXOF(paidAgg._sum.discount || 0) },
+        ],
+      },
+    ],
     columns: COLUMNS,
     rows,
     pagination: filters.exportMode ? undefined : { total, page, pageSize },

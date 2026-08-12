@@ -281,6 +281,30 @@ export async function fetchTransactionsReport(filters: ReportFilters): Promise<F
         })),
       },
     ],
+    kpis: [
+      { label: 'Transactions', value: String(total) },
+      { label: 'Montant total encaissé', value: formatXOF(totalAmount), tone: 'positive' },
+      {
+        label: 'Montant moyen',
+        value: total > 0 ? formatXOF(Math.round(totalAmount / total)) : formatXOF(0),
+      },
+    ],
+    breakdowns: [
+      {
+        title: 'Par source',
+        total: totalAmount,
+        items: Array.from(sourceMap.entries())
+          .sort((a, b) => b[1].total - a[1].total)
+          .map(([k, v]) => ({ label: k, value: v.total, count: v.count })),
+      },
+      {
+        title: 'Par méthode',
+        total: totalAmount,
+        items: Array.from(methodMap.entries())
+          .sort((a, b) => b[1].total - a[1].total)
+          .map(([k, v]) => ({ label: k, value: v.total, count: v.count })),
+      },
+    ],
     columns: COLUMNS,
     rows: rows as unknown as Record<string, unknown>[],
     pagination: filters.exportMode ? undefined : { total, page, pageSize },
