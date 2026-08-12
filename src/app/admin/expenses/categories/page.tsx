@@ -34,10 +34,9 @@ interface ExpenseCategory {
   isDefault: boolean
   sortOrder: number
   parentId: string | null
-  _count?: {
-    expenses: number
-    children: number
-  }
+  // L'API aplatit _count en expensesCount / childrenCount
+  expensesCount?: number
+  childrenCount?: number
 }
 
 const ICONS: { [key: string]: any } = {
@@ -191,8 +190,12 @@ export default function ExpenseCategoriesPage() {
   }
 
   const handleDelete = async (category: ExpenseCategory) => {
-    if (category._count && category._count.expenses > 0) {
-      toast.error(`Impossible de supprimer: ${category._count.expenses} dépense(s) liée(s)`)
+    if ((category.expensesCount || 0) > 0) {
+      toast.error(`Impossible de supprimer: ${category.expensesCount} dépense(s) liée(s)`)
+      return
+    }
+    if ((category.childrenCount || 0) > 0) {
+      toast.error(`Impossible de supprimer: ${category.childrenCount} sous-catégorie(s) rattachée(s)`)
       return
     }
 
@@ -336,9 +339,12 @@ export default function ExpenseCategoriesPage() {
                           {category.description}
                         </p>
                       )}
-                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        {category._count?.expenses || 0} dépense(s)
-                      </p>
+                      {/* Compte affiché seulement si la catégorie est utilisée */}
+                      {(category.expensesCount || 0) > 0 && (
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                          {category.expensesCount} dépense(s)
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -350,7 +356,7 @@ export default function ExpenseCategoriesPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(category)}
-                      disabled={category._count && category._count.expenses > 0}
+                      disabled={(category.expensesCount || 0) > 0 || (category.childrenCount || 0) > 0}
                       className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
@@ -417,7 +423,7 @@ export default function ExpenseCategoriesPage() {
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  disabled={!!editingCategory && (editingCategory._count?.children || 0) > 0}
+                  disabled={!!editingCategory && (editingCategory.childrenCount || 0) > 0}
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
                 >
                   <option value="">Aucune — c'est une catégorie principale</option>
@@ -430,7 +436,7 @@ export default function ExpenseCategoriesPage() {
                     ))}
                 </select>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {editingCategory && (editingCategory._count?.children || 0) > 0
+                  {editingCategory && (editingCategory.childrenCount || 0) > 0
                     ? 'Cette catégorie a des sous-catégories : elle doit rester principale.'
                     : 'Ex. rattacher « Salaires des couturiers » à « Salaires » : les rapports totaliseront par catégorie principale avec le détail par sous-catégorie.'}
                 </p>

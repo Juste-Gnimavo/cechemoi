@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
     const categoriesWithCount = categories.map((cat) => ({
       ...cat,
       expensesCount: cat._count.expenses,
+      childrenCount: cat._count.children,
       _count: undefined,
     }))
 
