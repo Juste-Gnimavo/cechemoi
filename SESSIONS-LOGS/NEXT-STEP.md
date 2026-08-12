@@ -35,10 +35,9 @@ Ajouter un encart **Personnel** au shell propriétaire (`gestion.cechemoi.com`, 
 - Rangement prod exécuté : doublons CAMARA/YANGO fusionnés, renommages (Livraison, Transport, accents), Wifi + Crédit d'appel → Communication, ordre logique appliqué. Salaires (3), Transport (1), Achats (5), Livraison (2) rattachés par le CEO.
 - Fix affichage « 0 dépense(s) » (bug de mapping `_count` → `expensesCount`) ; compte réel affiché seulement si > 0.
 
-## En attente (décisions propriétaire — à relancer)
+## Décisions résolues (fin de session 28)
 
-- **Perleuse Rosette / Perleuse Marie chantale** : sous « Salaires » ou créer « Prestataires » ? (rattachement = 2 clics dans Caisse → Catégories)
-- **CHEZ BRODY'S** : fournisseur de tissus ? → sous « ACHATS PAGNES ET TISSUS » ?
+- ✅ **PRESTATAIRES** créé par le CEO : Perleuse Rosette, Perleuse Marie chantale et CHEZ BRODY'S y sont rattachés. Le rangement des catégories de dépenses est terminé — plus rien en attente sur ce sujet.
 
 ## Vérifications en attente (héritées)
 
