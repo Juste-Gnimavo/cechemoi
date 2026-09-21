@@ -22,8 +22,15 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] **Le Personnel peut créer des factures** (cause : `POST /api/admin/invoices` exigeait ADMIN/MANAGER alors que la matrice accordait `invoices.create` au Personnel).
 - [x] **Étanchéité financière** : `transactions`, `expenses`, `reports`, `analytics/revenue-summary` et `analytics/products` fermés au Personnel ; montants expurgés dans `analytics/overview` et `invoices/stats`. Ces routes servaient la trésorerie au Personnel malgré le masquage à l'écran.
 - [x] Bouton « Voir les commandes » en tête de `/admin/materials`.
+- [x] Validé en production avec un compte Personnel : création de facture, création de commande sur mesure, saisie de dépense.
 
 - [x] **Saisie des dépenses préservée pour le Personnel** : permission `finance.expenses.create` — il saisit une dépense et relit ses propres écritures, sans cumul, sans rapports, sans voir les salaires. Le filtrage passe par `Expense.createdById` ; une dépense d'autrui renvoie 404, jamais 403.
+
+## À vérifier au prochain passage (session 31, non rejoué)
+
+- [ ] Avec un compte Personnel : `/admin/transactions`, `/admin/reports` et `/admin/sales` doivent rediriger vers `/admin`.
+- [ ] Tableau de bord d'un compte Personnel : doit s'afficher normalement et ne montrer aucun montant (ne pas tomber sur « Aucune donnée disponible »).
+- [ ] Bouton « Voir les commandes » en tête de `/admin/materials`.
 
 ## Prochaine session (au choix selon les retours)
 

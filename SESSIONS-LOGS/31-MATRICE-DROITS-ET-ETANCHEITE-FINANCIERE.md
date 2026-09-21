@@ -170,7 +170,23 @@ propre garde de page.
 - Différentiel d'accès du Personnel calculé automatiquement avant/après et
   vérifié ligne à ligne.
 
-## 8. Règle à ne pas casser
+## 8. Validation en production
+
+Déployé sur `main` (`f00fea6..9d84bba`, 156 fichiers) et testé par le CEO avec
+un compte de rôle `STAFF` sur `gestion.cechemoi.com`.
+
+| Parcours | Résultat |
+|---|---|
+| `/admin/invoices/new` — créer une facture | validé |
+| `/admin/custom-orders/new` — créer une commande sur mesure | validé |
+| `/admin/expenses/new` — saisir une dépense | validé |
+
+Non rejoués par le CEO, à vérifier à la prochaine occasion : la redirection des
+pages fermées (`/admin/transactions`, `/admin/reports`, `/admin/sales`),
+l'affichage du tableau de bord sans montants, et le bouton « Voir les
+commandes » de `/admin/materials`.
+
+## 9. Règle à ne pas casser
 
 **Aucun tableau de rôles codé en dur dans une route d'administration.** Toute
 nouvelle route passe par `denyUnlessPermitted`. L'écart entre ce que l'interface
