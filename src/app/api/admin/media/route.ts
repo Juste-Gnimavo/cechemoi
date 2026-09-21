@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { readdir, stat, unlink } from 'fs/promises'
 import path from 'path'
 
@@ -22,9 +23,9 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !session.user || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'media')
+    if (denied) return denied
 
     const searchParams = req.nextUrl.searchParams
     const category = searchParams.get('category') // Filter by category
@@ -133,9 +134,9 @@ export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !session.user || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'media.delete')
+    if (denied) return denied
 
     const { fileId } = await req.json()
 

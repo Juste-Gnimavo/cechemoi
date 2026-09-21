@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { notifyCustomOrderStatusChange } from '@/lib/custom-order-status-notifications'
 
@@ -11,9 +12,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'custom-orders')
+    if (denied) return denied
 
     const order = await prisma.customOrder.findUnique({
       where: { id: params.id },
@@ -115,9 +116,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'custom-orders')
+    if (denied) return denied
 
     const body = await req.json()
     const {
@@ -224,9 +225,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions)
 
     // Only ADMIN and MANAGER can delete
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'custom-orders.delete')
+    if (denied) return denied
 
     // Check if order exists
     const order = await prisma.customOrder.findUnique({

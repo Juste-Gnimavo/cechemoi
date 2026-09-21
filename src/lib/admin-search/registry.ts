@@ -164,20 +164,23 @@ export const MENU: MenuItem[] = [
       },
       {
         label: 'Ventes',
-        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+        // Chiffre d'affaires : direction uniquement
+        allowedRoles: ['ADMIN', 'MANAGER'],
         items: [
           { href: '/admin/sales', label: 'Toutes les ventes', badge: 'NEW' },
         ],
       },
       {
         label: 'Dépenses',
-        allowedRoles: ['ADMIN', 'MANAGER'],
+        // Le Personnel saisit et relit ses propres écritures ; les cumuls,
+        // rapports, catégories et transactions restent à la direction.
+        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
         items: [
-          { href: '/admin/expenses/categories', label: 'Catégories' },
-          { href: '/admin/expenses', label: 'Toutes les dépenses' },
           { href: '/admin/expenses/new', label: 'Ajouter une dépense', badge: 'NEW' },
-          { href: '/admin/expenses/reports', label: 'Rapports', badge: 'NEW' },
-          { href: '/admin/transactions', label: 'Transactions' },
+          { href: '/admin/expenses', label: 'Toutes les dépenses' },
+          { href: '/admin/expenses/categories', label: 'Catégories', allowedRoles: ['ADMIN', 'MANAGER'] },
+          { href: '/admin/expenses/reports', label: 'Rapports', badge: 'NEW', allowedRoles: ['ADMIN', 'MANAGER'] },
+          { href: '/admin/transactions', label: 'Transactions', allowedRoles: ['ADMIN', 'MANAGER'] },
         ],
       },
     ],

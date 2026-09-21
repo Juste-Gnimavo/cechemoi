@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 
@@ -15,9 +16,9 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'notifications')
+    if (denied) return denied
 
     const template = await prisma.notificationTemplate.findUnique({
       where: { id: params.id },
@@ -45,9 +46,9 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'notifications.manage')
+    if (denied) return denied
 
     const body = await req.json()
     const { name, description, content, enabled, pushTitle, pushBody } = body
@@ -88,9 +89,9 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'notifications.manage')
+    if (denied) return denied
 
     const body = await req.json()
     const updateData: any = {}

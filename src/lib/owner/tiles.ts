@@ -1,4 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
+import type { UserRole } from '@prisma/client'
+import { hasPermission, type Permission } from '@/lib/role-permissions'
 import {
   Users,
   Scissors,
@@ -26,6 +28,12 @@ export interface OwnerTile {
   href: string
   icon: LucideIcon
   enabled: boolean
+  /**
+   * Droit requis pour voir la tuile. Absent = visible par tout compte admin.
+   * Les tuiles « Caisse », « Rapports » et « Personnel » exposent la trésorerie
+   * et la masse salariale : elles restent réservées à la direction.
+   */
+  permission?: Permission
 }
 
 export const OWNER_TILES: OwnerTile[] = [
@@ -66,6 +74,7 @@ export const OWNER_TILES: OwnerTile[] = [
     label: 'Caisse',
     sublabel: 'Dépenses du jour, reçus et factures',
     href: '/owner/caisse',
+    permission: 'finance.expenses.create',
     icon: Wallet,
     enabled: true,
   },
@@ -74,6 +83,7 @@ export const OWNER_TILES: OwnerTile[] = [
     label: 'Rapports',
     sublabel: 'Chiffres et rapports, exports Excel et PDF',
     href: '/owner/rapports',
+    permission: 'reports.financial',
     icon: FileBarChart,
     enabled: true,
   },
@@ -82,6 +92,7 @@ export const OWNER_TILES: OwnerTile[] = [
     label: 'Personnel',
     sublabel: 'Équipe, couturiers, performances, comptes',
     href: '/owner/personnel',
+    permission: 'team',
     icon: UserCog,
     enabled: true,
   },
@@ -103,6 +114,11 @@ export const OWNER_TILES: OwnerTile[] = [
   },
 ]
 
-export function getEnabledTiles(): OwnerTile[] {
-  return OWNER_TILES.filter((t) => t.enabled)
+export function getEnabledTiles(role?: UserRole): OwnerTile[] {
+  return OWNER_TILES.filter((t) => {
+    if (!t.enabled) return false
+    if (!t.permission) return true
+    if (!role) return false
+    return hasPermission(role, t.permission)
+  })
 }

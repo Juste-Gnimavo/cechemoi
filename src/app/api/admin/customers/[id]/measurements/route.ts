@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -76,9 +77,9 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'customers')
+    if (denied) return denied
 
     // Verify customer exists
     const customer = await prisma.user.findUnique({
@@ -133,9 +134,9 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'customers')
+    if (denied) return denied
 
     // Verify customer exists
     const customer = await prisma.user.findUnique({
@@ -247,9 +248,9 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorise' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'customers')
+    if (denied) return denied
 
     // Verify customer exists
     const customer = await prisma.user.findUnique({

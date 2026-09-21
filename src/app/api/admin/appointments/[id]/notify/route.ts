@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { smsingService } from '@/lib/smsing-service'
 
@@ -11,9 +12,9 @@ export async function POST(
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments.manage')
+    if (denied) return denied
 
     const { id } = await params
     const body = await request.json()

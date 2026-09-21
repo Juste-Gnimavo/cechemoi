@@ -427,14 +427,18 @@ export default function AdminDashboard() {
 
   // Role-based permissions
   const userRole = (adminProfile?.role as UserRole) || 'STAFF'
-  const isAdminOrManager = userRole === 'ADMIN' || userRole === 'MANAGER'
   const isTailor = userRole === 'TAILOR'
-  const canSeeRevenue = isAdminOrManager // Only Admin/Manager can see global revenue stats
-  const canSeeCustomers = hasPermission(userRole, 'customers') || isAdminOrManager
-  const canSeeProducts = hasPermission(userRole, 'products') || isAdminOrManager
-  const canSeeOrders = hasPermission(userRole, 'orders') || isAdminOrManager
-  const canSeeMaterials = hasPermission(userRole, 'materials') || isAdminOrManager
-  const canSendNotifications = hasPermission(userRole, 'notifications') || isAdminOrManager
+  // La matrice de droits (src/lib/role-permissions.ts) fait autorité : ADMIN et
+  // MANAGER y ont '*', inutile de les traiter à part.
+  const canSeeRevenue = hasPermission(userRole, 'finance.revenue')
+  const canSeeExpenses = hasPermission(userRole, 'finance.expenses')
+  // Le Personnel saisit les dépenses du jour sans accéder aux cumuls
+  const canEnterExpenses = hasPermission(userRole, 'finance.expenses.create')
+  const canSeeCustomers = hasPermission(userRole, 'customers')
+  const canSeeProducts = hasPermission(userRole, 'products')
+  const canSeeOrders = hasPermission(userRole, 'orders')
+  const canSeeMaterials = hasPermission(userRole, 'materials')
+  const canSendNotifications = hasPermission(userRole, 'notifications')
 
   // Calculate daily and monthly revenue from revenueByDay
   const today = new Date()
@@ -818,8 +822,8 @@ export default function AdminDashboard() {
           </div>
           )}
 
-          {/* Financial Overview - Recettes vs Dépenses - Only for ADMIN/MANAGER */}
-          {isAdminOrManager && (
+          {/* Bilan financier — recettes contre dépenses, direction uniquement */}
+          {canSeeRevenue && canSeeExpenses && (
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -1472,7 +1476,7 @@ export default function AdminDashboard() {
                 </div>
               </a>
               )}
-              {isAdminOrManager && (
+              {hasPermission(userRole, 'analytics') && (
               <a
                 href="/admin/analytics"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-primary-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1512,7 +1516,7 @@ export default function AdminDashboard() {
                 </div>
               </a>
               )}
-              {isAdminOrManager && (
+              {canEnterExpenses && (
               <a
                 href="/admin/expenses"
                 className="block p-3 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 hover:border-red-500/30 rounded-lg transition-all text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -1523,7 +1527,7 @@ export default function AdminDashboard() {
                 </div>
               </a>
               )}
-              {isAdminOrManager && (
+              {canSeeRevenue && (
               <a
                 href="/admin/transactions"
                 className="block p-3 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-700/50 hover:border-emerald-500/50 rounded-lg transition-all text-emerald-700 dark:text-emerald-300"

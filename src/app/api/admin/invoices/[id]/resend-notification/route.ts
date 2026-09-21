@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { NotificationService } from '@/lib/notification-service'
 
@@ -14,14 +15,10 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
 
-    const userRole = (session.user as any).role
-    if (userRole !== 'ADMIN' && userRole !== 'MANAGER' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices')
+    if (denied) return denied
 
     // Get the invoice with order and user info
     const invoice = await prisma.invoice.findUnique({

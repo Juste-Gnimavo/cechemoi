@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import {
   syncPaymentToInvoice,
@@ -14,9 +15,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.payments')
+    if (denied) return denied
 
     // Check order exists
     const order = await prisma.customOrder.findUnique({
@@ -73,9 +74,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.payments')
+    if (denied) return denied
 
     const body = await req.json()
     const { amount, paymentType = 'INSTALLMENT', paymentMethod, notes, paidAt } = body
@@ -198,9 +199,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const session = await getServerSession(authOptions)
 
     // Only ADMIN and MANAGER can delete payments
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.delete')
+    if (denied) return denied
 
     const { searchParams } = new URL(req.url)
     const paymentId = searchParams.get('paymentId')

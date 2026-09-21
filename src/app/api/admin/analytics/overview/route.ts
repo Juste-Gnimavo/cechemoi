@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { computeCashReceipts } from '@/lib/finance/aggregations'
 
@@ -18,10 +19,9 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     // Allow ADMIN, MANAGER, STAFF, TAILOR to access dashboard stats
-    const allowedRoles = ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR']
-    if (!session || !allowedRoles.includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'dashboard')
+    if (denied) return denied
 
     const { searchParams } = new URL(req.url)
     const startDateParam = searchParams.get('startDate')
@@ -276,52 +276,76 @@ export async function GET(req: NextRequest) {
     // (/admin, /admin/analytics, /admin/analytics/revenue, /admin/transactions).
     // `fromInvoicePayments` est conservé pour back-compat mais vaut 0 — sa
     // valeur est désormais incluse dans `fromStandaloneInvoices`.
-    return NextResponse.json({
-      success: true,
-      analytics: {
-        revenue: {
-          total: cashReceipts.total,
-          fromOrders: cashReceipts.breakdown.orders,
-          fromStandaloneInvoices: cashReceipts.breakdown.standaloneInvoices,
-          fromCustomOrders: cashReceipts.breakdown.customOrders,
-          fromStandalonePayments: cashReceipts.breakdown.standalone,
-          fromInvoicePayments: 0,
-          fromAppointments: cashReceipts.breakdown.appointments,
-          subtotal: totalSubtotal,
-          tax: totalTax,
-          shipping: totalShipping,
-          discount: totalDiscount,
-        },
-        orders: {
-          total: totalOrders,
-          paid: paidOrdersCount,
-          byStatus: ordersByStatus,
-          byPaymentStatus: ordersByPaymentStatus,
-          byPaymentMethod: ordersByPaymentMethod,
-          averageValue: averageOrderValue,
-        },
-        standaloneInvoices: {
-          total: paidStandaloneInvoices.length,
-          revenue: cashReceipts.breakdown.standaloneInvoices,
-        },
-        customOrders: {
-          receiptsCount: dayCustomPayments.length,
-          revenue: cashReceipts.breakdown.customOrders,
-        },
-        items: {
-          totalSold: totalItemsSold,
-        },
-        customers: {
-          total: customerCount,
-        },
-        products: {
-          total: productCount,
-        },
-        revenueByDay,
-        topProducts,
-        comparison,
+    const analytics = {
+      revenue: {
+        total: cashReceipts.total,
+        fromOrders: cashReceipts.breakdown.orders,
+        fromStandaloneInvoices: cashReceipts.breakdown.standaloneInvoices,
+        fromCustomOrders: cashReceipts.breakdown.customOrders,
+        fromStandalonePayments: cashReceipts.breakdown.standalone,
+        fromInvoicePayments: 0,
+        fromAppointments: cashReceipts.breakdown.appointments,
+        subtotal: totalSubtotal,
+        tax: totalTax,
+        shipping: totalShipping,
+        discount: totalDiscount,
       },
-    })
+      orders: {
+        total: totalOrders,
+        paid: paidOrdersCount,
+        byStatus: ordersByStatus,
+        byPaymentStatus: ordersByPaymentStatus,
+        byPaymentMethod: ordersByPaymentMethod,
+        averageValue: averageOrderValue,
+      },
+      standaloneInvoices: {
+        total: paidStandaloneInvoices.length,
+        revenue: cashReceipts.breakdown.standaloneInvoices,
+      },
+      customOrders: {
+        receiptsCount: dayCustomPayments.length,
+        revenue: cashReceipts.breakdown.customOrders,
+      },
+      items: {
+        totalSold: totalItemsSold,
+      },
+      customers: {
+        total: customerCount,
+      },
+      products: {
+        total: productCount,
+      },
+      revenueByDay,
+      topProducts,
+      comparison,
+    }
+
+    // Étanchéité financière : le Personnel et les couturiers voient les volumes
+    // (commandes, clients, produits) mais jamais les montants. La forme du
+    // payload est préservée — les montants sont mis à zéro, pas supprimés —
+    // pour ne casser aucun consommateur existant.
+    if (!sessionCan(session, 'finance.revenue')) {
+      return NextResponse.json({
+        success: true,
+        analytics: {
+          ...analytics,
+          revenue: Object.fromEntries(
+            Object.keys(analytics.revenue).map((k) => [k, 0])
+          ) as typeof analytics.revenue,
+          orders: { ...analytics.orders, averageValue: 0 },
+          standaloneInvoices: { ...analytics.standaloneInvoices, revenue: 0 },
+          customOrders: { ...analytics.customOrders, revenue: 0 },
+          revenueByDay: [],
+          topProducts: analytics.topProducts.map((p: any) => ({ ...p, revenue: 0 })),
+          comparison: {
+            ...analytics.comparison,
+            revenue: { current: 0, previous: 0, change: 0 },
+          },
+        },
+      })
+    }
+
+    return NextResponse.json({ success: true, analytics })
   } catch (error) {
     console.error('Error fetching analytics:', error)
     return NextResponse.json(

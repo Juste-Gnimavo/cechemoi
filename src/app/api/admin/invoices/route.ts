@@ -6,6 +6,7 @@ import { generateInvoiceNumber } from '@/lib/invoice-generator'
 import { InvoiceStatus } from '@prisma/client'
 import { notificationService } from '@/lib/notification-service'
 import { smsingService } from '@/lib/smsing-service'
+import { requirePermission, denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -16,9 +17,9 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices')
+    if (denied) return denied
 
     const searchParams = req.nextUrl.searchParams
     const statusParam = searchParams.get('status')
@@ -117,11 +118,8 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/invoices - Create a new invoice (standalone or from order)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    const auth = await requirePermission('invoices.create')
+    if ('error' in auth) return auth.error
 
     const body = await req.json()
     const {
@@ -192,7 +190,7 @@ export async function POST(req: NextRequest) {
         notes: notes || null,
         issueDate: invoiceDate ? new Date(invoiceDate) : new Date(),
         dueDate: dueDate ? new Date(dueDate) : null,
-        createdById: (session.user as any).id,
+        createdById: auth.user.id,
         items: {
           create: items.map((item: any) => ({
             description: item.description,

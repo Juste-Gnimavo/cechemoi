@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments')
+    if (denied) return denied
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -106,9 +107,9 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments.manage')
+    if (denied) return denied
 
     const body = await request.json()
     const { id, status, paymentStatus, adminNotes, paymentMethod, paidAmount } = body

@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 import { getEnabledTiles } from '@/lib/owner/tiles'
 
 export default function OwnerHomePage() {
   const { data: session } = useSession()
-  const tiles = getEnabledTiles()
+  const tiles = getEnabledTiles((session?.user as { role?: UserRole } | undefined)?.role)
   const firstName = session?.user?.name?.split(' ')[0]
 
   return (

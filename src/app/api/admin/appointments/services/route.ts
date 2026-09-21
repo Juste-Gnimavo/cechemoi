@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 // GET - Fetch all consultation services (including disabled)
@@ -8,9 +9,9 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments')
+    if (denied) return denied
 
     const services = await prisma.consultationType.findMany({
       orderBy: { sortOrder: 'asc' }
@@ -38,9 +39,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments.availability')
+    if (denied) return denied
 
     const body = await request.json()
     const { name, description, price, duration, features, color, icon, enabled, requiresPayment, sortOrder } = body
@@ -95,9 +96,9 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments.availability')
+    if (denied) return denied
 
     const body = await request.json()
     const { id, name, description, price, duration, features, color, icon, enabled, requiresPayment, sortOrder } = body
@@ -146,9 +147,9 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     const user = session?.user as { id?: string; role?: string } | undefined
-    if (!session || !['ADMIN', 'MANAGER'].includes(user?.role || '')) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'appointments.availability')
+    if (denied) return denied
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

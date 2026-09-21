@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { pushNotificationService } from '@/lib/push-notification-service'
 import { PushTargetType } from '@prisma/client'
@@ -13,9 +14,9 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || !['ADMIN', 'MANAGER'].includes((session.user as any).role as string)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'campaigns')
+    if (denied) return denied
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -73,9 +74,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || !['ADMIN', 'MANAGER'].includes((session.user as any).role as string)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'campaigns.send')
+    if (denied) return denied
 
     const body = await request.json()
     const {
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     // Get user ID from session (admin/manager/staff)
     const user = await prisma.user.findFirst({
-      where: { email: session.user.email!, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
+      where: { email: session.user?.email!, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
       select: { id: true },
     })
 

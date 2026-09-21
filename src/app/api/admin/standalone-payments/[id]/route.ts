@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { resendStandalonePaymentNotification } from '@/lib/notifications/standalone-payment'
 
 export const dynamic = 'force-dynamic'
@@ -19,12 +20,9 @@ export async function GET(
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role || '')) {
-      return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.payments')
+    if (denied) return denied
 
     const { id } = await params
 
@@ -59,12 +57,9 @@ export async function POST(
   try {
     // Check authentication
     const session = await getServerSession(authOptions)
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any)?.role || '')) {
-      return NextResponse.json(
-        { success: false, error: 'Non autorisé' },
-        { status: 401 }
-      )
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.payments')
+    if (denied) return denied
 
     const { id } = await params
     const url = new URL(request.url)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -10,9 +11,13 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'finance.expenses.create')
+    if (denied) return denied
+
+    // Vue complète (tous auteurs + totaux) réservée à la direction. Qui n'a que
+    // le droit de saisie ne relit que ses propres écritures, sans aucun cumul.
+    const canSeeAllExpenses = sessionCan(session, 'finance.expenses')
 
     const { searchParams } = new URL(req.url)
     const categoryId = searchParams.get('categoryId')
@@ -27,6 +32,10 @@ export async function GET(req: NextRequest) {
 
     // Build where clause
     const where: any = {}
+
+    if (!canSeeAllExpenses) {
+      where.createdById = (session.user as { id?: string }).id ?? '__none__'
+    }
 
     if (categoryId) {
       // Roll-up hiérarchique : filtrer une catégorie principale inclut ses
@@ -120,9 +129,11 @@ export async function GET(req: NextRequest) {
         pages: Math.ceil(total / limit),
       },
       totals: {
-        totalAmount: totals._sum.amount || 0,
+        totalAmount: canSeeAllExpenses ? totals._sum.amount || 0 : 0,
         count: totals._count,
       },
+      // Indique au client qu'il consulte une vue restreinte à ses saisies
+      scope: canSeeAllExpenses ? 'all' : 'own',
     })
   } catch (error) {
     console.error('Error fetching expenses:', error)
@@ -135,9 +146,9 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'finance.expenses.create')
+    if (denied) return denied
 
     const body = await req.json()
     const {

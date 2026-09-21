@@ -15,6 +15,7 @@ import {
   Filter,
   RefreshCw,
   User,
+  ClipboardList,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -149,6 +150,13 @@ export default function MaterialsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin/custom-orders"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 hover:border-primary-500 dark:hover:border-primary-500 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            >
+              <ClipboardList className="h-4 w-4" />
+              Voir les commandes
+            </Link>
             <Link
               href="/admin/materials/in"
               className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"

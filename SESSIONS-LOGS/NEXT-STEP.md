@@ -16,6 +16,15 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] Aucun compte admin avec `twoFactorEnabled = true` en base prod.
 - [x] Fichiers session 26 commités ; `RECRUTEMENT/` et `doc-web/print-output/` mis en `.gitignore` (app quiz autonome avec futures réponses candidats, et HTML généré).
 
+## Fait en session 31 (21/09/2026)
+
+- [x] **Matrice de droits unifiée** : les 232 gardes des routes d'administration lisent désormais `src/lib/role-permissions.ts` via `denyUnlessPermitted`. Plus aucun tableau de rôles codé en dur. Voir `SESSIONS-LOGS/31-MATRICE-DROITS-ET-ETANCHEITE-FINANCIERE.md`.
+- [x] **Le Personnel peut créer des factures** (cause : `POST /api/admin/invoices` exigeait ADMIN/MANAGER alors que la matrice accordait `invoices.create` au Personnel).
+- [x] **Étanchéité financière** : `transactions`, `expenses`, `reports`, `analytics/revenue-summary` et `analytics/products` fermés au Personnel ; montants expurgés dans `analytics/overview` et `invoices/stats`. Ces routes servaient la trésorerie au Personnel malgré le masquage à l'écran.
+- [x] Bouton « Voir les commandes » en tête de `/admin/materials`.
+
+- [x] **Saisie des dépenses préservée pour le Personnel** : permission `finance.expenses.create` — il saisit une dépense et relit ses propres écritures, sans cumul, sans rapports, sans voir les salaires. Le filtrage passe par `Expense.createdById` ; une dépense d'autrui renvoie 404, jamais 403.
+
 ## Prochaine session (au choix selon les retours)
 
 1. **Corrections du lot 1** remontées par la propriétaire après vérification (le plus probable).
@@ -29,6 +38,7 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - Comptes employés : désactivation, jamais de suppression (analogie banque — encart dans le hub Personnel).
 - Stock : l'historique des mouvements ne se modifie jamais — bouton « Corriger » = mouvement ADJUST avec motif.
 - Sous-catégories de dépenses : 1 niveau max, roll-up partout, exports « dont X » sans double comptage.
+- Droits : **aucun tableau de rôles codé en dur** dans une route d'administration. Tout passe par `denyUnlessPermitted(session, '<permission>')` et la matrice `src/lib/role-permissions.ts`. Le Personnel ne doit jamais voir la trésorerie ni la masse salariale.
 - Sync paiement → facture : `syncPaymentToInvoice` est idempotente — ne jamais recréer un reçu ou un InvoicePayment existant, toujours finir par `updateInvoiceAmountAndStatus`.
 
 ## Ensuite (file d'attente inchangée)

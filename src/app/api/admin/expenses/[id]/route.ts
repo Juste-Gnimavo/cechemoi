@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/admin/expenses/[id] - Get single expense
+/**
+ * Sans le droit de vue complète, on n'accède qu'à ses propres écritures : une
+ * dépense saisie par quelqu'un d'autre — un salaire, notamment — reste invisible.
+ * On renvoie 404 et non 403, pour ne pas confirmer l'existence de la dépense.
+ */
+function forbidsOthersExpense(
+  session: { user?: unknown } | null,
+  expense: { createdById: string | null }
+): boolean {
+  if (sessionCan(session, 'finance.expenses')) return false
+  const userId = (session?.user as { id?: string } | undefined)?.id
+  return !userId || expense.createdById !== userId
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -13,9 +28,9 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'finance.expenses.create')
+    if (denied) return denied
 
     const { id } = await params
 
@@ -47,7 +62,7 @@ export async function GET(
       },
     })
 
-    if (!expense) {
+    if (!expense || forbidsOthersExpense(session, expense)) {
       return NextResponse.json({ error: 'Dépense non trouvée' }, { status: 404 })
     }
 
@@ -69,9 +84,9 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'finance.expenses.create')
+    if (denied) return denied
 
     const { id } = await params
     const body = await req.json()
@@ -92,7 +107,7 @@ export async function PUT(
       where: { id },
     })
 
-    if (!existing) {
+    if (!existing || forbidsOthersExpense(session, existing)) {
       return NextResponse.json({ error: 'Dépense non trouvée' }, { status: 404 })
     }
 
@@ -172,9 +187,9 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'finance.expenses')
+    if (denied) return denied
 
     const { id } = await params
 

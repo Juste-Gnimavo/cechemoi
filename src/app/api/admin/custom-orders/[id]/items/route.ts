@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -10,9 +11,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'custom-orders')
+    if (denied) return denied
 
     const body = await req.json()
     const { garmentType, customType, description, quantity = 1, unitPrice = 0, tailorId, estimatedHours } = body
@@ -226,9 +227,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'custom-orders')
+    if (denied) return denied
 
     const { searchParams } = new URL(req.url)
     const itemId = searchParams.get('itemId')

@@ -68,6 +68,9 @@ function ExpensesPageInner() {
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [totals, setTotals] = useState({ totalAmount: 0, count: 0 })
+  // 'own' : l'utilisateur n'a que le droit de saisie et ne voit que ses propres
+  // écritures, sans cumul. 'all' : vue complète (direction).
+  const [scope, setScope] = useState<'all' | 'own'>('all')
 
   // Pagination — la liste était auparavant tronquée silencieusement à 100 lignes
   const [page, setPage] = useState(1)
@@ -127,6 +130,7 @@ function ExpensesPageInner() {
       if (data.success) {
         setExpenses(data.expenses)
         setTotals(data.totals)
+        setScope(data.scope === 'own' ? 'own' : 'all')
         setTotalPages(data.pagination?.pages || 1)
       }
     } catch (error) {
@@ -201,10 +205,13 @@ function ExpensesPageInner() {
             Gestion des Dépenses
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Suivez toutes les dépenses de l'entreprise
+            {scope === 'own'
+              ? 'Vos saisies — les dépenses enregistrées par vous'
+              : "Suivez toutes les dépenses de l'entreprise"}
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {scope === 'all' && (
           <Link
             href="/admin/expenses/reports"
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
@@ -212,6 +219,8 @@ function ExpensesPageInner() {
             <BarChart3 className="h-4 w-4" />
             Rapports
           </Link>
+          )}
+          {scope === 'all' && (
           <Link
             href="/admin/expenses/categories"
             className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
@@ -219,6 +228,7 @@ function ExpensesPageInner() {
             <FolderOpen className="h-4 w-4" />
             Catégories
           </Link>
+          )}
           <Link
             href="/admin/expenses/new"
             className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
@@ -229,8 +239,9 @@ function ExpensesPageInner() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats — le cumul n'est affiché qu'en vue complète */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {scope === 'all' && (
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-500/10 rounded-lg">
@@ -242,13 +253,16 @@ function ExpensesPageInner() {
             </div>
           </div>
         </div>
+        )}
         <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-500/10 rounded-lg">
               <DollarSign className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Nombre de dépenses</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {scope === 'own' ? 'Vos saisies' : 'Nombre de dépenses'}
+              </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{totals.count}</p>
             </div>
           </div>
@@ -451,7 +465,7 @@ function ExpensesPageInner() {
           {/* Pagination */}
           <div className="px-4 py-3 border-t border-gray-200 dark:border-dark-700 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {totals.count} dépense{totals.count > 1 ? 's' : ''} au total — page {page} / {totalPages}
+              {totals.count} dépense{totals.count > 1 ? 's' : ''}{scope === 'own' ? ' saisie(s) par vous' : ' au total'} — page {page} / {totalPages}
             </p>
             {totalPages > 1 && (
               <div className="flex items-center gap-2">

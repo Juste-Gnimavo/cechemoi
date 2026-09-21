@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { InvoiceStatus } from '@prisma/client'
 import { computeBilled } from '@/lib/finance/aggregations'
@@ -27,9 +28,9 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices')
+    if (denied) return denied
 
     const { searchParams } = new URL(req.url)
     const { start, end } = resolveDateRange(
@@ -89,7 +90,7 @@ export async function GET(req: NextRequest) {
       _sum: { total: true },
     })
 
-    return NextResponse.json({
+    const payload = {
       success: true,
       stats: {
         // Compteurs globaux (lifetime, peu importe la période sélectionnée)
@@ -115,7 +116,25 @@ export async function GET(req: NextRequest) {
           revenue: thisMonthRevenueAgg._sum.total || 0,
         },
       },
-    })
+    }
+
+    // Étanchéité financière : sans droit sur les recettes, on renvoie les
+    // compteurs et le reste dû (outils de relance) mais aucun cumul encaissé.
+    if (!sessionCan(session, 'finance.revenue')) {
+      return NextResponse.json({
+        ...payload,
+        stats: {
+          ...payload.stats,
+          billedTotal: 0,
+          cashReceipts: 0,
+          totalRevenue: 0,
+          averageInvoiceValue: 0,
+          thisMonth: { invoices: thisMonthInvoicesCount, revenue: 0 },
+        },
+      })
+    }
+
+    return NextResponse.json(payload)
   } catch (error) {
     console.error('Error fetching invoice stats:', error)
     return NextResponse.json(

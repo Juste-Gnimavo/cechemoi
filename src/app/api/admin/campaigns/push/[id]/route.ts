@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 // Force dynamic rendering for API routes using auth
@@ -17,9 +18,9 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || !['ADMIN', 'MANAGER'].includes((session.user as any).role as string)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'campaigns')
+    if (denied) return denied
 
     const campaign = await prisma.pushCampaign.findUnique({
       where: { id: params.id },
@@ -61,9 +62,9 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || !['ADMIN'].includes((session.user as any).role as string)) {
-      return NextResponse.json({ error: 'Non autorisé - Admin uniquement' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'campaigns.manage')
+    if (denied) return denied
 
     const campaign = await prisma.pushCampaign.findUnique({
       where: { id: params.id },

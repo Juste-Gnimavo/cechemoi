@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
+import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 // Force dynamic rendering for API routes using auth
@@ -12,9 +13,9 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     // Only ADMIN can view staff performance
-    if (!session || !['ADMIN', 'MANAGER'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'analytics')
+    if (denied) return denied
 
     const searchParams = req.nextUrl.searchParams
     const startDate = searchParams.get('startDate')
