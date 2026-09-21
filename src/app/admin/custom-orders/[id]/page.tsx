@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -19,10 +19,7 @@ import {
   Edit2,
   MessageSquare,
   Ruler,
-  ChevronDown,
-  ChevronUp,
   Send,
-  Package,
   Download,
   FileText,
   Receipt,
@@ -159,10 +156,28 @@ interface Attachment {
   createdAt: string
 }
 
-export default function CustomOrderDetailPage() {
+type TabId = 'items' | 'payments' | 'materials' | 'attachments' | 'timeline' | 'notes'
+
+const TAB_IDS: TabId[] = ['items', 'payments', 'materials', 'attachments', 'timeline', 'notes']
+
+function CustomOrderDetailContent() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const orderId = params.id as string
+
+  // Onglet actif, synchronisé avec l'URL (?tab=) pour survivre au rechargement
+  const urlTab = searchParams.get('tab') as TabId | null
+  const [activeTab, setActiveTab] = useState<TabId>(
+    urlTab && TAB_IDS.includes(urlTab) ? urlTab : 'items'
+  )
+
+  const changeTab = (id: TabId) => {
+    setActiveTab(id)
+    const next = new URLSearchParams(searchParams.toString())
+    next.set('tab', id)
+    router.replace(`/admin/custom-orders/${orderId}?${next.toString()}`, { scroll: false })
+  }
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -171,7 +186,6 @@ export default function CustomOrderDetailPage() {
   const [materialUsages, setMaterialUsages] = useState<MaterialUsage[]>([])
   const [materialTotalCost, setMaterialTotalCost] = useState(0)
   const [attachments, setAttachments] = useState<Attachment[]>([])
-  const [attachmentsExpanded, setAttachmentsExpanded] = useState(true)
   const [uploadingFile, setUploadingFile] = useState(false)
 
   // Notes editing
@@ -187,11 +201,6 @@ export default function CustomOrderDetailPage() {
   const [downloadingFicheSuivi, setDownloadingFicheSuivi] = useState(false)
   const [generatingInvoice, setGeneratingInvoice] = useState(false)
 
-  // Collapsed states
-  const [itemsExpanded, setItemsExpanded] = useState(true)
-  const [paymentsExpanded, setPaymentsExpanded] = useState(true)
-  const [timelineExpanded, setTimelineExpanded] = useState(true)
-  const [materialsExpanded, setMaterialsExpanded] = useState(true)
 
   // Payment form
   const [paymentAmount, setPaymentAmount] = useState(0)
@@ -645,8 +654,17 @@ export default function CustomOrderDetailPage() {
     (new Date(order.pickupDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   )
 
+  const tabs: { id: TabId; label: string; icon: any; count?: number }[] = [
+    { id: 'items', label: 'Articles', icon: Scissors, count: order.items.length },
+    { id: 'payments', label: 'Paiements', icon: CreditCard, count: order.payments.length },
+    { id: 'materials', label: 'Matériels', icon: Box, count: materialUsages.length },
+    { id: 'attachments', label: 'Fichiers', icon: Paperclip, count: attachments.length },
+    { id: 'timeline', label: 'Historique', icon: Clock, count: order.timeline.length },
+    { id: 'notes', label: 'Notes', icon: MessageSquare },
+  ]
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -747,205 +765,427 @@ export default function CustomOrderDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Customer Info */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <User className="h-5 w-5 text-primary-400" />
-              Client
-            </h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white text-lg">{order.customer.name}</p>
-                <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  {order.customer.phone}
-                </p>
-                {order.customer.email && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">{order.customer.email}</p>
-                )}
-                {order.customer.city && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    {order.customer.city}, {order.customer.country || 'Côte d\'Ivoire'}
-                  </p>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {order.customer.whatsappNumber && (
-                  <a
-                    href={`https://wa.me/${order.customer.whatsappNumber.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-colors"
-                    title="WhatsApp"
-                  >
-                    <Send className="h-5 w-5 text-green-500" />
-                  </a>
-                )}
-                <Link
-                  href={`/admin/customers/${order.customer.id}`}
-                  className="p-2 bg-primary-500/10 hover:bg-primary-500/20 rounded-lg transition-colors"
-                  title="Voir le profil"
-                >
-                  <User className="h-5 w-5 text-primary-500" />
-                </Link>
-              </div>
-            </div>
+      {/* Bandeau financier — reste visible quel que soit l'onglet actif */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
+          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Total</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+            {(order.totalCost + order.materialCost).toLocaleString()} FCFA
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Tenues {order.totalCost.toLocaleString()} · Matériel {order.materialCost.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
+          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Payé</p>
+          <p className="text-xl font-bold text-green-500 mt-1">{order.deposit.toLocaleString()} FCFA</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {order.payments.length} paiement{order.payments.length > 1 ? 's' : ''} enregistré{order.payments.length > 1 ? 's' : ''}
+          </p>
+        </div>
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
+          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Reliquat</p>
+          <p className={`text-xl font-bold mt-1 ${order.balance > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+            {order.balance.toLocaleString()} FCFA
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            {order.balance > 0 ? 'Solde restant dû' : 'Intégralement réglée'}
+          </p>
+        </div>
+        <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
+          <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Retrait</p>
+          <p className={`text-xl font-bold mt-1 ${daysUntilPickup <= 0 ? 'text-red-500' : daysUntilPickup <= 3 ? 'text-orange-500' : 'text-gray-900 dark:text-white'}`}>
+            {new Date(order.pickupDate).toLocaleDateString('fr-FR')}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            {daysUntilPickup > 0
+              ? `Dans ${daysUntilPickup} jour${daysUntilPickup > 1 ? 's' : ''}`
+              : daysUntilPickup === 0
+                ? "Aujourd'hui"
+                : `En retard de ${Math.abs(daysUntilPickup)} jour${Math.abs(daysUntilPickup) > 1 ? 's' : ''}`}
+          </p>
+        </div>
+      </div>
 
-            {/* Measurements info */}
-            {order.measurement && (
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-700">
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <Ruler className="h-4 w-4" />
-                  <span>
-                    Mensurations du {new Date(order.measurement.measurementDate).toLocaleDateString('fr-FR')}
-                  </span>
-                </div>
-              </div>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Contenu principal — onglets */}
+        <div className="lg:col-span-2">
+          <div className="border-b border-gray-200 dark:border-dark-700 mb-6">
+            <nav className="flex flex-wrap gap-1 -mb-px">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                const active = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => changeTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                      active
+                        ? 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+                        : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-dark-600'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                    {tab.count !== undefined && (
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-xs font-semibold ${
+                          active
+                            ? 'bg-primary-500/15 text-primary-600 dark:text-primary-300'
+                            : 'bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-gray-400'
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </nav>
           </div>
 
-          {/* Items Section */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
-            <button
-              onClick={() => setItemsExpanded(!itemsExpanded)}
-              className="w-full p-6 flex items-center justify-between text-left"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Scissors className="h-5 w-5 text-primary-400" />
-                Articles ({order.items.length})
-              </h2>
-              {itemsExpanded ? (
-                <ChevronUp className="h-5 w-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              )}
-            </button>
+          {/* Onglet Articles */}
+          {activeTab === 'items' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
+              {order.items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="p-4 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {index + 1}. {item.garmentType}
+                        {item.customType && ` (${item.customType})`}
+                      </p>
+                      {item.description && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
+                      )}
+                    </div>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium text-white ${ITEM_STATUS_COLORS[item.status]}`}
+                    >
+                      {ITEM_STATUS_LABELS[item.status]}
+                    </span>
+                  </div>
 
-            {itemsExpanded && (
-              <div className="px-6 pb-6 space-y-4">
-                {order.items.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
-                          {index + 1}. {item.garmentType}
-                          {item.customType && ` (${item.customType})`}
-                        </p>
-                        {item.description && (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{item.description}</p>
-                        )}
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium text-white ${ITEM_STATUS_COLORS[item.status]}`}
-                      >
-                        {ITEM_STATUS_LABELS[item.status]}
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Quantité:</span>{' '}
+                      <span className="text-gray-900 dark:text-white">{item.quantity}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">Prix:</span>{' '}
+                      <span className="text-gray-900 dark:text-white">
+                        {(item.unitPrice * item.quantity).toLocaleString()} FCFA
                       </span>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                    {item.estimatedHours && (
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Quantité:</span>{' '}
-                        <span className="text-gray-900 dark:text-white">{item.quantity}</span>
+                        <span className="text-gray-500 dark:text-gray-400">Heures estimées:</span>{' '}
+                        <span className="text-gray-900 dark:text-white">{item.estimatedHours}h</span>
                       </div>
+                    )}
+                    {item.actualHours && (
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Prix:</span>{' '}
-                        <span className="text-gray-900 dark:text-white">
-                          {(item.unitPrice * item.quantity).toLocaleString()} FCFA
-                        </span>
-                      </div>
-                      {item.estimatedHours && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Heures estimées:</span>{' '}
-                          <span className="text-gray-900 dark:text-white">{item.estimatedHours}h</span>
-                        </div>
-                      )}
-                      {item.actualHours && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Heures réelles:</span>{' '}
-                          <span className="text-gray-900 dark:text-white">{item.actualHours}h</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Item controls */}
-                    <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-200 dark:border-dark-700">
-                      {/* Tailor assignment */}
-                      <select
-                        value={item.tailorId || ''}
-                        onChange={(e) => updateItemTailor(item.id, e.target.value)}
-                        className="flex-1 min-w-[150px] px-2 py-1 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded text-gray-900 dark:text-white"
-                      >
-                        <option value="">Non assigné</option>
-                        {tailors.map((t) => (
-                          <option key={t.id} value={t.id}>
-                            {t.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      {/* Status change */}
-                      <select
-                        value={item.status}
-                        onChange={(e) => updateItemStatus(item.id, e.target.value)}
-                        className="flex-1 min-w-[150px] px-2 py-1 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded text-gray-900 dark:text-white"
-                      >
-                        {Object.entries(ITEM_STATUS_LABELS).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Tailor info */}
-                    {item.tailor && (
-                      <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        Assigné à {item.tailor.name}
+                        <span className="text-gray-500 dark:text-gray-400">Heures réelles:</span>{' '}
+                        <span className="text-gray-900 dark:text-white">{item.actualHours}h</span>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* Timeline Section */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
-            <button
-              onClick={() => setTimelineExpanded(!timelineExpanded)}
-              className="w-full p-6 flex items-center justify-between text-left"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary-400" />
-                Historique ({order.timeline.length})
-              </h2>
-              <div className="flex items-center gap-2">
+                  {/* Contrôles de l'article */}
+                  <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-200 dark:border-dark-700">
+                    {/* Assignation du tailleur */}
+                    <select
+                      value={item.tailorId || ''}
+                      onChange={(e) => updateItemTailor(item.id, e.target.value)}
+                      className="flex-1 min-w-[150px] px-2 py-1 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded text-gray-900 dark:text-white"
+                    >
+                      <option value="">Non assigné</option>
+                      {tailors.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Changement de statut */}
+                    <select
+                      value={item.status}
+                      onChange={(e) => updateItemStatus(item.id, e.target.value)}
+                      className="flex-1 min-w-[150px] px-2 py-1 text-sm bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded text-gray-900 dark:text-white"
+                    >
+                      {Object.entries(ITEM_STATUS_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Tailleur assigné */}
+                  {item.tailor && (
+                    <div className="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      Assigné à {item.tailor.name}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {order.items.length === 0 && (
+                <div className="text-center py-8">
+                  <Scissors className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucun article sur cette commande</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet Paiements */}
+          {activeTab === 'payments' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-primary-400" />
+                  Paiements
+                </h2>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowTimelineModal(true)
-                  }}
-                  className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors"
+                  onClick={() => setShowPaymentModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-semibold"
                 >
-                  <Plus className="h-4 w-4 text-primary-500" />
+                  <Plus className="h-4 w-4" />
+                  Ajouter un paiement
                 </button>
-                {timelineExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-400" />
-                )}
               </div>
-            </button>
 
-            {timelineExpanded && (
-              <div className="px-6 pb-6">
+              {order.payments.length > 0 ? (
+                <div className="space-y-3">
+                  {order.payments.map((payment) => (
+                    <div
+                      key={payment.id}
+                      className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-green-500">+{payment.amount.toLocaleString()} FCFA</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {payment.paymentType === 'DEPOSIT'
+                              ? 'Avance'
+                              : payment.paymentType === 'FINAL'
+                                ? 'Solde'
+                                : 'Acompte'}
+                            {payment.paymentMethod && ` - ${payment.paymentMethod}`}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          {new Date(payment.paidAt).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      {payment.notes && (
+                        <p className="text-xs text-gray-500 mt-2">{payment.notes}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-dark-700">
+                        {payment.receivedBy && (
+                          <p className="text-xs text-gray-400">Reçu par {payment.receivedBy.name}</p>
+                        )}
+                        {payment.receipt && (
+                          <Link
+                            href={`/admin/receipts/${payment.receipt.id}`}
+                            className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:underline"
+                          >
+                            <Receipt className="h-3 w-3" />
+                            {payment.receipt.receiptNumber}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CreditCard className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucun paiement enregistré</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet Matériels */}
+          {activeTab === 'materials' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Box className="h-5 w-5 text-primary-400" />
+                  Matériels utilisés
+                </h2>
+                <Link
+                  href={`/admin/materials/out?customOrderId=${orderId}`}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-semibold"
+                >
+                  <Plus className="h-4 w-4" />
+                  Enregistrer une sortie
+                </Link>
+              </div>
+
+              {materialUsages.length > 0 ? (
+                <>
+                  <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Coût total: </span>
+                    <span className="font-semibold text-orange-600 dark:text-orange-400">
+                      {materialTotalCost.toLocaleString()} FCFA
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {materialUsages.map((usage) => (
+                      <div
+                        key={usage.id}
+                        className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white text-sm">
+                              {usage.material.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {usage.quantity} {usage.material.unit}
+                              {usage.tailor && ` - ${usage.tailor.name}`}
+                            </p>
+                          </div>
+                          <p className="font-medium text-orange-500 text-sm">
+                            {usage.totalCost.toLocaleString()} FCFA
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(usage.createdAt).toLocaleDateString('fr-FR')}
+                          {usage.createdBy && ` par ${usage.createdBy.name}`}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href={`/admin/materials/movements?customOrderId=${orderId}`}
+                    className="block mt-3 text-center text-sm text-primary-500 hover:text-primary-400"
+                  >
+                    Voir tout l&apos;historique
+                  </Link>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <Box className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucun matériel enregistré</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet Fichiers joints */}
+          {activeTab === 'attachments' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Paperclip className="h-5 w-5 text-primary-400" />
+                  Fichiers joints
+                </h2>
+                <label className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-semibold cursor-pointer">
+                  <input
+                    type="file"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                    disabled={uploadingFile}
+                  />
+                  {uploadingFile ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  Ajouter un fichier
+                </label>
+              </div>
+
+              {attachments.length > 0 ? (
+                <div className="space-y-2">
+                  {attachments.map((attachment) => {
+                    const FileIcon = getFileIcon(attachment.fileType)
+                    return (
+                      <div
+                        key={attachment.id}
+                        className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="p-2 bg-gray-200 dark:bg-dark-700 rounded-lg">
+                            <FileIcon className="h-5 w-5 text-gray-500" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <a
+                              href={attachment.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary-500 truncate block"
+                            >
+                              {attachment.originalName}
+                            </a>
+                            <p className="text-xs text-gray-500">
+                              {formatFileSize(attachment.fileSize)}
+                              {attachment.uploadedByName && ` - par ${attachment.uploadedByName}`}
+                              {' - '}
+                              {new Date(attachment.createdAt).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={attachment.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-colors"
+                            title="Ouvrir"
+                          >
+                            <ExternalLink className="h-4 w-4 text-gray-400" />
+                          </a>
+                          <button
+                            onClick={() => deleteAttachment(attachment.id)}
+                            className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Paperclip className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Aucun fichier joint (taille maximale : 500 Mo)
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet Historique */}
+          {activeTab === 'timeline' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary-400" />
+                  Historique
+                </h2>
+                <button
+                  onClick={() => setShowTimelineModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-semibold"
+                >
+                  <Plus className="h-4 w-4" />
+                  Ajouter une entrée
+                </button>
+              </div>
+
+              {order.timeline.length > 0 ? (
                 <div className="space-y-4">
                   {order.timeline.map((entry) => (
                     <div key={entry.id} className="flex gap-4">
@@ -966,14 +1206,79 @@ export default function CustomOrderDetailPage() {
                     </div>
                   ))}
                 </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Clock className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucun évènement enregistré</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet Notes */}
+          {activeTab === 'notes' && (
+            <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary-400" />
+                  Notes internes
+                </h2>
+                {!editingNotes && (
+                  <button
+                    onClick={() => {
+                      setNotesValue(order.notes || '')
+                      setEditingNotes(true)
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors text-sm font-semibold"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Modifier
+                  </button>
+                )}
               </div>
-            )}
-          </div>
+
+              {editingNotes ? (
+                <div className="space-y-3">
+                  <textarea
+                    value={notesValue}
+                    onChange={(e) => setNotesValue(e.target.value)}
+                    rows={8}
+                    className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Ajouter des notes..."
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingNotes(false)}
+                      className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={saveNotes}
+                      disabled={savingNotes}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg disabled:opacity-50"
+                    >
+                      {savingNotes && <Loader2 className="h-3 w-3 animate-spin" />}
+                      <Save className="h-3 w-3" />
+                      Enregistrer
+                    </button>
+                  </div>
+                </div>
+              ) : order.notes ? (
+                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{order.notes}</p>
+              ) : (
+                <div className="text-center py-8">
+                  <MessageSquare className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucune note</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Sidebar */}
+        {/* Contexte permanent — visible quel que soit l'onglet */}
         <div className="space-y-6">
-          {/* Status Control */}
+          {/* Statut de la commande */}
           <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Statut de la commande</h3>
             <select
@@ -988,6 +1293,14 @@ export default function CustomOrderDetailPage() {
                 </option>
               ))}
             </select>
+
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Ajouter un paiement
+            </button>
           </div>
 
           {/* Facture manquante — réparation en un clic (voir messages/07) */}
@@ -1016,7 +1329,7 @@ export default function CustomOrderDetailPage() {
             </div>
           )}
 
-          {/* Invoice Section */}
+          {/* Facture liée */}
           {order.invoice && (
             <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -1049,6 +1362,59 @@ export default function CustomOrderDetailPage() {
             </div>
           )}
 
+          {/* Client */}
+          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <User className="h-4 w-4 text-primary-400" />
+                Client
+              </h3>
+              <div className="flex gap-2">
+                {order.customer.whatsappNumber && (
+                  <a
+                    href={`https://wa.me/${order.customer.whatsappNumber.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-colors"
+                    title="WhatsApp"
+                  >
+                    <Send className="h-4 w-4 text-green-500" />
+                  </a>
+                )}
+                <Link
+                  href={`/admin/customers/${order.customer.id}`}
+                  className="p-2 bg-primary-500/10 hover:bg-primary-500/20 rounded-lg transition-colors"
+                  title="Voir le profil"
+                >
+                  <User className="h-4 w-4 text-primary-500" />
+                </Link>
+              </div>
+            </div>
+            <p className="font-medium text-gray-900 dark:text-white">{order.customer.name}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-1">
+              <Phone className="h-3 w-3" />
+              {order.customer.phone}
+            </p>
+            {order.customer.email && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">{order.customer.email}</p>
+            )}
+            {order.customer.city && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {order.customer.city}, {order.customer.country || 'Côte d\'Ivoire'}
+              </p>
+            )}
+            {order.measurement && (
+              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-dark-700">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Ruler className="h-4 w-4" />
+                  <span>
+                    Mensurations du {new Date(order.measurement.measurementDate).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Dates */}
           <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -1077,371 +1443,6 @@ export default function CustomOrderDetailPage() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Financial Summary */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-primary-400" />
-              Finances
-            </h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Coût tenues:</span>
-                <span className="text-gray-900 dark:text-white">{order.totalCost.toLocaleString()} FCFA</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Coût matériel:</span>
-                <span className="text-gray-900 dark:text-white">{order.materialCost.toLocaleString()} FCFA</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500 dark:text-gray-400">Total:</span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {(order.totalCost + order.materialCost).toLocaleString()} FCFA
-                </span>
-              </div>
-              <div className="border-t border-gray-200 dark:border-dark-700 pt-2 mt-2">
-                <div className="flex justify-between">
-                  <span className="text-green-500">Payé:</span>
-                  <span className="text-green-500">{order.deposit.toLocaleString()} FCFA</span>
-                </div>
-                <div className="flex justify-between font-semibold text-lg mt-1">
-                  <span className={order.balance > 0 ? 'text-orange-500' : 'text-green-500'}>Reliquat:</span>
-                  <span className={order.balance > 0 ? 'text-orange-500' : 'text-green-500'}>
-                    {order.balance.toLocaleString()} FCFA
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowPaymentModal(true)}
-              className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Ajouter un paiement
-            </button>
-          </div>
-
-          {/* Payments Section */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
-            <button
-              onClick={() => setPaymentsExpanded(!paymentsExpanded)}
-              className="w-full p-6 flex items-center justify-between text-left"
-            >
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-primary-400" />
-                Paiements ({order.payments.length})
-              </h3>
-              {paymentsExpanded ? (
-                <ChevronUp className="h-5 w-5 text-gray-400" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              )}
-            </button>
-
-            {paymentsExpanded && order.payments.length > 0 && (
-              <div className="px-6 pb-6 space-y-3">
-                {order.payments.map((payment) => (
-                  <div
-                    key={payment.id}
-                    className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-green-500">+{payment.amount.toLocaleString()} FCFA</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {payment.paymentType === 'DEPOSIT'
-                            ? 'Avance'
-                            : payment.paymentType === 'FINAL'
-                              ? 'Solde'
-                              : 'Acompte'}
-                          {payment.paymentMethod && ` - ${payment.paymentMethod}`}
-                        </p>
-                      </div>
-                      <p className="text-xs text-gray-400">
-                        {new Date(payment.paidAt).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    {payment.notes && (
-                      <p className="text-xs text-gray-500 mt-2">{payment.notes}</p>
-                    )}
-                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-dark-700">
-                      {payment.receivedBy && (
-                        <p className="text-xs text-gray-400">Reçu par {payment.receivedBy.name}</p>
-                      )}
-                      {payment.receipt && (
-                        <Link
-                          href={`/admin/receipts/${payment.receipt.id}`}
-                          className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 hover:underline"
-                        >
-                          <Receipt className="h-3 w-3" />
-                          {payment.receipt.receiptNumber}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary-400" />
-                Notes
-              </h3>
-              {!editingNotes && (
-                <button
-                  onClick={() => {
-                    setNotesValue(order.notes || '')
-                    setEditingNotes(true)
-                  }}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-dark-700 rounded transition-colors"
-                  title="Modifier"
-                >
-                  <Edit2 className="h-4 w-4 text-gray-400" />
-                </button>
-              )}
-            </div>
-            {editingNotes ? (
-              <div className="space-y-3">
-                <textarea
-                  value={notesValue}
-                  onChange={(e) => setNotesValue(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-900 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Ajouter des notes..."
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setEditingNotes(false)}
-                    className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-gray-300 rounded-lg"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={saveNotes}
-                    disabled={savingNotes}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary-500 hover:bg-primary-600 text-white rounded-lg disabled:opacity-50"
-                  >
-                    {savingNotes && <Loader2 className="h-3 w-3 animate-spin" />}
-                    <Save className="h-3 w-3" />
-                    Enregistrer
-                  </button>
-                </div>
-              </div>
-            ) : order.notes ? (
-              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{order.notes}</p>
-            ) : (
-              <p className="text-sm text-gray-400 italic">Aucune note</p>
-            )}
-          </div>
-
-          {/* Material Usages Section */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
-            <button
-              onClick={() => setMaterialsExpanded(!materialsExpanded)}
-              className="w-full p-6 flex items-center justify-between text-left"
-            >
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Box className="h-4 w-4 text-primary-400" />
-                Matériels utilisés ({materialUsages.length})
-              </h3>
-              <div className="flex items-center gap-2">
-                <Link
-                  href={`/admin/materials/out?customOrderId=${orderId}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors"
-                  title="Ajouter sortie matériel"
-                >
-                  <Plus className="h-4 w-4 text-primary-500" />
-                </Link>
-                {materialsExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-400" />
-                )}
-              </div>
-            </button>
-
-            {materialsExpanded && (
-              <div className="px-6 pb-6">
-                {materialUsages.length > 0 ? (
-                  <>
-                    <div className="mb-3 p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Coût total: </span>
-                      <span className="font-semibold text-orange-600 dark:text-orange-400">
-                        {materialTotalCost.toLocaleString()} FCFA
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      {materialUsages.map((usage) => (
-                        <div
-                          key={usage.id}
-                          className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white text-sm">
-                                {usage.material.name}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {usage.quantity} {usage.material.unit}
-                                {usage.tailor && ` - ${usage.tailor.name}`}
-                              </p>
-                            </div>
-                            <p className="font-medium text-orange-500 text-sm">
-                              {usage.totalCost.toLocaleString()} FCFA
-                            </p>
-                          </div>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {new Date(usage.createdAt).toLocaleDateString('fr-FR')}
-                            {usage.createdBy && ` par ${usage.createdBy.name}`}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <Link
-                      href={`/admin/materials/movements?customOrderId=${orderId}`}
-                      className="block mt-3 text-center text-sm text-primary-500 hover:text-primary-400"
-                    >
-                      Voir tout l'historique
-                    </Link>
-                  </>
-                ) : (
-                  <div className="text-center py-4">
-                    <Box className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      Aucun matériel enregistré
-                    </p>
-                    <Link
-                      href={`/admin/materials/out?customOrderId=${orderId}`}
-                      className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-400"
-                    >
-                      <Plus className="h-3 w-3" />
-                      Enregistrer une sortie
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Attachments Section */}
-          <div className="bg-white/80 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg">
-            <button
-              onClick={() => setAttachmentsExpanded(!attachmentsExpanded)}
-              className="w-full p-6 flex items-center justify-between text-left"
-            >
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Paperclip className="h-4 w-4 text-primary-400" />
-                Fichiers joints ({attachments.length})
-              </h3>
-              <div className="flex items-center gap-2">
-                <label
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-1.5 bg-primary-500/10 hover:bg-primary-500/20 rounded transition-colors cursor-pointer"
-                  title="Ajouter un fichier"
-                >
-                  <input
-                    type="file"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                    disabled={uploadingFile}
-                  />
-                  {uploadingFile ? (
-                    <Loader2 className="h-4 w-4 text-primary-500 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4 text-primary-500" />
-                  )}
-                </label>
-                {attachmentsExpanded ? (
-                  <ChevronUp className="h-5 w-5 text-gray-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-gray-400" />
-                )}
-              </div>
-            </button>
-
-            {attachmentsExpanded && (
-              <div className="px-6 pb-6">
-                {attachments.length > 0 ? (
-                  <div className="space-y-2">
-                    {attachments.map((attachment) => {
-                      const FileIcon = getFileIcon(attachment.fileType)
-                      return (
-                        <div
-                          key={attachment.id}
-                          className="p-3 bg-gray-50 dark:bg-dark-900 rounded-lg border border-gray-200 dark:border-dark-700 flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <div className="p-2 bg-gray-200 dark:bg-dark-700 rounded-lg">
-                              <FileIcon className="h-5 w-5 text-gray-500" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <a
-                                href={attachment.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary-500 truncate block"
-                              >
-                                {attachment.originalName}
-                              </a>
-                              <p className="text-xs text-gray-500">
-                                {formatFileSize(attachment.fileSize)}
-                                {attachment.uploadedByName && ` - par ${attachment.uploadedByName}`}
-                                {' - '}
-                                {new Date(attachment.createdAt).toLocaleDateString('fr-FR')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={attachment.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-colors"
-                              title="Ouvrir"
-                            >
-                              <ExternalLink className="h-4 w-4 text-gray-400" />
-                            </a>
-                            <button
-                              onClick={() => deleteAttachment(attachment.id)}
-                              className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors"
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-4">
-                    <Paperclip className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      Aucun fichier joint
-                    </p>
-                    <label className="inline-flex items-center gap-1 text-sm text-primary-500 hover:text-primary-400 cursor-pointer">
-                      <input
-                        type="file"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                        disabled={uploadingFile}
-                      />
-                      <Upload className="h-3 w-3" />
-                      Ajouter un fichier (max 500MB)
-                    </label>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -1611,5 +1612,19 @@ export default function CustomOrderDetailPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function CustomOrderDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-400" />
+        </div>
+      }
+    >
+      <CustomOrderDetailContent />
+    </Suspense>
   )
 }
