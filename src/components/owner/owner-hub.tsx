@@ -1,9 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { ArrowLeft } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
+import type { UserRole } from '@prisma/client'
+import { hasPermission, type Permission } from '@/lib/role-permissions'
 
 // Page intermédiaire du shell propriétaire : un titre, une action
 // principale (grande carte pleine couleur) et quelques actions
@@ -16,6 +19,13 @@ export interface OwnerHubAction {
   href: string
   icon: LucideIcon
   primary?: boolean
+  /**
+   * Droit requis pour voir l'action. Absent = visible par tout compte admin.
+   * Même convention que les tuiles de l'accueil (`src/lib/owner/tiles.ts`) :
+   * la matrice `role-permissions.ts` fait autorité, le hub ne doit jamais
+   * proposer une action que le serveur refusera.
+   */
+  permission?: Permission
 }
 
 export function OwnerHub({
@@ -29,6 +39,12 @@ export function OwnerHub({
   actions: OwnerHubAction[]
   notice?: ReactNode
 }) {
+  const { data: session } = useSession()
+  const role = (session?.user as { role?: UserRole } | undefined)?.role
+  const visibleActions = actions.filter(
+    (a) => !a.permission || (role ? hasPermission(role, a.permission) : false)
+  )
+
   return (
     <div className="max-w-3xl mx-auto">
       <Link
@@ -47,7 +63,7 @@ export function OwnerHub({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-5">
-        {actions.map((action) => {
+        {visibleActions.map((action) => {
           const Icon = action.icon
           return (
             <Link

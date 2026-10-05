@@ -232,6 +232,7 @@ export const MENU: MenuItem[] = [
         allowedRoles: ['ADMIN', 'MANAGER'],
         items: [
           { href: '/admin/inventory', label: 'Gestion du stock' },
+          { href: '/admin/inventory/adjust', label: 'Mettre à jour le stock' },
           { href: '/admin/coupons', label: 'Codes promo' },
         ],
       },
@@ -619,6 +620,10 @@ const ENRICHMENTS: Record<string, Enrichment> = {
   '/admin/inventory': {
     description: 'Gestion du stock produits boutique',
     keywords: ['stock', 'inventaire', 'quantites', 'rupture'],
+  },
+  '/admin/inventory/adjust': {
+    description: 'Mettre à jour le stock d’une tenue : arrivage, retour, pièce abîmée, correction',
+    keywords: ['stock', 'arrivage', 'retour', 'abime', 'correction', 'ajustement', 'mouvement'],
   },
   '/admin/coupons': {
     description: 'Codes promo / coupons / pourcentages de réduction',

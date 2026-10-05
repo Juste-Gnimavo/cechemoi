@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Bell,
   History,
+  Boxes,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
@@ -173,6 +174,13 @@ export default function InventoryPage() {
           >
             <History className="h-4 w-4" />
             Historique
+          </Link>
+          <Link
+            href="/admin/inventory/adjust"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg transition-all duration-200"
+          >
+            <Boxes className="h-4 w-4" />
+            Mettre à jour le stock
           </Link>
         </div>
       </div>
