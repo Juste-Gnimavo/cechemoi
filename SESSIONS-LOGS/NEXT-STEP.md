@@ -37,6 +37,18 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] Table `HeroSlide` créée (`npx -y prisma@5.22.0 db push` depuis le conteneur), API `/api/admin/hero-slides` OK, écran `/admin/storefront` opérationnel.
 - [x] Le CEO informe les employés : ils commencent par **créer de nouvelles catégories et ajouter de nouveaux produits** depuis le hub « Boutique en ligne » de gestion.cechemoi.com.
 
+## Fait en session 33 (05/10/2026)
+
+- [x] **Guides utilisateurs illustrés** (Word + PDF, 26 pages chacun) dans `~/Desktop/GUIDES-CECHEMOI/` : « Gérer la boutique en ligne » et « Gérer la relation client » (7 tuiles STAFF). Générateur dans `doc-web/guides-utilisateurs/`. Guide Boutique envoyé à la propriétaire. Voir `SESSIONS-LOGS/33-GUIDES-UTILISATEURS-BOUTIQUE-ET-CRM.md`.
+
+## Priorité 1 — Constats de la session 33 (étanchéité financière incomplète)
+
+- [ ] **Le Personnel voit encore des cumuls d'argent** : encaissements annuels dans `/admin/custom-orders` et `/admin/receipts`, « Reste dû » dans `/admin/invoices`, valeur du stock dans `/admin/materials` et `/admin/materials/movements`, « Valeur totale / vie client / panier moyen » dans `/admin/customers` et la fiche cliente. Expurger côté API (comme `invoices/stats` en session 31), pas seulement à l'écran.
+- [ ] **Masquer les boutons « Supprimer »** au Personnel quand le serveur refuse (catégories : ADMIN seul) ; auditer clientes, commandes, commandes sur mesure, avis, campagnes.
+- [ ] **Codes promo** : la matrice STAFF contient `coupons`, la tuile est visible ; la session 32 les disait réservés à la direction. Demander au CEO et aligner.
+- [ ] **Anniversaires** : colonne « Âge » à « 0 ans » pour toutes les clientes.
+- [ ] Après chaque correction visible, mettre à jour les guides (`doc-web/guides-utilisateurs/`).
+
 ## Déploiement — rappels (appris en session 32)
 
 - Le conteneur n'embarque pas le CLI Prisma : **toujours épingler la version**, `npx -y prisma@5.22.0 db push`. Un `npx prisma` nu télécharge Prisma 8 dont la ligne de commande est incompatible.
