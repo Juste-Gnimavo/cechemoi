@@ -18,7 +18,9 @@ export type Permission =
   | 'products' | 'products.manage' | 'categories' | 'categories.manage'
   | 'inventory' | 'inventory.adjust'
   | 'coupons' | 'coupons.manage'
-  | 'media' | 'media.delete' | 'reviews.moderate'
+  | 'media' | 'media.delete' | 'reviews.moderate' | 'reviews.delete'
+  // Vitrine : bandeau de l'accueil du site
+  | 'storefront' | 'storefront.manage' | 'storefront.delete'
   // Communication
   | 'campaigns' | 'campaigns.manage' | 'campaigns.send'
   | 'notifications' | 'notifications.manage' | 'notifications.send'
@@ -71,6 +73,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | '*'> = {
     'notifications', 'notifications.manage', 'notifications.send',
     'finance.expenses.create',
     'coupons', 'media', 'reviews.moderate', 'blog',
+    'storefront', 'storefront.manage',
     'team.view',
   ],
   TAILOR: [

@@ -141,7 +141,7 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
 
     if (!session) return unauthenticated()
-    const denied = denyUnlessPermitted(session, 'media.delete')
+    const denied = denyUnlessPermitted(session, 'reviews.delete')
     if (denied) return denied
 
     // Check if review exists

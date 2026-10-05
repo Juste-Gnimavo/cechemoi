@@ -11,6 +11,7 @@ import {
   Images,
   MessageSquareText,
   Ticket,
+  GalleryHorizontal,
 } from 'lucide-react'
 import { OwnerHub } from '@/components/owner/owner-hub'
 
@@ -80,6 +81,14 @@ export default function OwnerBoutiquePage() {
           href: '/admin/media',
           icon: Images,
           permission: 'media',
+        },
+        {
+          key: 'storefront',
+          label: 'Bandeau de l’accueil',
+          sublabel: 'Les grandes images qui défilent en haut de cechemoi.com',
+          href: '/admin/storefront',
+          icon: GalleryHorizontal,
+          permission: 'storefront',
         },
         {
           key: 'reviews',

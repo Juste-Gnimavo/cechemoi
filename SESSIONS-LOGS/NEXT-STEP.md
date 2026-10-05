@@ -29,13 +29,16 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 ## Fait en session 32 (05/10/2026)
 
 - [x] **Hub « Boutique en ligne » enrichi** pour que le Personnel mette à jour le catalogue : Ajouter une tenue, Mettre à jour le stock, Toutes les tenues, Catégories, Photos, Avis des clientes ; Codes promo réservés à la direction. `OwnerHub` filtre désormais ses actions par permission. Voir `SESSIONS-LOGS/32-HUB-BOUTIQUE-MISE-A-JOUR-CATALOGUE-PAR-LE-PERSONNEL.md`.
+- [x] **Bandeau de l'accueil éditable** (`/admin/storefront`, modèle `HeroSlide`, permissions `storefront*`) ; la fiche produit trace ses changements de stock ; garde `reviews.delete`.
 - [x] **Nouvel écran `/admin/inventory/adjust`** : seul écran qui enregistre un mouvement de stock produit (arrivage, retour, pièce abîmée, correction). Avant, l'API existait sans interface et la fiche produit changeait le stock sans trace.
 
 ## À vérifier au prochain passage (session 32, non rejoué)
 
 - [ ] Compte Personnel sur `gestion.cechemoi.com/owner/boutique` : 8 cartes visibles, pas « Codes promo ».
 - [ ] Depuis ce compte : enregistrer un arrivage de 2 pièces sur une tenue, vérifier le stock sur la fiche et la ligne dans `/admin/inventory/movements`.
-- [ ] Décider : le `PUT` produit doit-il créer un mouvement quand le stock change (recommandé) ? Voir §3 du journal 32.
+- [ ] **Lancer `npx prisma db push` depuis le conteneur de production** (table `HeroSlide`, additive). Base injoignable depuis le poste de dev.
+- [ ] Ouvrir `/admin/storefront`, cliquer « Reprendre les 3 images actuelles », masquer la 3e, vérifier l'accueil de cechemoi.com.
+- [ ] Modifier le stock d'une tenue depuis sa fiche produit : une ligne « Modification depuis la fiche produit » doit apparaître dans `/admin/inventory/movements`.
 
 ## À vérifier au prochain passage (session 31, non rejoué)
 

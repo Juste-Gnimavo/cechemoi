@@ -243,6 +243,13 @@ export const MENU: MenuItem[] = [
           { href: '/admin/media', label: "Galerie d'images" },
         ],
       },
+      {
+        label: 'Vitrine',
+        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+        items: [
+          { href: '/admin/storefront', label: 'Bandeau de l’accueil' },
+        ],
+      },
     ],
   },
   {
@@ -620,6 +627,10 @@ const ENRICHMENTS: Record<string, Enrichment> = {
   '/admin/inventory': {
     description: 'Gestion du stock produits boutique',
     keywords: ['stock', 'inventaire', 'quantites', 'rupture'],
+  },
+  '/admin/storefront': {
+    description: 'Bandeau de l’accueil du site : images qui défilent en haut de cechemoi.com',
+    keywords: ['bandeau', 'slide', 'carrousel', 'accueil', 'hero', 'banniere', 'vitrine', 'image'],
   },
   '/admin/inventory/adjust': {
     description: 'Mettre à jour le stock d’une tenue : arrivage, retour, pièce abîmée, correction',

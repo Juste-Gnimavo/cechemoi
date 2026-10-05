@@ -5,22 +5,20 @@ import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 
-// Hero slide banners (images contain their own text/branding)
-const HERO_SLIDES = [
-  { id: 1, image: '/slides/slide1.jpg?v=2', alt: 'Bienvenue sur la plateforme CÈCHÉMOI — L\'excellence au service de votre style' },
-  { id: 2, image: '/slides/slide2.jpg?v=2', alt: 'Nouvelle Collection 2026 — Élégance, Style Africain, Prêt-à-Porter, Sur-Mesure' },
-  { id: 3, image: '/slides/slide3.jpg?v=2', alt: 'CÈCHÉMOI — Mode Africaine, Élégance et Tradition' },
-]
+// Les slides viennent de la base (HeroSlide) via src/app/page.tsx ; les images
+// par défaut servent de repli tant qu'aucune n'a été ajoutée dans l'admin.
+import { DEFAULT_HERO_SLIDES, type HeroSlideData } from '@/lib/hero-slides'
 
 const SLIDE_INTERVAL = 5000 // 5 seconds
 
-export function FashionHero() {
+export function FashionHero({ slides }: { slides?: HeroSlideData[] }) {
+  const HERO_SLIDES = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)
-  }, [])
+  }, [HERO_SLIDES.length])
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
@@ -42,21 +40,35 @@ export function FashionHero() {
     setTimeout(() => setIsAutoPlaying(true), 10000)
   }
 
-  const slide = HERO_SLIDES[currentSlide]
+  const slide = HERO_SLIDES[currentSlide] ?? HERO_SLIDES[0]
 
   return (
     <section className="relative w-full bg-gray-900 overflow-hidden">
       {/* Slide Image — natural proportions, full width */}
       <div className="relative w-full">
-        <Image
-          src={slide.image}
-          alt={slide.alt}
-          width={1600}
-          height={1066}
-          priority
-          sizes="100vw"
-          className="w-full h-auto block transition-opacity duration-700"
-        />
+        {slide.link ? (
+          <Link href={slide.link} aria-label={slide.alt} className="block">
+            <Image
+              src={slide.image}
+              alt={slide.alt}
+              width={1600}
+              height={1066}
+              priority
+              sizes="100vw"
+              className="w-full h-auto block transition-opacity duration-700"
+            />
+          </Link>
+        ) : (
+          <Image
+            src={slide.image}
+            alt={slide.alt}
+            width={1600}
+            height={1066}
+            priority
+            sizes="100vw"
+            className="w-full h-auto block transition-opacity duration-700"
+          />
+        )}
         {/* Subtle bottom gradient for CTA readability */}
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
       </div>

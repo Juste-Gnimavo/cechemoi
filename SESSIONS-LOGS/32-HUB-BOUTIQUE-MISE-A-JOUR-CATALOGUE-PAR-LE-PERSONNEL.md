@@ -76,25 +76,65 @@ L'encart explique comment retirer une tenue du site sans la supprimer
 Bouton « Mettre à jour le stock » ajouté en tête de `/admin/inventory`, et entrée
 dans le registre de recherche (`src/lib/admin-search/registry.ts`).
 
-## 3. Non fait, à arbitrer
+## 3. Deuxième passe (même journée) — les trois points ouverts, tranchés et faits
 
-- **Le `PUT` produit modifie toujours le stock sans mouvement.** Deux options :
-  (a) faire créer un `StockMovement` de type `adjustment` par le `PUT` quand le
-  stock change (motif « fiche produit »), (b) rendre le champ stock de la fiche en
-  lecture seule avec lien vers l'écran d'ajustement. Recommandation : (a), un
-  seul endroit à modifier et aucune régression d'usage ; environ 20 lignes dans
-  `src/app/api/admin/products/[id]/route.ts`.
-- **Contenu de l'accueil du site** : les slides du bandeau (`HERO_SLIDES` dans
-  `src/components/home/fashion-hero.tsx`) sont codés en dur. Les tenues « vedettes »
-  et les catégories, elles, sont déjà pilotées depuis l'admin. Si la propriétaire
-  veut changer les visuels du bandeau elle-même, il faut un modèle + un écran :
-  chantier distinct, à ouvrir sur demande.
-- `src/app/api/admin/reviews` : une route garde avec `media.delete` au lieu d'une
-  permission de suppression d'avis. Incohérence de nommage, pas de fuite (STAFF
-  n'a ni l'une ni l'autre). À ranger lors d'un prochain passage sur la matrice.
+### 3.1 La fiche produit trace désormais ses changements de stock
 
-## 4. Vérification
+`PUT /api/admin/products/[id]` : la mise à jour du produit et la création du
+`StockMovement` sont dans une même transaction. Dès que le stock demandé diffère
+du stock existant, un mouvement `adjustment` est écrit avec le motif
+« Modification depuis la fiche produit », signé de l'utilisateur. L'historique
+`/admin/inventory/movements` est maintenant complet quel que soit le chemin.
 
-- `tsc --noEmit` : 0 erreur.
+### 3.2 Bandeau de l'accueil éditable (`/admin/storefront`)
+
+- **Modèle `HeroSlide`** (`image`, `alt`, `link?`, `position`, `active`).
+  Table additive, aucune donnée existante touchée.
+- **`src/lib/hero-slides.ts`** : images par défaut (les trois actuelles de
+  `/public/slides`) et `getActiveHeroSlides()` avec repli sur ces défauts si la
+  table est vide, si toutes sont masquées, ou si la base est injoignable (build).
+- **`src/app/page.tsx`** devient un composant serveur asynchrone avec
+  `revalidate = 120` ; le héro reçoit ses slides en props, plus de flash d'image
+  par défaut. Chaque mutation admin appelle `revalidatePath('/')`, la page est
+  donc à jour immédiatement.
+- **`FashionHero`** : slides en props, image cliquable quand un lien est défini.
+- **API** `GET/POST /api/admin/hero-slides`, `PUT/DELETE .../[id]`,
+  `PUT .../reorder` (liste d'identifiants dans l'ordre voulu, vérifiée complète
+  et sans doublon avant écriture transactionnelle). Lien limité aux chemins du
+  site (`/…`) et aux URL `https`.
+- **Permissions** : `storefront` (voir), `storefront.manage` (ajouter, modifier,
+  ordonner, masquer) accordées au Personnel ; `storefront.delete` à la direction.
+  Même doctrine que partout : le Personnel masque, il ne supprime pas.
+- **Écran** `/admin/storefront` : liste ordonnée avec vignette, monter/descendre,
+  Modifier (téléversement via `ImageUpload`, catégorie `slides`, 8 Mo max),
+  Masquer/Afficher, Supprimer (direction). Tant que la table est vide, un bouton
+  « Reprendre les 3 images actuelles » les copie en base pour qu'on puisse les
+  réordonner ou les remplacer.
+- Hub Boutique : action « Bandeau de l'accueil » (permission `storefront`).
+  Registre de recherche : groupe « Vitrine ».
+
+### 3.3 Garde de suppression des avis
+
+`DELETE /api/admin/reviews/[id]` exigeait `media.delete`. Permission
+`reviews.delete` créée (direction seulement), route corrigée.
+
+## 4. Déploiement — action requise
+
+La table `HeroSlide` n'existe pas encore en production : la base
+(`thales.deblo.app:5460`) n'est pas joignable depuis le poste de développement
+(P1001), le `prisma db push` n'a donc pas pu être lancé ici. À exécuter depuis
+le conteneur après déploiement :
+
+```bash
+npx prisma db push
+```
+
+Tant que ce n'est pas fait : le site affiche les images par défaut (repli
+prévu), l'écran `/admin/storefront` renvoie une erreur de chargement, tout le
+reste fonctionne.
+
+## 5. Vérification
+
+- `tsc --noEmit` : 0 erreur (les deux passes).
 - Pas de test automatisé sur ces écrans ; validation manuelle en production à
   faire avec un compte Personnel (voir NEXT-STEP).

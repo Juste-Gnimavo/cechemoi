@@ -167,8 +167,18 @@ export async function PUT(
       }
     }
 
+    // Changement de stock depuis la fiche produit : on le trace comme un
+    // mouvement « correction », sinon l'historique d'inventaire ne voit ni
+    // les arrivages ni les pertes saisis ici (session 32).
+    const requestedStock = stock !== undefined ? parseInt(stock) : undefined
+    const stockChanged =
+      requestedStock !== undefined &&
+      !Number.isNaN(requestedStock) &&
+      requestedStock !== existingProduct.stock
+
     // Update product
-    const product = await prisma.product.update({
+    const [product] = await prisma.$transaction([
+      prisma.product.update({
       where: { id: params.id },
       data: {
         ...(name && { name }),
@@ -217,7 +227,24 @@ export async function PUT(
         variations: true,
         attributes: true,
       },
-    })
+      }),
+      ...(stockChanged
+        ? [
+            prisma.stockMovement.create({
+              data: {
+                productId: params.id,
+                type: 'adjustment',
+                quantity: requestedStock - existingProduct.stock,
+                previousStock: existingProduct.stock,
+                newStock: requestedStock,
+                reason: 'Modification depuis la fiche produit',
+                performedBy: (session.user as any).id,
+                performedByName: (session.user as any).name || 'Admin',
+              },
+            }),
+          ]
+        : []),
+    ])
 
     // Check stock levels and send notifications if needed
     if (stock !== undefined) {

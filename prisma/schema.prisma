@@ -2465,3 +2465,19 @@ model BirthdayGreetingLog {
   @@index([year])
   @@index([userId])
 }
+
+// Bandeau de l'accueil du site (slides du héro). Géré depuis /admin/storefront ;
+// tant que la table est vide, le site affiche les images par défaut embarquées
+// dans src/lib/hero-slides.ts.
+model HeroSlide {
+  id        String   @id @default(cuid())
+  image     String   // URL (S3 ou /uploads/slides/...)
+  alt       String   // Texte alternatif : décrit l'image, utile aussi pour le SEO
+  link      String?  // Page ouverte au clic sur l'image (optionnel)
+  position  Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, position])
+}
