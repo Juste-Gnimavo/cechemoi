@@ -32,13 +32,22 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] **Bandeau de l'accueil éditable** (`/admin/storefront`, modèle `HeroSlide`, permissions `storefront*`) ; la fiche produit trace ses changements de stock ; garde `reviews.delete`.
 - [x] **Nouvel écran `/admin/inventory/adjust`** : seul écran qui enregistre un mouvement de stock produit (arrivage, retour, pièce abîmée, correction). Avant, l'API existait sans interface et la fiche produit changeait le stock sans trace.
 
-## À vérifier au prochain passage (session 32, non rejoué)
+## Validé en production (05/10/2026, fin de session 32)
 
-- [ ] Compte Personnel sur `gestion.cechemoi.com/owner/boutique` : 8 cartes visibles, pas « Codes promo ».
-- [ ] Depuis ce compte : enregistrer un arrivage de 2 pièces sur une tenue, vérifier le stock sur la fiche et la ligne dans `/admin/inventory/movements`.
-- [ ] **Lancer `npx prisma db push` depuis le conteneur de production** (table `HeroSlide`, additive). Base injoignable depuis le poste de dev.
-- [ ] Ouvrir `/admin/storefront`, cliquer « Reprendre les 3 images actuelles », masquer la 3e, vérifier l'accueil de cechemoi.com.
-- [ ] Modifier le stock d'une tenue depuis sa fiche produit : une ligne « Modification depuis la fiche produit » doit apparaître dans `/admin/inventory/movements`.
+- [x] Table `HeroSlide` créée (`npx -y prisma@5.22.0 db push` depuis le conteneur), API `/api/admin/hero-slides` OK, écran `/admin/storefront` opérationnel.
+- [x] Le CEO informe les employés : ils commencent par **créer de nouvelles catégories et ajouter de nouveaux produits** depuis le hub « Boutique en ligne » de gestion.cechemoi.com.
+
+## Déploiement — rappels (appris en session 32)
+
+- Le conteneur n'embarque pas le CLI Prisma : **toujours épingler la version**, `npx -y prisma@5.22.0 db push`. Un `npx prisma` nu télécharge Prisma 8 dont la ligne de commande est incompatible.
+- Lancer le push **après** le redéploiement, jamais avant : il compare la base au schéma présent dans le conteneur. Un « already in sync » obtenu sur l'ancien conteneur ne crée rien.
+- L'erreur `EACCES: permission denied, unlink node_modules/.prisma/client/index.js` à la fin du push est la régénération du client, inutile en runtime : à ignorer.
+
+## À surveiller pendant les premières semaines d'usage par les employés
+
+- [ ] Retours sur la création de catégories et de produits par le Personnel (formulaire produit : photos, tailles, prix, stock initial). Chaque problème = fichier `messages/18+`.
+- [ ] Vérifier que les mouvements de stock saisis par le Personnel (`/admin/inventory/adjust` et fiche produit) apparaissent dans `/admin/inventory/movements` avec le bon auteur.
+- [ ] Bandeau de l'accueil : la propriétaire reprend les 3 images d'origine puis les remplace à son rythme ; si elle veut un texte éditable par-dessus l'image (titre, bouton), c'est un chantier à ouvrir, aujourd'hui le texte doit être dans l'image.
 
 ## À vérifier au prochain passage (session 31, non rejoué)
 
