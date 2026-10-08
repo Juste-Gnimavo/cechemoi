@@ -51,6 +51,11 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 
 Prompt : `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` (ou `/next`). Un rôle qui n'accède qu'au hub `/owner/boutique` et aux écrans de ses tuiles. Trois décisions à faire trancher par le CEO avant d'écrire : vente au comptoir, accès aux clientes, codes promo.
 
+## File CASP après la 35
+
+- **36** — Étanchéité financière du Personnel : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md`.
+- **37** — Bouton « Informer le couturier » (aperçu puis envoi WhatsApp manuel, aucun montant) : `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.
+
 ## Priorité 1 — Constats de la session 33 (étanchéité financière incomplète)
 
 → Mis en file CASP : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (session 36, après le rôle).

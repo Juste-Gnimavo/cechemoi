@@ -11,7 +11,8 @@
   ],
   "phases_queued": [
     "35-role-gestionnaire-boutique-en-ligne",
-    "36-etancheite-financiere-personnel"
+    "36-etancheite-financiere-personnel",
+    "37-informer-le-couturier"
   ],
   "phases_backlog": [
     "notification-system",

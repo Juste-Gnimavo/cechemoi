@@ -12,7 +12,7 @@
 |---|------|--------|--------|
 | 1 | Rôle « Gestionnaire boutique en ligne » limité au hub Boutique | `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` | queued |
 | 2 | Étanchéité financière du Personnel : cumuls expurgés côté API, boutons « Supprimer » alignés, codes promo (constats session 33) | `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` | queued |
-| 3 | Diagnostiquer le déploiement automatique Easypanel (push sans build) | (prompt not yet drafted) | not drafted |
+| 3 | Bouton « Informer le couturier » : aperçu puis envoi WhatsApp manuel des articles, mesures et pièces jointes, sans aucun montant | `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md` | queued |
 
 If you reach for anything BELOW Next-3, stop and check why.
 
@@ -42,6 +42,7 @@ _(site et CRM déjà en production — aucun bloquant de lancement)_
 
 ## Queued — non-critical (post-launch deferable)
 
+- Diagnostiquer le déploiement automatique Easypanel (push sans build) — contourné par le webhook manuel, rappelé dans chaque prompt.
 - Facture : un seul bouton de paiement (« Ajouter un acompte » et « Ajouter un paiement » font la même chose).
 - Système de notifications (templates, déclencheurs) — `SESSIONS-LOGS/08-NOTIFICATION-SYSTEM-AND-ADMIN-IMPROVEMENTS-PLAN.md`.
 - Libellés sans accents dans `paymentMethodLabels` (`src/lib/receipt-generator.ts`).
@@ -69,3 +70,4 @@ _(site et CRM déjà en production — aucun bloquant de lancement)_
 | 34 — Sync commande ↔ facture | shipped | `SESSIONS-LOGS/34-SYNC-COMMANDE-FACTURE-PAIEMENTS-ARTICLES.md` | CASP installé en clôture |
 | 35 — Rôle gestionnaire boutique en ligne | queued | _(pending)_ | Schéma : enum `UserRole` |
 | 36 — Étanchéité financière du Personnel | queued | _(pending)_ | Constats session 33 |
+| 37 — Informer le couturier | queued | _(pending)_ | Schéma : jeton de partage du PDF |
