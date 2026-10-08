@@ -40,14 +40,14 @@ next_after: 36-etancheite-financiere-personnel
 
 ---
 
-## DÉCISIONS À FAIRE TRANCHER PAR LE CEO EN DÉBUT DE SESSION
+## DÉCISIONS DU CEO (08/10/2026) — tranchées, ne pas les rouvrir
 
-Bloquer avant toute écriture tant que ces points ne sont pas tranchés. Recommandations à présenter :
+1. **Plusieurs couturiers sur une commande** : *un envoi par couturier, avec seulement ses articles.* Dans la réalité, plusieurs couturiers travaillent sur une même commande. Un article non assigné bloque l'envoi pour cet article, avec un message « assignez un couturier ».
+2. **Identité de la cliente** : *prénom et numéro de commande seulement*, jamais son téléphone.
+3. **PDF** : servi par une URL publique à **jeton aléatoire révocable** (pas l'id de la commande). Format retenu sans objection du CEO : un message WhatsApp texte court + le PDF « Fiche couturier » (mesures, articles, photos du modèle intégrées, matières sans coût, échéances).
+4. **Moment** : *uniquement depuis la fiche commande*, pas à la création (`/admin/custom-orders/new`), où les couturiers ne sont pas encore assignés.
 
-1. **Plusieurs couturiers sur une commande** → *un envoi par couturier, avec seulement ses articles.* Un article non assigné bloque l'envoi pour cet article, avec un message « assignez un couturier ».
-2. **Identité de la cliente** → *prénom et numéro de commande seulement*, sans téléphone : le couturier passe par la boutique pour les essayages. À confirmer, l'atelier fonctionne peut-être autrement.
-3. **Format** → *un message WhatsApp texte (récapitulatif court) + un PDF « Fiche couturier »* qui contient mesures, articles, photos du modèle intégrées, matières (sans coût) et échéances. Le PDF est servi par une URL publique à **jeton aléatoire révocable** (pas l'id de la commande).
-4. **Moment** → *uniquement depuis la fiche commande*, pas à la création (`/admin/custom-orders/new`) : les couturiers ne sont pas encore assignés à ce stade.
+Reste à décider pendant la session (choix technique, pas CEO) : garde de la route d'envoi — permission existante `production` ou permission dédiée.
 
 ---
 
