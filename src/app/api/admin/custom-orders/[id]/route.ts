@@ -128,10 +128,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       pickupDate,
       customerDeadline,
       materialCost,
-      totalCost,
       notes,
       measurementId,
     } = body
+
+    // Le total découle des articles (routes /items) : un total saisi à la main
+    // ferait diverger la commande de sa facture
+    if (body.totalCost !== undefined) {
+      return NextResponse.json(
+        { error: 'Le total se calcule à partir des articles : modifiez les articles de la commande' },
+        { status: 400 }
+      )
+    }
 
     // Check if order exists
     const existingOrder = await prisma.customOrder.findUnique({
@@ -152,7 +160,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     if (customerDeadline !== undefined)
       updateData.customerDeadline = customerDeadline ? new Date(customerDeadline) : null
     if (materialCost !== undefined) updateData.materialCost = materialCost
-    if (totalCost !== undefined) updateData.totalCost = totalCost
     if (notes !== undefined) updateData.notes = notes
     if (measurementId !== undefined) updateData.measurementId = measurementId
 
