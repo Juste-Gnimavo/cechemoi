@@ -41,6 +41,16 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 
 - [x] **Guides utilisateurs illustrés** (Word + PDF, 26 pages chacun) dans `~/Desktop/GUIDES-CECHEMOI/` : « Gérer la boutique en ligne » et « Gérer la relation client » (7 tuiles STAFF). Générateur dans `doc-web/guides-utilisateurs/`. Guide Boutique envoyé à la propriétaire. Voir `SESSIONS-LOGS/33-GUIDES-UTILISATEURS-BOUTIQUE-ET-CRM.md`.
 
+## Fait en session 34 (08/10/2026)
+
+- [x] **Commande sur mesure ↔ facture synchronisées** : paiements saisis sur la facture recopiés vers la commande (et suppression répercutée) ; modes de paiement enregistrés en code (`src/lib/payment-methods.ts`) ; la commande est la seule source des articles et du total de sa facture (facture liée en lecture seule sur ses articles, `totalCost` refusé par l'API). Commits `f985a86`, `3991d29`, `66a0804`, `911482f`, tous en production. Voir `SESSIONS-LOGS/34-SYNC-COMMANDE-FACTURE-PAIEMENTS-ARTICLES.md`.
+- [x] **Données réparées en prod** : 4 paiements recopiés côté commande, 9 paiements facture remis sur leur vrai mode (Wave / Orange Money / virement), SM-240226-0001 alignée sur sa facture, doublon de 40 000 supprimé sur SM-040326-0006.
+- [x] **CASP installé** : `casp/state.json` pilote désormais la file ; ce fichier reste tenu en parallèle.
+
+## Prochaine session — 35 : rôle « Gestionnaire boutique en ligne »
+
+Prompt : `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` (ou `/next`). Un rôle qui n'accède qu'au hub `/owner/boutique` et aux écrans de ses tuiles. Trois décisions à faire trancher par le CEO avant d'écrire : vente au comptoir, accès aux clientes, codes promo.
+
 ## Priorité 1 — Constats de la session 33 (étanchéité financière incomplète)
 
 - [ ] **Le Personnel voit encore des cumuls d'argent** : encaissements annuels dans `/admin/custom-orders` et `/admin/receipts`, « Reste dû » dans `/admin/invoices`, valeur du stock dans `/admin/materials` et `/admin/materials/movements`, « Valeur totale / vie client / panier moyen » dans `/admin/customers` et la fiche cliente. Expurger côté API (comme `invoices/stats` en session 31), pas seulement à l'écran.
@@ -54,6 +64,9 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - Le conteneur n'embarque pas le CLI Prisma : **toujours épingler la version**, `npx -y prisma@5.22.0 db push`. Un `npx prisma` nu télécharge Prisma 8 dont la ligne de commande est incompatible.
 - Lancer le push **après** le redéploiement, jamais avant : il compare la base au schéma présent dans le conteneur. Un « already in sync » obtenu sur l'ancien conteneur ne crée rien.
 - L'erreur `EACCES: permission denied, unlink node_modules/.prisma/client/index.js` à la fin du push est la régénération du client, inutile en runtime : à ignorer.
+- **(session 34)** Serveur : `ssh zerosuite` (Easypanel, Swarm). Base : `docker exec -i $(docker ps -qf name=cechemoi_postgres.1) psql -U postgres -d postgres`. Postgres n'est pas exposé (proxy Cloudflare) et ne doit pas l'être ; `.env` locaux pointent encore vers l'ancien hôte `thales.deblo.app`.
+- **(session 34)** Le push ne déclenche pas toujours de build : vérifier l'âge du conteneur (`docker service ps cechemoi_cechemoi`) et, si rien ne part, utiliser le webhook de l'onglet Deployments du service dans Easypanel.
+- **(session 34)** Le conteneur est un build standalone (pas de `scripts/`, pas de ts-node) : les rattrapages de données se font en SQL, dans une transaction, avec aperçu en lecture seule d'abord.
 
 ## À surveiller pendant les premières semaines d'usage par les employés
 
@@ -67,7 +80,7 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [ ] Tableau de bord d'un compte Personnel : doit s'afficher normalement et ne montrer aucun montant (ne pas tomber sur « Aucune donnée disponible »).
 - [ ] Bouton « Voir les commandes » en tête de `/admin/materials`.
 
-## Prochaine session (au choix selon les retours)
+## Ensuite, selon les retours de la propriétaire
 
 1. **Corrections du lot 1** remontées par la propriétaire après vérification (le plus probable).
 2. **Lot 2** : la suite de ses ~20 signalements (le CEO reprendra la liste — chaque nouveau problème = fichier `messages/18+`).
@@ -82,6 +95,7 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - Sous-catégories de dépenses : 1 niveau max, roll-up partout, exports « dont X » sans double comptage.
 - Droits : **aucun tableau de rôles codé en dur** dans une route d'administration. Tout passe par `denyUnlessPermitted(session, '<permission>')` et la matrice `src/lib/role-permissions.ts`. Le Personnel ne doit jamais voir la trésorerie ni la masse salariale.
 - Sync paiement → facture : `syncPaymentToInvoice` est idempotente — ne jamais recréer un reçu ou un InvoicePayment existant, toujours finir par `updateInvoiceAmountAndStatus`.
+- **Commande sur mesure = source de vérité de sa facture** (session 34) : articles et total ne se modifient que sur la commande (`syncInvoiceItemsFromCustomOrder`) ; paiements saisissables des deux côtés, miroir dans les deux sens (`syncPaymentToInvoice` / `mirrorInvoicePaymentToCustomOrder`). Mode de paiement toujours en code (`src/lib/payment-methods.ts`).
 
 ## Ensuite (file d'attente inchangée)
 

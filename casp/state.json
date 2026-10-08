@@ -1,0 +1,22 @@
+{
+  "casp_version": "0.19.0",
+  "updated_at": "2026-10-08",
+  "last_session_id": "34-SYNC-COMMANDE-FACTURE-PAIEMENTS-ARTICLES",
+  "last_commit": "911482f",
+  "current_phase": "34-sync-commande-facture",
+  "next_phase": "35-role-gestionnaire-boutique-en-ligne",
+  "next_prompt": "docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md",
+  "phases_shipped": [
+    "34-sync-commande-facture"
+  ],
+  "phases_queued": [
+    "35-role-gestionnaire-boutique-en-ligne"
+  ],
+  "phases_backlog": [
+    "notification-system",
+    "facture-bouton-paiement-unique",
+    "webhook-deploiement-easypanel"
+  ],
+  "notes": "Sessions 1-33 antérieures à CASP : historique dans SESSIONS-LOGS/ et SESSIONS-LOGS/NEXT-STEP.md (maintenu en parallèle). Schéma appliqué par `npx -y prisma@5.22.0 db push` depuis le conteneur, pas de migrations versionnées. Lancer `casp check` avant push.",
+  "logs_dir": "SESSIONS-LOGS"
+}
