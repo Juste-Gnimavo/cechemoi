@@ -53,6 +53,8 @@ Prompt : `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` (ou `/ne
 
 ## Priorité 1 — Constats de la session 33 (étanchéité financière incomplète)
 
+→ Mis en file CASP : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (session 36, après le rôle).
+
 - [ ] **Le Personnel voit encore des cumuls d'argent** : encaissements annuels dans `/admin/custom-orders` et `/admin/receipts`, « Reste dû » dans `/admin/invoices`, valeur du stock dans `/admin/materials` et `/admin/materials/movements`, « Valeur totale / vie client / panier moyen » dans `/admin/customers` et la fiche cliente. Expurger côté API (comme `invoices/stats` en session 31), pas seulement à l'écran.
 - [ ] **Masquer les boutons « Supprimer »** au Personnel quand le serveur refuse (catégories : ADMIN seul) ; auditer clientes, commandes, commandes sur mesure, avis, campagnes.
 - [ ] **Codes promo** : la matrice STAFF contient `coupons`, la tuile est visible ; la session 32 les disait réservés à la direction. Demander au CEO et aligner.

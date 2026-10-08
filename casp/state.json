@@ -10,7 +10,8 @@
     "34-sync-commande-facture"
   ],
   "phases_queued": [
-    "35-role-gestionnaire-boutique-en-ligne"
+    "35-role-gestionnaire-boutique-en-ligne",
+    "36-etancheite-financiere-personnel"
   ],
   "phases_backlog": [
     "notification-system",

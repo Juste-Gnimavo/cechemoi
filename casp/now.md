@@ -30,6 +30,7 @@ Prompt 35 complet : accueil et navigation filtrés, équipe, audit des rôles co
 
 - **Système de notifications** (templates, déclencheurs) — backlog depuis novembre 2025, pas demandé.
 - **Bouton de paiement en double sur la facture** — cosmétique, après le rôle.
+- **Fuites de cumuls d'argent vers le Personnel** — en file juste après (prompt 36), pas dans la session 35.
 - **Application mobile** — en pause, la priorité est le CRM web.
 
 ---
