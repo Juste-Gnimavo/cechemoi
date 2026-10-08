@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
+import { syncInvoiceItemsFromCustomOrder } from '@/lib/custom-order-invoice-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       where: { id: params.id },
       data: { totalCost: newTotal },
     })
+    await syncInvoiceItemsFromCustomOrder(params.id)
 
     // Add timeline entry
     await prisma.customOrderTimeline.create({
@@ -187,6 +189,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       })
     }
 
+    // Description or price changes both show on the invoice lines
+    if (unitPrice !== undefined || quantity !== undefined || garmentType !== undefined || customType !== undefined || description !== undefined) {
+      await syncInvoiceItemsFromCustomOrder(params.id)
+    }
+
     // Add timeline entry for status change
     if (status && status !== existingItem.status) {
       const statusLabels: Record<string, string> = {
@@ -271,6 +278,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       where: { id: params.id },
       data: { totalCost: newTotal },
     })
+    await syncInvoiceItemsFromCustomOrder(params.id)
 
     // Add timeline entry
     await prisma.customOrderTimeline.create({

@@ -425,3 +425,61 @@ export async function mirrorInvoicePaymentToCustomOrder(
 
   return customOrderPaymentId
 }
+
+/**
+ * Rebuild the invoice lines and total from its CustomOrder (sens commande → facture).
+ * La commande est la seule source des articles : chaque ajout, modification ou
+ * suppression d'article, ou changement du coût matériel, repasse par ici.
+ * Les ajustements propres à la facture (taxe, livraison, remise) sont conservés.
+ * No-op when the order has no invoice yet.
+ */
+export async function syncInvoiceItemsFromCustomOrder(customOrderId: string): Promise<void> {
+  const customOrder = await prisma.customOrder.findUnique({
+    where: { id: customOrderId },
+    select: {
+      materialCost: true,
+      items: { orderBy: { createdAt: 'asc' } },
+      invoice: { select: { id: true, tax: true, shippingCost: true, discount: true, status: true } },
+    },
+  })
+
+  const invoice = customOrder?.invoice
+  if (!customOrder || !invoice) return
+
+  // Same line layout as createInvoiceFromCustomOrder
+  const lines = [
+    ...customOrder.items.map((item) => ({
+      description: `${item.garmentType}${item.customType ? ` - ${item.customType}` : ''}${item.description ? `: ${item.description}` : ''}`,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      total: item.unitPrice * item.quantity,
+    })),
+    ...(customOrder.materialCost > 0
+      ? [
+          {
+            description: 'Coût matériel (tissu, accessoires)',
+            quantity: 1,
+            unitPrice: customOrder.materialCost,
+            total: customOrder.materialCost,
+          },
+        ]
+      : []),
+  ]
+
+  const subtotal = lines.reduce((sum, line) => sum + line.total, 0)
+  const total = subtotal + (invoice.tax || 0) + (invoice.shippingCost || 0) - (invoice.discount || 0)
+
+  await prisma.$transaction([
+    prisma.invoiceItem.deleteMany({ where: { invoiceId: invoice.id } }),
+    prisma.invoice.update({
+      where: { id: invoice.id },
+      data: { subtotal, total, items: { create: lines } },
+    }),
+  ])
+
+  // A cancelled or refunded invoice keeps its status; otherwise the new total
+  // can move it between SENT / PARTIAL / PAID
+  if (!['CANCELLED', 'REFUNDED'].includes(invoice.status)) {
+    await updateInvoiceAmountAndStatus(invoice.id)
+  }
+}

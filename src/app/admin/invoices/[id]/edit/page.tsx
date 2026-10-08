@@ -68,6 +68,7 @@ interface InvoiceDetail {
   dueDate: string | null
   paidDate: string | null
   items: InvoiceItem[]
+  customOrder: { id: string; orderNumber: string } | null
 }
 
 export default function EditInvoicePage() {
@@ -274,14 +275,17 @@ export default function EditInvoicePage() {
       return
     }
 
-    if (items.length === 0 || items.every(item => !item.description)) {
+    // Facture d'une commande sur mesure : les articles viennent de la commande
+    const linkedOrder = invoice?.customOrder ?? null
+
+    if (!linkedOrder && (items.length === 0 || items.every(item => !item.description))) {
       toast.error('Ajoutez au moins un article')
       return
     }
 
     const validItems = items.filter(item => item.description.trim() !== '')
 
-    if (validItems.length === 0) {
+    if (!linkedOrder && validItems.length === 0) {
       toast.error('Ajoutez au moins un article valide')
       return
     }
@@ -297,12 +301,14 @@ export default function EditInvoicePage() {
           customerEmail: customerEmail || null,
           customerPhone: customerPhone || null,
           customerAddress: customerAddress || null,
-          items: validItems.map(item => ({
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            productId: item.productId || null,
-          })),
+          ...(!linkedOrder && {
+            items: validItems.map(item => ({
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              productId: item.productId || null,
+            })),
+          }),
           tax,
           shippingCost,
           discount,
@@ -510,6 +516,41 @@ export default function EditInvoicePage() {
         </div>
 
         {/* Invoice Items */}
+        {invoice.customOrder ? (
+          <div className="bg-white/80 dark:bg-dark-800 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-green-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Articles</h2>
+            </div>
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="text-gray-900 dark:text-white font-medium">
+                  Articles gérés depuis la commande {invoice.customOrder.orderNumber}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                  Pour ajouter, modifier ou retirer un article, passez par la commande : la facture se met à jour automatiquement.
+                </p>
+                <Link
+                  href={`/admin/custom-orders/${invoice.customOrder.id}?tab=items`}
+                  className="inline-block mt-2 text-primary-500 hover:underline font-medium"
+                >
+                  Modifier les articles de la commande →
+                </Link>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-200 dark:divide-dark-700">
+              {items.map((item, index) => (
+                <div key={index} className="flex justify-between gap-4 py-2 text-sm">
+                  <span className="text-gray-900 dark:text-white">
+                    {item.description} <span className="text-gray-500">× {item.quantity}</span>
+                  </span>
+                  <span className="text-gray-900 dark:text-white whitespace-nowrap">{formatCurrency(item.total)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
         <div className="bg-white/80 dark:bg-dark-800 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-lg p-6 space-y-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -617,6 +658,8 @@ export default function EditInvoicePage() {
             ))}
           </div>
         </div>
+
+        )}
 
         {/* Totals */}
         <div className="bg-white/80 dark:bg-dark-800 backdrop-blur-sm border border-gray-200 dark:border-dark-700 rounded-lg p-6">

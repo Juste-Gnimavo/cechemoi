@@ -144,6 +144,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Facture non trouvée' }, { status: 404 })
     }
 
+    // Facture d'une commande sur mesure : la commande est la seule source des
+    // articles, sinon les deux divergent (cas SM-240226-0001)
+    if (existingInvoice.customOrderId && items !== undefined) {
+      return NextResponse.json(
+        { error: 'Les articles de cette facture se modifient depuis la commande sur mesure liée' },
+        { status: 400 }
+      )
+    }
+
     // Update invoice
     const updateData: any = {}
 

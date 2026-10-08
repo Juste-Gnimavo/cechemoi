@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { notifyCustomOrderStatusChange } from '@/lib/custom-order-status-notifications'
+import { syncInvoiceItemsFromCustomOrder } from '@/lib/custom-order-invoice-sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -135,7 +136,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Check if order exists
     const existingOrder = await prisma.customOrder.findUnique({
       where: { id: params.id },
-      select: { id: true, status: true, orderNumber: true },
+      select: { id: true, status: true, orderNumber: true, materialCost: true },
     })
 
     if (!existingOrder) {
@@ -171,6 +172,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         payments: true,
       },
     })
+
+    // The material cost is billed as an invoice line
+    if (materialCost !== undefined && materialCost !== existingOrder.materialCost) {
+      await syncInvoiceItemsFromCustomOrder(params.id)
+    }
 
     // Add timeline entry if status changed
     if (status && status !== existingOrder.status) {
