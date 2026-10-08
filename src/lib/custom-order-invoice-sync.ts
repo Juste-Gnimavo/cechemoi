@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { InvoiceStatus, PaymentMethod } from '@prisma/client'
 import { generateReceiptNumber } from './receipt-generator'
+import { normalizePaymentMethod } from './payment-methods'
 
 /**
  * Generate invoice number format: FAC-DDMMYY-0001
@@ -156,7 +157,9 @@ function mapPaymentMethod(method: string | null): PaymentMethod {
     CARD: PaymentMethod.PAIEMENTPRO,
     OTHER: PaymentMethod.OTHER,
   }
-  return mapping[method || ''] || PaymentMethod.CASH
+  // Les anciens paiements stockent le libellé (« Wave ») : sans normalisation
+  // ils tombaient tous sur CASH.
+  return mapping[normalizePaymentMethod(method) || ''] || PaymentMethod.CASH
 }
 
 /**

@@ -35,6 +35,7 @@ import {
   Save,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { CUSTOM_ORDER_PAYMENT_METHODS, paymentMethodLabel } from '@/lib/payment-methods'
 
 // Status and priority labels
 const STATUS_LABELS: Record<string, string> = {
@@ -976,7 +977,7 @@ function CustomOrderDetailContent() {
                               : payment.paymentType === 'FINAL'
                                 ? 'Solde'
                                 : 'Acompte'}
-                            {payment.paymentMethod && ` - ${payment.paymentMethod}`}
+                            {payment.paymentMethod && ` - ${paymentMethodLabel(payment.paymentMethod)}`}
                           </p>
                         </div>
                         <p className="text-xs text-gray-400">
@@ -1477,12 +1478,9 @@ function CustomOrderDetailContent() {
                   className="w-full px-3 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg text-gray-900 dark:text-white"
                 >
                   <option value="">Sélectionner...</option>
-                  <option value="Espèces">Espèces</option>
-                  <option value="Orange Money">Orange Money</option>
-                  <option value="MTN MoMo">MTN MoMo</option>
-                  <option value="Wave">Wave</option>
-                  <option value="Carte">Carte bancaire</option>
-                  <option value="Virement">Virement</option>
+                  {CUSTOM_ORDER_PAYMENT_METHODS.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
                 </select>
               </div>
 

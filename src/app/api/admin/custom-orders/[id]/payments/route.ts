@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
+import { normalizePaymentMethod, paymentMethodLabel } from '@/lib/payment-methods'
 import {
   syncPaymentToInvoice,
   deletePaymentAndSync,
@@ -79,7 +80,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (denied) return denied
 
     const body = await req.json()
-    const { amount, paymentType = 'INSTALLMENT', paymentMethod, notes, paidAt } = body
+    const { amount, paymentType = 'INSTALLMENT', notes, paidAt } = body
+    const paymentMethod = normalizePaymentMethod(body.paymentMethod)
 
     if (!amount || amount <= 0) {
       return NextResponse.json({ error: 'Montant requis et doit être positif' }, { status: 400 })
@@ -166,7 +168,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       data: {
         customOrderId: params.id,
         event: `Paiement reçu: ${paymentTypeLabels[finalPaymentType] || finalPaymentType}`,
-        description: `${formatAmount(amount)} FCFA reçu${paymentMethod ? ` via ${paymentMethod}` : ''}. ${balance <= 0 ? 'Commande entièrement payée!' : `Reste: ${formatAmount(balance)} FCFA`}${receiptInfo ? ` - Reçu ${receiptInfo.receiptNumber}` : ''}`,
+        description: `${formatAmount(amount)} FCFA reçu${paymentMethod ? ` via ${paymentMethodLabel(paymentMethod)}` : ''}. ${balance <= 0 ? 'Commande entièrement payée!' : `Reste: ${formatAmount(balance)} FCFA`}${receiptInfo ? ` - Reçu ${receiptInfo.receiptNumber}` : ''}`,
         userId: (session.user as any).id,
         userName: (session.user as any).name,
       },
