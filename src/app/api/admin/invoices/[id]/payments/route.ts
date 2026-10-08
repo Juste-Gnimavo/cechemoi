@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { InvoiceStatus, InvoicePaymentType } from '@prisma/client'
 import { z } from 'zod'
 import { generateReceiptNumber, getPaymentMethodLabel } from '@/lib/receipt-generator'
+import { mirrorInvoicePaymentToCustomOrder } from '@/lib/custom-order-invoice-sync'
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
@@ -136,6 +137,7 @@ export async function POST(
         customerName: true,
         customerPhone: true,
         customerEmail: true,
+        customOrderId: true,
       },
     })
 
@@ -261,6 +263,36 @@ export async function POST(
       data: { invoicePaymentId: payment.id },
     })
 
+    // Facture liée à une commande sur mesure : le paiement doit aussi
+    // apparaître côté commande (onglet Paiements, cartes Payé / Reliquat).
+    if (invoice.customOrderId) {
+      try {
+        await mirrorInvoicePaymentToCustomOrder(payment.id)
+
+        const paymentTypeLabels: Record<string, string> = {
+          DEPOSIT: 'Avance',
+          INSTALLMENT: 'Acompte',
+          FINAL: 'Solde',
+        }
+        const formatAmount = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+        const balance = updatedInvoice.total - updatedInvoice.amountPaid
+
+        await prisma.customOrderTimeline.create({
+          data: {
+            customOrderId: invoice.customOrderId,
+            event: `Paiement reçu: ${paymentTypeLabels[finalPaymentType] || finalPaymentType}`,
+            description: `${formatAmount(amount)} FCFA reçu via ${getPaymentMethodLabel(paymentMethod)} (saisi depuis la facture ${invoice.invoiceNumber}). ${balance <= 0 ? 'Commande entièrement payée!' : `Reste: ${formatAmount(balance)} FCFA`} - Reçu ${receipt.receiptNumber}`,
+            userId: (session.user as any).id,
+            userName: (session.user as any).name,
+          },
+        })
+      } catch (mirrorError) {
+        // Le paiement facture est enregistré ; le script de rattrapage
+        // scripts/backfill-custom-order-payments.ts répare un miroir manqué.
+        console.error('Error mirroring invoice payment to custom order:', mirrorError)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       payment: {
@@ -328,6 +360,7 @@ export async function DELETE(
             total: true,
             amountPaid: true,
             status: true,
+            customOrderId: true,
           },
         },
         receipt: {
@@ -372,6 +405,20 @@ export async function DELETE(
       )
     }
 
+    // Delete the mirrored custom order payment, otherwise the order keeps
+    // counting money that no longer exists on the invoice
+    const mirroredCustomOrderPayment = await prisma.customOrderPayment.findUnique({
+      where: { invoicePaymentId: paymentId },
+      select: { id: true, customOrderId: true },
+    })
+    if (mirroredCustomOrderPayment) {
+      transactionOperations.push(
+        prisma.customOrderPayment.delete({
+          where: { id: mirroredCustomOrderPayment.id },
+        })
+      )
+    }
+
     // Delete payment
     transactionOperations.push(
       prisma.invoicePayment.delete({
@@ -394,6 +441,19 @@ export async function DELETE(
 
     // Execute transaction
     await prisma.$transaction(transactionOperations)
+
+    if (mirroredCustomOrderPayment) {
+      const formatAmount = (n: number) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+      await prisma.customOrderTimeline.create({
+        data: {
+          customOrderId: mirroredCustomOrderPayment.customOrderId,
+          event: 'Paiement supprimé',
+          description: `Paiement de ${formatAmount(payment.amount)} FCFA annulé depuis la facture`,
+          userId: (session.user as any).id,
+          userName: (session.user as any).name,
+        },
+      })
+    }
 
     return NextResponse.json({
       success: true,

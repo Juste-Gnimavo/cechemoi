@@ -365,3 +365,60 @@ export async function deletePaymentAndSync(customOrderPaymentId: string): Promis
     await updateInvoiceAmountAndStatus(payment.customOrder.invoice.id)
   }
 }
+
+/**
+ * Mirror an InvoicePayment onto its CustomOrder (sens facture → commande).
+ * Called when a payment is added from the invoice page of an invoice linked
+ * to a custom order: sans ce miroir, la commande affiche 0 FCFA payé alors
+ * que la facture est partiellement réglée.
+ * Idempotent : un CustomOrderPayment déjà lié à ce paiement est réutilisé.
+ * Returns the CustomOrderPayment id, or null when the invoice is standalone.
+ */
+export async function mirrorInvoicePaymentToCustomOrder(
+  invoicePaymentId: string
+): Promise<string | null> {
+  const invoicePayment = await prisma.invoicePayment.findUnique({
+    where: { id: invoicePaymentId },
+    include: {
+      invoice: { select: { customOrderId: true } },
+      receipt: { select: { id: true, customOrderPaymentId: true } },
+    },
+  })
+
+  const customOrderId = invoicePayment?.invoice.customOrderId
+  if (!invoicePayment || !customOrderId) return null
+
+  const existing = await prisma.customOrderPayment.findUnique({
+    where: { invoicePaymentId },
+    select: { id: true },
+  })
+
+  const customOrderPaymentId =
+    existing?.id ??
+    (
+      await prisma.customOrderPayment.create({
+        data: {
+          customOrderId,
+          amount: invoicePayment.amount,
+          // Same enum values on both sides (DEPOSIT / INSTALLMENT / FINAL)
+          paymentType: invoicePayment.paymentType,
+          paymentMethod: invoicePayment.paymentMethod,
+          notes: invoicePayment.notes,
+          paidAt: invoicePayment.paidAt,
+          receivedById: invoicePayment.createdById,
+          invoicePaymentId,
+        },
+        select: { id: true },
+      })
+    ).id
+
+  // Attach the invoice receipt to the order so it appears on both sides
+  if (invoicePayment.receipt && !invoicePayment.receipt.customOrderPaymentId) {
+    await prisma.receipt.update({
+      where: { id: invoicePayment.receipt.id },
+      data: { customOrderPaymentId, customOrderId },
+    })
+  }
+
+  return customOrderPaymentId
+}
