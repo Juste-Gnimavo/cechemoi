@@ -47,7 +47,7 @@ next_after: 36-etancheite-financiere-personnel
 3. **PDF** : servi par une URL publique à **jeton aléatoire révocable** (pas l'id de la commande). Format retenu sans objection du CEO : un message WhatsApp texte court + le PDF « Fiche couturier » (mesures, articles, photos du modèle intégrées, matières sans coût, échéances).
 4. **Moment** : *uniquement depuis la fiche commande*, pas à la création (`/admin/custom-orders/new`), où les couturiers ne sont pas encore assignés.
 
-Reste à décider pendant la session (choix technique, pas CEO) : garde de la route d'envoi — permission existante `production` ou permission dédiée.
+5. **Qui peut envoyer** : *la permission existante `production`*, soit Administrateur, Manager et Personnel (les couturiers n'ont pas de mot de passe ; le rôle `ECOMMERCE` ne l'a pas). Pas de permission dédiée : c'est le Personnel qui crée les commandes et assigne les couturiers, et le contenu envoyé ne comporte aucun montant.
 
 ---
 
@@ -59,7 +59,7 @@ Reste à décider pendant la session (choix technique, pas CEO) : garde de la ro
 2. **PDF « Fiche couturier »** : générateur distinct (inspiré de la mise en page de la fiche de suivi, sans ses tableaux de prix). Photos du modèle intégrées si les pièces jointes sont des images.
 3. **Route publique** du PDF par jeton (nouveau champ ou nouvelle table, `db push`), révocable, sans authentification, ne renvoyant que la fiche.
 4. **Bouton « Informer le couturier »** sur `src/app/admin/custom-orders/[id]/page.tsx` → fenêtre d'aperçu : couturier destinataire et son numéro, texte exact du message, aperçu du PDF, champ « Note pour le couturier » facultatif, bouton « Envoyer ». Rien ne part sans ce clic.
-5. **Route d'envoi** `POST /api/admin/custom-orders/[id]/notify-tailor` : garde par la matrice (`denyUnlessPermitted(session, 'production')` ou une permission dédiée — à décider), envoi via `sendWhatsAppBusiness`, erreurs remontées clairement (numéro manquant, proxy indisponible).
+5. **Route d'envoi** `POST /api/admin/custom-orders/[id]/notify-tailor` : garde `denyUnlessPermitted(session, 'production')` (décision 5) ; le bouton est masqué sans cette permission, envoi via `sendWhatsAppBusiness`, erreurs remontées clairement (numéro manquant, proxy indisponible).
 6. **Trace** : entrée d'historique sur la commande (« Couturier informé : <nom> », auteur, date) et indication « Dernier envoi le … » à côté du bouton ; un renvoi reste possible.
 
 ### SHOULD HAVE
