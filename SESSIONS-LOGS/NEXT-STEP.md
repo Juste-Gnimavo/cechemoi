@@ -53,7 +53,8 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] Vente au comptoir du Personnel réparée (la liste des livraisons était vide : il n'avait pas `shipping`).
 - [x] Enum `ECOMMERCE` ajouté en base de production par SQL, **avant** le push, pour ne pas casser la connexion admin.
 - [ ] **CEO : relancer le déploiement depuis Easypanel** (aucun build déclenché par les deux pushes).
-- [ ] Après le déploiement : `npx -y prisma@5.22.0 db push` (attendu : already in sync), puis compte ECOMMERCE de test créé depuis `/admin/team`, checklist du journal 35, et désactivation du compte.
+- [x] Déploiement relancé à la main et `db push` lancé le 09/10/2026 : « already in sync », client Prisma du conteneur à jour (contient `ECOMMERCE`).
+- [ ] Compte ECOMMERCE de test créé depuis `/admin/team`, checklist du journal 35, et désactivation du compte.
 
 ## Prochaine session — 36 : étanchéité financière du Personnel
 
@@ -76,7 +77,7 @@ Lire `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (préalables de 
 
 ## Déploiement — rappels (appris en session 32)
 
-- Le conteneur n'embarque pas le CLI Prisma : **toujours épingler la version**, `npx -y prisma@5.22.0 db push`. Un `npx prisma` nu télécharge Prisma 8 dont la ligne de commande est incompatible.
+- Le conteneur n'embarque pas le CLI Prisma : **toujours épingler la version**, `npx -y prisma@5.22.0 db push --skip-generate`. Un `npx prisma` nu télécharge Prisma 8 dont la ligne de commande est incompatible. Sans `--skip-generate`, la commande tente de régénérer le client et échoue en `EACCES` (utilisateur `nextjs`, fichiers `root`) : erreur sans conséquence, le client est généré au build de l'image.
 - Lancer le push **après** le redéploiement, jamais avant : il compare la base au schéma présent dans le conteneur. Un « already in sync » obtenu sur l'ancien conteneur ne crée rien.
 - L'erreur `EACCES: permission denied, unlink node_modules/.prisma/client/index.js` à la fin du push est la régénération du client, inutile en runtime : à ignorer.
 - **(session 34)** Serveur : `ssh zerosuite` (Easypanel, Swarm). Base : `docker exec -i $(docker ps -qf name=cechemoi_postgres.1) psql -U postgres -d postgres`. Postgres n'est pas exposé (proxy Cloudflare) et ne doit pas l'être ; `.env` locaux pointent encore vers l'ancien hôte `thales.deblo.app`.
