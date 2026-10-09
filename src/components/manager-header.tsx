@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutToAdminLogin } from '@/lib/admin-sign-out'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -116,7 +117,7 @@ export function ManagerHeader() {
 
             {/* Logout */}
             <button
-              onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL || '/' })}
+              onClick={() => signOutToAdminLogin()}
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
               title="Déconnexion"
             >
@@ -186,7 +187,7 @@ export function ManagerHeader() {
                 <button
                   onClick={() => {
                     setIsMenuOpen(false)
-                    signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL || '/' })
+                    signOutToAdminLogin()
                   }}
                   className="flex items-center space-x-3 px-4 py-3 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-dark-800 rounded-lg transition-colors w-full"
                 >

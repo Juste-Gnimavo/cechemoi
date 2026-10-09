@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutToAdminLogin } from '@/lib/admin-sign-out'
 import { useState, useEffect, useCallback } from 'react'
 import { Home, LogOut, Moon, Search, Sun } from 'lucide-react'
 import { useTheme } from '@/store/theme'
@@ -85,7 +86,7 @@ export function OwnerHeader() {
             )}
 
             <button
-              onClick={() => signOut({ callbackUrl: '/auth/login' })}
+              onClick={() => signOutToAdminLogin()}
               className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
               title="Déconnexion"
               aria-label="Déconnexion"
