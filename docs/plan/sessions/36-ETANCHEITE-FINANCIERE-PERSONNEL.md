@@ -25,7 +25,7 @@ next_after: 35-role-gestionnaire-boutique-en-ligne
 
 - **Session 31** a fermé `transactions`, `expenses`, `reports`, `analytics/revenue-summary`, `analytics/products` au Personnel et expurgé les montants de `analytics/overview` et `invoices/stats` via `sessionCan(session, 'finance.revenue')` (`src/app/api/admin/invoices/stats/route.ts:123`, `src/app/api/admin/analytics/overview/route.ts:327`). C'est le modèle à reproduire : **expurger côté API**, jamais seulement masquer à l'écran.
 - **Session 33** (`SESSIONS-LOGS/33-GUIDES-UTILISATEURS-BOUTIQUE-ET-CRM.md`, section « Constats ») a relevé les fuites restantes en faisant les captures des guides.
-- **Session 35** aura ajouté le rôle `ECOMMERCE` : toute expurgation doit se baser sur la permission (`finance.revenue`), pas sur le nom du rôle, pour couvrir les deux.
+- **Session 35** aura ajouté le rôle `ECOMMERCE` (périmètre limité au hub Boutique ; le compte réel du gestionnaire ne sera créé qu'après le déploiement de cette session) : toute expurgation doit se baser sur la permission (`finance.revenue`), pas sur le nom du rôle, pour couvrir les deux.
 
 ---
 
@@ -42,7 +42,7 @@ next_after: 35-role-gestionnaire-boutique-en-ligne
    Chaque écran concerné masque la carte proprement (pas de « 0 F » trompeur, pas de « Aucune donnée »).
    Les montants **unitaires** nécessaires au travail (montant d'une facture, d'un reçu, d'un paiement) restent visibles : seuls les cumuls sont visés.
 2. **Boutons « Supprimer » alignés sur le serveur** : masqués quand la permission ou le test serveur refuse. Point de départ : catégories (`DELETE /api/admin/categories/[id]` exige `role === 'ADMIN'`) ; auditer clientes, commandes du site, commandes sur mesure, avis, campagnes. Consigner chaque écran dans le journal.
-3. **Codes promo** : trancher avec le CEO (la matrice STAFF contient `coupons`, la session 32 les disait réservés à la direction) et aligner matrice + tuile du hub. Reprendre la décision prise en session 35 pour `ECOMMERCE`.
+3. **Codes promo** — décidé le 09/10/2026, ne pas rouvrir : `ECOMMERCE` a `coupons` + `coupons.manage` (CEO, session 35). `STAFF` garde le statu quo : `coupons` seul (lecture et validation d'un code pendant une vente), **sans** `coupons.manage` ; la tuile Codes promo du hub, gardée par `coupons.manage`, lui reste donc masquée. Vérifier seulement que l'écran `/admin/coupons` n'offre pas à `STAFF` de bouton de création ou de modification que le serveur refuserait.
 
 ### SHOULD HAVE
 

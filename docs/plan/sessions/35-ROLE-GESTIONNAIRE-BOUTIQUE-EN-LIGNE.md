@@ -43,13 +43,14 @@ next_after: 34
 
 ---
 
-## DÉCISIONS À FAIRE TRANCHER PAR LE CEO EN DÉBUT DE SESSION
+## DÉCISIONS DU CEO (09/10/2026) — tranchées, ne pas les rouvrir
 
-Bloquer avant toute écriture tant que ces trois points ne sont pas tranchés (règle 9). Recommandations à présenter :
+Le CEO a précisé le métier : le gestionnaire **met à jour la boutique** — tenues, catégories, stock, photos, bandeau, avis, commandes du site et vente au comptoir. Il accède **directement** à `/owner/boutique` et à ses sous-écrans, à rien d'autre.
 
-1. **Vente au comptoir** (`orders.create`) : c'est une vente en magasin, pas en ligne. *Recommandation : l'inclure*, elle est sur le hub Boutique et passe par le même stock.
-2. **Accès aux clientes** : créer une commande ou traiter une commande du site exige de retrouver la cliente. *Recommandation : lecture seule limitée à ce que les écrans commande exposent*, pas l'annuaire `customers` complet (pas d'export, pas de mensurations).
-3. **Codes promo** : créer une réduction engage de l'argent. *Recommandation : `coupons` + `coupons.manage`*, la propriétaire garde la main via le rapport.
+1. **Vente au comptoir** (`orders.create`) : **incluse**.
+2. **Clientes** : **pas** de permission `customers` (ni annuaire, ni fiche, ni mensurations, ni valeur client, ni export). La vente au comptoir passe par une recherche dédiée (voir MUST HAVE 3 bis).
+3. **Codes promo** : **`coupons` + `coupons.manage`** — le gestionnaire crée et gère les codes.
+4. **Hors périmètre, explicitement** : commandes sur mesure (atelier), factures, reçus, caisse, dépenses, salaires, rapports, clients, stock matériels, personnel, messages, anniversaires. Une proposition antérieure « STAFF moins la caisse » a été **rejetée** par le CEO : le gestionnaire irait créer des commandes dans l'atelier.
 
 ---
 
@@ -58,8 +59,9 @@ Bloquer avant toute écriture tant que ces trois points ne sont pas tranchés (r
 ### MUST HAVE
 
 1. **Enum** : `UserRole.ECOMMERCE` dans `prisma/schema.prisma` ; libellé « Gestionnaire boutique en ligne », couleur de badge propre.
-2. **Matrice** : `ECOMMERCE` = `orders`, `orders.create`, `products`, `products.manage`, `categories`, `categories.manage`, `inventory`, `inventory.adjust`, `coupons`(+`.manage` selon décision 3), `media`, `reviews.moderate`, `storefront`, `storefront.manage`. **Aucune** permission `finance.*`, `reports.*`, `analytics`, `sales`, `team*`, `custom-orders`, `invoices*`, `materials*`, `customers.export`, aucune suppression définitive.
-3. **Accueil** : un `ECOMMERCE` qui arrive sur `/owner` est redirigé vers `/owner/boutique` (ou ne voit que cette tuile) ; le hub n'affiche que les tuiles autorisées.
+2. **Matrice** : `ECOMMERCE` = `orders`, `orders.create`, `products`, `products.manage`, `categories`, `categories.manage`, `inventory`, `inventory.adjust`, `coupons`, `coupons.manage`, `media`, `reviews.moderate`, `storefront`, `storefront.manage`. **Aucune** permission `finance.*`, `reports.*`, `analytics`, `sales`, `team*`, `customers*`, `custom-orders`, `production`, `invoices*`, `receipts`, `materials*`, `appointments*`, `campaigns*`, `notifications*`, `blog*`, `shipping`, `orders.refund`, aucune suppression définitive.
+3. **Accueil** : un `ECOMMERCE` qui arrive sur `/owner` est **redirigé** vers `/owner/boutique` (le CEO veut un accès direct, pas un accueil à une tuile) ; le hub n'affiche que les tuiles autorisées ; le lien « Retour à l'accueil » ne doit pas créer de boucle.
+3 bis. **Vente au comptoir sans l'annuaire** (constaté le 09/10 en lisant `src/app/admin/orders/new/page.tsx`) : l'écran appelle `GET /api/admin/customers?search=` et `GET /api/admin/customers/[id]` (gardés par `customers`), `GET /api/admin/shipping/methods` (gardé par `shipping`) et `POST /api/admin/coupons/validate` (gardé par `coupons`). Créer une route de recherche dédiée gardée par `orders.create`, qui ne renvoie que l'identifiant, le nom, le téléphone et les adresses de la cliente, et y brancher l'écran ; ouvrir la **lecture** des modes de livraison à `orders.create`. Ne pas donner `customers` au rôle. Vérifier au passage que la vente au comptoir de `STAFF` (qui n'a pas `shipping`) fonctionne, et la réparer de la même façon sinon.
 4. **Navigation `/admin`** : barre latérale et palette de recherche n'exposent que les écrans autorisés ; une URL tapée à la main hors périmètre renvoie la page d'accès refusé, et l'API un 403.
 5. **Équipe** : option « Gestionnaire boutique en ligne » dans le sélecteur ; listes et validations de `team/route.ts` et `team/[id]/route.ts` passent par une constante partagée des rôles d'équipe au lieu de tableaux en dur.
 6. **Audit des tests de rôle en dur** : relire chaque occurrence de `'STAFF'` / `'TAILOR'` hors matrice ; décider pour `ECOMMERCE` (connexion admin, 2FA, reset mot de passe doivent l'accepter). Consigner la liste dans le journal.
@@ -78,7 +80,7 @@ Bloquer avant toute écriture tant que ces trois points ne sont pas tranchés (r
 ## VALIDATION (obligatoire avant de clore)
 
 - `npx tsc --noEmit` vert.
-- En production, avec un vrai compte `ECOMMERCE` créé depuis `/admin/team` : les 10 tuiles du hub fonctionnent (création de tenue, stock, commande comptoir, avis, bandeau…) ; `/owner/caisse`, `/owner/rapports`, `/admin/custom-orders`, `/admin/invoices`, `/admin/customers`, `/admin/team`, `/admin/expenses` sont refusés à l'écran **et** en API (`curl` avec le cookie de session : 403).
+- En production, avec un compte `ECOMMERCE` **de test** créé depuis `/admin/team` (le désactiver en fin de session ; le compte réel du gestionnaire ne sera créé par le CEO qu'après le déploiement de la session 36, qui expurge les cumuls d'argent restants) : les 10 tuiles du hub fonctionnent (création de tenue, stock, commande comptoir **jusqu'au bout, cliente retrouvée et code promo appliqué**, avis, bandeau, codes promo…) ; `/owner/caisse`, `/owner/rapports`, `/admin/custom-orders`, `/admin/invoices`, `/admin/customers`, `/admin/team`, `/admin/expenses` sont refusés à l'écran **et** en API (`curl` avec le cookie de session : 403).
 - Journal de session écrit, `casp/state.json` et `SESSIONS-LOGS/NEXT-STEP.md` mis à jour, `casp check` vert.
 
 ---
