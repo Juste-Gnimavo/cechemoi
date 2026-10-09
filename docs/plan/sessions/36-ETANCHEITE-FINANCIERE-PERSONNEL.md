@@ -45,6 +45,13 @@ next_after: 35-role-gestionnaire-boutique-en-ligne
 2. **Boutons « Supprimer » alignés sur le serveur** : masqués quand la permission ou le test serveur refuse. Catégories et produits sont déjà traités (`83996b1`, 09/10/2026 : `categories.delete` et `products.delete`, accordés à `ECOMMERCE`, pas à `STAFF` — masquer donc ces boutons pour `STAFF`) ; auditer clientes, commandes du site, commandes sur mesure, avis, campagnes. Consigner chaque écran dans le journal.
 3. **Codes promo** — décidé le 09/10/2026, ne pas rouvrir : `ECOMMERCE` a `coupons` + `coupons.manage` (CEO, session 35). `STAFF` garde le statu quo : `coupons` seul (lecture et validation d'un code pendant une vente), **sans** `coupons.manage` ; la tuile Codes promo du hub, gardée par `coupons.manage`, lui reste donc masquée. Vérifier seulement que l'écran `/admin/coupons` n'offre pas à `STAFF` de bouton de création ou de modification que le serveur refuserait.
 
+3 bis. **Faille `POST /api/upload`** (constat session 35, journal `SESSIONS-LOGS/26-10-09-001-35-role-gestionnaire-boutique-en-ligne.md` § risques ; mis en MUST par le CEO le 09/10/2026). La route n'exige qu'une session, **n'importe laquelle** : une cliente connectée peut envoyer un SVG (script exécutable s'il est servi depuis notre domaine), un PDF, un document bureautique, dans la `category` de son choix (la valeur, lue dans le formulaire, sert à construire le chemin de stockage). On ne peut pas simplement la fermer aux clientes : `src/app/account/profile/page.tsx:223` et `src/components/user-profile-card.tsx:89` l'appellent pour la **photo de profil** (`category=avatars`). Attendu :
+   - rôle d'équipe (`isTeamRole`, comme le `GET` de la même route) : comportement actuel conservé ;
+   - toute autre session : uniquement `category === 'avatars'`, uniquement JPEG, PNG ou WebP, plafond de taille explicite, type vérifié **sur les octets** (signature du fichier), pas sur le `Content-Type` déclaré ; tout le reste → 403 ;
+   - `category` validée contre une liste fermée pour tout le monde (aucun `..`, aucun `/`) ;
+   - aucune session → 401, comme aujourd'hui.
+   Valider par `curl` avec un cookie client : avatar PNG accepté ; SVG, PDF et `category=products` refusés.
+
 ### SHOULD HAVE
 
 4. **Anniversaires** : la colonne « Âge » affiche « 0 ans » pour toutes les clientes — corriger le calcul.
