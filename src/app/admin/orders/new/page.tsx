@@ -41,6 +41,7 @@ interface Customer {
   whatsappNumber?: string | null
   city?: string | null
   _count?: { orders: number }
+  addresses?: Address[]
 }
 
 interface Product {
@@ -198,36 +199,36 @@ export default function NewOrderPage() {
     }
   }, [customerId])
 
-  // Fetch customer by ID (for pre-filling from URL param)
+  // Fetch customer by ID (for pre-filling from URL param). Passe par la
+  // recherche dédiée à la vente au comptoir (`orders.create`), pas par
+  // l'annuaire clients : le gestionnaire boutique n'a pas la permission
+  // `customers`.
   const fetchCustomerById = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/customers/${id}`)
+      const res = await fetch(`/api/admin/orders/customer-search?id=${encodeURIComponent(id)}`)
       if (res.ok) {
-        const text = await res.text()
-        if (text) {
-          const data = JSON.parse(text)
-          if (data.success && data.customer) {
-            const customer = data.customer
-            setSelectedCustomer({
-              id: customer.id,
-              name: customer.name,
-              email: customer.email,
-              phone: customer.phone,
-              whatsappNumber: customer.whatsappNumber,
-              city: customer.city,
-            })
-            // Load addresses
-            const addresses = customer.addresses || []
-            setCustomerAddresses(addresses)
-            if (addresses.length > 0) {
-              const defaultAddr = addresses.find((a: Address) => a.isDefault)
-              setSelectedAddressId(defaultAddr?.id || addresses[0].id)
-            }
-          }
+        const data = await res.json()
+        const customer = data.customers?.[0]
+        if (customer) {
+          setSelectedCustomer({
+            id: customer.id,
+            name: customer.name,
+            email: null,
+            phone: customer.phone,
+          })
+          applyCustomerAddresses(customer.addresses || [])
         }
       }
     } catch (err) {
       console.error('Error fetching customer:', err)
+    }
+  }
+
+  const applyCustomerAddresses = (addresses: Address[]) => {
+    setCustomerAddresses(addresses)
+    if (addresses.length > 0) {
+      const defaultAddr = addresses.find((a) => a.isDefault)
+      setSelectedAddressId(defaultAddr?.id || addresses[0].id)
     }
   }
 
@@ -256,7 +257,7 @@ export default function NewOrderPage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/customers?search=${encodeURIComponent(query)}&limit=10`)
+      const res = await fetch(`/api/admin/orders/customer-search?search=${encodeURIComponent(query)}`)
       if (!res.ok) throw new Error('Erreur de recherche')
       const text = await res.text()
       const data = text ? JSON.parse(text) : {}
@@ -266,30 +267,13 @@ export default function NewOrderPage() {
     }
   }
 
-  // Select customer and load addresses from customer detail API
-  const selectCustomer = async (customer: Customer) => {
-    setSelectedCustomer(customer)
+  // Select customer : la recherche renvoie déjà ses adresses
+  const selectCustomer = (customer: Customer) => {
+    const { addresses, ...rest } = customer
+    setSelectedCustomer(rest)
     setCustomerResults([])
     setCustomerSearch('')
-
-    // Load customer addresses from admin customer detail endpoint
-    try {
-      const res = await fetch(`/api/admin/customers/${customer.id}`)
-      if (res.ok) {
-        const text = await res.text()
-        if (text) {
-          const data = JSON.parse(text)
-          const addresses = data.customer?.addresses || []
-          setCustomerAddresses(addresses)
-          if (addresses.length > 0) {
-            const defaultAddr = addresses.find((a: Address) => a.isDefault)
-            setSelectedAddressId(defaultAddr?.id || addresses[0].id)
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Error loading addresses:', err)
-    }
+    applyCustomerAddresses(addresses || [])
   }
 
   // Search products

@@ -22,8 +22,10 @@ import {
   Boxes
 } from 'lucide-react'
 import { UserRole } from '@prisma/client'
+import { getRoleHome } from '@/lib/role-permissions'
+import { canAccessPath } from '@/lib/route-permissions'
 
-type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR'
+type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR' | 'ECOMMERCE'
 
 interface QuickAction {
   href: string
@@ -106,8 +108,15 @@ export function AdminBottomBar() {
   // Filter quick actions based on role
   const filteredActions = quickActions.filter(action => {
     if (userRole === 'ADMIN' || userRole === 'MANAGER') return true
-    return action.allowedRoles.includes(userRole as AllowedRole)
+    return action.allowedRoles.includes(userRole as AllowedRole) && canAccessPath(userRole, action.href)
   })
+
+  // Seuls les écrans ouverts au rôle ; un rôle qui a son propre accueil
+  // (gestionnaire boutique) y est ramené par « Accueil ».
+  const roleHome = getRoleHome(userRole)
+  const visibleNav = navItems
+    .map(item => (item.href === '/admin' && roleHome ? { ...item, href: roleHome } : item))
+    .filter(item => item.href === roleHome || canAccessPath(userRole, item.href))
 
   // Close modal on escape key
   useEffect(() => {
@@ -140,7 +149,7 @@ export function AdminBottomBar() {
         <div className="bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-dark-700 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
           <div className="flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
             {/* First two nav items */}
-            {navItems.slice(0, 2).map((item) => {
+            {visibleNav.slice(0, 2).map((item) => {
               const Icon = item.icon
               const active = isActive(item.href, item.exact)
               return (
@@ -163,7 +172,7 @@ export function AdminBottomBar() {
             <div className="w-16" />
 
             {/* Last two nav items */}
-            {navItems.slice(2).map((item) => {
+            {visibleNav.slice(2).map((item) => {
               const Icon = item.icon
               const active = isActive(item.href, item.exact)
               return (
@@ -185,6 +194,7 @@ export function AdminBottomBar() {
         </div>
 
         {/* FAB Button */}
+        {filteredActions.length > 0 && (
         <button
           onClick={() => setIsModalOpen(true)}
           className="absolute left-1/2 -translate-x-1/2 -top-7 w-14 h-14 bg-primary-500 hover:bg-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-500/30 transition-all active:scale-95"
@@ -192,6 +202,7 @@ export function AdminBottomBar() {
         >
           <Plus className="h-7 w-7 text-white" />
         </button>
+        )}
       </nav>
 
       {/* Quick Actions Modal */}

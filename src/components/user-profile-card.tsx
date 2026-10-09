@@ -98,7 +98,7 @@ export function UserProfileCard({
       }
 
       // Determine which API to use based on user role
-      const isAdminRole = user.role && ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(user.role)
+      const isAdminRole = user.role && ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE', 'TAILOR'].includes(user.role)
       const profileApiUrl = isAdminRole ? '/api/admin/profile' : '/api/account/profile'
 
       // Update user profile

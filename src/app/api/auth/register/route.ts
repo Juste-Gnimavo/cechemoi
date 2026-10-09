@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists with same email for admin roles
     const existingUser = await prisma.user.findFirst({
-      where: { email, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
+      where: { email, role: { in: TEAM_ROLES } },
     })
 
     if (existingUser) {

@@ -1,6 +1,7 @@
 import type { UserRole } from '@prisma/client'
 import { SEARCH_ENTRIES, DEFAULT_SUGGESTIONS, type AllowedRole, type SearchEntry } from './registry'
 import { normalize, tokens } from './normalize'
+import { canAccessPath } from '@/lib/route-permissions'
 
 export interface ScoredEntry extends SearchEntry {
   score: number
@@ -11,7 +12,7 @@ const MAX_RESULTS = 10
 function canRoleAccess(entry: SearchEntry, role: UserRole): boolean {
   if (role === 'ADMIN' || role === 'MANAGER') return true
   if (role === 'CUSTOMER') return false
-  return entry.allowedRoles.includes(role as AllowedRole)
+  return entry.allowedRoles.includes(role as AllowedRole) && canAccessPath(role, entry.path)
 }
 
 // Pre-compute tokens / normalized fields for each entry once (module-level cache)

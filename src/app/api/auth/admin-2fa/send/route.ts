@@ -4,6 +4,7 @@ import { otpService } from '@/lib/otp-service'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import crypto from 'crypto'
+import { TEAM_ROLES, isTeamRole } from '@/lib/role-permissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Find admin user by email (admin/manager/staff only)
     const user = await prisma.user.findFirst({
-      where: { email, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
+      where: { email, role: { in: TEAM_ROLES } },
       select: {
         id: true,
         email: true,
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Check if user exists and has admin role
-    if (!user || !['ADMIN', 'MANAGER', 'STAFF'].includes(user.role)) {
+    if (!user || !isTeamRole(user.role)) {
       return NextResponse.json(
         {
           success: false,

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session) return unauthenticated()
-    const denied = denyUnlessPermitted(session, 'dashboard')
+    const denied = denyUnlessPermitted(session, 'account')
     if (denied) return denied
 
     const { password } = await req.json()

@@ -162,6 +162,8 @@ export default function StaffPerformancePage() {
         return 'bg-blue-500/10 text-blue-500 border-blue-500/30'
       case 'STAFF':
         return 'bg-green-500/10 text-green-500 border-green-500/30'
+      case 'ECOMMERCE':
+        return 'bg-amber-500/10 text-amber-600 border-amber-500/30'
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/30'
     }
@@ -175,6 +177,8 @@ export default function StaffPerformancePage() {
         return 'Manager'
       case 'STAFF':
         return 'Staff'
+      case 'ECOMMERCE':
+        return 'Boutique en ligne'
       default:
         return role
     }

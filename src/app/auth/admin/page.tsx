@@ -52,7 +52,7 @@ function AdminLoginContent() {
     if (status === 'authenticated' && session?.user) {
       const userRole = (session.user as any).role
       // Only redirect if user is admin/manager/staff
-      if (['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(userRole)) {
+      if (['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE', 'TAILOR'].includes(userRole)) {
         router.replace(callbackUrl)
       }
     }
@@ -70,7 +70,7 @@ function AdminLoginContent() {
   // If already authenticated, show redirecting state
   if (status === 'authenticated' && session?.user) {
     const userRole = (session.user as any).role
-    if (['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'].includes(userRole)) {
+    if (['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE', 'TAILOR'].includes(userRole)) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
           <Loader2 className="h-8 w-8 text-primary-500 animate-spin mb-4" />

@@ -5,6 +5,7 @@ import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { pushNotificationService } from '@/lib/push-notification-service'
 import { PushTargetType } from '@prisma/client'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 /**
  * GET /api/admin/campaigns/push
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     // Get user ID from session (admin/manager/staff)
     const user = await prisma.user.findFirst({
-      where: { email: session.user?.email!, role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
+      where: { email: session.user?.email!, role: { in: TEAM_ROLES } },
       select: { id: true },
     })
 

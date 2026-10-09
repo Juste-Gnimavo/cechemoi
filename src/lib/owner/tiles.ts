@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import type { UserRole } from '@prisma/client'
 import { hasPermission, type Permission } from '@/lib/role-permissions'
+import { canAccessPath } from '@/lib/route-permissions'
 import {
   Users,
   Scissors,
@@ -29,7 +30,8 @@ export interface OwnerTile {
   icon: LucideIcon
   enabled: boolean
   /**
-   * Droit requis pour voir la tuile. Absent = visible par tout compte admin.
+   * Droit requis pour voir la tuile, en plus du droit de son écran
+   * (`src/lib/route-permissions.ts`).
    * Les tuiles « Caisse », « Rapports » et « Personnel » exposent la trésorerie
    * et la masse salariale : elles restent réservées à la direction.
    */
@@ -114,11 +116,13 @@ export const OWNER_TILES: OwnerTile[] = [
   },
 ]
 
+// Une tuile n'apparaît que si son écran est ouvert au rôle (`canAccessPath`) :
+// sans ce filtre, un rôle restreint verrait des tuiles menant à un refus.
 export function getEnabledTiles(role?: UserRole): OwnerTile[] {
   return OWNER_TILES.filter((t) => {
     if (!t.enabled) return false
-    if (!t.permission) return true
     if (!role) return false
-    return hasPermission(role, t.permission)
+    if (t.permission && !hasPermission(role, t.permission)) return false
+    return canAccessPath(role, t.href)
   })
 }

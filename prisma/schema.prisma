@@ -15,6 +15,7 @@ enum UserRole {
   MANAGER
   STAFF
   TAILOR    // Couturier - can view assigned orders and update production status
+  ECOMMERCE // Gestionnaire boutique en ligne - catalogue, stock, commandes du site, vente au comptoir
 }
 
 enum OrderStatus {

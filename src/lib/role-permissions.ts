@@ -2,6 +2,9 @@ import { UserRole } from '@prisma/client'
 
 export type Permission =
   | 'dashboard'
+  // Son propre compte : profil, mot de passe, double authentification.
+  // Distinct de `dashboard`, qui ouvre le tableau de bord et ses cumuls.
+  | 'account'
   // Clients
   | 'customers' | 'customers.create' | 'customers.contact' | 'customers.export' | 'customers.delete'
   // Rendez-vous
@@ -59,7 +62,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | '*'> = {
   // Personnel : opérationnel complet, aucune visibilité sur l'argent en caisse,
   // aucune suppression définitive (analogie banque : on désactive, on ne supprime pas).
   STAFF: [
-    'dashboard',
+    'dashboard', 'account',
     'customers', 'customers.create', 'customers.contact', 'customers.export',
     'appointments', 'appointments.manage', 'appointments.availability',
     'custom-orders', 'production',
@@ -77,10 +80,55 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | '*'> = {
     'team.view',
   ],
   TAILOR: [
-    'dashboard',
+    'dashboard', 'account',
     'appointments',
     'custom-orders', 'production',
   ],
+  // Gestionnaire boutique en ligne (décisions CEO du 09/10/2026) : le hub
+  // /owner/boutique et ses sous-écrans, rien d'autre. Ni tableau de bord
+  // (cumuls d'argent), ni clientes (la vente au comptoir passe par une
+  // recherche dédiée gardée par `orders.create`), ni atelier, caisse,
+  // rapports, équipe ou messages. Aucune suppression définitive.
+  ECOMMERCE: [
+    'account',
+    'orders', 'orders.create',
+    'products', 'products.manage',
+    'categories', 'categories.manage',
+    'inventory', 'inventory.adjust',
+    'coupons', 'coupons.manage',
+    'media', 'reviews.moderate',
+    'storefront', 'storefront.manage',
+  ],
+}
+
+/**
+ * Rôles d'équipe à identifiants email + mot de passe, gérés depuis
+ * /admin/team. Les couturiers (TAILOR) ont leur propre écran et leur propre
+ * connexion ; les clientes n'en font jamais partie. Utiliser cette constante
+ * partout où l'on filtrait sur `['ADMIN', 'MANAGER', 'STAFF']` en dur : un
+ * rôle oublié dans l'une de ces listes, c'est une connexion impossible.
+ */
+export type TeamRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'ECOMMERCE'
+export const TEAM_ROLES: TeamRole[] = ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE']
+
+export function isTeamRole(role: string | null | undefined): role is TeamRole {
+  return !!role && (TEAM_ROLES as string[]).includes(role)
+}
+
+/** Rôles proposés dans le sélecteur de /admin/team, dans l'ordre d'affichage. */
+export const TEAM_ROLE_OPTIONS: { value: TeamRole; label: string }[] = [
+  { value: 'STAFF', label: 'Personnel' },
+  { value: 'ECOMMERCE', label: 'Gestionnaire boutique en ligne' },
+  { value: 'MANAGER', label: 'Manager' },
+  { value: 'ADMIN', label: 'Administrateur' },
+]
+
+/**
+ * Accueil propre à un rôle, lorsqu'il n'est pas l'accueil tuiles (/owner).
+ * Le gestionnaire boutique arrive directement sur son hub (décision CEO).
+ */
+export function getRoleHome(role: UserRole | undefined): string | null {
+  return role === 'ECOMMERCE' ? '/owner/boutique' : null
 }
 
 export function hasPermission(role: UserRole, permission: Permission): boolean {
@@ -101,6 +149,7 @@ export function getRoleBadgeLabel(role: UserRole): string {
     MANAGER: 'Manager',
     STAFF: 'Staff',
     TAILOR: 'Couturier',
+    ECOMMERCE: 'Gestionnaire boutique en ligne',
   }
   return labels[role] || role
 }
@@ -112,6 +161,7 @@ export function getRoleBadgeColor(role: UserRole): string {
     MANAGER: 'bg-blue-500/15 text-blue-500',
     STAFF: 'bg-green-500/15 text-green-500',
     TAILOR: 'bg-purple-500/15 text-purple-500',
+    ECOMMERCE: 'bg-amber-500/15 text-amber-600',
   }
   return colors[role] || 'bg-gray-500/15 text-gray-500'
 }

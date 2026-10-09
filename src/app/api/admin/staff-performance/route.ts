@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest) {
     // Get all staff members (ADMIN, MANAGER, STAFF roles)
     const staffMembers = await prisma.user.findMany({
       where: {
-        role: { in: ['ADMIN', 'MANAGER', 'STAFF'] },
+        role: { in: TEAM_ROLES },
       },
       select: {
         id: true,

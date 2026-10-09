@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { TEAM_ROLES, isTeamRole } from '@/lib/role-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
     const members = await prisma.user.findMany({
       where: {
         role: {
-          in: ['ADMIN', 'MANAGER', 'STAFF'],
+          in: TEAM_ROLES,
         },
       },
       select: {
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 })
     }
 
-    if (!['ADMIN', 'MANAGER', 'STAFF'].includes(role)) {
+    if (!isTeamRole(role)) {
       return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
     }
 

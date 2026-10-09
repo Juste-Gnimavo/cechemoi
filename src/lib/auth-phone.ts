@@ -6,6 +6,7 @@ import { otpService } from '@/lib/otp-service'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { notificationService } from '@/lib/notification-service'
+import { TEAM_ROLES, isTeamRole } from '@/lib/role-permissions'
 
 // Default avatar for new users
 const DEFAULT_AVATAR = '/images/default-avatar.png'
@@ -38,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findFirst({
           where: {
             email: credentials.email.toLowerCase(),
-            role: { in: ['ADMIN', 'MANAGER', 'STAFF'] },
+            role: { in: TEAM_ROLES },
           },
         })
 
@@ -371,7 +372,7 @@ export const authOptions: NextAuthOptions = {
         })
         if (dbUser) {
           // If the account has been deactivated, strip the role so admin guards reject on next page load
-          if (!dbUser.isActive && ['ADMIN', 'MANAGER', 'STAFF'].includes(dbUser.role)) {
+          if (!dbUser.isActive && isTeamRole(dbUser.role)) {
             token.role = null as any
           } else {
             token.role = dbUser.role

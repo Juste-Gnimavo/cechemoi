@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emailService } from '@/lib/email-service'
 import crypto from 'crypto'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Find user (admin/manager/staff only - customers use phone)
     const user = await prisma.user.findFirst({
-      where: { email: email.toLowerCase(), role: { in: ['ADMIN', 'MANAGER', 'STAFF'] } },
+      where: { email: email.toLowerCase(), role: { in: TEAM_ROLES } },
     })
 
     // Don't reveal if user exists (security best practice). Deactivated accounts also fall through silently.

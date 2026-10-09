@@ -18,7 +18,8 @@ import { OwnerHub } from '@/components/owner/owner-hub'
 // Hub « Boutique en ligne » : tout ce qui touche au prêt-à-porter vendu sur
 // cechemoi.com. Les actions de mise à jour du catalogue (tenues, stock,
 // catégories, photos, avis) sont ouvertes au Personnel par la matrice de
-// droits ; les codes promo restent réservés à la direction.
+// droits ; les codes promo restent réservés à la direction et au
+// gestionnaire boutique en ligne, dont ce hub est l'accueil.
 
 export default function OwnerBoutiquePage() {
   return (
@@ -33,6 +34,7 @@ export default function OwnerBoutiquePage() {
           href: '/admin/orders/new',
           icon: PlusCircle,
           primary: true,
+          permission: 'orders.create',
         },
         {
           key: 'new-product',

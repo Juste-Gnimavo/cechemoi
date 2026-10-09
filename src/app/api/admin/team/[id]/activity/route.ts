@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
+import { isTeamRole } from '@/lib/role-permissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export async function GET(
       },
     })
 
-    if (!member || !['ADMIN', 'MANAGER', 'STAFF'].includes(member.role)) {
+    if (!member || !isTeamRole(member.role)) {
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 

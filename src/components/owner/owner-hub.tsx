@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { UserRole } from '@prisma/client'
-import { hasPermission, type Permission } from '@/lib/role-permissions'
+import { getRoleHome, hasPermission, type Permission } from '@/lib/role-permissions'
 
 // Page intermédiaire du shell propriétaire : un titre, une action
 // principale (grande carte pleine couleur) et quelques actions
@@ -41,19 +42,25 @@ export function OwnerHub({
 }) {
   const { data: session } = useSession()
   const role = (session?.user as { role?: UserRole } | undefined)?.role
+  const pathname = usePathname()
+  // Pour un rôle dont ce hub EST l'accueil, le lien de retour ramènerait ici.
+  const homeHref = getRoleHome(role) ?? '/'
+  const isRoleHome = homeHref === pathname
   const visibleActions = actions.filter(
     (a) => !a.permission || (role ? hasPermission(role, a.permission) : false)
   )
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Retour à l’accueil
-      </Link>
+      {!isRoleHome && (
+        <Link
+          href={homeHref}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour à l’accueil
+        </Link>
+      )}
 
       <div className="text-center mb-8 mt-4">
         <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">

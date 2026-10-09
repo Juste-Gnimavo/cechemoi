@@ -5,6 +5,7 @@ import { UserPlus, Edit, Power, PowerOff, Eye, EyeOff, Shield, Mail, Phone, X, S
 import { toast } from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { TEAM_ROLE_OPTIONS, type TeamRole } from '@/lib/role-permissions'
 
 interface TeamMember {
   id: string
@@ -44,7 +45,7 @@ export default function TeamManagementPage() {
     email: '',
     phone: '',
     password: '',
-    role: 'STAFF' as 'ADMIN' | 'MANAGER' | 'STAFF',
+    role: 'STAFF' as TeamRole,
   })
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export default function TeamManagementPage() {
         email: member.email || '',
         phone: member.phone,
         password: '',
-        role: member.role as 'ADMIN' | 'MANAGER' | 'STAFF',
+        role: member.role as TeamRole,
       })
     } else {
       setEditingMember(null)
@@ -211,6 +212,8 @@ export default function TeamManagementPage() {
         return 'bg-blue-100 text-blue-800'
       case 'STAFF':
         return 'bg-green-100 text-green-800'
+      case 'ECOMMERCE':
+        return 'bg-amber-100 text-amber-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -224,6 +227,8 @@ export default function TeamManagementPage() {
         return 'Manager'
       case 'STAFF':
         return 'Personnel'
+      case 'ECOMMERCE':
+        return 'Gestionnaire boutique en ligne'
       default:
         return role
     }
@@ -621,13 +626,15 @@ export default function TeamManagementPage() {
                   <select
                     value={formData.role}
                     onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'MANAGER' | 'STAFF' })
+                      setFormData({ ...formData, role: e.target.value as TeamRole })
                     }
                     className="w-full bg-gray-100 dark:bg-dark-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 border border-gray-200 dark:border-transparent"
                   >
-                    <option value="STAFF">Personnel</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="ADMIN">Administrateur</option>
+                    {TEAM_ROLE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 
@@ -14,8 +14,12 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
     if (!session) return unauthenticated()
-    const denied = denyUnlessPermitted(session, 'shipping')
-    if (denied) return denied
+    // Lecture seule : la vente au comptoir (`orders.create`) doit proposer les
+    // modes de livraison sans ouvrir leur configuration (`shipping`).
+    if (!sessionCan(session, 'orders.create')) {
+      const denied = denyUnlessPermitted(session, 'shipping')
+      if (denied) return denied
+    }
 
     const { searchParams } = new URL(req.url)
     const zoneId = searchParams.get('zoneId')

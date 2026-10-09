@@ -8,6 +8,7 @@ import { Home, LogOut, Moon, Search, Sun } from 'lucide-react'
 import { useTheme } from '@/store/theme'
 import { UserRole } from '@prisma/client'
 import { AdminSearch } from '@/components/admin/admin-search'
+import { getRoleHome } from '@/lib/role-permissions'
 
 // Header minimal du shell propriétaire (crm.cechemoi.com) :
 // logo, accueil, recherche, thème, déconnexion. Rien d'autre.
@@ -18,6 +19,7 @@ export function OwnerHeader() {
   const closeSearch = useCallback(() => setSearchOpen(false), [])
 
   const userRole = ((session?.user as any)?.role as UserRole) || 'CUSTOMER'
+  const homeHref = getRoleHome(userRole) ?? '/'
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -34,7 +36,7 @@ export function OwnerHeader() {
     <header className="sticky top-0 z-[9999] bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-3">
-          <Link href="/" className="flex items-center">
+          <Link href={homeHref} className="flex items-center">
             <Image
               src="/logo/web/logo-cechemoi-transparent-dark-mode.png"
               alt="CÈCHÉMOI"
@@ -50,7 +52,7 @@ export function OwnerHeader() {
 
           <div className="flex items-center space-x-1 sm:space-x-2">
             <Link
-              href="/"
+              href={homeHref}
               className="flex items-center space-x-1.5 text-sm px-3 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
             >
               <Home className="h-4 w-4" />

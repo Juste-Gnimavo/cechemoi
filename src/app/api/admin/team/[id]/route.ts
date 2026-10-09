@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { isTeamRole } from '@/lib/role-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -42,7 +43,7 @@ export async function GET(
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 
-    if (!['ADMIN', 'MANAGER', 'STAFF'].includes(member.role)) {
+    if (!isTeamRole(member.role)) {
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 
@@ -80,7 +81,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Tous les champs sont requis' }, { status: 400 })
     }
 
-    if (!['ADMIN', 'MANAGER', 'STAFF'].includes(role)) {
+    if (!isTeamRole(role)) {
       return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
     }
 
@@ -182,7 +183,7 @@ export async function PATCH(
       where: { id: params.id },
     })
 
-    if (!member || !['ADMIN', 'MANAGER', 'STAFF'].includes(member.role)) {
+    if (!member || !isTeamRole(member.role)) {
       return NextResponse.json({ error: 'Membre non trouvé' }, { status: 404 })
     }
 

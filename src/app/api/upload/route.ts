@@ -4,6 +4,7 @@ import path from 'path'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
 import { uploadToS3 } from '@/lib/s3-client'
+import { isTeamRole } from '@/lib/role-permissions'
 
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
@@ -146,7 +147,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || !session.user || !['ADMIN', 'MANAGER', 'STAFF'].includes((session.user as any).role)) {
+    if (!session || !session.user || !isTeamRole((session.user as any).role)) {
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }

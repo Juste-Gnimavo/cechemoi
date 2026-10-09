@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { UserRole } from '@prisma/client'
 import { otpService } from '@/lib/otp-service'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findFirst({
           where: {
             email: credentials.email,
-            role: { in: ['ADMIN', 'MANAGER', 'STAFF'] },
+            role: { in: TEAM_ROLES },
           },
         })
 

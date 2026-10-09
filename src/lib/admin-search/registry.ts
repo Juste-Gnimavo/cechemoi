@@ -20,12 +20,13 @@ import {
   Lock,
 } from 'lucide-react'
 import type { UserRole } from '@prisma/client'
+import { canAccessPath } from '@/lib/route-permissions'
 
 // =====================================================================
 // Types
 // =====================================================================
 
-export type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR'
+export type AllowedRole = 'ADMIN' | 'MANAGER' | 'STAFF' | 'TAILOR' | 'ECOMMERCE'
 
 export interface SubMenuItem {
   href: string
@@ -203,11 +204,11 @@ export const MENU: MenuItem[] = [
   {
     label: 'Boutique',
     icon: Package,
-    allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE'],
     groups: [
       {
         label: 'Commandes',
-        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE'],
         items: [
           { href: '/admin/orders', label: 'Voir toutes les commandes' },
           { href: '/admin/orders?status=pending', label: 'Commandes en attente' },
@@ -218,7 +219,7 @@ export const MENU: MenuItem[] = [
       },
       {
         label: 'Produits',
-        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE'],
         items: [
           { href: '/admin/products', label: 'Tous les produits' },
           { href: '/admin/products/new', label: 'Ajouter un produit' },
@@ -229,7 +230,7 @@ export const MENU: MenuItem[] = [
       },
       {
         label: 'Stock et Prix',
-        allowedRoles: ['ADMIN', 'MANAGER'],
+        allowedRoles: ['ADMIN', 'MANAGER', 'ECOMMERCE'],
         items: [
           { href: '/admin/inventory', label: 'Gestion du stock' },
           { href: '/admin/inventory/adjust', label: 'Mettre à jour le stock' },
@@ -238,14 +239,14 @@ export const MENU: MenuItem[] = [
       },
       {
         label: 'Médias',
-        allowedRoles: ['ADMIN', 'MANAGER'],
+        allowedRoles: ['ADMIN', 'MANAGER', 'ECOMMERCE'],
         items: [
           { href: '/admin/media', label: "Galerie d'images" },
         ],
       },
       {
         label: 'Vitrine',
-        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF'],
+        allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'ECOMMERCE'],
         items: [
           { href: '/admin/storefront', label: 'Bandeau de l’accueil' },
         ],
@@ -317,6 +318,15 @@ export const MENU: MenuItem[] = [
 // filterMenuByRole — used by both AdminHeader and admin search
 // =====================================================================
 
+// Une entrée n'est visible que si son rôle figure dans `allowedRoles` ET que
+// son écran lui est ouvert par la matrice (`canAccessPath`). Le second test
+// rattrape les listes de rôles qui dérivent de la matrice (ex. les ventes,
+// listées pour le Personnel alors qu'elles relèvent de la direction).
+function canSee(allowed: AllowedRole[] | undefined, href: string | undefined, role: UserRole): boolean {
+  if (allowed && !allowed.includes(role as AllowedRole)) return false
+  return href ? canAccessPath(role, href) : true
+}
+
 export function filterMenuByRole(items: MenuItem[], role: UserRole): MenuItem[] {
   if (role === 'ADMIN' || role === 'MANAGER') {
     return items
@@ -324,30 +334,23 @@ export function filterMenuByRole(items: MenuItem[], role: UserRole): MenuItem[] 
   return items
     .filter((item) => {
       if (!item.allowedRoles) return false
-      return item.allowedRoles.includes(role as AllowedRole)
+      return canSee(item.allowedRoles, item.href, role)
     })
     .map((item) => {
       if (item.groups) {
         const filteredGroups = item.groups
-          .filter((group) => {
-            if (!group.allowedRoles) return true
-            return group.allowedRoles.includes(role as AllowedRole)
-          })
+          .filter((group) => canSee(group.allowedRoles, undefined, role))
           .map((group) => ({
             ...group,
-            items: group.items.filter((subItem) => {
-              if (!subItem.allowedRoles) return true
-              return subItem.allowedRoles.includes(role as AllowedRole)
-            }),
+            items: group.items.filter((subItem) => canSee(subItem.allowedRoles, subItem.href, role)),
           }))
           .filter((group) => group.items.length > 0)
         return { ...item, groups: filteredGroups }
       }
       if (item.items) {
-        const filteredItems = item.items.filter((subItem) => {
-          if (!subItem.allowedRoles) return true
-          return subItem.allowedRoles.includes(role as AllowedRole)
-        })
+        const filteredItems = item.items.filter((subItem) =>
+          canSee(subItem.allowedRoles, subItem.href, role)
+        )
         return { ...item, items: filteredItems }
       }
       return item
@@ -834,7 +837,7 @@ const EXTRA_ENTRIES: SearchEntry[] = [
     description: 'Nouveau code promo avec pourcentage ou montant fixe',
     keywords: ['nouveau coupon', 'creer promo', 'pourcentage reduction', 'discount', 'soldes', 'remise'],
     icon: Ticket,
-    allowedRoles: ['ADMIN', 'MANAGER'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'ECOMMERCE'],
     section: 'Boutique',
     action: 'create',
   },
@@ -854,7 +857,7 @@ const EXTRA_ENTRIES: SearchEntry[] = [
     description: 'Historique des entrées / sorties du stock produits',
     keywords: ['mouvements stock', 'entrees sorties', 'historique inventaire'],
     icon: Boxes,
-    allowedRoles: ['ADMIN', 'MANAGER'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'ECOMMERCE'],
     section: 'Boutique',
   },
   {
@@ -863,7 +866,7 @@ const EXTRA_ENTRIES: SearchEntry[] = [
     description: 'Modération des avis et commentaires produits',
     keywords: ['reviews', 'avis', 'commentaires', 'notes', 'moderation'],
     icon: Star,
-    allowedRoles: ['ADMIN', 'MANAGER'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'ECOMMERCE'],
     section: 'Boutique',
   },
   {
@@ -882,7 +885,7 @@ const EXTRA_ENTRIES: SearchEntry[] = [
     description: 'Changer mot de passe, sessions actives, 2FA',
     keywords: ['securite', 'mot de passe', 'password', '2fa', 'compte', 'sessions'],
     icon: Lock,
-    allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR'],
+    allowedRoles: ['ADMIN', 'MANAGER', 'STAFF', 'TAILOR', 'ECOMMERCE'],
     section: 'Compte',
     action: 'configure',
   },

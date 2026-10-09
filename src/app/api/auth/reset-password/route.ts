@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emailService } from '@/lib/email-service'
 import bcrypt from 'bcryptjs'
+import { TEAM_ROLES } from '@/lib/role-permissions'
 
 
 // Force dynamic rendering for API routes using auth
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
           gt: new Date(), // Token not expired
         },
         role: {
-          in: ['ADMIN', 'MANAGER', 'STAFF'],
+          in: TEAM_ROLES,
         },
         isActive: true,
       },
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
           gt: new Date(),
         },
         role: {
-          in: ['ADMIN', 'MANAGER', 'STAFF'],
+          in: TEAM_ROLES,
         },
         isActive: true,
       },

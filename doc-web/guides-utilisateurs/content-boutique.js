@@ -41,6 +41,12 @@ module.exports = {
       ['**Codes promo**', 'Réductions et promotions du site (chapitre 12).'],
     ] } },
     { note: { title: 'Boutique ou atelier ?', text: 'La Boutique en ligne concerne le **prêt-à-porter**. Les commandes **sur mesure** (avec suivi de confection) se gèrent dans **Commandes atelier**, depuis la page d’accueil.' } },
+    { note: { title: 'Votre accès — Gestionnaire boutique en ligne', text: [
+      'Avec un compte **Gestionnaire boutique en ligne**, vous arrivez **directement** sur cette page après la connexion : c’est votre accueil, et le bouton **Accueil** y ramène.',
+      'Vous avez accès aux dix tuiles ci-dessus, et à elles seules : tenues, catégories, stock, photos, bandeau, avis, codes promo, commandes du site et vente au comptoir.',
+      'Pour une vente au comptoir, la recherche retrouve la cliente par son **nom** ou son **téléphone** et propose ses adresses ; l’annuaire des clientes, l’atelier, la caisse, les rapports et l’équipe restent réservés à la direction et au personnel.',
+      'Si vous ouvrez un lien hors de votre accès, la page **Accès refusé** s’affiche : demandez à la direction si vous en avez besoin.',
+    ] } },
 
     // ------------------------------------------------------------------
     { h1: 'Ajouter une tenue', lead: 'Mettre une nouvelle pièce en vente sur le site' },
