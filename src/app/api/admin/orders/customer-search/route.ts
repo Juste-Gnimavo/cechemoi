@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth-phone'
 import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 // Recherche de cliente pour la vente au comptoir (/admin/orders/new).
 //
 // Gardée par `orders.create`, et non par `customers` : le gestionnaire
