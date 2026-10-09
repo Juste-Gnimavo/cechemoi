@@ -42,7 +42,7 @@ next_after: 35-role-gestionnaire-boutique-en-ligne
    - `/admin/customers` et fiche cliente : « Valeur totale », « Valeur vie client », « Panier moyen ».
    Chaque écran concerné masque la carte proprement (pas de « 0 F » trompeur, pas de « Aucune donnée »).
    Les montants **unitaires** nécessaires au travail (montant d'une facture, d'un reçu, d'un paiement) restent visibles : seuls les cumuls sont visés.
-2. **Boutons « Supprimer » alignés sur le serveur** : masqués quand la permission ou le test serveur refuse. Point de départ : catégories (`DELETE /api/admin/categories/[id]` exige `role === 'ADMIN'`) ; auditer clientes, commandes du site, commandes sur mesure, avis, campagnes. Consigner chaque écran dans le journal.
+2. **Boutons « Supprimer » alignés sur le serveur** : masqués quand la permission ou le test serveur refuse. Catégories et produits sont déjà traités (`83996b1`, 09/10/2026 : `categories.delete` et `products.delete`, accordés à `ECOMMERCE`, pas à `STAFF` — masquer donc ces boutons pour `STAFF`) ; auditer clientes, commandes du site, commandes sur mesure, avis, campagnes. Consigner chaque écran dans le journal.
 3. **Codes promo** — décidé le 09/10/2026, ne pas rouvrir : `ECOMMERCE` a `coupons` + `coupons.manage` (CEO, session 35). `STAFF` garde le statu quo : `coupons` seul (lecture et validation d'un code pendant une vente), **sans** `coupons.manage` ; la tuile Codes promo du hub, gardée par `coupons.manage`, lui reste donc masquée. Vérifier seulement que l'écran `/admin/coupons` n'offre pas à `STAFF` de bouton de création ou de modification que le serveur refuserait.
 
 ### SHOULD HAVE
