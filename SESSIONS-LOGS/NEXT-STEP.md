@@ -47,11 +47,19 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] **Données réparées en prod** : 4 paiements recopiés côté commande, 9 paiements facture remis sur leur vrai mode (Wave / Orange Money / virement), SM-240226-0001 alignée sur sa facture, doublon de 40 000 supprimé sur SM-040326-0006.
 - [x] **CASP installé** : `casp/state.json` pilote désormais la file ; ce fichier reste tenu en parallèle.
 
-## Prochaine session — 35 : rôle « Gestionnaire boutique en ligne »
+## Fait en session 35 (09/10/2026) — rôle « Gestionnaire boutique en ligne »
 
-Prompt : `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` (ou `/next`). Un rôle qui n'accède qu'au hub `/owner/boutique` et aux écrans de ses tuiles. Trois décisions à faire trancher par le CEO avant d'écrire : vente au comptoir, accès aux clientes, codes promo.
+- [x] `UserRole.ECOMMERCE`, matrice limitée au hub Boutique, garde d'URL unique (`src/lib/route-permissions.ts`) avec page « Accès refusé », accueil direct sur `/owner/boutique`, vente au comptoir via une recherche de cliente dédiée (`orders.create`), permission `account` pour profil et 2FA, `TEAM_ROLES` à la place des listes de rôles en dur. Commits `6a06ceb`, `138aed3`. Journal : `SESSIONS-LOGS/26-10-09-001-35-role-gestionnaire-boutique-en-ligne.md`.
+- [x] Vente au comptoir du Personnel réparée (la liste des livraisons était vide : il n'avait pas `shipping`).
+- [x] Enum `ECOMMERCE` ajouté en base de production par SQL, **avant** le push, pour ne pas casser la connexion admin.
+- [ ] **CEO : relancer le déploiement depuis Easypanel** (aucun build déclenché par les deux pushes).
+- [ ] Après le déploiement : `npx -y prisma@5.22.0 db push` (attendu : already in sync), puis compte ECOMMERCE de test créé depuis `/admin/team`, checklist du journal 35, et désactivation du compte.
 
-## File CASP après la 35
+## Prochaine session — 36 : étanchéité financière du Personnel
+
+Lire `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (préalables de déploiement de la 35 en tête du CONTEXTE).
+
+## File CASP
 
 - **36** — Étanchéité financière du Personnel : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md`.
 - **37** — Bouton « Informer le couturier » (aperçu puis envoi WhatsApp manuel, aucun montant) : `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.

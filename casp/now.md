@@ -1,12 +1,12 @@
 # What I'm doing NOW
 
-> **Updated** : 2026-10-08 (clôture de la session 34).
+> **Updated** : 2026-10-09 (clôture de la session 35).
 
 ---
 
 ## Current focus (1 sentence)
 
-La session 34 a rendu **la commande sur mesure source de vérité de sa facture** : paiements recopiés dans les deux sens, modes de paiement enregistrés en code, articles et total de la facture reconstruits depuis la commande, facture liée non modifiable sur ses articles, et 5 commandes réparées en production (`911482f`, déployé). Prochaine étape : **un rôle « Gestionnaire boutique en ligne »** limité au hub `/owner/boutique`.
+La session 35 a livré **le rôle « Gestionnaire boutique en ligne »** (`ECOMMERCE`, commits `6a06ceb` et `138aed3`) : matrice limitée au hub Boutique, garde d'URL unique, vente au comptoir sans l'annuaire. **Ce n'est pas encore déployé** : aucun build Easypanel n'a été déclenché. Prochaine étape : **l'étanchéité financière du Personnel** (prompt 36), après la relance du déploiement par le CEO.
 
 ---
 
@@ -14,15 +14,15 @@ La session 34 a rendu **la commande sur mesure source de vérité de sa facture*
 
 ### 15 minutes
 
-Faire trancher par le CEO les 3 décisions du prompt 35 (vente au comptoir, accès clientes, codes promo).
+CEO : relancer le déploiement depuis Easypanel, puis lancer `npx -y prisma@5.22.0 db push` depuis le conteneur (attendu : already in sync).
 
 ### 1 hour
 
-Ajouter `UserRole.ECOMMERCE`, sa ligne dans `src/lib/role-permissions.ts`, et corriger chaque erreur de typage qu'elle provoque.
+Créer un compte ECOMMERCE de test depuis `/admin/team` et jouer la checklist du journal 35 (10 tuiles, vente au comptoir complète, refus à l'écran et en API), puis le désactiver.
 
 ### Half a day
 
-Prompt 35 complet : accueil et navigation filtrés, équipe, audit des rôles codés en dur, `db push` en prod, validation avec un vrai compte.
+Prompt 36 : expurger côté API les cumuls d'argent encore visibles par le Personnel et le gestionnaire.
 
 ---
 
@@ -30,7 +30,6 @@ Prompt 35 complet : accueil et navigation filtrés, équipe, audit des rôles co
 
 - **Système de notifications** (templates, déclencheurs) — backlog depuis novembre 2025, pas demandé.
 - **Bouton de paiement en double sur la facture** — cosmétique, après le rôle.
-- **Fuites de cumuls d'argent vers le Personnel** — en file juste après (prompt 36), pas dans la session 35.
 - **Application mobile** — en pause, la priorité est le CRM web.
 
 ---

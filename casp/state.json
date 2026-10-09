@@ -1,16 +1,16 @@
 {
   "casp_version": "0.19.0",
-  "updated_at": "2026-10-08",
-  "last_session_id": "34-SYNC-COMMANDE-FACTURE-PAIEMENTS-ARTICLES",
-  "last_commit": "911482f",
-  "current_phase": "34-sync-commande-facture",
-  "next_phase": "35-role-gestionnaire-boutique-en-ligne",
-  "next_prompt": "docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md",
+  "updated_at": "2026-10-09",
+  "last_session_id": "26-10-09-001-35-role-gestionnaire-boutique-en-ligne",
+  "last_commit": "138aed3",
+  "current_phase": "35-role-gestionnaire-boutique-en-ligne",
+  "next_phase": "36-etancheite-financiere-personnel",
+  "next_prompt": "docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md",
   "phases_shipped": [
-    "34-sync-commande-facture"
+    "34-sync-commande-facture",
+    "35-role-gestionnaire-boutique-en-ligne"
   ],
   "phases_queued": [
-    "35-role-gestionnaire-boutique-en-ligne",
     "36-etancheite-financiere-personnel",
     "37-informer-le-couturier"
   ],
