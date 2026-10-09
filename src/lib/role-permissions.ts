@@ -18,7 +18,8 @@ export type Permission =
   // Commandes boutique
   | 'orders' | 'orders.create' | 'orders.refund'
   // Catalogue
-  | 'products' | 'products.manage' | 'categories' | 'categories.manage'
+  | 'products' | 'products.manage' | 'products.delete'
+  | 'categories' | 'categories.manage' | 'categories.delete'
   | 'inventory' | 'inventory.adjust'
   | 'coupons' | 'coupons.manage'
   | 'media' | 'media.delete' | 'reviews.moderate' | 'reviews.delete'
@@ -92,12 +93,14 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[] | '*'> = {
   ECOMMERCE: [
     'account',
     'orders', 'orders.create',
-    'products', 'products.manage',
-    'categories', 'categories.manage',
+    // Suppressions du catalogue autorisées (CEO, 09/10/2026) : les routes
+    // refusent déjà un produit commandé ou une catégorie non vide.
+    'products', 'products.manage', 'products.delete',
+    'categories', 'categories.manage', 'categories.delete',
     'inventory', 'inventory.adjust',
     'coupons', 'coupons.manage',
-    'media', 'reviews.moderate',
-    'storefront', 'storefront.manage',
+    'media', 'media.delete', 'reviews.moderate', 'reviews.delete',
+    'storefront', 'storefront.manage', 'storefront.delete',
   ],
 }
 

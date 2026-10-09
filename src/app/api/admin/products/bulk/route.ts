@@ -160,9 +160,8 @@ export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Non autorisé - Admin uniquement' }, { status: 401 })
-    }
+    const denied = denyUnlessPermitted(session, 'products.delete')
+    if (denied) return denied
 
     const body = await req.json()
     const { productIds } = body
