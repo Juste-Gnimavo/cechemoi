@@ -22,10 +22,10 @@
   "notes": "Sessions 1-33 antérieures à CASP : historique dans SESSIONS-LOGS/ et SESSIONS-LOGS/NEXT-STEP.md (maintenu en parallèle). Schéma appliqué par `npx -y prisma@5.22.0 db push` depuis le conteneur, pas de migrations versionnées. Lancer `casp check` avant push.",
   "logs_dir": "SESSIONS-LOGS",
   "arbitration": {
-    "phase": "35-role-gestionnaire-boutique-en-ligne",
+    "phase": "36-etancheite-financiere-personnel",
     "shape": "solo",
-    "decided_at": "2026-10-09",
-    "by": "chain-runner",
-    "reason": "Gates non isolables (une base Postgres de prod, un déploiement Easypanel par push sur main, tsc sur un seul arbre) ; enum Prisma + matrice partagée = un seul fil."
+    "decided_at": "2026-10-10",
+    "by": "cto-36",
+    "reason": "Gates non isolables (une base Postgres de prod, push main = déploiement Easypanel) ; tous les MUST passent par role-permissions.ts et le motif sessionCan, un seul fil."
   }
 }
