@@ -17,6 +17,7 @@ import {
   Box,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface MaterialUsage {
   id: string
@@ -45,6 +46,7 @@ const formatPrice = (price: number) => {
 }
 
 export default function TailorsPage() {
+  const canDelete = useCan('tailors')
   const [tailors, setTailors] = useState<Tailor[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -275,6 +277,8 @@ export default function TailorsPage() {
                   >
                     <Pencil className="h-4 w-4 text-gray-400 group-hover:text-orange-500" />
                   </button>
+                  {/* Masqué : suppression refusée par l'API sans ce droit */}
+                  {canDelete && (
                   <button
                     onClick={() => handleDelete(tailor)}
                     disabled={deletingId === tailor.id}
@@ -287,6 +291,7 @@ export default function TailorsPage() {
                       <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
                     )}
                   </button>
+                  )}
                 </div>
               </div>
 

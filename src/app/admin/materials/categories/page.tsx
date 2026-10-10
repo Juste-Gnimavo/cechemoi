@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Loader2, ArrowLeft, Plus, Pencil, Trash2, FolderOpen, X, Package } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface Category {
   id: string
@@ -16,6 +17,7 @@ interface Category {
 }
 
 export default function MaterialCategoriesPage() {
+  const canDelete = useCan('materials.delete')
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -258,7 +260,8 @@ export default function MaterialCategoriesPage() {
                       >
                         <Pencil className="h-4 w-4 text-gray-400 group-hover:text-primary-500" />
                       </button>
-                      {!category.isDefault && (
+                      {/* Masqué : suppression refusée par l'API sans ce droit */}
+                      {canDelete && !category.isDefault && (
                         <button
                           onClick={() => handleDelete(category)}
                           disabled={deletingId === category.id || category.materialsCount > 0}

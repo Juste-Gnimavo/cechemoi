@@ -16,6 +16,7 @@ import {
   Layers
 } from 'lucide-react'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
+import { useCan } from '@/hooks/useCan'
 
 interface Category {
   id: string
@@ -32,6 +33,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const canDelete = useCan('categories.delete')
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -182,6 +184,8 @@ export default function CategoriesPage() {
               >
                 <Edit className="h-4 w-4" />
               </Link>
+              {/* Masqué sans categories.delete (refusé par l'API) */}
+              {canDelete && (
               <button
                 onClick={() => setDeleteConfirm(category.id)}
                 className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-all duration-200"
@@ -189,6 +193,7 @@ export default function CategoriesPage() {
               >
                 <Trash2 className="h-4 w-4" />
               </button>
+              )}
             </div>
           </div>
         </div>

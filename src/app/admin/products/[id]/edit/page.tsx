@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast'
 import { RichTextEditor } from '@/components/admin/rich-text-editor'
 import { ProductMultiSelect } from '@/components/admin/product-multi-select'
 import { CategoryTreeSelector } from '@/components/admin/category-tree-selector'
+import { useCan } from '@/hooks/useCan'
 
 interface Category {
   id: string
@@ -66,6 +67,7 @@ interface Product {
 }
 
 export default function EditProductPage() {
+  const canDelete = useCan('products.delete')
   const params = useParams()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -437,6 +439,8 @@ export default function EditProductPage() {
           </div>
         </div>
         <div className="flex gap-3">
+          {/* Masqué sans products.delete (refusé par l'API) */}
+          {canDelete && (
           <button
             type="button"
             onClick={handleDelete}
@@ -445,6 +449,7 @@ export default function EditProductPage() {
             <Trash2 className="h-4 w-4" />
             Supprimer
           </button>
+          )}
           <button
             onClick={handleSubmit}
             disabled={saving}

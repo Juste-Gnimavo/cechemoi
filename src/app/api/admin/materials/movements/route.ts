@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -119,7 +119,9 @@ export async function GET(req: NextRequest) {
         pages: Math.ceil(total / limit),
       },
       totals: {
-        totalCost: totals._sum.totalCost || 0,
+        // Étanchéité financière : cumul réservé à `finance.revenue` (null, l'écran
+        // masque la carte). Le coût de chaque mouvement reste visible.
+        totalCost: sessionCan(session, 'finance.revenue') ? totals._sum.totalCost || 0 : null,
         totalQuantity: totals._sum.quantity || 0,
       },
     })

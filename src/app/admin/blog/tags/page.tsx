@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface BlogTag {
   id: string
@@ -26,6 +27,7 @@ interface BlogTag {
 }
 
 export default function BlogTagsPage() {
+  const canDelete = useCan('blog.manage')
   const [tags, setTags] = useState<BlogTag[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -171,12 +173,15 @@ export default function BlogTagsPage() {
                   >
                     <Edit className="h-4 w-4" />
                   </Link>
+                  {/* Masqué : suppression refusée par l'API sans ce droit */}
+                  {canDelete && (
                   <button
                     onClick={() => setDeleteConfirm(tag.id)}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-100 dark:hover:bg-dark-700 rounded transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  )}
                 </div>
               </div>
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { deleteFromS3 } from '@/lib/s3-client'
 
@@ -161,20 +161,26 @@ export async function GET(
       segments.push('high-value')
     }
 
+    // Étanchéité financière : cumuls de la cliente réservés à `finance.revenue`.
+    // Le montant de chaque commande et facture reste visible.
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+
     const customerWithAnalytics = {
       ...customer,
       standaloneInvoices: paidStandaloneInvoices,
       analytics: {
         totalOrders,
         completedOrders,
-        lifetimeValue,
-        lifetimeValueFromOrders: orderLifetimeValue,
-        lifetimeValueFromInvoices: standaloneInvoiceTotal,
+        lifetimeValue: canSeeRevenue ? lifetimeValue : null,
+        lifetimeValueFromOrders: canSeeRevenue ? orderLifetimeValue : null,
+        lifetimeValueFromInvoices: canSeeRevenue ? standaloneInvoiceTotal : null,
         standaloneInvoiceCount: paidStandaloneInvoices.length,
-        averageOrderValue,
+        averageOrderValue: canSeeRevenue ? averageOrderValue : null,
         totalItemsPurchased,
         ordersByStatus,
-        monthlySpending,
+        monthlySpending: canSeeRevenue
+          ? monthlySpending
+          : monthlySpending.map((m) => ({ ...m, amount: null })),
         segments,
         lastOrderDate: lastOrder?.createdAt || null,
       },

@@ -39,6 +39,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { useConfetti } from '@/hooks/useConfetti'
 import { AdminMessageModal, AdminMessageType } from '@/components/admin/admin-message-modal'
+import { useCan } from '@/hooks/useCan'
 
 interface InvoiceItem {
   id: string
@@ -153,6 +154,7 @@ const statusConfig: Record<string, { color: string; icon: any; label: string }> 
 }
 
 export default function InvoiceDetailPage() {
+  const canDeletePayment = useCan('invoices.delete')
   const params = useParams()
   const router = useRouter()
   const { celebration, success } = useConfetti()
@@ -885,6 +887,8 @@ export default function InvoiceDetailPage() {
                             +{formatCurrency(payment.amount)}
                           </td>
                           <td className="py-3 text-right print:hidden">
+                            {/* Masqué sans invoices.delete (refusé par l'API) */}
+                            {canDeletePayment && (
                             <button
                               onClick={() => handleDeletePayment(payment.id)}
                               className="text-red-400 hover:text-red-300 p-1"
@@ -892,6 +896,7 @@ export default function InvoiceDetailPage() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
+                            )}
                           </td>
                         </tr>
                       )

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -67,11 +67,15 @@ export async function GET(_req: NextRequest) {
 
     const veryOld = new Date('2000-01-01T00:00:00.000Z')
 
+    // Étanchéité financière : sans droit sur les recettes, les cumuls annuel
+    // et total ne sont ni calculés ni renvoyés (null, l'écran masque la carte).
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+
     const [today, last30, year, all] = await Promise.all([
       customCashIn({ gte: todayStart, lte: todayEnd }),
       customCashIn({ gte: start30 }),
-      customCashIn({ gte: startYear }),
-      customCashIn({ gte: veryOld }),
+      canSeeRevenue ? customCashIn({ gte: startYear }) : null,
+      canSeeRevenue ? customCashIn({ gte: veryOld }) : null,
     ])
 
     return NextResponse.json({
@@ -79,7 +83,7 @@ export async function GET(_req: NextRequest) {
       stats: {
         today,
         last30,
-        year: { ...year, label: now.getFullYear() },
+        year: year ? { ...year, label: now.getFullYear() } : null,
         all,
       },
     })

@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { useSession } from 'next-auth/react'
 
 interface Order {
   id: string
@@ -66,6 +67,10 @@ const paymentStatusColors: Record<string, string> = {
 }
 
 export default function OrdersPage() {
+  // Suppression d'une commande : l'API n'autorise que le rôle ADMIN (test
+  // en dur, voir DELETE /api/admin/orders/[id]) ; le bouton suit le serveur.
+  const { data: session } = useSession()
+  const canDelete = (session?.user as { role?: string } | undefined)?.role === 'ADMIN'
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<string>('all')
@@ -519,6 +524,7 @@ export default function OrdersPage() {
                           >
                             <Printer className="h-4 w-4" />
                           </button>
+                          {canDelete && (
                           <button
                             onClick={() => handleDeleteOrder(order.id, order.orderNumber)}
                             disabled={deletingId === order.id}
@@ -527,6 +533,7 @@ export default function OrdersPage() {
                           >
                             <Trash2 className={`h-4 w-4 ${deletingId === order.id ? 'animate-spin' : ''}`} />
                           </button>
+                          )}
                         </div>
                       </td>
                     </tr>

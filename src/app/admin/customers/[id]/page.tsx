@@ -56,11 +56,12 @@ interface CustomerDetail {
   analytics: {
     totalOrders: number
     completedOrders: number
-    lifetimeValue: number
-    averageOrderValue: number
+    // null sans le droit `finance.revenue` : cartes masquées.
+    lifetimeValue: number | null
+    averageOrderValue: number | null
     totalItemsPurchased: number
     ordersByStatus: Record<string, number>
-    monthlySpending: Array<{ month: string; amount: number; orders: number }>
+    monthlySpending: Array<{ month: string; amount: number | null; orders: number }>
     segments: string[]
     lastOrderDate?: string
   }
@@ -417,7 +418,7 @@ export default function CustomerDetailPage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 ${customer.analytics.lifetimeValue === null ? '' : 'lg:grid-cols-4'}`}>
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500 dark:text-gray-400 text-sm">Total commandes</span>
@@ -429,6 +430,7 @@ export default function CustomerDetailPage() {
           </p>
         </div>
 
+        {customer.analytics.lifetimeValue !== null && (
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500 dark:text-gray-400 text-sm">Valeur vie client</span>
@@ -439,7 +441,9 @@ export default function CustomerDetailPage() {
           </div>
           <p className="text-sm text-gray-500 mt-1">Depuis inscription</p>
         </div>
+        )}
 
+        {customer.analytics.averageOrderValue !== null && (
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-gray-500 dark:text-gray-400 text-sm">Panier moyen</span>
@@ -450,6 +454,7 @@ export default function CustomerDetailPage() {
           </div>
           <p className="text-sm text-gray-500 mt-1">Par commande</p>
         </div>
+        )}
 
         <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 p-6">
           <div className="flex items-center justify-between mb-2">

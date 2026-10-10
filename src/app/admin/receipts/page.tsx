@@ -36,8 +36,9 @@ interface ReceiptData {
 interface Stats {
   today: { count: number; total: number }
   month: { count: number; total: number }
-  year: { count: number; total: number }
-  all: { count: number; total: number }
+  // null sans le droit `finance.revenue` : la carte est masquée.
+  year: { count: number; total: number } | null
+  all: { count: number; total: number } | null
 }
 
 const paymentMethodLabels: Record<string, string> = {
@@ -159,7 +160,7 @@ export default function ReceiptsPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-2 gap-4 ${stats.year && stats.all ? 'md:grid-cols-4' : ''}`}>
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -184,6 +185,7 @@ export default function ReceiptsPage() {
               <TrendingUp className="w-8 h-8 text-blue-500" />
             </div>
           </div>
+          {stats.year && (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -196,6 +198,8 @@ export default function ReceiptsPage() {
               <TrendingUp className="w-8 h-8 text-purple-500" />
             </div>
           </div>
+          )}
+          {stats.all && (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
@@ -208,6 +212,7 @@ export default function ReceiptsPage() {
               <TrendingUp className="w-8 h-8 text-amber-500" />
             </div>
           </div>
+          )}
         </div>
       )}
 

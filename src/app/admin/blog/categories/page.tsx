@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface BlogCategory {
   id: string
@@ -27,6 +28,7 @@ interface BlogCategory {
 }
 
 export default function BlogCategoriesPage() {
+  const canDelete = useCan('blog.manage')
   const [categories, setCategories] = useState<BlogCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -188,6 +190,8 @@ export default function BlogCategoriesPage() {
                   >
                     <Edit className="h-4 w-4" />
                   </Link>
+                  {/* Masqué : suppression refusée par l'API sans ce droit */}
+                  {canDelete && (
                   <button
                     onClick={() => setDeleteConfirm(category.id)}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-100 dark:hover:bg-dark-600 rounded transition-colors"
@@ -195,6 +199,7 @@ export default function BlogCategoriesPage() {
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  )}
                 </div>
               </div>
             ))}

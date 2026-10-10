@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -69,6 +69,11 @@ export async function GET(req: NextRequest) {
     if (!session) return unauthenticated()
     const denied = denyUnlessPermitted(session, 'materials')
     if (denied) return denied
+
+    // Étanchéité financière : sans `finance.revenue`, les quantités restent
+    // (outil de travail de l'atelier) mais tout cumul d'argent part à null.
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+    const money = (amount: number) => (canSeeRevenue ? amount : null)
 
     const { searchParams } = new URL(req.url)
     const period = searchParams.get('period') || 'month'
@@ -268,41 +273,41 @@ export async function GET(req: NextRequest) {
       summary: {
         entries: {
           count: totalIn._count,
-          totalCost: totalIn._sum.totalCost || 0,
+          totalCost: money(totalIn._sum.totalCost || 0),
           totalQuantity: totalIn._sum.quantity || 0,
         },
         exits: {
           count: totalOut._count,
-          totalCost: totalOut._sum.totalCost || 0,
+          totalCost: money(totalOut._sum.totalCost || 0),
           totalQuantity: totalOut._sum.quantity || 0,
         },
         lowStockCount: lowStockItems.length,
         totalMaterials: stockStatus.length,
-        totalStockValue: stockStatus.reduce((sum, m) => sum + m.stock * m.unitPrice, 0),
+        totalStockValue: money(stockStatus.reduce((sum, m) => sum + m.stock * m.unitPrice, 0)),
       },
       byTailor: outByTailor.map((t) => ({
         tailor: tailorMap.get(t.tailorId!),
         count: t._count,
-        totalCost: t._sum.totalCost || 0,
+        totalCost: money(t._sum.totalCost || 0),
         totalQuantity: t._sum.quantity || 0,
       })),
       byStaff: outByStaff.map((s) => ({
         staff: staffMap.get(s.createdById!),
         count: s._count,
-        totalCost: s._sum.totalCost || 0,
+        totalCost: money(s._sum.totalCost || 0),
         totalQuantity: s._sum.quantity || 0,
       })),
       byCategory: outByCategory.map((c: any) => ({
         categoryId: c.categoryId,
         categoryName: c.categoryName,
         count: Number(c.count),
-        totalCost: Number(c.totalCost) || 0,
+        totalCost: money(Number(c.totalCost) || 0),
         totalQuantity: Number(c.totalQuantity) || 0,
       })),
       topMaterials: topMaterials.map((m) => ({
         material: materialMap.get(m.materialId),
         count: m._count,
-        totalCost: m._sum.totalCost || 0,
+        totalCost: money(m._sum.totalCost || 0),
         totalQuantity: m._sum.quantity || 0,
       })),
       lowStockItems,

@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Trash2,
 } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useCan'
 
 interface ReceiptDetail {
   id: string
@@ -67,6 +68,7 @@ const invoiceStatusLabels: Record<string, { label: string; color: string }> = {
 }
 
 export default function ReceiptDetailPage() {
+  const canDelete = useIsAdmin()
   const params = useParams()
   const router = useRouter()
   const [receipt, setReceipt] = useState<ReceiptDetail | null>(null)
@@ -212,6 +214,8 @@ export default function ReceiptDetailPage() {
             )}
             Télécharger PDF
           </button>
+          {/* Masqué : l'API ne permet la suppression qu'au rôle ADMIN */}
+          {canDelete && (
           <button
             onClick={handleDelete}
             disabled={deleting}
@@ -224,6 +228,7 @@ export default function ReceiptDetailPage() {
             )}
             Supprimer
           </button>
+          )}
         </div>
       </div>
 

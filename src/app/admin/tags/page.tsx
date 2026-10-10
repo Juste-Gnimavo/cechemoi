@@ -14,6 +14,7 @@ import {
   GitMerge,
   Eye
 } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useCan'
 
 interface TagData {
   name: string
@@ -30,6 +31,7 @@ interface TagStats {
 }
 
 export default function TagsPage() {
+  const canDelete = useIsAdmin()
   const [tags, setTags] = useState<TagData[]>([])
   const [stats, setStats] = useState<TagStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -356,6 +358,8 @@ export default function TagsPage() {
                     >
                       <Edit className="h-4 w-4" />
                     </button>
+                    {/* Masqué : l'API ne permet la suppression qu'au rôle ADMIN */}
+                    {canDelete && (
                     <button
                       onClick={() => setDeleteConfirm(tag.name)}
                       className="p-2 text-gray-500 dark:text-gray-400 hover:text-red-400 hover:bg-gray-100 dark:hover:bg-dark-600 rounded transition-all duration-200"
@@ -363,6 +367,7 @@ export default function TagsPage() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </div>

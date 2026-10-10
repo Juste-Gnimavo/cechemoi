@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -100,6 +100,10 @@ export async function GET(req: NextRequest) {
     const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1)
     const yearStart = new Date(todayStart.getFullYear(), 0, 1)
 
+    // Étanchéité financière : sans droit sur les recettes, les cumuls annuel
+    // et total ne sont ni calculés ni renvoyés (null, l'écran masque la carte).
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+
     const [todayStats, monthStats, yearStats, allStats] = await Promise.all([
       prisma.receipt.aggregate({
         where: { paymentDate: { gte: todayStart, lte: todayEnd } },
@@ -111,15 +115,19 @@ export async function GET(req: NextRequest) {
         _sum: { amount: true },
         _count: true,
       }),
-      prisma.receipt.aggregate({
-        where: { paymentDate: { gte: yearStart } },
-        _sum: { amount: true },
-        _count: true,
-      }),
-      prisma.receipt.aggregate({
-        _sum: { amount: true },
-        _count: true,
-      }),
+      canSeeRevenue
+        ? prisma.receipt.aggregate({
+            where: { paymentDate: { gte: yearStart } },
+            _sum: { amount: true },
+            _count: true,
+          })
+        : null,
+      canSeeRevenue
+        ? prisma.receipt.aggregate({
+            _sum: { amount: true },
+            _count: true,
+          })
+        : null,
     ])
 
     return NextResponse.json({
@@ -134,8 +142,8 @@ export async function GET(req: NextRequest) {
       stats: {
         today: { count: todayStats._count, total: todayStats._sum.amount || 0 },
         month: { count: monthStats._count, total: monthStats._sum.amount || 0 },
-        year: { count: yearStats._count, total: yearStats._sum.amount || 0 },
-        all: { count: allStats._count, total: allStats._sum.amount || 0 },
+        year: yearStats ? { count: yearStats._count, total: yearStats._sum.amount || 0 } : null,
+        all: allStats ? { count: allStats._count, total: allStats._sum.amount || 0 } : null,
       },
     })
   } catch (error) {

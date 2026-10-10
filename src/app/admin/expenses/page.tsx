@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { ExpenseCategoryOptions } from '@/components/admin/ExpenseCategoryOptions'
+import { useCan } from '@/hooks/useCan'
 
 interface ExpenseCategory {
   id: string
@@ -60,6 +61,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 const PAGE_SIZE = 50
 
 function ExpensesPageInner() {
+  const canDelete = useCan('finance.expenses')
   // Deep-links depuis les rapports : /admin/expenses?categoryId=…&startDate=…&endDate=…
   const searchParams = useSearchParams()
 
@@ -444,6 +446,8 @@ function ExpensesPageInner() {
                       >
                         <Pencil className="h-4 w-4 text-gray-400 group-hover:text-primary-500" />
                       </Link>
+                      {/* Masqué : suppression refusée par l'API sans ce droit */}
+                      {canDelete && (
                       <button
                         onClick={() => handleDelete(expense)}
                         disabled={deletingId === expense.id}
@@ -456,6 +460,7 @@ function ExpensesPageInner() {
                           <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
                         )}
                       </button>
+                      )}
                     </div>
                   </td>
                 </tr>

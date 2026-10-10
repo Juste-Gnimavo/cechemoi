@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -145,7 +145,10 @@ export async function GET(req: NextRequest) {
       stats: {
         total,
         lowStock: Number(lowStockMaterials[0]?.count || 0),
-        totalValue,
+        // Étanchéité financière : valeur cumulée du stock réservée à
+        // `finance.revenue` (null, l'écran masque la carte). Le prix unitaire
+        // de chaque matériel reste visible, il sert à saisir les mouvements.
+        totalValue: sessionCan(session, 'finance.revenue') ? totalValue : null,
       },
     })
   } catch (error) {

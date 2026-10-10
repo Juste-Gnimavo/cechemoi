@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 
@@ -108,6 +108,9 @@ export async function GET(req: NextRequest) {
       })
     }
 
+    // Étanchéité financière : sans `finance.revenue`, aucun cumul d'argent.
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -116,10 +119,12 @@ export async function GET(req: NextRequest) {
         vipCount,
         highValueCount,
         inactiveCount,
-        totalLifetimeValue,
-        averageCustomerValue,
+        totalLifetimeValue: canSeeRevenue ? totalLifetimeValue : null,
+        averageCustomerValue: canSeeRevenue ? averageCustomerValue : null,
       },
-      topCustomers,
+      topCustomers: canSeeRevenue
+        ? topCustomers
+        : topCustomers.map((c) => ({ ...c, lifetimeValue: null })),
       monthlyGrowth,
     })
   } catch (error) {

@@ -119,17 +119,21 @@ export async function GET(req: NextRequest) {
     }
 
     // Étanchéité financière : sans droit sur les recettes, on renvoie les
-    // compteurs et le reste dû (outils de relance) mais aucun cumul encaissé.
+    // compteurs mais aucun cumul d'argent, reste dû compris (session 36).
+    // null plutôt que 0 : l'écran masque la carte au lieu d'afficher « 0 F ».
     if (!sessionCan(session, 'finance.revenue')) {
       return NextResponse.json({
         ...payload,
         stats: {
           ...payload.stats,
-          billedTotal: 0,
-          cashReceipts: 0,
-          totalRevenue: 0,
-          averageInvoiceValue: 0,
-          thisMonth: { invoices: thisMonthInvoicesCount, revenue: 0 },
+          billedTotal: null,
+          cashReceipts: null,
+          outstanding: null,
+          totalRevenue: null,
+          overdueAmount: null,
+          pendingAmount: null,
+          averageInvoiceValue: null,
+          thisMonth: { invoices: thisMonthInvoicesCount, revenue: null },
         },
       })
     }

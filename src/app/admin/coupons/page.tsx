@@ -6,6 +6,7 @@ import { Plus, Edit, Trash2, Tag, Calendar, Users, TrendingUp, Search, CheckCirc
 import { toast } from 'react-hot-toast'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { useCan } from '@/hooks/useCan'
 
 interface Coupon {
   id: string
@@ -45,6 +46,9 @@ interface Pagination {
 }
 
 export default function CouponsPage() {
+  // Personnel : lecture seule (`coupons`), sans `coupons.manage` ; création,
+  // modification et suppression sont refusées par l'API, on n'en offre aucune.
+  const canManage = useCan('coupons.manage')
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
@@ -181,6 +185,7 @@ export default function CouponsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestion des coupons</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Créez et gérez vos codes de réduction</p>
         </div>
+        {canManage && (
         <Link
           href="/admin/coupons/new"
           className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-all duration-200"
@@ -188,6 +193,7 @@ export default function CouponsPage() {
           <Plus className="h-5 w-5" />
           Nouveau coupon
         </Link>
+        )}
       </div>
 
       {/* Stats Header */}
@@ -264,12 +270,14 @@ export default function CouponsPage() {
           <div className="flex flex-col items-center justify-center py-12">
             <Tag className="h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
             <div className="text-gray-500 dark:text-gray-400">Aucun coupon trouvé</div>
+            {canManage && (
             <Link
               href="/admin/coupons/new"
               className="mt-4 text-primary-500 hover:text-primary-400"
             >
               Créer votre premier coupon
             </Link>
+            )}
           </div>
         ) : (
           <>
@@ -352,6 +360,7 @@ export default function CouponsPage() {
                       <td className="px-6 py-4">{getStatusBadge(coupon)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
+                          {canManage && (
                           <button
                             onClick={() => toggleActive(coupon.id, coupon.active)}
                             className={`px-3 py-1 rounded text-sm ${
@@ -362,13 +371,16 @@ export default function CouponsPage() {
                           >
                             {coupon.active ? 'Désactiver' : 'Activer'}
                           </button>
+                          )}
+                          {canManage && (
                           <Link
                             href={`/admin/coupons/${coupon.id}`}
                             className="p-2 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-all duration-200"
                           >
                             <Edit className="h-4 w-4 text-gray-400" />
                           </Link>
-                          {coupon.totalOrders === 0 && (
+                          )}
+                          {canManage && coupon.totalOrders === 0 && (
                             <button
                               onClick={() => handleDelete(coupon.id, coupon.code)}
                               className="p-2 hover:bg-gray-200 dark:hover:bg-dark-700 rounded transition-all duration-200"

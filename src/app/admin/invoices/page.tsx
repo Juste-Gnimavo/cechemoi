@@ -22,6 +22,7 @@ import { toast } from 'react-hot-toast'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
 import { ConfirmationModal, useConfirmationModal } from '@/components/admin/confirmation-modal'
+import { useIsAdmin } from '@/hooks/useCan'
 
 interface Invoice {
   id: string
@@ -48,14 +49,15 @@ interface Stats {
     REFUNDED: number
   }
   // Période sélectionnée
-  billedTotal: number
+  // Montants à null sans le droit `finance.revenue` : la carte est masquée.
+  billedTotal: number | null
   billedCount: number
-  cashReceipts: number
-  outstanding: number
+  cashReceipts: number | null
+  outstanding: number | null
   // Back-compat
-  totalRevenue: number
-  overdueAmount: number
-  pendingAmount: number
+  totalRevenue: number | null
+  overdueAmount: number | null
+  pendingAmount: number | null
 }
 
 const PERIOD_OPTIONS: { value: string; label: string }[] = [
@@ -72,6 +74,7 @@ function periodLabel(period: string): string {
 }
 
 export default function InvoicesPage() {
+  const canDelete = useIsAdmin()
   const { modal, hideModal, showWarning } = useConfirmationModal()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
@@ -257,7 +260,10 @@ export default function InvoicesPage() {
       {stats && (
         <>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Compteurs en bleu : depuis le début. Montants en vert : <span className="font-medium">{periodLabel(period)}</span>.
+            Compteurs en bleu : depuis le début.
+            {stats.billedTotal !== null && (
+              <> Montants en vert : <span className="font-medium">{periodLabel(period)}</span>.</>
+            )}
           </p>
           <AdminStatsHeader
             stats={[
@@ -266,9 +272,9 @@ export default function InvoicesPage() {
               { label: 'Envoyées', value: stats.byStatus.SENT, icon: Mail, color: 'blue' },
               { label: 'En retard', value: stats.byStatus.OVERDUE, icon: AlertCircle, color: 'red' },
               { label: 'Brouillons', value: stats.byStatus.DRAFT, icon: FileText, color: 'default' },
-              { label: `Facturé (${periodLabel(period)})`, value: formatCurrency(stats.billedTotal || 0), icon: FileText, color: 'blue' },
-              { label: `Encaissé (${periodLabel(period)})`, value: formatCurrency(stats.cashReceipts || 0), icon: TrendingUp, color: 'green' },
-              { label: `Reste dû (${periodLabel(period)})`, value: formatCurrency(stats.outstanding || 0), icon: Clock, color: 'yellow' },
+              ...(stats.billedTotal === null ? [] : [{ label: `Facturé (${periodLabel(period)})`, value: formatCurrency(stats.billedTotal), icon: FileText, color: 'blue' as const }]),
+              ...(stats.cashReceipts === null ? [] : [{ label: `Encaissé (${periodLabel(period)})`, value: formatCurrency(stats.cashReceipts), icon: TrendingUp, color: 'green' as const }]),
+              ...(stats.outstanding === null ? [] : [{ label: `Reste dû (${periodLabel(period)})`, value: formatCurrency(stats.outstanding), icon: Clock, color: 'yellow' as const }]),
             ]}
           />
         </>
@@ -476,6 +482,8 @@ export default function InvoicesPage() {
                         >
                           <Download className="h-4 w-4" />
                         </a>
+                        {/* Masqué : l'API ne permet la suppression qu'au rôle ADMIN */}
+                        {canDelete && (
                         <button
                           onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
                           disabled={deletingId === invoice.id}
@@ -484,6 +492,7 @@ export default function InvoicesPage() {
                         >
                           <Trash2 className={`h-4 w-4 ${deletingId === invoice.id ? 'animate-spin' : ''}`} />
                         </button>
+                        )}
                       </div>
                     </td>
                   </tr>

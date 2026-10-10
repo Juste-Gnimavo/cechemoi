@@ -282,17 +282,20 @@ function MovementsContent() {
 
       {/* Totals */}
       {totals && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${totals.totalCost === null ? '' : 'md:grid-cols-2'}`}>
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">Total mouvements</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{movements.length}</p>
           </div>
-          <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Valeur totale</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatPrice(totals.totalCost)}
-            </p>
-          </div>
+          {/* null sans le droit `finance.revenue` : carte masquée */}
+          {totals.totalCost !== null && (
+            <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Valeur totale</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatPrice(totals.totalCost)}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

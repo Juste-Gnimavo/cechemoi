@@ -36,6 +36,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { CUSTOM_ORDER_PAYMENT_METHODS, paymentMethodLabel } from '@/lib/payment-methods'
+import { useCan } from '@/hooks/useCan'
 
 // Status and priority labels
 const STATUS_LABELS: Record<string, string> = {
@@ -162,6 +163,7 @@ type TabId = 'items' | 'payments' | 'materials' | 'attachments' | 'timeline' | '
 const TAB_IDS: TabId[] = ['items', 'payments', 'materials', 'attachments', 'timeline', 'notes']
 
 function CustomOrderDetailContent() {
+  const canDelete = useCan('custom-orders.delete')
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
@@ -720,6 +722,8 @@ function CustomOrderDetailContent() {
             )}
             <span>Fiche PDF</span>
           </button>
+          {/* Masqué sans custom-orders.delete (refusé par l'API) */}
+          {canDelete && (
           <button
             onClick={() => setShowDeleteModal(true)}
             className="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -727,6 +731,7 @@ function CustomOrderDetailContent() {
           >
             <Trash2 className="h-5 w-5 text-red-400" />
           </button>
+          )}
           <Link
             href="/admin/custom-orders"
             className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-dark-800 hover:bg-gray-200 dark:hover:bg-dark-700 border border-gray-200 dark:border-dark-700 text-gray-900 dark:text-white rounded-lg transition-all duration-200"

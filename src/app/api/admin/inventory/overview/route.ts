@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 
 
@@ -80,7 +80,8 @@ export async function GET(req: NextRequest) {
     })
 
     // Stock by category
-    const categoryStats = products.reduce((acc: any, product) => {
+    type CategoryStat = { category: string; products: number; totalStock: number; stockValue: number }
+    const categoryStats = products.reduce((acc: Record<string, CategoryStat>, product) => {
       const categoryName = product.category.name
       if (!acc[categoryName]) {
         acc[categoryName] = {
@@ -96,7 +97,12 @@ export async function GET(req: NextRequest) {
       return acc
     }, {})
 
-    const stockByCategory = Object.values(categoryStats)
+    // Étanchéité financière : la valeur du stock (globale et par catégorie)
+    // est réservée à `finance.revenue` ; les quantités restent visibles.
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+    const stockByCategory = Object.values(categoryStats).map((c) =>
+      canSeeRevenue ? c : { ...c, stockValue: null }
+    )
 
     return NextResponse.json({
       success: true,
@@ -106,7 +112,7 @@ export async function GET(req: NextRequest) {
         inStock,
         lowStock,
         outOfStock,
-        totalStockValue,
+        totalStockValue: canSeeRevenue ? totalStockValue : null,
         totalStockQuantity,
       },
       lowStockProducts,

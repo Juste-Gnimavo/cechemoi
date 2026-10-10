@@ -18,6 +18,7 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface Category {
   id: string
@@ -58,6 +59,7 @@ const getUnitLabel = (unit: string): string => {
 }
 
 export default function MaterialsPage() {
+  const canDelete = useCan('materials.delete')
   const [materials, setMaterials] = useState<Material[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -215,7 +217,7 @@ export default function MaterialsPage() {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${stats.totalValue === null ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary-500/10 rounded-lg">
@@ -238,6 +240,7 @@ export default function MaterialsPage() {
               </div>
             </div>
           </div>
+          {stats.totalValue !== null && (
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-500/10 rounded-lg">
@@ -251,6 +254,7 @@ export default function MaterialsPage() {
               </div>
             </div>
           </div>
+          )}
           <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -448,6 +452,8 @@ export default function MaterialsPage() {
                         >
                           <Pencil className="h-4 w-4 text-gray-400 group-hover:text-primary-500" />
                         </Link>
+                        {/* Masqué : suppression refusée par l'API sans ce droit */}
+                        {canDelete && (
                         <button
                           onClick={() => handleDelete(material)}
                           disabled={deletingId === material.id}
@@ -460,6 +466,7 @@ export default function MaterialsPage() {
                             <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
                           )}
                         </button>
+                        )}
                       </div>
                     </td>
                   </tr>

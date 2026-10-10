@@ -21,35 +21,35 @@ import { toast } from 'react-hot-toast'
 interface ReportData {
   period: { type: string; start: string; end: string }
   summary: {
-    entries: { count: number; totalCost: number; totalQuantity: number }
-    exits: { count: number; totalCost: number; totalQuantity: number }
+    entries: { count: number; totalCost: number | null; totalQuantity: number }
+    exits: { count: number; totalCost: number | null; totalQuantity: number }
     lowStockCount: number
     totalMaterials: number
-    totalStockValue: number
+    totalStockValue: number | null
   }
   byTailor: Array<{
     tailor: { id: string; name: string; phone: string }
     count: number
-    totalCost: number
+    totalCost: number | null
     totalQuantity: number
   }>
   byStaff: Array<{
     staff: { id: string; name: string; role: string }
     count: number
-    totalCost: number
+    totalCost: number | null
     totalQuantity: number
   }>
   byCategory: Array<{
     categoryId: string
     categoryName: string
     count: number
-    totalCost: number
+    totalCost: number | null
     totalQuantity: number
   }>
   topMaterials: Array<{
     material: { id: string; name: string; unit: string; category: { name: string } }
     count: number
-    totalCost: number
+    totalCost: number | null
     totalQuantity: number
   }>
   lowStockItems: Array<{
@@ -106,7 +106,9 @@ export default function MaterialReportsPage() {
     }
   }
 
-  const formatPrice = (price: number) => {
+  // null sans le droit `finance.revenue` : aucun montant affiché.
+  const formatPrice = (price: number | null) => {
+    if (price === null) return ''
     return new Intl.NumberFormat('fr-FR').format(price) + ' CFA'
   }
 
@@ -201,7 +203,7 @@ export default function MaterialReportsPage() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${data.summary.totalStockValue === null ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
             <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-lg">
@@ -242,6 +244,7 @@ export default function MaterialReportsPage() {
                 </div>
               </div>
             </div>
+            {data.summary.totalStockValue !== null && (
             <div className="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -255,6 +258,7 @@ export default function MaterialReportsPage() {
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

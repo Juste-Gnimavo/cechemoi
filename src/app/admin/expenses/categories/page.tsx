@@ -24,6 +24,7 @@ import {
   CornerDownRight,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface ExpenseCategory {
   id: string
@@ -83,6 +84,7 @@ const ICON_OPTIONS = [
 ]
 
 export default function ExpenseCategoriesPage() {
+  const canDelete = useCan('finance.expenses')
   const [categories, setCategories] = useState<ExpenseCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -354,6 +356,8 @@ export default function ExpenseCategoriesPage() {
                     >
                       <Edit2 className="h-4 w-4 text-gray-500" />
                     </button>
+                    {/* Masqué : suppression refusée par l'API sans ce droit */}
+                    {canDelete && (
                     <button
                       onClick={() => handleDelete(category)}
                       disabled={(category.expensesCount || 0) > 0 || (category.childrenCount || 0) > 0}
@@ -361,6 +365,7 @@ export default function ExpenseCategoriesPage() {
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </button>
+                    )}
                   </div>
                 </div>
               )

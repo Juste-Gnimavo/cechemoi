@@ -14,6 +14,7 @@ import {
   Image as ImageIcon,
   X
 } from 'lucide-react'
+import { useCan } from '@/hooks/useCan'
 
 interface Category {
   id: string
@@ -30,6 +31,7 @@ interface Category {
 }
 
 export default function EditCategoryPage({ params }: { params: { id: string } }) {
+  const canDelete = useCan('categories.delete')
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -523,6 +525,8 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
         {/* Actions */}
         <div className="flex items-center justify-between">
           {/* Delete Button */}
+          {/* Masqué : suppression refusée par l'API sans ce droit */}
+          {canDelete && (
           <button
             type="button"
             onClick={() => setDeleteConfirm(true)}
@@ -531,6 +535,7 @@ export default function EditCategoryPage({ params }: { params: { id: string } })
             <Trash2 className="h-4 w-4" />
             <span>Supprimer</span>
           </button>
+          )}
 
           {/* Save Buttons */}
           <div className="flex items-center space-x-4">

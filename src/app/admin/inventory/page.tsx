@@ -21,7 +21,8 @@ interface InventoryOverview {
   inStock: number
   lowStock: number
   outOfStock: number
-  totalStockValue: number
+  // null sans le droit `finance.revenue` : seule la quantité est affichée.
+  totalStockValue: number | null
   totalStockQuantity: number
 }
 
@@ -56,7 +57,7 @@ interface CategoryStat {
   category: string
   products: number
   totalStock: number
-  stockValue: number
+  stockValue: number | null
 }
 
 export default function InventoryPage() {
@@ -228,15 +229,25 @@ export default function InventoryPage() {
 
           <div className="bg-white/80 dark:bg-dark-900/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-dark-700/50 shadow-lg shadow-black/5 dark:shadow-black/20 p-6 md:col-span-2">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-500 dark:text-gray-400 text-sm">Valeur totale du stock</span>
+              <span className="text-gray-500 dark:text-gray-400 text-sm">
+                {overview.totalStockValue === null ? 'Unités en stock' : 'Valeur totale du stock'}
+              </span>
               <DollarSign className="h-5 w-5 text-primary-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {overview.totalStockValue.toLocaleString()} CFA
-            </div>
-            <p className="text-sm text-gray-500 mt-1">
-              {overview.totalStockQuantity.toLocaleString()} unités
-            </p>
+            {overview.totalStockValue === null ? (
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {overview.totalStockQuantity.toLocaleString()} unités
+              </div>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {overview.totalStockValue.toLocaleString()} CFA
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  {overview.totalStockQuantity.toLocaleString()} unités
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -415,10 +426,12 @@ export default function InventoryPage() {
                     <span className="text-gray-500 dark:text-gray-400">Stock total:</span>
                     <span className="text-gray-900 dark:text-white">{stat.totalStock}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Valeur:</span>
-                    <span className="text-gray-900 dark:text-white">{stat.stockValue.toLocaleString()} CFA</span>
-                  </div>
+                  {stat.stockValue !== null && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 dark:text-gray-400">Valeur :</span>
+                      <span className="text-gray-900 dark:text-white">{stat.stockValue.toLocaleString()} CFA</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-phone'
-import { denyUnlessPermitted, unauthenticated } from '@/lib/api-permissions'
+import { denyUnlessPermitted, sessionCan, unauthenticated } from '@/lib/api-permissions'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { smsingService } from '@/lib/smsing-service'
@@ -121,6 +121,8 @@ export async function GET(req: NextRequest) {
       prisma.user.count({ where: { role: 'CUSTOMER', createdAt: { gte: startOfYear } } }),
     ])
 
+    const canSeeRevenue = sessionCan(session, 'finance.revenue')
+
     const stats = {
       total: totalCustomers,
       today: todayCustomers,
@@ -238,10 +240,11 @@ export async function GET(req: NextRequest) {
         image: customer.image,
         createdAt: customer.createdAt,
         totalOrders,
-        lifetimeValue,
-        lifetimeValueFromOrders: orderLifetimeValue,
-        lifetimeValueFromInvoices: standaloneInvoiceValue,
-        averageOrderValue,
+        // Étanchéité financière : cumuls par cliente réservés à `finance.revenue`.
+        lifetimeValue: canSeeRevenue ? lifetimeValue : null,
+        lifetimeValueFromOrders: canSeeRevenue ? orderLifetimeValue : null,
+        lifetimeValueFromInvoices: canSeeRevenue ? standaloneInvoiceValue : null,
+        averageOrderValue: canSeeRevenue ? averageOrderValue : null,
         lastOrderDate,
         segments,
         reviewsCount: customer._count.reviews,
@@ -261,6 +264,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       customers: filteredCustomers,
+      // L'écran masque les colonnes « Valeur totale » et « Panier moyen ».
+      revenueVisible: canSeeRevenue,
       stats,
       pagination: {
         page,

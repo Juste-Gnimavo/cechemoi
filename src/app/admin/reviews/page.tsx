@@ -6,6 +6,7 @@ import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { useConfetti } from '@/hooks/useConfetti'
 import { AdminMessageModal, AdminMessageType } from '@/components/admin/admin-message-modal'
+import { useCan } from '@/hooks/useCan'
 
 interface Review {
   id: string
@@ -40,6 +41,7 @@ interface ReviewStats {
 }
 
 export default function ReviewsManagementPage() {
+  const canDelete = useCan('reviews.delete')
   const { reward, mini } = useConfetti()
   const [reviews, setReviews] = useState<Review[]>([])
   const [stats, setStats] = useState<ReviewStats | null>(null)
@@ -369,6 +371,8 @@ export default function ReviewsManagementPage() {
                       <X className="h-4 w-4" />
                     </button>
                   )}
+                  {/* Masqué sans reviews.delete (refusé par l'API) */}
+                  {canDelete && (
                   <button
                     onClick={() => confirmDelete(review.id)}
                     className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20"
@@ -376,6 +380,7 @@ export default function ReviewsManagementPage() {
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  )}
                 </div>
               </div>
 

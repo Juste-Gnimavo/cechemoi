@@ -156,7 +156,7 @@ interface MaterialStats {
     exits: { count: number; totalCost: number; totalQuantity: number }
     lowStockCount: number
     totalMaterials: number
-    totalStockValue: number
+    totalStockValue: number | null
   }
   lowStockItems: {
     id: string
@@ -1004,12 +1004,15 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-amber-600">{materialStats?.summary.totalMaterials || 0}</p>
                   <p className="text-xs text-gray-500">Matériels</p>
                 </div>
+                {/* null sans le droit `finance.revenue` : tuile masquée */}
+                {materialStats?.summary.totalStockValue != null && (
                 <div className="text-center p-3 bg-blue-500/10 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">
-                    {formatCurrency(materialStats?.summary.totalStockValue || 0).replace(' CFA', '')}
+                    {formatCurrency(materialStats.summary.totalStockValue).replace(' CFA', '')}
                   </p>
                   <p className="text-xs text-gray-500">Valeur stock</p>
                 </div>
+                )}
                 <div className="text-center p-3 bg-green-500/10 rounded-lg">
                   <p className="text-2xl font-bold text-green-600">{materialStats?.summary.entries.count || 0}</p>
                   <p className="text-xs text-gray-500">Entrées (mois)</p>

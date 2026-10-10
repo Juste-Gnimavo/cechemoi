@@ -14,6 +14,7 @@ import {
   Search,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useIsAdmin } from '@/hooks/useCan'
 
 interface NotificationLog {
   id: string
@@ -81,6 +82,7 @@ const TRIGGER_LABELS: Record<string, string> = {
 const triggerLabel = (trigger: string) => TRIGGER_LABELS[trigger] || trigger
 
 export default function NotificationLogsPage() {
+  const canDelete = useIsAdmin()
   const [logs, setLogs] = useState<NotificationLog[]>([])
   const [stats, setStats] = useState<LogStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -365,6 +367,8 @@ export default function NotificationLogsPage() {
               <Download className="h-4 w-4" />
               Export CSV
             </button>
+            {/* Masqué : l'API ne permet la purge qu'au rôle ADMIN */}
+            {canDelete && (
             <button
               onClick={() => handleDeleteOldLogs(30)}
               className="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
@@ -372,6 +376,7 @@ export default function NotificationLogsPage() {
               <Trash2 className="h-4 w-4" />
               Nettoyer
             </button>
+            )}
           </div>
         </div>
       </div>

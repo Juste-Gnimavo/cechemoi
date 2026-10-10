@@ -28,6 +28,7 @@ import OrderNotes from '@/components/admin/order-notes'
 import RefundModal from '@/components/admin/refund-modal'
 import { useConfetti } from '@/hooks/useConfetti'
 import { AdminMessageModal, AdminMessageType } from '@/components/admin/admin-message-modal'
+import { useSession } from 'next-auth/react'
 
 interface OrderDetail {
   id: string
@@ -115,6 +116,10 @@ const paymentMethodLabels: Record<string, string> = {
 }
 
 export default function OrderDetailPage() {
+  // Suppression d'une commande : l'API n'autorise que le rôle ADMIN (test
+  // en dur, voir DELETE /api/admin/orders/[id]) ; le bouton suit le serveur.
+  const { data: session } = useSession()
+  const canDelete = (session?.user as { role?: string } | undefined)?.role === 'ADMIN'
   const params = useParams()
   const router = useRouter()
   const { celebration, success } = useConfetti()
@@ -483,6 +488,7 @@ export default function OrderDetailPage() {
             <Printer className="h-4 w-4" />
             Imprimer
           </button>
+          {canDelete && (
           <button
             onClick={confirmDeleteOrder}
             disabled={deleting}
@@ -491,6 +497,7 @@ export default function OrderDetailPage() {
             <Trash2 className={`h-4 w-4 ${deleting ? 'animate-spin' : ''}`} />
             Supprimer
           </button>
+          )}
         </div>
       </div>
 

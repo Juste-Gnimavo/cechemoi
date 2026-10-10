@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { ConfirmationModal, useConfirmationModal } from '@/components/admin/confirmation-modal'
+import { useCan } from '@/hooks/useCan'
 
 interface CustomOrder {
   id: string
@@ -113,6 +114,7 @@ const getPriorityColor = (priority: string) => {
 }
 
 export default function CustomOrdersPage() {
+  const canDelete = useCan('custom-orders.delete')
   const { modal, hideModal, showWarning } = useConfirmationModal()
   const [orders, setOrders] = useState<CustomOrder[]>([])
   const [loading, setLoading] = useState(true)
@@ -123,8 +125,9 @@ export default function CustomOrdersPage() {
   const [paymentStats, setPaymentStats] = useState<{
     today: { count: number; total: number }
     last30: { count: number; total: number }
-    year: { count: number; total: number; label: number }
-    all: { count: number; total: number }
+    // null sans le droit `finance.revenue` : la carte est masquée.
+    year: { count: number; total: number; label: number } | null
+    all: { count: number; total: number } | null
   } | null>(null)
 
   // Filters
@@ -282,7 +285,7 @@ export default function CustomOrdersPage() {
 
       {/* Encaissements sur-mesure — Aujourd'hui / 30j / Année / Total */}
       {paymentStats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className={`grid grid-cols-2 gap-3 mb-4 ${paymentStats.year && paymentStats.all ? 'md:grid-cols-4' : ''}`}>
           <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
             <p className="text-xs text-gray-500 dark:text-gray-400">Aujourd&apos;hui</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.today.total)}</p>
@@ -293,16 +296,20 @@ export default function CustomOrdersPage() {
             <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.last30.total)}</p>
             <p className="text-xs text-gray-400 mt-1">{paymentStats.last30.count} paiement(s)</p>
           </div>
+          {paymentStats.year && (
           <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
             <p className="text-xs text-gray-500 dark:text-gray-400">Année {paymentStats.year.label}</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.year.total)}</p>
             <p className="text-xs text-gray-400 mt-1">{paymentStats.year.count} paiement(s)</p>
           </div>
+          )}
+          {paymentStats.all && (
           <div className="p-4 rounded-lg border border-gray-200 dark:border-dark-700 bg-white/80 dark:bg-dark-900/50">
             <p className="text-xs text-gray-500 dark:text-gray-400">Toute la période</p>
             <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(paymentStats.all.total)}</p>
             <p className="text-xs text-gray-400 mt-1">{paymentStats.all.count} paiement(s)</p>
           </div>
+          )}
         </div>
       )}
 
@@ -570,6 +577,8 @@ export default function CustomOrdersPage() {
                             <FileText className="h-4 w-4" />
                           )}
                         </button>
+                        {/* Masqué sans custom-orders.delete (refusé par l'API) */}
+                        {canDelete && (
                         <button
                           onClick={() => handleDelete(order.id, order.orderNumber)}
                           className="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
@@ -577,6 +586,7 @@ export default function CustomOrdersPage() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
+                        )}
                       </div>
                     </td>
                   </tr>

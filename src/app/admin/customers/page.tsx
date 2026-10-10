@@ -5,6 +5,7 @@ import { Search, User, DollarSign, ShoppingBag, Star, Users, Calendar, TrendingU
 import { toast } from 'react-hot-toast'
 import { AdminStatsHeader } from '@/components/admin/admin-stats-header'
 import { AdminPagination } from '@/components/admin/admin-pagination'
+import { useCan } from '@/hooks/useCan'
 
 interface Customer {
   id: string
@@ -15,8 +16,9 @@ interface Customer {
   image?: string
   createdAt: string
   totalOrders: number
-  lifetimeValue: number
-  averageOrderValue: number
+  // null sans le droit `finance.revenue` : colonnes masquées.
+  lifetimeValue: number | null
+  averageOrderValue: number | null
   lastOrderDate?: string
   segments: string[]
   reviewsCount: number
@@ -40,7 +42,9 @@ interface Pagination {
 }
 
 export default function CustomersPage() {
+  const canDelete = useCan('customers.delete')
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [revenueVisible, setRevenueVisible] = useState(false)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats | null>(null)
   const [pagination, setPagination] = useState<Pagination>({
@@ -88,6 +92,7 @@ export default function CustomersPage() {
 
       if (data.success) {
         setCustomers(data.customers)
+        setRevenueVisible(data.revenueVisible === true)
         setStats(data.stats)
         setPagination(data.pagination)
       }
@@ -493,12 +498,16 @@ export default function CustomersPage() {
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Commandes
                     </th>
-                    <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                      Valeur totale
-                    </th>
-                    <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
-                      Panier moyen
-                    </th>
+                    {revenueVisible && (
+                      <>
+                        <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                          Valeur totale
+                        </th>
+                        <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
+                          Panier moyen
+                        </th>
+                      </>
+                    )}
                     <th className="text-left px-6 py-4 text-gray-500 dark:text-gray-400 font-medium text-sm">
                       Segment
                     </th>
@@ -562,19 +571,23 @@ export default function CustomersPage() {
                           <span className="text-gray-900 dark:text-white font-medium">{customer.totalOrders}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                          <span className="text-gray-900 dark:text-white font-medium">
-                            {customer.lifetimeValue.toLocaleString()} CFA
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {customer.averageOrderValue.toLocaleString()} CFA
-                        </span>
-                      </td>
+                      {revenueVisible && (
+                        <>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="text-gray-900 dark:text-white font-medium">
+                                {(customer.lifetimeValue ?? 0).toLocaleString()} CFA
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-700 dark:text-gray-300">
+                              {(customer.averageOrderValue ?? 0).toLocaleString()} CFA
+                            </span>
+                          </td>
+                        </>
+                      )}
                       <td className="px-6 py-4">{getSegmentBadge(customer.segments)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1">
@@ -616,7 +629,8 @@ export default function CustomersPage() {
                             )}
                           </button>
 
-                          {/* Delete */}
+                          {/* Delete — masqué sans `customers.delete` (refusé par l'API) */}
+                          {canDelete && (
                           <button
                             onClick={(e) => handleDeleteCustomer(e, customer.id, customer.name)}
                             disabled={deletingId === customer.id}
@@ -629,6 +643,7 @@ export default function CustomersPage() {
                               <Trash2 className="h-4 w-4 text-gray-400 group-hover:text-red-500" />
                             )}
                           </button>
+                          )}
                         </div>
                       </td>
                     </tr>
