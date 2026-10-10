@@ -132,7 +132,7 @@ module.exports = {
     { h2: 'La fiche d’une commande' },
     { img: 'C15-atelier-fiche.png', cap: 'Fiche d’une commande sur mesure' },
     { bullets: [
-      'Boutons du haut : **Voir la facture**, **Fiche de suivi** (pour l’atelier), **Fiche PDF**.',
+      'Boutons du haut : **Informer le couturier**, **Voir la facture**, **Fiche de suivi** (pour l’atelier), **Fiche PDF**.',
       'Un bandeau rouge signale un **retrait en retard**.',
       'Quatre chiffres : **Total**, **Payé**, **Reliquat**, date de **Retrait**.',
       'Onglet **Articles** : pour chaque tenue, changez le **couturier** et l’**étape** de confection.',
@@ -151,6 +151,22 @@ module.exports = {
     { h3: 'Enregistrer les matériels utilisés' },
     { img: 'C17-atelier-materiels.png', cap: 'Onglet « Matériels » de la commande' },
     { p: 'Onglet **Matériels → Enregistrer une sortie** : le tissu et les fournitures prélevés sont rattachés à la commande et déduits du stock. Le détail de la sortie est expliqué au chapitre 4.' },
+    { h3: 'Informer le couturier par WhatsApp' },
+    { p: 'Le bouton **Informer le couturier** envoie à chaque couturier sa **fiche couturier** : ses articles, les mesures de la cliente, les photos du modèle, les matières remises et la date de retrait. **Aucun montant** n’y figure, ni prix, ni acompte, ni coût des matières.' },
+    { steps: [
+      'Dans l’onglet **Articles**, assignez un **couturier** à chaque tenue. Un article sans couturier ne part pas : la fenêtre vous le signale.',
+      'Cliquez sur **Informer le couturier** en haut de la fiche.',
+      'Choisissez le **couturier destinataire** si plusieurs travaillent sur la commande : chacun ne reçoit que ses propres articles.',
+      'Vérifiez son **numéro WhatsApp**, le **message** et l’**aperçu du PDF**. Ajoutez au besoin une **note pour le couturier**.',
+      'Cliquez sur **Envoyer**. L’envoi apparaît dans l’onglet **Historique** et la date du **dernier envoi** s’affiche sous le bouton.',
+    ] },
+    { bullets: [
+      'La cliente n’apparaît que par son **prénom** et le numéro de commande, jamais par son téléphone.',
+      'Les documents joints (devis, reçus…) ne partent jamais, seulement les photos, vocaux et vidéos du modèle.',
+      'Après une modification (mesure corrigée, article ajouté), cliquez sur **Renvoyer** : l’ancien lien est désactivé.',
+      'En cas d’erreur de destinataire, cliquez sur **Révoquer le lien du PDF** : le document ne s’ouvre plus.',
+    ] },
+    { warn: { title: 'Pas de prix dans la note', text: 'La note pour le couturier part telle quelle. N’y écrivez jamais un prix ou un acompte. La **Fiche de suivi** contient le coût des matières : elle reste au bureau, ne la remettez pas au couturier.' } },
     { h2: 'Suivi de production' },
     { p: 'Chemin : **Commandes atelier → Suivi de production**. C’est la vue de l’atelier, article par article.' },
     { img: 'C18-production.png', cap: 'Tableau de production (noms de clientes d’exemple)' },
@@ -161,7 +177,7 @@ module.exports = {
       'Les dates de retrait **en rouge** sont dépassées : relancez l’atelier et prévenez la cliente.',
     ] },
     { h2: 'Fiche de suivi confection' },
-    { p: 'Chemin : **Commandes atelier → Fiche de suivi confection**. Recherchez la commande et cliquez sur **Télécharger** pour imprimer la fiche remise au couturier.' },
+    { p: 'Chemin : **Commandes atelier → Fiche de suivi confection**. Recherchez la commande et cliquez sur **Télécharger** pour imprimer la fiche de suivi. Elle contient le coût des matières : pour le couturier, utilisez **Informer le couturier** sur la fiche de la commande.' },
     { img: 'C19-fiche-suivi-confection.png', cap: 'Liste des fiches de suivi' },
 
     // ------------------------------------------------------------------
