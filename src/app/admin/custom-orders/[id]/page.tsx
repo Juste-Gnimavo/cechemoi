@@ -37,6 +37,7 @@ import {
 import { toast } from 'react-hot-toast'
 import { CUSTOM_ORDER_PAYMENT_METHODS, paymentMethodLabel } from '@/lib/payment-methods'
 import { useCan } from '@/hooks/useCan'
+import { NotifyTailorButton } from '@/components/admin/notify-tailor-button'
 
 // Status and priority labels
 const STATUS_LABELS: Record<string, string> = {
@@ -164,6 +165,7 @@ const TAB_IDS: TabId[] = ['items', 'payments', 'materials', 'attachments', 'time
 
 function CustomOrderDetailContent() {
   const canDelete = useCan('custom-orders.delete')
+  const canNotifyTailor = useCan('production')
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
@@ -685,7 +687,15 @@ function CustomOrderDetailContent() {
             {order.createdBy && ` par ${order.createdBy.name}`}
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div className="flex items-start gap-2 flex-wrap justify-end">
+          {/* Masqué sans la permission production (refusée par l'API) */}
+          {canNotifyTailor && (
+            <NotifyTailorButton
+              orderId={orderId}
+              assignmentKey={order.items.map((i) => i.tailorId ?? '').join(',')}
+              onChange={fetchOrder}
+            />
+          )}
           {order.invoice && (
             <Link
               href={`/admin/invoices/${order.invoice.id}`}
