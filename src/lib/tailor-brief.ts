@@ -18,7 +18,7 @@ import { prisma } from '@/lib/prisma'
  *   - les notes des mouvements de matières ;
  *   - les pièces jointes de catégorie « document » (devis, reçus…) : seules les
  *     photos, les vocaux et les vidéos du modèle partent ;
- *   - le téléphone et le nom de famille de la cliente (prénom seulement).
+ *   - le téléphone et le nom complet de la cliente (voir `customerShortName`).
  */
 
 export interface TailorBriefItem {
@@ -53,7 +53,7 @@ export interface TailorBriefMaterial {
 export interface TailorBrief {
   orderId: string
   orderNumber: string
-  customerFirstName: string
+  customerShortName: string
   priority: string
   orderDate: Date
   pickupDate: Date
@@ -190,9 +190,20 @@ export class TailorBriefError extends Error {
   }
 }
 
-function firstName(fullName: string | null): string {
-  const first = (fullName || '').trim().split(/\s+/)[0]
-  return first || 'Cliente'
+const CIVILITIES = /^(m\.?|mr\.?|mme\.?|mlle\.?|madame|monsieur|mademoiselle|dr\.?)$/i
+
+/**
+ * Désignation courte de la cliente : jamais son nom complet ni son téléphone.
+ * Les noms sont saisis sans forme fixe (« Mme Konan », « Christiane TRAORE »,
+ * « Kouadio Beatrice ») : le prénom n'est pas identifiable à coup sûr. On garde
+ * la forme d'adresse de la boutique : la civilité et le mot qui suit quand le
+ * nom commence par une civilité, sinon le premier mot.
+ */
+function customerShortName(fullName: string | null): string {
+  const words = (fullName || '').trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return 'Client(e)'
+  if (CIVILITIES.test(words[0])) return words.slice(0, 2).join(' ')
+  return words[0]
 }
 
 /**
@@ -302,7 +313,7 @@ export async function buildTailorBrief(
   const brief: TailorBrief = {
     orderId: order.id,
     orderNumber: order.orderNumber,
-    customerFirstName: firstName(order.customer.name),
+    customerShortName: customerShortName(order.customer.name),
     priority: order.priority,
     orderDate: order.orderDate,
     pickupDate: order.pickupDate,
@@ -371,7 +382,7 @@ export function buildTailorBriefMessage(brief: TailorBrief): string {
   const lines = [
     `Bonjour ${brief.tailor.name},`,
     '',
-    `*Commande ${brief.orderNumber}* — cliente ${brief.customerFirstName}`,
+    `*Commande ${brief.orderNumber}* — client(e) : ${brief.customerShortName}`,
     ...shown.map((i) => `• ${i.label} ×${i.quantity}`),
   ]
   if (rest > 0) lines.push(`• et ${rest} autre${rest > 1 ? 's' : ''} article${rest > 1 ? 's' : ''}`)

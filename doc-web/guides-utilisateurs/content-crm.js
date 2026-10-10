@@ -161,7 +161,7 @@ module.exports = {
       'Cliquez sur **Envoyer**. L’envoi apparaît dans l’onglet **Historique** et la date du **dernier envoi** s’affiche sous le bouton.',
     ] },
     { bullets: [
-      'La cliente n’apparaît que par son **prénom** et le numéro de commande, jamais par son téléphone.',
+      'La cliente n’apparaît que sous une forme courte (« Mme Konan », ou le premier mot de son nom) et par le numéro de commande, jamais par son téléphone.',
       'Les documents joints (devis, reçus…) ne partent jamais, seulement les photos, vocaux et vidéos du modèle.',
       'Après une modification (mesure corrigée, article ajouté), cliquez sur **Renvoyer** : l’ancien lien est désactivé.',
       'En cas d’erreur de destinataire, cliquez sur **Révoquer le lien du PDF** : le document ne s’ouvre plus.',

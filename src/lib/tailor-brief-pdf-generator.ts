@@ -166,7 +166,7 @@ export async function generateTailorBriefPDF(brief: TailorBrief): Promise<Uint8A
   // Bloc d'informations, deux colonnes.
   const info: Array<[string, string]> = [
     ['Couturier', brief.tailor.name],
-    ['Cliente', brief.customerFirstName],
+    ['Client(e)', brief.customerShortName],
     ['Commande du', formatBriefDate(brief.orderDate)],
     ['Retrait prévu le', formatBriefDate(brief.pickupDate)],
   ]
