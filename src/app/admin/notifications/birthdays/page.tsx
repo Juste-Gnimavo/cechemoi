@@ -13,7 +13,7 @@ interface UpcomingBirthday {
   image: string | null
   daysUntil: number
   nextBirthday: string
-  age: number
+  age: number | null // null : année de naissance inconnue ou invraisemblable
   greetingStatus: string | null
 }
 
@@ -249,7 +249,7 @@ export default function BirthdaysPage() {
                         {formatDate(customer.dateOfBirth)}
                       </td>
                       <td className="p-4 text-sm text-gray-700 dark:text-gray-300">
-                        {customer.age} ans
+                        {customer.age === null ? '—' : `${customer.age} ans`}
                       </td>
                       <td className="p-4">
                         {customer.daysUntil === 0 ? (

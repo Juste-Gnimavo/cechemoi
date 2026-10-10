@@ -333,12 +333,9 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Non autorisé - Admin uniquement' },
-        { status: 401 }
-      )
-    }
+    if (!session) return unauthenticated()
+    const denied = denyUnlessPermitted(session, 'invoices.delete')
+    if (denied) return denied
 
     const { searchParams } = new URL(req.url)
     const paymentId = searchParams.get('paymentId')

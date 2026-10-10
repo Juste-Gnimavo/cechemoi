@@ -68,17 +68,23 @@ export async function GET(request: NextRequest) {
           // Create this year's birthday date
           let birthdayThisYear = new Date(Date.UTC(now.getUTCFullYear(), birthMonth, birthDay))
 
-          // If birthday already passed this year, calculate for next year
-          if (birthdayThisYear < now) {
+          // If birthday already passed this year, calculate for next year.
+          // Comparé au début de la journée (UTC) : l'anniversaire du jour
+          // reste dans la liste au lieu de basculer à l'année suivante.
+          const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+          if (birthdayThisYear < todayStart) {
             birthdayThisYear = new Date(Date.UTC(now.getUTCFullYear() + 1, birthMonth, birthDay))
           }
 
-          const diffTime = birthdayThisYear.getTime() - now.getTime()
+          const diffTime = birthdayThisYear.getTime() - todayStart.getTime()
           const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-          // Calculate age
+          // Âge atteint à ce prochain anniversaire. Une année de naissance
+          // invraisemblable (souvent l'année en cours, saisie faute de
+          // connaître la vraie) donne null : l'écran affiche « — », pas « 0 ans ».
           const birthYear = dob.getUTCFullYear()
-          const age = birthdayThisYear.getUTCFullYear() - birthYear
+          const rawAge = birthdayThisYear.getUTCFullYear() - birthYear
+          const age = rawAge >= 5 && rawAge <= 110 ? rawAge : null
 
           return {
             ...customer,
