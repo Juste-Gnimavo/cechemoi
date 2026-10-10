@@ -193,7 +193,7 @@ module.exports = {
       ['**Annulé**', 'La cliente renonce ou la commande ne peut pas être honorée.'],
       ['**Remboursé**', 'L’argent a été rendu à la cliente.'],
     ] } },
-    { warn: { text: 'N’utilisez pas le bouton **Supprimer** : une commande abandonnée passe en **Annulé**. La suppression efface la trace comptable.' } },
+    { warn: { text: 'Une commande abandonnée passe en **Annulé**. La suppression, qui efface la trace comptable, est réservée à la direction : le bouton n’apparaît pas pour vous.' } },
 
     // ------------------------------------------------------------------
     { h1: 'Catégories', lead: 'Les rayons du site' },
@@ -208,7 +208,7 @@ module.exports = {
       '**Catégorie parente** : laissez « Aucune » pour créer un rayon principal, ou choisissez le rayon dans lequel ranger la nouvelle sous-catégorie.',
       'Cliquez sur **Créer la Catégorie**.',
     ] },
-    { note: { text: 'Vérifiez qu’une catégorie équivalente n’existe pas déjà avant d’en créer une. La **suppression** d’une catégorie est réservée à la direction : le bouton « Supprimer » vous renverra un refus.' } },
+    { note: { text: 'Vérifiez qu’une catégorie équivalente n’existe pas déjà avant d’en créer une. La **suppression** d’une catégorie est réservée à la direction et au gestionnaire de la boutique : le bouton « Supprimer » n’apparaît pas pour vous.' } },
 
     // ------------------------------------------------------------------
     { h1: 'Photos (médiathèque)', lead: 'La bibliothèque d’images de la marque' },

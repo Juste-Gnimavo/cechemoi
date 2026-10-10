@@ -64,7 +64,7 @@ module.exports = {
       'Le filtre **segments** isole les clientes VIP, Haute valeur, Actives, Nouvelles ou Inactives ; **Filtrer par date** retrouve les inscriptions d’une période.',
       'Les icônes de la colonne **Actions** : **œil** (fiche), **crayon** (modifier), **document** (fiche PDF).',
     ] },
-    { warn: { text: 'Ne supprimez jamais une cliente (icône corbeille) : son historique de commandes et de factures disparaîtrait. Signalez les doublons à la direction.' } },
+    { warn: { text: 'La suppression d’une cliente est réservée à la direction (vous ne voyez pas d’icône corbeille) : son historique de commandes et de factures disparaîtrait. Signalez les doublons à la direction.' } },
     { h2: 'La fiche cliente' },
     { img: 'C06-client-fiche.jpg', cap: 'Haut de la fiche : coordonnées et chiffres clés' },
     { bullets: [
