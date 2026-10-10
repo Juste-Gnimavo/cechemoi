@@ -22,6 +22,7 @@ import {
   Eye
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { useCan } from '@/hooks/useCan'
 
 interface MediaFile {
   id: string
@@ -35,6 +36,7 @@ interface MediaFile {
 }
 
 export default function MediaLibraryPage() {
+  const canDelete = useCan('media.delete')
   const [files, setFiles] = useState<MediaFile[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -167,7 +169,17 @@ export default function MediaLibraryPage() {
   }
 
   const handleFileUpload = async (fileList: FileList) => {
-    const category = newCategory.trim() || uploadCategory
+    // Nom de dossier normalisé (minuscules, sans accents, tirets) : l'API
+    // refuse tout autre format, il sert à construire le chemin de stockage.
+    const category =
+      newCategory
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 50) || uploadCategory
     if (!category) {
       toast.error('Veuillez sélectionner ou créer une catégorie')
       return
@@ -543,6 +555,8 @@ export default function MediaLibraryPage() {
                       >
                         <ExternalLink className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       </a>
+                      {/* Masqué : suppression refusée par l'API sans ce droit */}
+                      {canDelete && (
                       <button
                         onClick={() => handleDelete(file)}
                         disabled={deleting === file.id}
@@ -555,6 +569,7 @@ export default function MediaLibraryPage() {
                           <Trash2 className="h-4 w-4 text-red-400" />
                         )}
                       </button>
+                      )}
                     </div>
                   </td>
                 </tr>

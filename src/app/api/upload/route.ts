@@ -9,6 +9,38 @@ import { isTeamRole } from '@/lib/role-permissions'
 // Force dynamic rendering for API routes using auth
 export const dynamic = 'force-dynamic'
 
+// La `category` sert à construire le chemin de stockage (disque ou clé S3) :
+// elle est validée avant tout usage. Équipe : un dossier en minuscules,
+// chiffres et tirets, ou `custom-orders/<id>` (pièces jointes d'une commande).
+// Aucun `..`, aucun autre `/`.
+const TEAM_CATEGORY = /^(?:[a-z0-9][a-z0-9-]{0,49}|custom-orders\/[a-z0-9]{1,40})$/
+
+// Toute autre session (cliente) : la photo de profil, rien d'autre.
+const CUSTOMER_CATEGORIES = ['avatars']
+const CUSTOMER_MAX_SIZE = 5 * 1024 * 1024
+
+// Type réel d'une image d'après ses premiers octets, jamais d'après le
+// `Content-Type` ou l'extension déclarés par le client.
+function sniffImage(buffer: Buffer): { mime: string; ext: string } | null {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return { mime: 'image/jpeg', ext: '.jpg' }
+  }
+  if (
+    buffer.length >= 8 &&
+    buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  ) {
+    return { mime: 'image/png', ext: '.png' }
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+    buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+  ) {
+    return { mime: 'image/webp', ext: '.webp' }
+  }
+  return null
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -21,9 +53,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const isTeam = isTeamRole((session.user as { role?: string } | undefined)?.role)
+
     const formData = await req.formData()
     const file = formData.get('file') as File
     const category = (formData.get('category') as string) || 'temp'
+
+    if (isTeam ? !TEAM_CATEGORY.test(category) : !CUSTOMER_CATEGORIES.includes(category)) {
+      return NextResponse.json(
+        { error: isTeam ? 'Dossier de destination invalide' : 'Envoi non autorisé' },
+        { status: isTeam ? 400 : 403 }
+      )
+    }
 
     // Auto-detect S3: use S3 if configured, otherwise fall back to local storage
     const s3Configured = !!(process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY)
@@ -35,6 +76,25 @@ export async function POST(req: NextRequest) {
         { error: 'Aucun fichier fourni' },
         { status: 400 }
       )
+    }
+
+    // Cliente : photo de profil JPEG, PNG ou WebP uniquement, type vérifié sur
+    // les octets ; l'extension et le Content-Type stockés en découlent.
+    let sniffed: { mime: string; ext: string } | null = null
+    if (!isTeam) {
+      if (file.size > CUSTOMER_MAX_SIZE) {
+        return NextResponse.json(
+          { error: 'Fichier trop volumineux. Maximum 5 Mo' },
+          { status: 403 }
+        )
+      }
+      sniffed = sniffImage(Buffer.from(await file.arrayBuffer()))
+      if (!sniffed) {
+        return NextResponse.json(
+          { error: 'Seules les images JPEG, PNG ou WebP sont acceptées' },
+          { status: 403 }
+        )
+      }
     }
 
     // Validate file type - support design files
@@ -103,7 +163,8 @@ export async function POST(req: NextRequest) {
     // Generate unique filename (reuse ext from validation, fallback to MIME type)
     const timestamp = Date.now()
     const randomString = Math.random().toString(36).substring(2, 9)
-    const fileExt = ext || `.${file.type.split('/')[1]}`
+    const fileExt = sniffed ? sniffed.ext : ext || `.${file.type.split('/')[1]}`
+    const contentType = sniffed ? sniffed.mime : file.type
     const filename = `${timestamp}-${randomString}${fileExt}`
 
     // Convert file to buffer
@@ -115,7 +176,7 @@ export async function POST(req: NextRequest) {
     if (useS3) {
       // Upload to S3
       const s3Key = `${category}/${filename}`
-      publicUrl = await uploadToS3(s3Key, buffer, file.type)
+      publicUrl = await uploadToS3(s3Key, buffer, contentType)
     } else {
       // Save to local filesystem (legacy behavior)
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', category)
@@ -130,7 +191,7 @@ export async function POST(req: NextRequest) {
       url: publicUrl,
       filename,
       size: file.size,
-      type: file.type,
+      type: contentType,
       storage: useS3 ? 's3' : 'local',
     })
   } catch (error) {
