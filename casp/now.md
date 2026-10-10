@@ -1,12 +1,12 @@
 # What I'm doing NOW
 
-> **Updated** : 2026-10-09 (clôture de la session 35).
+> **Updated** : 2026-10-10 (clôture de la session 36).
 
 ---
 
 ## Current focus (1 sentence)
 
-La session 35 a livré **le rôle « Gestionnaire boutique en ligne »** (`ECOMMERCE`, commits `6a06ceb` et `138aed3`) : matrice limitée au hub Boutique, garde d'URL unique, vente au comptoir sans l'annuaire. **Ce n'est pas encore déployé** : aucun build Easypanel n'a été déclenché. Prochaine étape : **l'étanchéité financière du Personnel** (prompt 36), après la relance du déploiement par le CEO.
+La session 36 a livré **l'étanchéité financière du Personnel** (cumuls d'argent à `null` côté API sans `finance.revenue`, boutons Supprimer alignés sur le serveur sur 23 écrans, `POST /api/upload` fermé aux clientes hors avatar) ; prochaine étape : **la checklist production du journal 36**, puis la session 37 (informer le couturier).
 
 ---
 
@@ -14,15 +14,15 @@ La session 35 a livré **le rôle « Gestionnaire boutique en ligne »** (`ECOMM
 
 ### 15 minutes
 
-CEO : relancer le déploiement depuis Easypanel, puis lancer `npx -y prisma@5.22.0 db push` depuis le conteneur (attendu : already in sync).
+CEO : vérifier qu'Easypanel a construit le push de la session 36 (sinon relance manuelle), puis ouvrir `/admin/receipts` et `/admin/customers` avec un compte Personnel : aucun cumul, aucune corbeille.
 
 ### 1 hour
 
-Créer un compte ECOMMERCE de test depuis `/admin/team` et jouer la checklist du journal 35 (10 tuiles, vente au comptoir complète, refus à l'écran et en API), puis le désactiver.
+Jouer la checklist complète du journal `SESSIONS-LOGS/26-10-10-001-36-etancheite-financiere-personnel.md` (Personnel, cliente pour l'upload, Administrateur) et trancher les deux décisions ouvertes (suppressions en `role === 'ADMIN'` en dur, date de naissance sans année).
 
 ### Half a day
 
-Prompt 36 : expurger côté API les cumuls d'argent encore visibles par le Personnel et le gestionnaire.
+Session 37 : bouton « Informer le couturier » (`docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`).
 
 ---
 

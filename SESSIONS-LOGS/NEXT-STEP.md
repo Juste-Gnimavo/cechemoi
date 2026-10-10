@@ -56,24 +56,27 @@ Principe de travail : un fichier par problème dans `messages/` (PROBLÈME / CAU
 - [x] Déploiement relancé à la main et `db push` lancé le 09/10/2026 : « already in sync », client Prisma du conteneur à jour (contient `ECOMMERCE`).
 - [ ] Compte ECOMMERCE de test créé depuis `/admin/team`, checklist du journal 35, et désactivation du compte.
 
-## Prochaine session — 36 : étanchéité financière du Personnel
+## Fait en session 36 (10/10/2026) — étanchéité financière du Personnel
 
-Lire `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (préalables de déploiement de la 35 en tête du CONTEXTE).
+Journal : `SESSIONS-LOGS/26-10-10-001-36-etancheite-financiere-personnel.md`. Commits `7d7c1fb`, `65e030e`, `8ce725d`, `a220562`.
+
+- [x] **Cumuls d'argent expurgés côté API** (`finance.revenue`, `null` + carte masquée, plus jamais « 0 F ») : commandes sur mesure, reçus, factures (Reste dû compris), matériels, mouvements, rapports matériels, inventaire produits (lu aussi par ECOMMERCE), clientes (liste, fiche, stats).
+- [x] **Boutons « Supprimer » alignés sur le serveur** sur 23 écrans (hook `src/hooks/useCan.ts`), Codes promo en lecture seule sans `coupons.manage`.
+- [x] **`POST /api/upload`** : une cliente ne peut envoyer qu'un avatar JPEG/PNG/WebP de 5 Mo au plus, reconnu sur les octets ; `category` validée pour tous.
+- [x] Anniversaires : âge invraisemblable affiché « — » ; l'anniversaire du jour ne disparaît plus de la liste.
+- [x] Suppression d'un paiement de facture sur `invoices.delete`.
+- [ ] **CEO : checklist production du journal 36** (compte Personnel, cookie de cliente pour l'upload, compte Administrateur). Vérifier qu'Easypanel a construit le push.
+- [ ] Régénérer les guides `.docx` (`cd doc-web/guides-utilisateurs && node build.js crm && node build.js boutique`).
+- [ ] **Décision CEO** : les suppressions encore en `role === 'ADMIN'` en dur (commandes, factures, reçus, étiquettes, journaux et modèles de notifications) refusent le gérant (MANAGER). Les passer sur des permissions ?
+- [ ] **Décision CEO** : si la colonne Âge n'affiche que « — », l'équipe ne connaît pas l'année de naissance. Accepter une date JJ-MM sans année (changement de schéma) ?
+
+## Prochaine session — 37 : informer le couturier
+
+Lire `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.
 
 ## File CASP
 
-- **36** — Étanchéité financière du Personnel : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md`.
 - **37** — Bouton « Informer le couturier » (aperçu puis envoi WhatsApp manuel, aucun montant) : `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.
-
-## Priorité 1 — Constats de la session 33 (étanchéité financière incomplète)
-
-→ Mis en file CASP : `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` (session 36, après le rôle).
-
-- [ ] **Le Personnel voit encore des cumuls d'argent** : encaissements annuels dans `/admin/custom-orders` et `/admin/receipts`, « Reste dû » dans `/admin/invoices`, valeur du stock dans `/admin/materials` et `/admin/materials/movements`, « Valeur totale / vie client / panier moyen » dans `/admin/customers` et la fiche cliente. Expurger côté API (comme `invoices/stats` en session 31), pas seulement à l'écran.
-- [ ] **Masquer les boutons « Supprimer »** au Personnel quand le serveur refuse (catégories : ADMIN seul) ; auditer clientes, commandes, commandes sur mesure, avis, campagnes.
-- [ ] **Codes promo** : la matrice STAFF contient `coupons`, la tuile est visible ; la session 32 les disait réservés à la direction. Demander au CEO et aligner.
-- [ ] **Anniversaires** : colonne « Âge » à « 0 ans » pour toutes les clientes.
-- [ ] Après chaque correction visible, mettre à jour les guides (`doc-web/guides-utilisateurs/`).
 
 ## Déploiement — rappels (appris en session 32)
 
