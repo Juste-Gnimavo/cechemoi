@@ -10,9 +10,9 @@
 
 | # | Item | Prompt | Status |
 |---|------|--------|--------|
-| 1 | Rôle « Gestionnaire boutique en ligne » limité au hub Boutique | `docs/plan/sessions/35-ROLE-GESTIONNAIRE-BOUTIQUE-EN-LIGNE.md` | queued |
-| 2 | Étanchéité financière du Personnel : cumuls expurgés côté API, boutons « Supprimer » alignés, codes promo (constats session 33) | `docs/plan/sessions/36-ETANCHEITE-FINANCIERE-PERSONNEL.md` | queued |
-| 3 | Bouton « Informer le couturier » : aperçu puis envoi WhatsApp manuel des articles, mesures et pièces jointes, sans aucun montant | `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md` | queued |
+| 1 | Discussion 38 : arbitrages après la 37 (rôle TAILOR, suppressions ADMIN en dur, anniversaires sans année, fiche de suivi « document interne », désignation de la cliente, prochaine feuille de route) | `docs/plan/sessions/DISCUSSION-38-ARBITRAGES-APRES-37.md` | queued |
+| 2 | _(produit par la discussion 38)_ | — | — |
+| 3 | _(produit par la discussion 38)_ | — | — |
 
 If you reach for anything BELOW Next-3, stop and check why.
 
@@ -55,6 +55,8 @@ _(site et CRM déjà en production — aucun bloquant de lancement)_
 
 | Date | Commit | Title | Notes |
 |------|--------|-------|-------|
+| 2026-10-10 | `f9d2819` | Informer le couturier | fiche sans montant, PDF à jeton révocable, table `TailorBriefShare` |
+| 2026-10-10 | `4c47044` | Désignation de la cliente | 369 noms à civilité |
 | 2026-10-08 | `f985a86` | Paiements facture → commande | 4 paiements recopiés en prod |
 | 2026-10-08 | `3991d29` | Modes de paiement en code | 9 paiements facture réalignés |
 | 2026-10-08 | `66a0804` | Commande source des articles de la facture | SM-240226-0001 alignée, doublon SM-040326-0006 supprimé |

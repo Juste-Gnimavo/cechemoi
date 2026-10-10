@@ -1,18 +1,19 @@
 {
   "casp_version": "0.19.0",
   "updated_at": "2026-10-10",
-  "last_session_id": "26-10-10-001-36-etancheite-financiere-personnel",
-  "last_commit": "a220562",
-  "current_phase": "36-etancheite-financiere-personnel",
-  "next_phase": "37-informer-le-couturier",
-  "next_prompt": "docs/plan/sessions/37-INFORMER-LE-COUTURIER.md",
+  "last_session_id": "26-10-10-002-37-informer-le-couturier",
+  "last_commit": "4c47044",
+  "current_phase": "37-informer-le-couturier",
+  "next_phase": "38-arbitrages-apres-37",
+  "next_prompt": "docs/plan/sessions/DISCUSSION-38-ARBITRAGES-APRES-37.md",
   "phases_shipped": [
     "34-sync-commande-facture",
     "35-role-gestionnaire-boutique-en-ligne",
-    "36-etancheite-financiere-personnel"
+    "36-etancheite-financiere-personnel",
+    "37-informer-le-couturier"
   ],
   "phases_queued": [
-    "37-informer-le-couturier"
+    "38-arbitrages-apres-37"
   ],
   "phases_backlog": [
     "notification-system",
@@ -22,11 +23,11 @@
   "notes": "Sessions 1-33 antérieures à CASP : historique dans SESSIONS-LOGS/ et SESSIONS-LOGS/NEXT-STEP.md (maintenu en parallèle). Schéma appliqué par `npx -y prisma@5.22.0 db push` depuis le conteneur, pas de migrations versionnées. Lancer `casp check` avant push.",
   "logs_dir": "SESSIONS-LOGS",
   "arbitration": {
-    "phase": "36-etancheite-financiere-personnel",
+    "phase": "37-informer-le-couturier",
     "shape": "solo",
     "decided_at": "2026-10-10",
-    "by": "cto-36",
-    "reason": "Gates non isolables (une base Postgres de prod, push main = déploiement Easypanel) ; tous les MUST passent par role-permissions.ts et le motif sessionCan, un seul fil."
+    "by": "cto-37",
+    "reason": "Une seule chaîne dépendante (schéma jeton → constructeur sans montant → PDF → route publique → envoi → UI) ; seul gate tsc, pas d e2e ; validation finale manuelle en production par le CEO : rien à paralléliser, et la règle aucun montant se défend mieux en un seul auteur."
   },
   "next_prompt_note": null
 }

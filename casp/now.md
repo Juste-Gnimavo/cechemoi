@@ -1,12 +1,12 @@
 # What I'm doing NOW
 
-> **Updated** : 2026-10-10 (clôture de la session 36).
+> **Updated** : 2026-10-10 (clôture de la session 37).
 
 ---
 
 ## Current focus (1 sentence)
 
-La session 36 a livré **l'étanchéité financière du Personnel** (cumuls d'argent à `null` côté API sans `finance.revenue`, boutons Supprimer alignés sur le serveur sur 23 écrans, `POST /api/upload` fermé aux clientes hors avatar) ; prochaine étape : **la checklist production du journal 36**, puis la session 37 (informer le couturier).
+La session 37 a livré **le bouton « Informer le couturier »** (fiche sans aucun montant, garde de type prouvée, PDF par jeton révocable, validé en production sur une fiche réelle sans envoi) ; prochaine étape : **l'envoi réel de test par le CEO**, puis la discussion 38 (arbitrages : rôle TAILOR, suppressions ADMIN en dur, anniversaires, suite de la feuille de route).
 
 ---
 
@@ -14,15 +14,15 @@ La session 36 a livré **l'étanchéité financière du Personnel** (cumuls d'ar
 
 ### 15 minutes
 
-CEO : vérifier qu'Easypanel a construit le push de la session 36 (sinon relance manuelle), puis ouvrir `/admin/receipts` et `/admin/customers` avec un compte Personnel : aucun cumul, aucune corbeille.
+CEO : checklist production du journal `SESSIONS-LOGS/26-10-10-002-37-informer-le-couturier.md` — couturier de test avec son propre numéro, envoi, lecture du PDF reçu, révocation.
 
 ### 1 hour
 
-Jouer la checklist complète du journal `SESSIONS-LOGS/26-10-10-001-36-etancheite-financiere-personnel.md` (Personnel, cliente pour l'upload, Administrateur) et trancher les deux décisions ouvertes (suppressions en `role === 'ADMIN'` en dur, date de naissance sans année).
+Checklists restantes des journaux 36 (Personnel, upload cliente) et 35 (compte ECOMMERCE), puis régénérer les guides `.docx`.
 
 ### Half a day
 
-Session 37 : bouton « Informer le couturier » (`docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`).
+Discussion 38 (`docs/plan/sessions/DISCUSSION-38-ARBITRAGES-APRES-37.md`) : six décisions, une recommandation chacune.
 
 ---
 
@@ -36,7 +36,7 @@ Session 37 : bouton « Informer le couturier » (`docs/plan/sessions/37-INFORMER
 
 ## Constraints active today
 
-- Le push ne déclenche pas toujours le build Easypanel : vérifier le conteneur, sinon webhook manuel (onglet Deployments du service).
+- Le push ne déclenche pas toujours le build Easypanel : vérifier le conteneur, sinon webhook manuel (onglet Deployments du service). Les pushes de la 37 ont, eux, bien déclenché un build.
 - Base sur `ssh zerosuite` (Swarm `cechemoi_postgres`), non exposée ; `.env` locaux pointent encore vers l'ancien hôte.
 - Toute correction de données ambiguë passe par la validation du CEO.
 - `npx @justethales/casp check` avant push.

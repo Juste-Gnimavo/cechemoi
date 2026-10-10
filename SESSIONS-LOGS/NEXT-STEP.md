@@ -70,13 +70,24 @@ Journal : `SESSIONS-LOGS/26-10-10-001-36-etancheite-financiere-personnel.md`. Co
 - [ ] **Décision CEO** : les suppressions encore en `role === 'ADMIN'` en dur (commandes, factures, reçus, étiquettes, journaux et modèles de notifications) refusent le gérant (MANAGER). Les passer sur des permissions ?
 - [ ] **Décision CEO** : si la colonne Âge n'affiche que « — », l'équipe ne connaît pas l'année de naissance. Accepter une date JJ-MM sans année (changement de schéma) ?
 
-## Prochaine session — 37 : informer le couturier
+## Fait en session 37 (10/10/2026)
 
-Lire `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.
+Journal : `SESSIONS-LOGS/26-10-10-002-37-informer-le-couturier.md`. Commits `f9d2819`, `5fbb7fd`, `4c47044`.
+
+- [x] **Bouton « Informer le couturier »** sur la fiche commande : aperçu exact (numéro, message, PDF), envoi WhatsApp manuel, un envoi par couturier avec ses seuls articles, trace dans l'historique, révocation du lien.
+- [x] **Aucun montant** : `buildTailorBrief` en `select` explicite, garde de type prouvée (`unitPrice` fait échouer `tsc`), revérification à l'exécution ; notes générales de commande et pièces « document » exclues.
+- [x] Table `TailorBriefShare` créée en production (`db push` dans le conteneur). Routes admin 401 sans session, route publique 410 sur jeton inconnu ou révoqué ; fiche réelle SM-270226-0002 lue sans aucun montant (lien de test supprimé).
+- [x] Guide CRM : section « Informer le couturier » ; la fiche de suivi confection (avec coûts) est un document interne.
+- [ ] **CEO : envoi réel de test** (checklist du journal 37) — couturier de test à son propre numéro, lecture du PDF reçu.
+- [ ] **CEO : valider la désignation de la cliente** (« Mme Konan » plutôt que « prénom seulement », 369 noms à civilité) — discussion 38.
+
+## Prochaine session — 38 : discussion d'arbitrages
+
+Lire `docs/plan/sessions/DISCUSSION-38-ARBITRAGES-APRES-37.md`. Session de décisions avec le CEO, aucun code.
 
 ## File CASP
 
-- **37** — Bouton « Informer le couturier » (aperçu puis envoi WhatsApp manuel, aucun montant) : `docs/plan/sessions/37-INFORMER-LE-COUTURIER.md`.
+- **38** — Discussion : arbitrages après la 37 : `docs/plan/sessions/DISCUSSION-38-ARBITRAGES-APRES-37.md`.
 
 ## Déploiement — rappels (appris en session 32)
 

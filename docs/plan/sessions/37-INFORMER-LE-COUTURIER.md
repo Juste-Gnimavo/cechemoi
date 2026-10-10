@@ -1,7 +1,7 @@
 ---
-status: queued
-session_id: pending
-session_log: pending
+status: shipped
+session_id: 26-10-10-002-37-informer-le-couturier
+session_log: SESSIONS-LOGS/26-10-10-002-37-informer-le-couturier.md
 drafted_at: 2026-10-08
 next_after: 36-etancheite-financiere-personnel
 ---
